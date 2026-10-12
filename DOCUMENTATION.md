@@ -15,7 +15,10 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - `SongStudio` (`js/song-studio.js`): Controlador do Estúdio de Músicas com abas de Biblioteca, Upload de Áudio & Capa com detecção de duração e tap-tempo para BPM, e importação/exportação com feedback por toasts.
 - `EnemyPoolSystem` (`js/enemy-pool.js`): Catálogo mestre de arquétipos de zumbis com retratos de alta definição (`assets/zombies/`), atributos de combate e sorteio randômico ponderado de 5 inimigos por partida ("Nesse mapa vc encontrará esses zumbis:").
 - `TalentSystem` (`js/talents.js`): Sistema avançado de árvore de talentos com 15 upgrades em 3 ramificações (Ofensivo, Defensivo, Ritmo/Economia), custos base dobrados e fator multiplicador aumentado por nível para progressão prolongada de longo prazo.
-- `CombatSystem` (`js/combat.js`): Motor de combate AAA, projéteis sónicos compactos, Chroma Key com silhuetas brancas pré-renderizadas, combate contínuo corpo a corpo, integração da pool ativa de zumbis com nomes e barras de vida coloridas individuais, e telemetria de combate em tempo real.
+- `SpriteSheet` (`js/spritesheet.js`): Carregador e manipulador modular de spritesheets com remoção de fundo verde (*ChromaKey*) e geração em tempo real de silhuetas brancas em canvas secundários para efeitos de flash de dano com alta performance.
+- `CombatFX` (`js/combat-fx.js`): Motor dedicado de efeitos visuais e partículas (explosões sónicas, faíscas metálicas, ondas de choque radiais, textos flutuantes com sombras, poças de ácido tóxico borbulhantes, labaredas/brasas de ambiente, auras elétricas e telas de tremor dinâmico).
+- `ZombieEntity` (`js/zombie-entity.js`): Entidade polimórfica que encapsula ciclo de vida, animações, arcos de pulo, deflexão e comportamentos de ataque dedicados para todos os 9 arquétipos de zumbis (Normal, Runner, Leaper, Soldier, Spore, Bloater, Gladiator, Hazmat, Mutant).
+- `CombatSystem` (`js/combat.js`): Orquestrador central e coordenador de combate (~730 linhas), gerenciando ondas de inimigos, projéteis sónicos com curvas de dano e acertos aéreos, telemetria de batalha e delegação limpa aos módulos `CombatFX` e `ZombieEntity`.
 - `RhythmSystem` (`js/rhythm.js`): Pistas neon interativas com controle manual do jogador, modo de músicas customizadas com sincronização por relógio de áudio (`currentTime`), avaliação de ritmo, tela de resultados com premiações em ouro e multiplicador até x9.
 - `Game` (`js/main.js`): Máquina de estados de telas (`menu`, `map-select`, `battle`), HUD minimalista de batalha (Auto, Mute, SS, Engrenagem), orquestrador da preparação de mapa e modais de estatísticas (SS) e pausa/abandono.
 - `I18n` (`js/i18n.js`): Suporte a idiomas (Português do Brasil e Inglês).
@@ -23,6 +26,27 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 ---
 
 ## Changelog
+
+### [v1.4.3] - 2026-10-12 (Eliminação do God Object: Desacoplamento do Motor de Combate em Módulos Especializados)
+**Refatoração & Arquitetura**
+- **Eliminação Completa do "God Object" `CombatSystem`:**
+  - O antigo `CombatSystem` continha quase 2.000 linhas em um único arquivo monopólio (`combat.js`), centralizando simultaneamente manipulação direta de pixels ChromaKey, física de partículas, lógica de IA de múltiplos zumbis, rendering complexo e loop de batalha.
+  - A arquitetura foi refatorada e desacoplada em 4 classes independentes, cada uma com Responsabilidade Única (SRP):
+    1. **`SpriteSheet` (`js/spritesheet.js` - ~100 linhas):**
+       - Isolamento completo do pipeline de imagem: carga de imagem, detecção de dimensões de quadro, canvas transparentes com corte de ChromaKey verde e criação de silhuetas brancas puras (*white silhouettes*) cacheadas para flashes de impacto sem recalcular a cada frame.
+    2. **`CombatFX` (`js/combat-fx.js` - ~420 linhas):**
+       - Motor visual dedicado para todas as partículas, ondas de choque circulares com espessura variável, textos flutuantes com amortecimento de velocidade, poças de ácido de Hazmat com tempo de vida e borbulhas ácidas, fagulhas/brasas de ambiente, auras elétricas do herói Cypher Volt, barreiras de choque do amplificador e controle de tremor de tela (*screen shake*).
+    3. **`ZombieEntity` (`js/zombie-entity.js` - ~440 linhas):**
+       - Classe de entidade polimórfica que gerencia a máquina de estados individual de cada zumbi: deslocamento por velocidade base, arcos balísticos de salto de Leaper, verificação de alcance de corpo a corpo contra o guitarrista, intervalos de ataque, deflexão de corrente pelo Gladiador, regeneração/cura pela Spore e rendering de barra de vida individual com cores por raridade/vida.
+    4. **`CombatSystem` (`js/combat.js` - reduzido de ~1.920 para ~730 linhas):**
+       - Coordenador limpo focado exclusivamente em: dimensionamento de pista/estrada, orquestração de waves, física e colisão de projéteis sónicos com acertos aéreos (*Air Shot Crit*), cálculo de recompensas de talentos e telemetria de estatísticas de batalha.
+- **Manutenção Rigorosa de Retrocompatibilidade:**
+  - `CombatSystem` expõe getters e proxies para `addFloatingText()`, `createExplosion()`, `triggerShake()`, `shakePower`, e referências transparentes para `combat.entities.particles` e `combat.entities.shockwaves`.
+  - Nenhuma chamada externa em `main.js`, `rhythm.js` ou na interface foi quebrada.
+- **Validação de Sintaxe & Teste de Simulação:**
+  - Validação estática com `node -c` em todos os 14 scripts do projeto (código de saída 0).
+  - Executada suíte de testes de simulação automatizada de 50 quadros cobrindo todos os 9 arquétipos de zumbis simultaneamente.
+  - Atualização dos scripts em `index.html` com versionamento de cache `?v=21`.
 
 ### [v1.4.2] - 2026-10-12 (Revisão Completa: Importação Robusta de Áudio e Músicas Editadas, Drag & Drop e Prevenção de Erros de Leitura)
 **Corrigido & Aprimorado**
