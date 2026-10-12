@@ -1,0 +1,15 @@
+# Node / NPM
+node_modules/
+package-lock.json
+
+# Logs & temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor folders
+.vscode/
+.idea/
+.gemini/

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Guitar vs Zombies</title>
+    <link rel="stylesheet" href="css/style.css?v=19">
+</head>
+<body>
+    <div id="game-container">
+        <!-- SCREEN 1: MAIN MENU -->
+        <div id="screen-main-menu" class="game-screen active">
+            <div class="menu-top-bar">
+                <div class="menu-hud-stats">
+                    <div class="menu-stat-badge gold-badge" title="Ouro Coletado">
+                        <span class="stat-icon">🪙</span>
+                        <span id="menu-gold-count" class="stat-val">0</span>
+                    </div>
+                    <div class="menu-stat-badge score-badge" title="Maior Pontuação">
+                        <span class="stat-icon">🏆</span>
+                        <span id="menu-highscore-val" class="stat-val">0</span>
+                    </div>
+                    <div class="menu-stat-badge kills-badge" title="Zumbis Destruídos">
+                        <span class="stat-icon">💀</span>
+                        <span id="menu-total-kills" class="stat-val">0</span>
+                    </div>
+                </div>
+                <div class="menu-quick-tools">
+                    <button id="menu-sound-toggle" class="menu-tool-btn" title="Alternar Som">🔊</button>
+                    <div class="menu-lang-group">
+                        <button class="lang-btn" onclick="i18n.setLanguage('pt')">PT</button>
+                        <button class="lang-btn" onclick="i18n.setLanguage('en')">EN</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-hero-showcase">
+                <div class="menu-logo-wrap">
+                    <span class="logo-sub">HEAVY METAL APOCALYPSE</span>
+                    <h1 class="logo-title">GUITAR <span>VS</span> ZOMBIES</h1>
+                    <div class="logo-divider"></div>
+                </div>
+                <div class="menu-stage-card">
+                    <div class="stage-glow"></div>
+                    <div class="stage-tag">🎸 TURNÊ MUNDIAL DOS CONDENADOS</div>
+                    <p class="stage-desc">Arme sua guitarra distorcida, destrua hordas de zumbis em tempo real e domine o palco com seus riffs mortais!</p>
+                </div>
+            </div>
+
+            <div class="menu-actions-stack">
+                <button id="menu-btn-play" class="menu-action-btn btn-play-battle">
+                    <span class="btn-icon">⚡</span>
+                    <span class="btn-text">JOGAR / INICIAR BATALHA</span>
+                </button>
+                <button id="menu-btn-talents" class="menu-action-btn btn-talents">
+                    <span class="btn-icon">🌳</span>
+                    <span class="btn-text">ÁRVORE DE TALENTOS</span>
+                </button>
+                <button id="menu-btn-studio" class="menu-action-btn btn-studio">
+                    <span class="btn-icon">🎵</span>
+                    <span class="btn-text">ESTÚDIO DE MÚSICA & RITMO</span>
+                </button>
+                <button id="menu-btn-settings" class="menu-action-btn btn-settings">
+                    <span class="btn-icon">⚙️</span>
+                    <span class="btn-text">CONFIGURAÇÕES</span>
+                </button>
+            </div>
+
+            <div class="menu-footer">
+                <span>Guitar vs Zombies v1.1.0 • AAA Audio & Action Experience</span>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: MAP / PRE-BATTLE PREPARATION -->
+        <div id="screen-map-select" class="game-screen">
+            <div class="map-header-bar">
+                <button id="map-back-btn" class="map-header-btn">⬅️ Voltar</button>
+                <div class="map-header-title">
+                    <h2>PREPARAÇÃO DA BATALHA</h2>
+                    <span class="map-sub">CONFIGURE SEU SHOW E CONHEÇA A HORDA</span>
+                </div>
+                <button id="map-reroll-btn" class="map-header-btn map-reroll" title="Sortear nova horda">🎲 Re-sortear</button>
+            </div>
+
+            <div class="map-screen-scroll">
+                <!-- Section 1: Playable Guitarist Selection (Hero Pool) -->
+                <div class="map-section-card hero-select-card">
+                    <div class="section-card-header">
+                        <div class="section-header-row">
+                            <span class="section-badge hero-badge">🎸 LINE-UP PRINCIPAL</span>
+                            <div class="cycle-nav-group">
+                                <button type="button" id="map-hero-prev-btn" class="cycle-nav-btn" title="Guitarrista Anterior">◀️</button>
+                                <button type="button" id="map-hero-next-btn" class="cycle-nav-btn" title="Próximo Guitarrista">▶️</button>
+                            </div>
+                        </div>
+                        <h3>Escolha seu Guitarrista:</h3>
+                        <p class="section-subtext">Toque em qualquer herói da lista para selecioná-lo para a batalha:</p>
+                    </div>
+
+                    <!-- Selected Hero Big Showcase Card -->
+                    <div id="map-selected-hero-showcase" class="selected-hero-showcase">
+                        <div class="hero-showcase-portrait-wrap">
+                            <img id="showcase-hero-img" src="assets/heroes/johnny_blaze.jpg" alt="Hero" class="showcase-hero-img">
+                            <span id="showcase-hero-rarity-badge" class="hero-rarity-badge badge-common">COMUM</span>
+                        </div>
+                        <div class="hero-showcase-details">
+                            <div class="showcase-hero-header">
+                                <h4 id="showcase-hero-name">Johnny "Riff" Blaze</h4>
+                                <span id="showcase-hero-title" class="showcase-hero-title">O Punk Rocker Clássico</span>
+                            </div>
+                            <div class="showcase-hero-instrument">
+                                <span class="inst-icon">🎸</span> <span id="showcase-hero-instrument-text">Stratocaster "Hellfire"</span>
+                            </div>
+                            <div class="showcase-hero-passive-box">
+                                <span class="passive-tag">PASSIVA: <b id="showcase-hero-passive-name">Espírito do Rock</b></span>
+                                <p id="showcase-hero-passive-desc" class="passive-desc">+15% de Dano Base e +10% de velocidade de projéteis sónicos.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6 Guitarists Carousel / Thumbnail Strip -->
+                    <div class="hero-roster-title">Todos os 6 Guitarristas Disponíveis:</div>
+                    <div id="map-heroes-roster-grid" class="map-heroes-roster-grid">
+                        <!-- Populated dynamically by window.game.renderHeroRoster() -->
+                    </div>
+                </div>
+
+                <!-- Section 2: Horde Intelligence -->
+                <div class="map-section-card">
+                    <div class="section-card-header">
+                        <span class="section-badge danger-badge">⚠️ HORDA DETECTADA</span>
+                        <h3>Nesse mapa você encontrará esses zumbis:</h3>
+                        <p class="section-subtext">5 tipos sorteados da pool para invadir seu palco nesta partida:</p>
+                    </div>
+                    <div id="map-zombies-grid" class="map-zombies-grid">
+                        <!-- Populated dynamically by window.game.renderMapZombies() -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Song Track Selection -->
+                <div class="map-section-card song-select-card">
+                    <div class="section-card-header">
+                        <div class="section-header-row">
+                            <span class="section-badge music-badge">🎵 TRILHA SONORA</span>
+                            <div class="cycle-nav-group">
+                                <button type="button" id="map-song-prev-btn" class="cycle-nav-btn" title="Música Anterior">◀️</button>
+                                <button type="button" id="map-song-next-btn" class="cycle-nav-btn" title="Próxima Música">▶️</button>
+                            </div>
+                        </div>
+                        <h3>Escolha a Música da Batalha:</h3>
+                        <p class="section-subtext">Toque no botão da música desejada ou alterne pelas setas:</p>
+                    </div>
+
+                    <!-- Selected Active Song Showcase -->
+                    <div class="map-selected-song-preview" id="map-active-song-preview-card">
+                        <div class="map-song-cover-wrap">
+                            <img id="map-selected-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="map-song-cover-img">
+                            <span class="map-song-active-pill">EM REPRODUÇÃO</span>
+                        </div>
+                        <div class="map-selected-song-info">
+                            <h4 id="map-selected-song-title" class="map-song-current-title">Thunder Strike</h4>
+                            <span id="map-song-artist" class="map-song-meta-text">Autoria: Cyber Shock</span>
+                            <div class="map-song-tags">
+                                <span id="selected-song-bpm-tag" class="map-song-tag-bpm">136 BPM</span>
+                                <span id="map-song-notes-count" class="map-song-meta-text">53 notas mapeadas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive List of Songs with Select Buttons -->
+                    <div class="song-roster-header">
+                        <span class="song-roster-title">Músicas do Repertório:</span>
+                    </div>
+                    <div id="map-songs-roster-list" class="map-songs-roster-list">
+                        <!-- Populated dynamically by window.game.renderSongRoster() -->
+                    </div>
+
+                    <!-- Synced Dropdown (Hidden/Fallback) -->
+                    <select id="map-song-select" class="map-song-dropdown" style="display: none;"></select>
+                </div>
+            </div>
+
+            <div class="map-bottom-bar">
+                <button id="map-start-battle-btn" class="map-start-battle-action">
+                    🔥 INICIAR BATALHA AGORA!
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: IN-GAME BATTLE -->
+        <div id="screen-battle" class="game-screen">
+            <!-- Minimal Clean Battle HUD (ONLY: Auto, Mute, SS Stats, Gear) -->
+            <div id="battle-hud-top">
+                <div class="battle-hud-left">
+                    <button id="battle-auto-toggle" class="battle-btn auto-btn" title="Alternar Batalha Automática">⚡ AUTO: OFF</button>
+                    <button id="battle-sound-toggle" class="battle-btn sound-btn" title="Alternar Áudio">🔊</button>
+                </div>
+                <div class="battle-hud-center">
+                    <div class="battle-hp-wrap">
+                        <div class="battle-bar-label">HP <span id="battle-hero-hp-text">100 / 100</span></div>
+                        <div class="battle-bar-frame">
+                            <div id="hero-hp-bar"></div>
+                        </div>
+                    </div>
+                    <div class="battle-rock-wrap">
+                        <div class="battle-bar-label">ROCK OVERDRIVE</div>
+                        <div class="battle-bar-frame">
+                            <div id="rock-meter-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="battle-hud-right">
+                    <button id="battle-stats-toggle" class="battle-btn ss-btn" title="Estatísticas da Batalha (SS)">📊 SS</button>
+                    <button id="battle-gear-toggle" class="battle-btn gear-btn" title="Configurações & Pausa">⚙️</button>
+                </div>
+            </div>
+
+            <!-- Floating Real-Time Battle Score & Combo Bar -->
+            <div id="battle-hud-sub">
+                <div class="battle-sub-pill score-pill" title="Pontuação Atual">
+                    <span class="sub-pill-icon">🏆</span>
+                    <span id="battle-score-val" class="sub-pill-val">0</span>
+                </div>
+                <div class="battle-sub-pill combo-pill" id="battle-combo-pill" title="Combo Atual">
+                    <span id="battle-combo-val" class="sub-pill-val">0 COMBO</span>
+                    <span id="battle-mult-val" class="sub-pill-mult">x1</span>
+                </div>
+            </div>
+
+            <!-- Top Half: Combat Canvas -->
+            <div id="combat-zone">
+                <canvas id="combat-canvas"></canvas>
+            </div>
+
+            <!-- Divider Line & Active Song Banner -->
+            <div id="zone-divider">
+                <div id="default-divider-content">
+                    <span class="divider-text">🎸 SOLO RHYTHM HIGHWAY - TOQUE NO RITMO! 🎸</span>
+                </div>
+                <div id="active-song-banner" style="display: none;">
+                    <div class="banner-song-info">
+                        <img id="active-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="banner-cover-img">
+                        <div class="banner-titles">
+                            <div id="active-song-title" class="banner-title">Thunder Strike</div>
+                            <div id="active-song-artist" class="banner-artist">Cyber Shock</div>
+                        </div>
+                    </div>
+                    <div class="banner-progress-wrap">
+                        <div class="banner-progress-track">
+                            <div id="active-song-progress-fill" class="banner-progress-fill"></div>
+                        </div>
+                        <span id="active-song-time" class="banner-time-text">00:00 / 00:30</span>
+                    </div>
+                    <button id="active-song-exit-btn" class="banner-exit-btn" title="Encerrar Música">✕ SAIR</button>
+                </div>
+            </div>
+
+            <!-- Bottom Half: Guitar Hero Rhythm Highway -->
+            <div id="rhythm-zone">
+                <canvas id="rhythm-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Talent Tree Modal Overlay -->
+    <div id="talent-modal" class="talent-modal-overlay">
+        <div class="talent-modal-dialog">
+            <!-- Modal Header -->
+            <div class="talent-modal-header">
+                <div class="talent-header-title">
+                    <h2>🎸 ÁRVORE DE TALENTOS</h2>
+                    <div class="talent-header-stats">
+                        <span class="modal-gold-tag">🪙 <span id="modal-gold-count">0</span></span>
+                        <span class="modal-upgrades-tag">Upgrades: <span id="modal-total-upgrades">0 / 188</span></span>
+                    </div>
+                </div>
+                <button id="talent-close-btn" class="talent-modal-close" aria-label="Fechar">✕</button>
+            </div>
+
+            <!-- Tabs: Branches -->
+            <div class="talent-tabs-bar">
+                <button class="talent-tab active" data-branch="offense">🔥 OFENSIVO</button>
+                <button class="talent-tab" data-branch="defense">🛡️ DEFENSIVO</button>
+                <button class="talent-tab" data-branch="rhythm">⚡ RITMO & OURO</button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="talent-modal-body">
+                <!-- Left/Scroll: Talent Nodes Grid -->
+                <div id="talent-nodes-container" class="talent-nodes-grid"></div>
+
+                <!-- Right/Inspector: Selected Talent Card -->
+                <div id="talent-inspector" class="talent-inspector-card">
+                    <div class="inspector-header">
+                        <img id="inspector-icon" src="assets/talents/guitar_power.jpg" alt="Talent Icon" class="inspector-icon-img">
+                        <div class="inspector-meta">
+                            <h3 id="inspector-name">Power Chord</h3>
+                            <div id="inspector-level" class="inspector-level-badge">NÍVEL 0 / 20</div>
+                        </div>
+                    </div>
+
+                    <p id="inspector-desc" class="inspector-desc-text">Aumenta a potência acústica das notas musicais.</p>
+
+                    <div class="inspector-progress-track">
+                        <div id="inspector-progress-fill" class="inspector-progress-fill"></div>
+                    </div>
+
+                    <div class="inspector-benefits-box">
+                        <div class="benefit-row current">
+                            <span class="benefit-label">Efeito Atual:</span>
+                            <span id="inspector-current-benefit" class="benefit-value">+0 Dano</span>
+                        </div>
+                        <div class="benefit-row next">
+                            <span class="benefit-label">Próximo Nível:</span>
+                            <span id="inspector-next-benefit" class="benefit-value">+5 Dano</span>
+                        </div>
+                    </div>
+
+                    <div id="inspector-requirement" class="inspector-prereq-alert"></div>
+
+                    <div class="inspector-actions">
+                        <button id="talent-upgrade-action" class="upgrade-btn ready">
+                            MELHORAR (<span id="inspector-cost-val">40 🪙</span>)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Song Studio Modal (Library, Upload, & Import/Export) -->
+    <div id="song-studio-modal" class="studio-modal-overlay">
+        <div class="studio-modal-dialog">
+            <!-- Studio Header -->
+            <div class="studio-modal-header">
+                <div class="studio-header-title">
+                    <h2>🎵 ESTÚDIO DE MÚSICAS & RITMO</h2>
+                    <span class="studio-subtitle">Crie, edite e compartilhe suas próprias faixas no jogo!</span>
+                </div>
+                <button id="studio-close-btn" class="studio-modal-close" aria-label="Fechar">✕</button>
+            </div>
+
+            <!-- Studio Tabs Bar -->
+            <div class="studio-tabs-bar">
+                <button class="studio-tab active" data-tab="library">📂 MINHAS MÚSICAS</button>
+                <button class="studio-tab" data-tab="new">➕ NOVA MÚSICA</button>
+                <button class="studio-tab" data-tab="io">📥 IMPORTAR / EXPORTAR</button>
+            </div>
+
+            <!-- Studio Body -->
+            <div class="studio-modal-body">
+                <!-- Tab 1: Library -->
+                <div id="studio-tab-library" class="studio-tab-content active">
+                    <div id="studio-library-list" class="studio-library-grid"></div>
+                </div>
+
+                <!-- Tab 2: New Song Upload & Metadata -->
+                <div id="studio-tab-new" class="studio-tab-content">
+                    <div class="new-song-form">
+                        <div class="form-row-2col">
+                            <!-- Cover Art Upload & Preview -->
+                            <div class="form-group cover-upload-group">
+                                <label class="form-label">Capa do Álbum (Imagem):</label>
+                                <div class="cover-preview-box">
+                                    <img id="new-song-cover-preview" src="assets/covers/default_cover.jpg" alt="Preview Capa" class="cover-preview-img">
+                                    <label for="new-song-cover-file" class="upload-badge-btn">📷 Escolher Imagem</label>
+                                    <input type="file" id="new-song-cover-file" accept="image/*" style="display: none;">
+                                </div>
+                            </div>
+
+                            <!-- Audio File Upload -->
+                            <div class="form-group audio-upload-group">
+                                <label class="form-label">Arquivo de Áudio (.mp3, .wav, .ogg, .m4a):</label>
+                                <div class="audio-dropzone">
+                                    <span class="dropzone-icon">🎧</span>
+                                    <label for="new-song-audio-file" class="dropzone-btn">📁 Escolher Arquivo de Áudio</label>
+                                    <input type="file" id="new-song-audio-file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.webm" style="display: none;">
+                                    <div id="new-song-audio-status" class="audio-status-text">Nenhum áudio selecionado</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata Fields -->
+                        <div class="form-group">
+                            <label for="new-song-title" class="form-label">Título da Música:</label>
+                            <input type="text" id="new-song-title" class="form-input" placeholder="Ex: Through the Fire and Flames" maxlength="60">
+                        </div>
+
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label for="new-song-artist" class="form-label">Autoria / Artista:</label>
+                                <input type="text" id="new-song-artist" class="form-input" placeholder="Ex: DragonForce" maxlength="60">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-song-bpm" class="form-label">BPM (Tempo da Música):</label>
+                                <div class="bpm-input-row">
+                                    <input type="number" id="new-song-bpm" class="form-input" value="130" min="40" max="280">
+                                    <button type="button" id="new-song-tap-tempo" class="tap-tempo-btn" title="Toque no ritmo para calcular BPM">🖐️ TAP TEMPO</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-song-desc" class="form-label">Descrição da Música:</label>
+                            <textarea id="new-song-desc" class="form-textarea" placeholder="Descreva sua faixa, estilo ou desafio rítmico..." rows="2" maxlength="200"></textarea>
+                        </div>
+
+                        <div class="form-group pattern-options">
+                            <label class="form-label">Ritmo Inicial:</label>
+                            <div class="radio-options">
+                                <label class="radio-label">
+                                    <input type="radio" name="new-song-pattern" value="empty" checked>
+                                    <span>Iniciar com Ritmo Vazio (Mapear no Editor)</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="new-song-pattern" value="autogen">
+                                    <span>Gerar Ritmo Base Automaticamente por BPM</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button id="new-song-submit-btn" class="form-submit-btn">🚀 CRIAR MÚSICA & ABRIR EDITOR</button>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Import / Export -->
+                <div id="studio-tab-io" class="studio-tab-content">
+                    <div class="io-panel">
+                        <div class="io-card import-card">
+                            <h3>📥 Importar Música (.gvsong / .json / Áudio)</h3>
+                            <p>Importe pacotes de músicas (.gvsong / .json) ou arquivos de áudio (.mp3, .wav, .ogg, .m4a) diretamente para o jogo! Você também pode simplesmente arrastar e soltar o arquivo aqui.</p>
+                            <label for="studio-import-file" class="io-upload-btn">📂 Escolher Pacote .gvsong ou Áudio</label>
+                            <input type="file" id="studio-import-file" accept=".gvsong,.json,audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.webm" style="display: none;">
+                        </div>
+
+                        <div class="io-card info-card">
+                            <h3>💾 Como Exportar e Compartilhar?</h3>
+                            <p>1. Vá até a aba <b>MINHAS MÚSICAS</b>.</p>
+                            <p>2. Clique em <b>EXPORTAR</b> no card da sua música.</p>
+                            <p>3. Um arquivo <code>.gvsong</code> será baixado no seu celular ou PC pronto para enviar aos amigos!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rhythm Chart Editor Modal (Full-Featured Visual Timeline & Recorder) -->
+    <div id="chart-editor-modal" class="editor-modal-overlay">
+        <div class="editor-modal-dialog">
+            <!-- Editor Top Header -->
+            <div class="editor-top-bar">
+                <div class="editor-header-info">
+                    <h2 id="editor-song-title">Título da Música</h2>
+                    <span id="editor-song-artist" class="editor-artist-sub">Artista</span>
+                </div>
+                <div class="editor-header-center">
+                    <span id="editor-time-display" class="editor-clock">00:00.0 / 00:30.0</span>
+                    <span id="editor-notes-count" class="editor-notes-badge">0 notas mapeadas</span>
+                </div>
+                <button id="editor-close-btn" class="editor-btn-close" aria-label="Fechar">✕</button>
+            </div>
+
+            <!-- Editor Transport & Toolbar -->
+            <div class="editor-toolbar">
+                <div class="tool-group">
+                    <button id="editor-rew-btn" class="tool-btn" title="Voltar 3s">⏪ -3s</button>
+                    <button id="editor-step-prev" class="tool-btn" title="Voltar 1 Beat">⏮️ -1B</button>
+                    <button id="editor-play-btn" class="tool-btn btn-play" title="Tocar / Pausar">▶️ TOCAR</button>
+                    <button id="editor-step-next" class="tool-btn" title="Avançar 1 Beat">⏭️ +1B</button>
+                    <button id="editor-fwd-btn" class="tool-btn" title="Avançar 3s">⏩ +3s</button>
+                    <button id="editor-rec-btn" class="tool-btn btn-rec" title="Gravação em Tempo Real">⏺️ GRAVAR (REC)</button>
+                </div>
+
+                <div class="tool-group">
+                    <label class="tool-select-label">Grade:
+                        <select id="editor-snap-select" class="tool-select">
+                            <option value="none">Livre</option>
+                            <option value="1/2">1/2 Tempo</option>
+                            <option value="1/4" selected>1/4 Tempo</option>
+                            <option value="1/8">1/8 Tempo</option>
+                            <option value="1/16">1/16 Tempo</option>
+                        </select>
+                    </label>
+
+                    <label class="tool-select-label">Velocidade:
+                        <select id="editor-speed-select" class="tool-select">
+                            <option value="0.5">0.5x</option>
+                            <option value="0.75">0.75x</option>
+                            <option value="1.0" selected>1.0x</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="tool-group note-type-group">
+                    <button id="editor-mode-tap" class="tool-btn mode-btn active" title="Toque Normal (Tap)">🎵 Normal</button>
+                    <button id="editor-mode-hold" class="tool-btn mode-btn" title="Toque Arrastado (Sustain / Hold)">〰️ Arrastado</button>
+                    <label class="tool-select-label" id="editor-hold-len-wrap" style="display: none;">Duração:
+                        <select id="editor-hold-len-select" class="tool-select">
+                            <option value="0.5">0.5s</option>
+                            <option value="1.0" selected>1.0s</option>
+                            <option value="1.5">1.5s</option>
+                            <option value="2.0">2.0s</option>
+                            <option value="3.0">3.0s</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="tool-group">
+                    <button id="editor-zoom-out" class="tool-btn" title="Diminuir Zoom">🔍 -</button>
+                    <button id="editor-zoom-in" class="tool-btn" title="Aumentar Zoom">🔍 +</button>
+                    <button id="editor-undo-btn" class="tool-btn" title="Desfazer">↩️ Desfazer</button>
+                    <button id="editor-autogen-btn" class="tool-btn" title="Gerar ritmo base por BPM">⚡ Auto-BPM</button>
+                    <button id="editor-clear-btn" class="tool-btn btn-danger" title="Limpar todas as notas">🗑️ Limpar</button>
+                </div>
+
+                <div class="tool-group save-group">
+                    <button id="editor-save-btn" class="tool-btn btn-save">💾 SALVAR</button>
+                    <button id="editor-save-play-btn" class="tool-btn btn-save-play">🚀 SALVAR & JOGAR</button>
+                </div>
+            </div>
+
+            <!-- Timeline Visual Multi-Track Canvas -->
+            <div class="editor-canvas-wrapper">
+                <canvas id="editor-timeline-canvas"></canvas>
+            </div>
+
+            <!-- Precision Timeline Time Scrubber Bar -->
+            <div class="editor-scrubber-row">
+                <span class="scrub-label">⏱️ Navegador de Tempo:</span>
+                <input type="range" id="editor-time-scrubber" min="0" max="30" step="0.05" value="0" class="editor-time-slider">
+            </div>
+
+            <!-- Fretboard Tap Pads (On-screen mobile buttons + keyboard A, S, D, F) -->
+            <div class="editor-pads-section">
+                <div class="pads-instructions">Toque nas pistas para adicionar/remover notas na linha do tempo, ou use <b>REC</b> para gravar no ritmo enquanto a música toca!</div>
+                <div class="editor-pads-bar">
+                    <button id="editor-pad-0" class="editor-fret-pad pad-green">
+                        <span class="pad-num">1</span>
+                        <span class="pad-label">VERDE [A]</span>
+                    </button>
+                    <button id="editor-pad-1" class="editor-fret-pad pad-red">
+                        <span class="pad-num">2</span>
+                        <span class="pad-label">VERMELHO [S]</span>
+                    </button>
+                    <button id="editor-pad-2" class="editor-fret-pad pad-yellow">
+                        <span class="pad-num">3</span>
+                        <span class="pad-label">AMARELO [D]</span>
+                    </button>
+                    <button id="editor-pad-3" class="editor-fret-pad pad-blue">
+                        <span class="pad-num">4</span>
+                        <span class="pad-label">AZUL [F]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Song Completion Results Modal -->
+    <div id="song-results-modal" class="results-modal-overlay">
+        <div class="results-modal-dialog">
+            <div class="results-header">
+                <h2>🎉 MÚSICA CONCLUÍDA!</h2>
+            </div>
+            <div class="results-song-card">
+                <img id="result-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="results-cover-img">
+                <div class="results-song-meta">
+                    <h3 id="result-song-title">Título</h3>
+                    <span id="result-song-artist">Artista</span>
+                </div>
+            </div>
+            <div class="results-stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Precisão</span>
+                    <span id="result-accuracy" class="stat-value val-acc">100%</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Notas Acertadas</span>
+                    <span id="result-hits" class="stat-value">0 / 0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Maior Streak</span>
+                    <span id="result-max-streak" class="stat-value val-streak">0 🔥</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Ouro Ganho</span>
+                    <span id="result-gold-reward" class="stat-value val-gold">+0 🪙</span>
+                </div>
+                <div class="stat-box full-width">
+                    <span class="stat-label">Pontos da Partida</span>
+                    <span id="result-score-gained" class="stat-value val-score">+0</span>
+                </div>
+            </div>
+            <div class="results-actions">
+                <button id="result-replay-btn" class="res-btn btn-replay">🔄 JOGAR NOVAMENTE</button>
+                <button id="result-edit-btn" class="res-btn btn-edit">✏️ EDITAR RITMO</button>
+                <button id="result-close-btn" class="res-btn btn-close">🏠 MENU PRINCIPAL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Battle Statistics Modal (SS) -->
+    <div id="battle-stats-modal" class="stats-modal-overlay">
+        <div class="stats-modal-dialog">
+            <div class="stats-modal-header">
+                <div class="stats-header-info">
+                    <h2>📊 ESTATÍSTICAS DE BATALHA</h2>
+                    <span class="stats-header-sub">Performance em tempo real do confronto</span>
+                </div>
+                <button id="stats-modal-close-btn" class="stats-modal-close" aria-label="Fechar">✕</button>
+            </div>
+            <div class="stats-modal-body">
+                <div class="stats-hero-banner">
+                    <div class="ss-hero-info-group">
+                        <img id="ss-hero-thumb" src="assets/heroes/johnny_blaze.jpg" alt="Hero" class="ss-hero-thumb-img">
+                        <div class="ss-hero-text">
+                            <span id="ss-hero-name" class="ss-hero-name-txt">Johnny Blaze</span>
+                            <span id="ss-hero-rarity" class="hero-rarity-badge badge-common ss-hero-rarity-badge">COMUM</span>
+                        </div>
+                    </div>
+                    <div class="hero-hp-status">
+                        <span class="stat-label">HP DO GUITARRISTA</span>
+                        <span id="ss-hero-hp" class="stat-highlight-val hp-val">100 / 100</span>
+                    </div>
+                    <div class="match-time-status">
+                        <span class="stat-label">TEMPO EM COMBATE</span>
+                        <span id="ss-time-elapsed" class="stat-highlight-val">00:00</span>
+                    </div>
+                </div>
+
+                <div class="stats-metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-icon">💥</span>
+                        <span class="metric-label">Dano Total Causado</span>
+                        <span id="ss-total-damage" class="metric-value val-dmg">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon">💀</span>
+                        <span class="metric-label">Zumbis Derrotados</span>
+                        <span id="ss-zombies-killed" class="metric-value val-kills">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon">🔥</span>
+                        <span class="metric-label">Maior Streak</span>
+                        <span id="ss-max-streak" class="metric-value val-streak">0 🔥</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon">⚡</span>
+                        <span class="metric-label">Multiplicador Atual</span>
+                        <span id="ss-current-multiplier" class="metric-value val-mult">x1</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon">🏆</span>
+                        <span class="metric-label">Pontuação Atual</span>
+                        <span id="ss-current-score" class="metric-value val-score">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon">🪙</span>
+                        <span class="metric-label">Ouro nesta Partida</span>
+                        <span id="ss-match-coins" class="metric-value val-gold">+0 🪙</span>
+                    </div>
+                    <div class="metric-card full-span">
+                        <span class="metric-icon">🎯</span>
+                        <span class="metric-label">Precisão & Julgamento de Notas</span>
+                        <span id="ss-accuracy-rate" class="metric-value val-acc">100% (0P / 0G / 0M)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-modal-footer">
+                <button onclick="document.getElementById('battle-stats-modal').classList.remove('open')" class="stats-resume-btn">VOLTAR AO JOGO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Battle Settings & Pause Modal (Gear) -->
+    <div id="battle-gear-modal" class="gear-modal-overlay">
+        <div class="gear-modal-dialog">
+            <div class="gear-modal-header">
+                <h2 id="gear-modal-title">⚙️ OPÇÕES & PAUSA</h2>
+                <button id="gear-modal-close-btn" class="gear-modal-close" aria-label="Fechar">✕</button>
+            </div>
+            <div class="gear-modal-body">
+                <div class="gear-option-row">
+                    <span class="gear-option-label">Idioma / Language:</span>
+                    <div class="gear-lang-group">
+                        <button class="gear-btn-choice" onclick="i18n.setLanguage('pt')">Português (PT)</button>
+                        <button class="gear-btn-choice" onclick="i18n.setLanguage('en')">English (EN)</button>
+                    </div>
+                </div>
+                <div class="gear-option-row">
+                    <span class="gear-option-label">Som do Jogo:</span>
+                    <button class="gear-btn-choice" onclick="if(window.soundEngine){ const m = window.soundEngine.toggleMute(); this.innerText = m ? 'Mutado 🔇' : 'Ativo 🔊'; }">Alternar Som</button>
+                </div>
+                <div class="gear-option-row">
+                    <span class="gear-option-label">Auto Battle:</span>
+                    <button class="gear-btn-choice" onclick="if(window.game){ window.game.rhythm.autoPlay = !window.game.rhythm.autoPlay; this.innerText = window.game.rhythm.autoPlay ? 'Auto: ATIVO' : 'Auto: DESATIVADO'; }">Alternar Auto</button>
+                </div>
+
+                <div id="gear-danger-zone-wrap" class="gear-danger-zone">
+                    <div class="danger-warning-text">⚠️ Voltar ao Menu Inicial encerrará o combate atual e os dados desta partida serão descartados!</div>
+                    <button id="gear-abandon-battle-btn" class="gear-abandon-btn">
+                        🚨 Voltar ao Menu Inicial (perde progresso atual)
+                    </button>
+                </div>
+            </div>
+            <div class="gear-modal-footer">
+                <button id="gear-footer-action-btn" onclick="document.getElementById('battle-gear-modal').classList.remove('open')" class="gear-resume-btn">▶️ Continuar Partida</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts with Cache Busting v=20 -->
+    <script src="js/audio.js?v=20"></script>
+    <script src="js/i18n.js?v=20"></script>
+    <script src="js/enemy-pool.js?v=20"></script>
+    <script src="js/guitarist-pool.js?v=20"></script>
+    <script src="js/talents.js?v=20"></script>
+    <script src="js/song-db.js?v=20"></script>
+    <script src="js/song-editor.js?v=20"></script>
+    <script src="js/song-studio.js?v=20"></script>
+    <script src="js/combat.js?v=20"></script>
+    <script src="js/rhythm.js?v=20"></script>
+    <script src="js/main.js?v=20"></script>
+</body>
+</html>
