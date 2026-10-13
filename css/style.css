@@ -3180,4 +3180,257 @@ button.hero-roster-card {
     transform: scale(0.98);
 }
 
+/* ========================================================
+   PROCEDURAL OVERHAUL v1.5.0 STYLES (Stages, Levels, Skills, Mana)
+   ======================================================== */
+
+/* Rock Mana Meter styling */
+#rock-meter-bar {
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, #00d4ff, #00ffaa, #9900ff);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.7);
+    transition: width 0.1s ease-out;
+}
+
+/* Stage Selector Card */
+.stage-select-card {
+    border: 1px solid rgba(0, 212, 255, 0.35);
+    background: linear-gradient(135deg, rgba(15, 20, 35, 0.95), rgba(10, 15, 30, 0.98));
+}
+
+.stage-badge {
+    background: linear-gradient(135deg, #0077ff, #00d4ff);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+/* Hero Level Progression */
+.hero-level-progression-box {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 204, 0, 0.3);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hero-level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hero-level-badge {
+    font-size: 11px;
+    font-weight: 900;
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+}
+
+.hero-xp-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: #aaccff;
+}
+
+.hero-xp-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(20, 25, 40, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.hero-xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffaa00);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+    transition: width 0.25s ease;
+}
+
+.hero-level-up-action {
+    width: 100%;
+    padding: 7px;
+    background: linear-gradient(135deg, #ffd700, #ff8800);
+    border: 1px solid #ffe680;
+    border-radius: 6px;
+    color: #1a0800;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(255, 215, 0, 0.35);
+    transition: all 0.12s ease;
+}
+
+.hero-level-up-action:active {
+    transform: scale(0.97);
+}
+
+/* 4-Lane Equipped Skills Grid */
+.skills-badge {
+    background: linear-gradient(135deg, #9900ff, #ff00aa);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(255, 0, 170, 0.4);
+}
+
+.map-lane-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.lane-skill-slot {
+    background: rgba(18, 14, 32, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+    user-select: none;
+}
+
+.lane-skill-slot:hover {
+    border-color: #00d4ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.25);
+}
+
+.lane-skill-slot.lane-0 { border-top: 3px solid #00ff66; }
+.lane-skill-slot.lane-1 { border-top: 3px solid #ff0055; }
+.lane-skill-slot.lane-2 { border-top: 3px solid #ffcc00; }
+.lane-skill-slot.lane-3 { border-top: 3px solid #00d4ff; }
+
+.lane-tag-num {
+    font-size: 9px;
+    font-weight: 800;
+    color: #8899aa;
+    text-transform: uppercase;
+}
+
+.lane-skill-icon {
+    font-size: 22px;
+    margin: 2px 0;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+}
+
+.lane-skill-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.lane-skill-cost {
+    font-size: 9px;
+    font-weight: 800;
+    color: #00d4ff;
+}
+
+/* Skill Picker Modal */
+.skill-modal-dialog {
+    max-width: 420px;
+    max-height: 85vh;
+}
+
+.skill-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.skill-card-choice {
+    background: rgba(25, 20, 40, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.skill-card-choice:hover {
+    background: rgba(45, 30, 70, 0.95);
+    border-color: #00d4ff;
+    transform: translateX(3px);
+}
+
+.skill-card-choice.active {
+    border-color: #00ff66;
+    background: rgba(0, 255, 102, 0.12);
+}
+
+.skill-choice-icon {
+    font-size: 26px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.skill-choice-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.skill-choice-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.skill-choice-desc {
+    font-size: 10px;
+    color: #b0bcd0;
+    line-height: 1.25;
+}
+
+.skill-choice-cost {
+    font-size: 10px;
+    font-weight: 800;
+    color: #00d4ff;
+    align-self: flex-start;
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 380px) {
+    .map-lane-skills-grid {
+        gap: 4px;
+    }
+    .lane-skill-slot {
+        padding: 6px 2px;
+    }
+    .lane-skill-icon {
+        font-size: 18px;
+    }
+    .lane-skill-title {
+        font-size: 9px;
+    }
+}
+
 

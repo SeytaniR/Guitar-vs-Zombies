@@ -204,6 +204,25 @@ class Game {
             songNextBtn.onclick = () => this.cycleSong(1);
         }
 
+        // Stage prev/next cycle navigation buttons
+        const stagePrevBtn = document.getElementById('map-stage-prev-btn');
+        if (stagePrevBtn) {
+            stagePrevBtn.onclick = () => this.cycleStage(-1);
+        }
+        const stageNextBtn = document.getElementById('map-stage-next-btn');
+        if (stageNextBtn) {
+            stageNextBtn.onclick = () => this.cycleStage(1);
+        }
+
+        // Skill Picker Close button
+        const skillCloseBtn = document.getElementById('skill-picker-close-btn');
+        if (skillCloseBtn) {
+            skillCloseBtn.onclick = () => {
+                const modal = document.getElementById('skill-picker-modal');
+                if (modal) modal.classList.remove('open');
+            };
+        }
+
         // Song selection dropdown change
         const mapSongSelect = document.getElementById('map-song-select');
         if (mapSongSelect) {
@@ -217,6 +236,9 @@ class Game {
     // MAP & PRE-BATTLE PREPARATION
     // ==========================================
     async prepareMapScreen() {
+        // 0. Update Stage Progression UI
+        this.updateStageUI();
+
         // 1. Render Guitarist Hero Roster & Showcase
         this.renderHeroRoster();
 
@@ -226,8 +248,38 @@ class Game {
             this.renderMapZombies();
         }
 
+        // 2.5. Render 4-Lane Equipped Skills
+        this.renderLaneSkills();
+
         // 3. Populate available songs from IndexedDB
         await this.populateSongDropdown();
+    }
+
+    cycleStage(direction = 1) {
+        if (!window.stageSystem) return;
+        const current = window.stageSystem.selectedStage;
+        const highest = window.stageSystem.highestUnlockedStage;
+        const next = Math.max(1, Math.min(highest, current + direction));
+        window.stageSystem.setSelectedStage(next);
+        if (window.soundEngine) window.soundEngine.playSustainTick(0);
+        this.updateStageUI();
+    }
+
+    updateStageUI() {
+        if (!window.stageSystem) return;
+        const stage = window.stageSystem.selectedStage;
+        const stageTitle = document.getElementById('map-stage-title-text');
+        const stageInfo = document.getElementById('map-stage-info-text');
+
+        if (stageTitle) {
+            stageTitle.innerText = window.stageSystem.getStageName(stage);
+        }
+        if (stageInfo) {
+            const range = window.stageSystem.getZombieLevelRange(stage);
+            const kills = window.stageSystem.getTargetKills(stage);
+            const rewards = window.stageSystem.getStageRewards(stage);
+            stageInfo.innerText = `Dificuldade: Zumbis Nv. ${range.min}-${range.max} | Alvo: ${kills} Baixas | Recompensas: 🪙 ${rewards.coins} | ⭐ ${rewards.xp} XP`;
+        }
     }
 
     renderHeroRoster() {
@@ -263,6 +315,42 @@ class Game {
             const color = currentHero.accentColor || currentHero.themeColor || '#ffaa00';
             showcaseBox.style.borderColor = color;
             showcaseBox.style.boxShadow = `0 4px 20px ${color}44`;
+        }
+
+        // Hero Level Progression Box
+        const lvlData = window.guitaristPool.getHeroLevelData(currentHero.id);
+        const reqXp = window.guitaristPool.getXpRequiredForNextLevel(lvlData.level);
+        const goldCost = window.guitaristPool.getGoldCostForLevelUp(lvlData.level);
+
+        const lvlBadge = document.getElementById('showcase-hero-level-badge');
+        const xpText = document.getElementById('showcase-hero-xp-text');
+        const xpFill = document.getElementById('showcase-hero-xp-fill');
+        const lvlUpBtn = document.getElementById('hero-level-up-btn');
+
+        if (lvlBadge) lvlBadge.innerText = `⭐ NÍVEL ${lvlData.level} / 100`;
+        if (xpText) xpText.innerText = lvlData.level >= 100 ? 'MÁXIMO' : `XP: ${lvlData.xp} / ${reqXp}`;
+        if (xpFill) {
+            const pct = lvlData.level >= 100 ? 100 : Math.min(100, Math.round((lvlData.xp / reqXp) * 100));
+            xpFill.style.width = `${pct}%`;
+        }
+        if (lvlUpBtn) {
+            if (lvlData.level >= 100) {
+                lvlUpBtn.innerText = '⭐ NÍVEL MÁXIMO (100)';
+                lvlUpBtn.disabled = true;
+            } else {
+                lvlUpBtn.disabled = false;
+                lvlUpBtn.innerText = `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`;
+                lvlUpBtn.onclick = () => {
+                    const res = window.guitaristPool.levelUpWithGold(currentHero.id);
+                    if (res.success) {
+                        if (window.soundEngine) window.soundEngine.playPowerChord();
+                        this.renderHeroRoster();
+                        this.updateMenuCurrencies();
+                    } else {
+                        alert(res.reason || 'Ouro insuficiente!');
+                    }
+                };
+            }
         }
 
         // 2. Populate 6 Guitarists Grid with Real Clickable Buttons
@@ -336,6 +424,71 @@ class Game {
             `;
             grid.appendChild(card);
         });
+    }
+
+    renderLaneSkills() {
+        if (!window.skillSystem) return;
+        const grid = document.getElementById('map-lane-skills-grid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+        const laneColors = ['#00ff66', '#ff0055', '#ffcc00', '#00d4ff'];
+
+        for (let l = 0; l < 4; l++) {
+            const skill = window.skillSystem.getEquippedSkill(l);
+            const slot = document.createElement('div');
+            slot.className = `lane-skill-slot lane-${l}`;
+            slot.innerHTML = `
+                <span class="lane-tag-num" style="color: ${laneColors[l]};">Trilho ${l + 1}</span>
+                <span class="lane-skill-icon">${skill.icon}</span>
+                <span class="lane-skill-title">${skill.name}</span>
+                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} Mana` : 'Grátis'}</span>
+            `;
+
+            slot.onclick = () => this.openSkillPickerModal(l);
+            grid.appendChild(slot);
+        }
+    }
+
+    openSkillPickerModal(laneIndex) {
+        if (!window.skillSystem) return;
+        this.pickingSkillLaneIndex = laneIndex;
+        const modal = document.getElementById('skill-picker-modal');
+        const titleEl = document.getElementById('skill-picker-title');
+        const listEl = document.getElementById('skill-picker-list');
+        if (!modal || !listEl) return;
+
+        const laneNames = ['Trilho 1 (Verde)', 'Trilho 2 (Vermelho)', 'Trilho 3 (Amarelo)', 'Trilho 4 (Azul)'];
+        if (titleEl) titleEl.innerText = `⚡ Equipar no ${laneNames[laneIndex] || `Trilho ${laneIndex + 1}`}`;
+
+        const currentSkill = window.skillSystem.getEquippedSkill(laneIndex);
+        const allSkills = window.skillSystem.getAllSkills();
+
+        listEl.innerHTML = '';
+        allSkills.forEach(s => {
+            const isEquipped = (s.id === currentSkill.id);
+            const card = document.createElement('div');
+            card.className = `skill-card-choice ${isEquipped ? 'active' : ''}`;
+            card.innerHTML = `
+                <div class="skill-choice-icon">${s.icon}</div>
+                <div class="skill-choice-info">
+                    <div class="skill-choice-name">${s.name} ${isEquipped ? '✓ (Equipada)' : ''}</div>
+                    <div class="skill-choice-desc">${s.desc}</div>
+                    <span class="skill-choice-cost">${s.manaCost > 0 ? `⚡ Custo: ${s.manaCost} Rock Mana` : '⚡ Custo: 0 (Ataque Padrão)'}</span>
+                </div>
+            `;
+
+            card.onclick = () => {
+                window.skillSystem.equipSkill(laneIndex, s.id);
+                if (window.soundEngine) window.soundEngine.playPowerChord();
+                modal.classList.remove('open');
+                this.renderLaneSkills();
+            };
+
+            listEl.appendChild(card);
+        });
+
+        modal.classList.add('open');
     }
 
     async populateSongDropdown() {
@@ -507,16 +660,6 @@ class Game {
     // BATTLE CONTROLS & HUD
     // ==========================================
     setupBattleControls() {
-        // Auto Play Toggle
-        const autoBtn = document.getElementById('battle-auto-toggle');
-        if (autoBtn) {
-            autoBtn.onclick = () => {
-                this.rhythm.autoPlay = !this.rhythm.autoPlay;
-                autoBtn.innerText = this.rhythm.autoPlay ? '⚡ AUTO: ON' : '⚡ AUTO: OFF';
-                autoBtn.classList.toggle('active', this.rhythm.autoPlay);
-            };
-        }
-
         // Sound Toggle
         const soundBtn = document.getElementById('battle-sound-toggle');
         if (soundBtn) {
@@ -698,10 +841,14 @@ class Game {
             hpText.innerText = `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`;
         }
 
-        // Rock Energy Meter
+        // Rock Mana Meter
         const rockBar = document.getElementById('rock-meter-bar');
+        const manaText = document.getElementById('battle-hero-mana-text');
         if (rockBar) {
             rockBar.style.width = `${this.combat.rockPower}%`;
+        }
+        if (manaText) {
+            manaText.innerText = `${Math.floor(this.combat.rockMana)} / ${this.combat.maxRockMana}`;
         }
 
         // Real-Time Battle Score, Combo and Multiplier

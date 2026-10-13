@@ -27,6 +27,57 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.0] - 2026-10-13 (Overhaul Procedural: Níveis 1-100 de Guitarristas e Zumbis, Fases Infinitas, Rock Mana, Habilidades por Trilho e Sistema de Velocidade de Ataque)
+**Novas Mecânicas & Sistemas Procedurais**
+- **Sistema Procedural de Níveis para Guitarristas (Nv. 1 a 100) (`js/guitarist-pool.js`):**
+  - Cada guitarrista agora evolui proceduralmente do nível 1 ao 100.
+  - Curva de dano suave e balanceada: +1% de dano base por nível, garantindo que no nível 100 o guitarrista desfira o dobro de dano (2.0x / +99% bônus).
+  - Guitarristas de raridades superiores recebem escalonamentos de atributos especializados e justos:
+    - *Comum (Johnny Blaze)*: +1.0% Dano, +0.40% Dano Crítico por nível.
+    - *Raro (Vulkan Ironhead)*: +1.0% Dano, +0.30% Dano Crítico, +0.20% Velocidade de Projétil e chance de queimadura por nível.
+    - *Raro (Dr. Radix)*: +1.0% Dano, +0.35% Dano Crítico, +0.35% Perfuração de Armadura e +0.12% Lentidão contínua de marcha zumbi.
+    - *Épico (Cypher-7 Volt)*: +1.1% Dano, +0.60% Dano Crítico e arcos elétricos em cadeia (*Chain Lightning*) atingindo múltiplos alvos.
+    - *Lendário (Kragthor, o Bárbaro)*: +1.15% Dano, +0.85% Dano Crítico e +0.40% Repulsão sísmica pesada (*Knockback*).
+    - *Mítico (Roxie Anarchy)*: +1.20% Dano, +0.70% Dano Crítico, +0.25% Bônus de Ouro e +0.50% de Regeneração de Rock Mana por nível.
+  - Progressão por XP em batalha (`addHeroXp`) e botão de Level-Up por Ouro (`levelUpWithGold`) na tela de pré-batalha, integrado ao `TalentSystem`.
+- **Sistema Procedural de Níveis para Zumbis (`js/zombie-entity.js`):**
+  - Os zumbis escalonam nível de acordo com a fase selecionada: vida máxima (`hpMult = (1 + 0.09*(lvl-1))^1.04`), dano de ataque corpo a corpo (`dmgMult = 1 + 0.075*(lvl-1)`) e ouro dropado (`getGoldDrop`).
+  - Badge visual `[Nv. X]` exibida dinamicamente acima da barra de vida dos zumbis.
+  - Estados alterados completos implementados: Atordoamento/Freeze (`applyStun`), Lentidão (`applySlow`) e Queimadura contínua DoT (`applyBurn`).
+- **Sistema Infinito de Fases Procedurais (`js/stage-system.js`):**
+  - Criação do módulo dedicado `StageSystem` gerenciando progressão infinita de fases.
+  - Geração procedural de nomes de ruas, setores e ciclos apocalípticos (ex.: Rua das Garagens, Setor Alfa MK-2, etc.).
+  - Metas dinâmicas de abate (`getTargetKills`) e recompensas procedurais de ouro e XP ao concluir a fase (`getStageRewards`).
+  - Seletor de fases interativo com botões anteriores/próximos na tela de pré-batalha.
+- **Substituição da Barra de Especial por Rock Mana (`js/skills.js` & `js/combat.js`):**
+  - Remoção da antiga barra de Overdrive e introdução do sistema de **Rock Mana** (capacidade 30/100 inicial).
+  - Regeneração passiva contínua escalonada por atributos do guitarrista e ganho dinâmico de mana em notas acertadas e sustain ticks.
+- **Sistema de 4 Habilidades Equipáveis por Trilho de Ritmo (`js/skills.js`):**
+  - Grade visual de 4 slots na tela de pré-batalha permitindo vincular 1 habilidade para cada uma das 4 pistas neon.
+  - 8 habilidades únicas balanceadas:
+    1. *Ataque Sônico* (Custo 0, Dano 1.0x - padrão).
+    2. *Power Chord Pesado* (Custo 8, Dano 2.2x + repulsão física forte).
+    3. *Melodia Regenerativa* (Custo 12, Dano 0.75x + restaura +20 HP ao herói).
+    4. *Choque Atordoante* (Custo 10, Dano 1.2x + paralisa o zumbi por 2.0s).
+    5. *Fuzz Dissuasivo* (Custo 9, Dano 0.9x + reduz velocidade de todos os zumbis em 50% por 3.5s).
+    6. *Riff Pirotécnico* (Custo 10, Dano 1.3x + incendeia com 22 DPS por 3.5s).
+    7. *Escudo Harmônico* (Custo 14, Dano 0.8x + barreira sônica que absorve até 35 de dano por 4.0s).
+    8. *Frenesi Overdrive* (Custo 15, Dano 1.1x + aumenta velocidade de ataque em 65% por 4.5s).
+  - **Mecânica de Mana Insuficiente (Starvation Fallback):** Caso o jogador acerte uma nota que ative uma habilidade mas não tenha mana suficiente, a habilidade é automaticamente substituída por um ataque básico enfraquecido (50% do dano base) com aviso flutuante `"⚡ SEM MANA! (50%)"`.
+- **Sistema de Velocidade de Ataque (Attack Speed) e Modificadores de Ritmo:**
+  - Desacoplamento da antiga regra de 1 nota = 1 ataque: o guitarrista possui intervalo de ataque automático baseado em sua velocidade de ataque (`attackSpeed`).
+  - A precisão das notas tocadas no minigame de ritmo alimenta a fila de modificadores que afetam os disparos:
+    - `MISS`: Penalidade de 50% de redução no dano do ataque seguinte (dano * 0.5).
+    - `GOOD`: Disparo normal (dano * 1.0).
+    - `GREAT`: Disparo amplificado (dano * 1.2).
+    - `PERFECT`: Ativação imediata de Ataque Crítico!
+  - Dano Crítico baseado em atributos percentuais do personagem: `danoNormal * (1 + bonusCriticoPercentual / 100)`.
+- **Eliminação Completa do Modo Automático (Auto-Play):**
+  - Removido qualquer botão ou atalho de jogo automático (`autoPlay`), garantindo jogabilidade puramente manual e baseada em habilidade.
+- **Design Modular e Responsividade Mobile:**
+  - 16 arquivos JavaScript independentes, todos rigorosamente abaixo de 1.000 linhas (zero God Objects).
+  - Interface com grid flexível e cards fluidos que se ajustam responsivamente a telas verticais mobile de qualquer resolução.
+
 ### [v1.4.3] - 2026-10-12 (Eliminação do God Object: Desacoplamento do Motor de Combate em Módulos Especializados)
 **Refatoração & Arquitetura**
 - **Eliminação Completa do "God Object" `CombatSystem`:**

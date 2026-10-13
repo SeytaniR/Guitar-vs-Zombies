@@ -1,8 +1,10 @@
 // Polymorphic Zombie Entity Class (Encapsulates AI, Animations, States, and Rendering for All 8 Archetypes)
 class ZombieEntity {
-    constructor(enemyDef, laneY, canvasWidth) {
+    constructor(enemyDef, laneY, canvasWidth, level = 1) {
+        this.level = Math.max(1, Math.round(level || 1));
         this.type = enemyDef.type || 'normal';
-        this.name = enemyDef.name || 'Zumbi';
+        this.baseName = enemyDef.name || 'Zumbi';
+        this.name = `[Nv.${this.level}] ${this.baseName}`;
         this.badge = enemyDef.badge || '';
         this.tint = enemyDef.tint || null;
         this.scale = enemyDef.scale || 0.50;
@@ -10,12 +12,18 @@ class ZombieEntity {
         const baseSpeed = enemyDef.speed || 38;
         this.speed = baseSpeed + (Math.random() * 8 - 4);
 
-        const hp = enemyDef.hp || 80;
+        // Procedural HP Scaling
+        const hpMult = Math.pow(1 + 0.09 * (this.level - 1), 1.04);
+        const baseHp = enemyDef.hp || 80;
+        const hp = Math.round(baseHp * hpMult);
         this.hp = hp;
         this.maxHp = hp;
 
+        // Procedural Damage Scaling
+        const dmgMult = 1 + 0.075 * (this.level - 1);
+        const baseDmg = enemyDef.attackDamage || 7;
+        this.attackDamage = Math.max(1, Math.round(baseDmg * dmgMult));
         this.attackInterval = enemyDef.attackInterval || 1.1;
-        this.attackDamage = enemyDef.attackDamage || 7;
         this.attackCooldown = 0.3;
         this.attackTimer = 0;
         this.isAttacking = false;
@@ -30,8 +38,12 @@ class ZombieEntity {
         this.flashTime = 0;
         this.active = true;
 
-        // Vulkan Ironhead Burn Status
+        // Status Effects (Stun, Slow, Burn)
+        this.stunTimer = 0;
+        this.slowTimer = 0;
+        this.slowFactor = 1.0;
         this.burnTimer = 0;
+        this.burnDps = 14;
         this.burnTick = 0;
 
         // Archetype: Leaper
@@ -66,27 +78,60 @@ class ZombieEntity {
     update(dt, combat) {
         if (this.flashTime > 0) this.flashTime -= dt;
 
-        // Burn Status Processing (Vulkan Ironhead passive)
+        // 1. Stun Handling (Paralyzed: cannot move or attack)
+        if (this.stunTimer > 0) {
+            this.stunTimer -= dt;
+            if (Math.random() < 0.28) {
+                combat.fx.particles.push({
+                    x: this.x + (Math.random() - 0.5) * 16,
+                    y: this.y - 28 + (Math.random() - 0.5) * 10,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: -Math.random() * 15 - 5,
+                    color: '#ffcc00',
+                    size: 2,
+                    life: 0.25,
+                    maxLife: 0.25
+                });
+            }
+            return;
+        }
+
+        // 2. Slow Handling
+        if (this.slowTimer > 0) {
+            this.slowTimer -= dt;
+        } else {
+            this.slowFactor = 1.0;
+        }
+        const effectiveDt = dt * (this.slowFactor || 1.0);
+
+        // 3. Burn Status Processing
         if (this.burnTimer > 0) {
             this.burnTimer -= dt;
             this.burnTick += dt;
             if (this.burnTick >= 0.5) {
                 this.burnTick = 0;
-                this.hp -= 7;
+                const burnTickDmg = Math.max(4, Math.round((this.burnDps || 14) * 0.5));
+                this.hp -= burnTickDmg;
                 this.flashTime = 0.08;
-                combat.battleStats.damageDealt += 7;
-                combat.addFloatingText("-7 🔥", this.x, this.y - 30, '#ff4400', false);
+                if (combat && combat.battleStats) {
+                    combat.battleStats.damageDealt += burnTickDmg;
+                }
+                if (combat && typeof combat.addFloatingText === 'function') {
+                    combat.addFloatingText(`-${burnTickDmg} 🔥`, this.x, this.y - 30, '#ff4400', false);
+                }
 
-                combat.fx.particles.push({
-                    x: this.x + (Math.random() - 0.5) * 16,
-                    y: this.y - 15,
-                    vx: (Math.random() - 0.5) * 20,
-                    vy: -Math.random() * 30 - 10,
-                    color: Math.random() > 0.5 ? '#ff4400' : '#ffaa00',
-                    size: 2,
-                    life: 0.3,
-                    maxLife: 0.3
-                });
+                if (combat && combat.fx && Array.isArray(combat.fx.particles)) {
+                    combat.fx.particles.push({
+                        x: this.x + (Math.random() - 0.5) * 16,
+                        y: this.y - 15,
+                        vx: (Math.random() - 0.5) * 20,
+                        vy: -Math.random() * 30 - 10,
+                        color: Math.random() > 0.5 ? '#ff4400' : '#ffaa00',
+                        size: 2,
+                        life: 0.3,
+                        maxLife: 0.3
+                    });
+                }
 
                 if (this.hp <= 0 && this.active) {
                     this.active = false;
@@ -101,25 +146,25 @@ class ZombieEntity {
 
         switch (this.type) {
             case 'leaper':
-                this.updateLeaper(dt, combat, heroPos, attackDistance);
+                this.updateLeaper(effectiveDt, combat, heroPos, attackDistance);
                 break;
             case 'soldier':
-                this.updateSoldier(dt, combat, attackDistance);
+                this.updateSoldier(effectiveDt, combat, attackDistance);
                 break;
             case 'spore':
-                this.updateSpore(dt, combat, attackDistance);
+                this.updateSpore(effectiveDt, combat, attackDistance);
                 break;
             case 'bloater':
-                this.updateBloater(dt, combat, attackDistance);
+                this.updateBloater(effectiveDt, combat, attackDistance);
                 break;
             case 'gladiator':
-                this.updateGladiator(dt, combat, attackDistance);
+                this.updateGladiator(effectiveDt, combat, attackDistance);
                 break;
             case 'hazmat':
-                this.updateHazmat(dt, combat, attackDistance);
+                this.updateHazmat(effectiveDt, combat, attackDistance);
                 break;
             default:
-                this.updateStandard(dt, combat, attackDistance);
+                this.updateStandard(effectiveDt, combat, attackDistance);
                 break;
         }
     }
@@ -485,6 +530,45 @@ class ZombieEntity {
             ctx.fillText(this.name || "ZUMBI", this.x, by - 2);
             ctx.restore();
         }
+    }
+
+    applyStun(durationSec) {
+        this.stunTimer = Math.max(this.stunTimer, durationSec);
+    }
+
+    applySlow(factor, durationSec) {
+        this.slowFactor = factor;
+        this.slowTimer = Math.max(this.slowTimer, durationSec);
+    }
+
+    applyBurn(dps, durationSec) {
+        this.burnDps = dps;
+        this.burnTimer = Math.max(this.burnTimer, durationSec);
+    }
+
+    isStunned() {
+        return this.stunTimer > 0;
+    }
+
+    isSlowed() {
+        return this.slowTimer > 0;
+    }
+
+    getGoldDrop(heroGoldMult = 1.0, talentBonus = 0) {
+        const baseMap = {
+            bloater: 16,
+            mutant: 14,
+            soldier: 10,
+            gladiator: 9,
+            hazmat: 8,
+            spore: 7,
+            runner: 5,
+            normal: 4
+        };
+        const baseGold = baseMap[this.type] || 5;
+        const levelMult = 1 + 0.075 * (this.level - 1);
+        const earned = Math.round((baseGold * levelMult + talentBonus) * heroGoldMult);
+        return Math.max(1, earned);
     }
 }
 

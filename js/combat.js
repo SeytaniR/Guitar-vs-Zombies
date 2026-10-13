@@ -68,7 +68,23 @@ class CombatSystem {
         this.heroMaxHp = 100;
         this.isGameOver = false;
         this.combo = 0;
-        this.rockPower = 0;
+
+        // Rock Mana & Attack Speed System (replaces old rock power)
+        this.rockMana = 30;
+        this.maxRockMana = 100;
+        this.rockManaRegen = 2.0;
+
+        this.baseAttackSpeed = 1.30; // attacks per second
+        this.heroAttackTimer = 0;
+        this.heroAttackSpeedBuffTimer = 0;
+        this.heroAttackSpeedBuffMult = 1.0;
+
+        this.heroShieldHp = 0;
+        this.heroShieldTimer = 0;
+
+        this.pendingAttackModifiers = [];
+        this.stageCompleted = false;
+
         this.zombiesKilled = 0;
         this.score = 0;
 
@@ -101,6 +117,10 @@ class CombatSystem {
         });
     }
 
+    // Rock Power backward compatibility property mapping to Rock Mana
+    get rockPower() { return (this.rockMana / this.maxRockMana) * 100; }
+    set rockPower(v) { this.rockMana = Math.max(0, Math.min(this.maxRockMana, (v / 100) * this.maxRockMana)); }
+
     // Proxy FX helper methods for backwards compatibility
     get shakePower() { return this.fx.shakePower; }
     set shakePower(v) { this.fx.shakePower = v; }
@@ -123,6 +143,37 @@ class CombatSystem {
             return window.guitaristPool.getSelectedGuitarist();
         }
         return null;
+    }
+
+    getActiveHeroStats() {
+        const heroData = this.getActiveHeroData();
+        if (heroData && window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function') {
+            return window.guitaristPool.getHeroStats(heroData.id);
+        }
+        return {
+            level: 1,
+            damageMult: 1.0,
+            critDamageBonusPercent: 50.0,
+            manaRegenRate: 1.0,
+            goldBonus: 0,
+            armorPen: 0,
+            slowHorde: 0,
+            burnChance: 0,
+            knockbackBonus: 0,
+            chainLightning: false,
+            chainTargets: 0
+        };
+    }
+
+    getHeroAttackSpeed() {
+        let spd = this.baseAttackSpeed || 1.30;
+        if (this.heroAttackSpeedBuffTimer > 0) {
+            spd *= (this.heroAttackSpeedBuffMult || 1.4);
+        }
+        if (window.talentSystem) {
+            spd += window.talentSystem.getStat('speed_shred') * 0.04;
+        }
+        return spd;
     }
 
     getActiveHeroSheet() {
@@ -176,11 +227,16 @@ class CombatSystem {
         this.fx.reset();
         this.heroHp = this.heroMaxHp;
         this.isGameOver = false;
-        this.rockPower = 0;
+        this.rockMana = 30;
         this.combo = 0;
         this.score = 0;
         this.zombiesKilled = 0;
         this.spawnTimer = 0;
+        this.pendingAttackModifiers = [];
+        this.stageCompleted = false;
+        this.heroAttackTimer = 0;
+        this.heroShieldHp = 0;
+        this.heroShieldTimer = 0;
 
         this.activeEnemyTypes = (enemyList && enemyList.length > 0)
             ? enemyList
@@ -208,13 +264,81 @@ class CombatSystem {
             ? pool[Math.floor(Math.random() * pool.length)]
             : { type: 'normal', scale: 0.50, speed: 38, hp: 80, attackInterval: 1.1, attackDamage: 7, name: 'Zumbi Punk' };
 
+        const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
+        const range = window.stageSystem ? window.stageSystem.getZombieLevelRange(stage) : { min: 1, max: 2 };
+        const zombieLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+
         const ZombieClass = window.ZombieEntity || ZombieEntity;
-        const zombie = new ZombieClass(enemyDef, metrics.laneY, this.canvas.width);
+        const zombie = new ZombieClass(enemyDef, metrics.laneY, this.canvas.width, zombieLevel);
         this.entities.zombies.push(zombie);
     }
 
-    launchAttack(isCrit = false, chordIndex = 0) {
+    registerRhythmNote(rating, laneIndex = 0) {
         if (this.isGameOver) return;
+        const heroPos = this.getHeroPosition();
+
+        if (rating === 'miss') {
+            this.pendingAttackModifiers.push({
+                mult: 0.5,
+                isCrit: false,
+                skill: null,
+                isMiss: true
+            });
+            this.addFloatingText('MISS (-50%)', heroPos.x, heroPos.y - 45, '#ff3333', false);
+            this.combo = 0;
+            return;
+        }
+
+        // Mana Award based on note precision
+        let manaAward = 2.0;
+        let ratingMult = 1.0;
+        let isCrit = false;
+
+        if (rating === 'perfect') {
+            manaAward = 4.5;
+            ratingMult = 1.4;
+            isCrit = true; // Perfect guarantees Critical Strike!
+        } else if (rating === 'great') {
+            manaAward = 3.2;
+            ratingMult = 1.2;
+            isCrit = false;
+        } else { // good
+            manaAward = 2.0;
+            ratingMult = 1.0;
+            isCrit = false;
+        }
+
+        this.rockMana = Math.min(this.maxRockMana, this.rockMana + manaAward);
+
+        // Retrieve equipped skill for this rhythm lane
+        const skill = window.skillSystem ? window.skillSystem.getEquippedSkill(laneIndex) : null;
+        let skillToApply = skill;
+        let manaPenalty = 1.0;
+
+        if (skill && skill.manaCost > 0) {
+            if (this.rockMana >= skill.manaCost) {
+                this.rockMana -= skill.manaCost;
+                this.addFloatingText(`${skill.icon} ${skill.name}`, heroPos.x + 20, heroPos.y - 50, skill.color || '#ff00ff', true);
+            } else {
+                // Insufficient Mana: replaced by reduced basic attack (damage * 0.5)
+                skillToApply = null;
+                manaPenalty = 0.5;
+                this.addFloatingText('⚡ SEM MANA! (50%)', heroPos.x, heroPos.y - 45, '#00d4ff', false);
+            }
+        }
+
+        this.pendingAttackModifiers.push({
+            mult: ratingMult * manaPenalty,
+            isCrit: isCrit,
+            skill: skillToApply,
+            lane: laneIndex
+        });
+
+        this.heroStrumAnim = 0.8;
+    }
+
+    performHeroAutoAttack() {
+        if (this.isGameOver || !this.matchActive) return;
         const heroPos = this.getHeroPosition();
         this.heroStrumAnim = 0.8;
 
@@ -234,30 +358,34 @@ class CombatSystem {
         const angle = Math.atan2(targetY - startY, targetX - startX);
 
         const activeHero = this.getActiveHeroData();
-        const baseBonus = window.talentSystem ? window.talentSystem.getStat('power_chord') : 0;
-        const critBonus = window.talentSystem ? window.talentSystem.getStat('ferocious_solo') : 0;
+        const heroStats = this.getActiveHeroStats();
+        const talentBaseBonus = window.talentSystem ? window.talentSystem.getStat('power_chord') : 0;
 
-        let heroDmgMult = 1.0;
-        let heroSpeedMult = 1.0;
-        let heroCritMultBonus = 0;
-        let projColor = isCrit ? '#ff00ff' : '#00ffff';
+        // Consume queued modifier or fallback to neutral shot
+        const mod = this.pendingAttackModifiers.length > 0
+            ? this.pendingAttackModifiers.shift()
+            : { mult: 1.0, isCrit: false, skill: null, lane: 0 };
 
-        if (activeHero) {
-            if (activeHero.id === 'johnny_blaze') {
-                heroDmgMult = 1.15;
-                heroSpeedMult = 1.10;
-            } else if (activeHero.id === 'kragthor_titan') {
-                heroCritMultBonus = 0.35;
-            }
-            if (activeHero.projectileColor) {
-                projColor = activeHero.projectileColor;
-            }
+        const baseDmg = (45 + talentBaseBonus) * (heroStats.damageMult || 1.0) * (mod.mult || 1.0);
+        let calcDamage = Math.round(baseDmg);
+        const isCrit = mod.isCrit;
+
+        if (isCrit) {
+            // Attribute-based Crit Damage: Character's crit percentage bonus
+            const critBonusPercent = (heroStats.critDamageBonusPercent || 50) + (window.talentSystem ? window.talentSystem.getStat('ferocious_solo') * 6 : 0);
+            calcDamage = Math.round(baseDmg * (1 + critBonusPercent / 100));
         }
 
-        const baseDmg = Math.round((45 + baseBonus) * heroDmgMult);
-        const critMult = 2.2 + critBonus + heroCritMultBonus;
-        const calcDamage = isCrit ? Math.round(baseDmg * critMult) : baseDmg;
-        const projSpeed = 440 * heroSpeedMult;
+        calcDamage = Math.max(1, calcDamage);
+
+        let projColor = isCrit ? '#ff00ff' : '#00ffff';
+        if (mod.skill && mod.skill.color) {
+            projColor = mod.skill.color;
+        } else if (activeHero && activeHero.projectileColor) {
+            projColor = activeHero.projectileColor;
+        }
+
+        const projSpeed = 440;
 
         this.entities.projectiles.push({
             x: startX,
@@ -267,6 +395,7 @@ class CombatSystem {
             target: target,
             isCrit: isCrit,
             damage: calcDamage,
+            skill: mod.skill,
             frame: 3 + Math.floor(Math.random() * 4),
             trailTimer: 0,
             active: true,
@@ -286,8 +415,14 @@ class CombatSystem {
         });
 
         if (window.soundEngine) {
-            window.soundEngine.playGuitarChord(chordIndex);
+            window.soundEngine.playGuitarChord(mod.lane || 0);
         }
+    }
+
+    launchAttack(isCrit = false, chordIndex = 0) {
+        if (this.isGameOver) return;
+        this.registerRhythmNote(isCrit ? 'perfect' : 'great', chordIndex);
+        this.performHeroAutoAttack();
     }
 
     launchSustainTick(lane = 0) {
@@ -358,39 +493,92 @@ class CombatSystem {
         this.score += bonusScore;
 
         const activeHero = this.getActiveHeroData();
-        const heroId = activeHero ? activeHero.id : null;
-
-        const baseGold = z.type === 'bloater' ? 14 : (z.type === 'mutant' ? 12 : (z.type === 'soldier' ? 9 : (z.type === 'gladiator' ? 8 : (z.type === 'hazmat' ? 7 : (z.type === 'spore' ? 6 : 4)))));
+        const heroStats = this.getActiveHeroStats();
         const goldBonus = window.talentSystem ? window.talentSystem.getStat('golden_pick') : 0;
-        let earnedGold = baseGold + goldBonus;
+        const heroGoldMult = 1.0 + (heroStats.goldBonus || 0);
 
-        if (heroId === 'roxie_anarchy') {
-            earnedGold = Math.round(earnedGold * 1.25);
-            this.rockPower = Math.min(100, this.rockPower + 4);
-        }
+        // Procedural Gold Calculation
+        const earnedGold = (z.getGoldDrop && typeof z.getGoldDrop === 'function')
+            ? z.getGoldDrop(heroGoldMult, goldBonus)
+            : Math.max(1, Math.round((5 + goldBonus) * heroGoldMult));
 
         this.battleStats.coinsEarned += earnedGold;
         if (window.talentSystem) {
             window.talentSystem.addGold(earnedGold);
         }
 
+        // Award Guitarist Procedural XP
+        const earnedXp = Math.max(2, Math.round(earnedGold * 1.35));
+        if (activeHero && window.guitaristPool) {
+            const xpRes = window.guitaristPool.addHeroXp(activeHero.id, earnedXp);
+            if (xpRes && xpRes.leveledUp) {
+                this.addFloatingText(`⭐ NÍVEL ${xpRes.newLevel}! UP!`, this.getHeroPosition().x, this.getHeroPosition().y - 65, '#ffd700', true);
+                this.triggerShake(5);
+            }
+        }
+
         const currentY = z.y + (z.jumpArcY || 0);
-        this.addFloatingText(`+${earnedGold} 🪙`, z.x, currentY - 58, '#ffd700', false);
+        this.addFloatingText(`+${earnedGold} 🪙 (+${earnedXp} XP)`, z.x, currentY - 58, '#ffd700', false);
+
+        // Rock Mana bonus on kill
+        this.rockMana = Math.min(this.maxRockMana, this.rockMana + 5.0);
+
+        // Check Stage Clear Target
+        const targetKills = window.stageSystem ? window.stageSystem.getTargetKills() : 20;
+        if (this.zombiesKilled >= targetKills && !this.stageCompleted) {
+            this.stageCompleted = true;
+            this.triggerStageClear();
+        }
 
         if (z.type === 'mutant') {
             this.fx.triggerMutantBlast(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, '+KILL! ☢️', '#39ff14'));
-            this.rockPower = Math.min(100, this.rockPower + 35);
+            this.rockMana = Math.min(this.maxRockMana, this.rockMana + 25);
         } else if (z.type === 'spore') {
             this.fx.triggerSporeBurst(z.x, z.y, this.getHeroPosition(), (dmg, isHvy, lbl, col) => this.takeDamage(dmg, isHvy, lbl, col));
-            this.rockPower = Math.min(100, this.rockPower + 10);
+            this.rockMana = Math.min(this.maxRockMana, this.rockMana + 10);
             this.addFloatingText("+KILL! 🍄", z.x, currentY - 42, '#ffaa00', true);
         } else if (z.type === 'hazmat') {
             this.fx.triggerHazmatMeltdown(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, '+KILL! 🧪', '#39ff14'));
-            this.rockPower = Math.min(100, this.rockPower + 12);
+            this.rockMana = Math.min(this.maxRockMana, this.rockMana + 12);
             this.addFloatingText("+KILL! ☢️", z.x, currentY - 42, '#39ff14', true);
         } else {
-            this.rockPower = Math.min(100, this.rockPower + (z.type === 'leaper' ? 12 : 8));
             this.addFloatingText(label, z.x, currentY - 42, color, true);
+        }
+    }
+
+    triggerStageClear() {
+        const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
+        const rewards = window.stageSystem ? window.stageSystem.getStageRewards(stage) : { coins: 80, xp: 100 };
+
+        if (window.talentSystem) {
+            window.talentSystem.addGold(rewards.coins);
+        }
+
+        const activeHero = this.getActiveHeroData();
+        if (activeHero && window.guitaristPool) {
+            window.guitaristPool.addHeroXp(activeHero.id, rewards.xp);
+        }
+
+        if (window.stageSystem) {
+            window.stageSystem.unlockNextStage();
+        }
+
+        this.triggerShake(7);
+        this.fx.shockwaves.push({
+            x: this.canvas.width / 2,
+            y: this.canvas.height / 2,
+            radius: 8,
+            maxRadius: 150,
+            color: '#ffd700',
+            lineWidth: 5,
+            alpha: 1.0
+        });
+
+        this.addFloatingText(`🏆 FASE ${stage} CONCLUÍDA!`, this.canvas.width / 2, this.canvas.height / 2 - 35, '#ffd700', true);
+        this.addFloatingText(`+${rewards.coins} 🪙  +${rewards.xp} XP`, this.canvas.width / 2, this.canvas.height / 2 + 10, '#00ff66', true);
+
+        if (window.soundEngine) {
+            window.soundEngine.playExplosion();
         }
     }
 
@@ -424,7 +612,20 @@ class CombatSystem {
         }
 
         const armReduction = window.talentSystem ? window.talentSystem.getStat('armored_amp') : 0;
-        const finalDamage = Math.max(1, rawDamage - armReduction);
+        let finalDamage = Math.max(1, rawDamage - armReduction);
+
+        // Harmonic Shield Absorption
+        if (this.heroShieldHp > 0) {
+            if (this.heroShieldHp >= finalDamage) {
+                this.heroShieldHp -= finalDamage;
+                this.addFloatingText(`🛡️ ESCUDO (-${finalDamage})`, heroPos.x, heroPos.y - 35, '#00a2ff', true);
+                this.triggerShake(2);
+                return;
+            } else {
+                finalDamage -= this.heroShieldHp;
+                this.heroShieldHp = 0;
+            }
+        }
 
         this.heroHp = Math.max(0, this.heroHp - finalDamage);
         this.heroFlashTime = 0.2;
@@ -501,6 +702,34 @@ class CombatSystem {
             this.isGameOver = true;
             this.triggerShake(12);
             this.addFloatingText("☠️ DERROTADO! ☠️", this.getHeroPosition().x, this.getHeroPosition().y - 50, '#ff2222', true);
+        }
+
+        // 1. Rock Mana Passive Regeneration
+        const heroStats = this.getActiveHeroStats();
+        const manaRegen = (this.rockManaRegen || 2.0) * (heroStats.manaRegenRate || 1.0);
+        this.rockMana = Math.min(this.maxRockMana, this.rockMana + manaRegen * dt);
+
+        // 2. Shield & Attack Speed Buff Timers
+        if (this.heroShieldTimer > 0) {
+            this.heroShieldTimer -= dt;
+            if (this.heroShieldTimer <= 0) {
+                this.heroShieldHp = 0;
+            }
+        }
+
+        if (this.heroAttackSpeedBuffTimer > 0) {
+            this.heroAttackSpeedBuffTimer -= dt;
+        }
+
+        // 3. Continuous Procedural Attack Speed Loop
+        if (!this.isGameOver && this.matchActive) {
+            this.heroAttackTimer += dt;
+            const currentSpeed = this.getHeroAttackSpeed();
+            const attackInterval = 1.0 / Math.max(0.3, currentSpeed);
+            if (this.heroAttackTimer >= attackInterval) {
+                this.heroAttackTimer = 0;
+                this.performHeroAutoAttack();
+            }
         }
 
         // Spawn Wave Timer
@@ -592,10 +821,17 @@ class CombatSystem {
                     z.flashTime = 0.14;
 
                     const activeHero = this.getActiveHeroData();
+                    const heroStats = this.getActiveHeroStats();
                     const heroId = p.heroId || (activeHero ? activeHero.id : null);
 
-                    if (heroId === 'dr_radix') {
-                        z.speed = Math.max(12, z.speed * 0.85);
+                    // Execute Equipped Lane Skill effect if present on projectile
+                    if (p.skill && typeof p.skill.apply === 'function') {
+                        p.skill.apply(this, z, p.damage);
+                    }
+
+                    if (heroStats.slowHorde > 0 || heroId === 'dr_radix') {
+                        const slowAmt = 1.0 - (heroStats.slowHorde || 0.15);
+                        z.speed = Math.max(12, z.speed * slowAmt);
                     }
 
                     if (z.type === 'soldier' && !z.armorBroken) {
@@ -611,20 +847,23 @@ class CombatSystem {
                                 });
                             }
                         } else {
-                            const armorReduction = heroId === 'dr_radix' ? 0.80 : 0.55;
-                            p.damage = Math.round(p.damage * armorReduction);
-                            this.addFloatingText(heroId === 'dr_radix' ? "BLINDADO PENETRADO! ☢️" : "BLINDADO! -45%", z.x, currentY - 34, '#88aacc', false);
+                            const pen = heroStats.armorPen || (heroId === 'dr_radix' ? 0.50 : 0);
+                            const armorReduction = 0.55 * (1 - pen);
+                            p.damage = Math.round(p.damage * (1 - armorReduction));
+                            this.addFloatingText(pen > 0 ? "BLINDADO PENETRADO! ☢️" : "BLINDADO! -45%", z.x, currentY - 34, '#88aacc', false);
                         }
                     }
 
-                    if (heroId === 'vulkan_ironhead' && Math.random() < 0.35) {
-                        z.burnTimer = 3.0;
-                        z.burnTick = 0;
+                    if (heroStats.burnChance && Math.random() < heroStats.burnChance) {
+                        z.burnTimer = 3.2;
+                        z.burnDps = 16;
                         this.addFloatingText("🔥 QUEIMANDO!", z.x, currentY - 48, '#ff5500', true);
                     }
 
                     let knockMult = 1.0 + (window.talentSystem ? window.talentSystem.getStat('sonic_knockback') : 0);
-                    if (heroId === 'kragthor_titan') {
+                    if (heroStats.knockbackBonus) {
+                        knockMult *= (1.0 + heroStats.knockbackBonus);
+                    } else if (heroId === 'kragthor_titan') {
                         knockMult *= 1.6;
                     }
 
@@ -662,8 +901,8 @@ class CombatSystem {
 
                     if (p.isCrit) {
                         let chainTargets = window.talentSystem ? window.talentSystem.getStat('fuzz_lightning') : 0;
-                        if (heroId === 'cypher_volt') {
-                            chainTargets = Math.max(chainTargets, 2);
+                        if (heroStats.chainLightning || heroId === 'cypher_volt') {
+                            chainTargets = Math.max(chainTargets, heroStats.chainTargets || 2);
                         }
                         if (chainTargets > 0) {
                             const chainDmg = Math.max(16, Math.round(p.damage * 0.45));

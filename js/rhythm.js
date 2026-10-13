@@ -26,9 +26,7 @@ class RhythmSystem {
         this.spawnTimer = 0;
         this.spawnInterval = 0.58; // Beat cadence
 
-        // MANUAL PLAY BY DEFAULT: Player hits the notes!
-        this.autoPlay = false;
-
+        // Pure manual play only
         this.streak = 0;
         this.multiplier = 1;
         this.onHitCallback = null;
@@ -205,20 +203,24 @@ class RhythmSystem {
             const perfectWindow = Math.round(18 * (1.0 + syncBonus));
             const greatWindow = Math.round(42 * (1.0 + syncBonus * 0.5));
 
+            let ratingKey = 'good';
             if (minDist <= perfectWindow) {
                 rating = 'PERFECT!';
+                ratingKey = 'perfect';
                 isCrit = true;
                 ratingColor = '#ffcc00';
                 this.streak++;
                 if (this.songStats) this.songStats.perfects++;
             } else if (minDist <= greatWindow) {
                 rating = 'GREAT!';
-                isCrit = Math.random() > 0.6;
+                ratingKey = 'great';
+                isCrit = false;
                 ratingColor = '#00ff66';
                 this.streak++;
                 if (this.songStats) this.songStats.greats++;
             } else {
                 rating = 'GOOD';
+                ratingKey = 'good';
                 ratingColor = '#00d4ff';
                 this.streak = Math.max(1, this.streak);
                 if (this.songStats) this.songStats.goods++;
@@ -266,6 +268,11 @@ class RhythmSystem {
             }
 
             this.createHitSparks(noteX, hitZoneY, this.colors[lane].main, isCrit);
+
+            // Register note rating with CombatSystem (charges Rock Mana & applies note damage modifier / skill)
+            if (window.game && window.game.combat) {
+                window.game.combat.registerRhythmNote(ratingKey, lane);
+            }
 
             if (this.onHitCallback) {
                 this.onHitCallback(isCrit, lane);
@@ -387,20 +394,16 @@ class RhythmSystem {
                     note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
                 }
 
-                // Auto-play trigger if enabled
-                if (this.autoPlay && note.active && !note.hit && Math.abs(note.y - hitZoneY) <= 12) {
-                    this.triggerLaneDown(note.track);
-                }
-
                 // Missed note passed hit zone (if not struck and not holding)
                 if (note.active && !note.hit && !note.holding && curTime > note.time + 0.22) {
                     note.active = false;
                     note.missed = true;
                     if (this.songStats) this.songStats.misses++;
-                    if (!this.autoPlay) {
-                        this.addFloatingRating('MISS', note.track * trackWidth + trackWidth / 2, hitZoneY - 10, '#ff2222', false);
-                        this.streak = 0;
-                        this.multiplier = 1;
+                    this.addFloatingRating('MISS', note.track * trackWidth + trackWidth / 2, hitZoneY - 10, '#ff2222', false);
+                    this.streak = 0;
+                    this.multiplier = 1;
+                    if (window.game && window.game.combat) {
+                        window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }
             });
@@ -423,20 +426,16 @@ class RhythmSystem {
                     note.y += this.noteSpeed * dt;
                 }
 
-                // Auto-play trigger only if explicitly turned on by user
-                if (this.autoPlay && note.active && !note.hit && note.y >= hitZoneY - 8 && note.y <= hitZoneY + 12) {
-                    this.triggerLaneDown(note.track);
-                }
-
                 // Missed note
                 if (note.y > hitZoneY + 55 && note.active && !note.hit && !note.holding) {
                     note.active = false;
                     note.missed = true;
-                    if (!this.autoPlay) {
-                        const trackWidth = this.canvas.width / this.tracks;
-                        this.addFloatingRating('MISS', note.track * trackWidth + trackWidth / 2, hitZoneY - 10, '#ff2222', false);
-                        this.streak = 0;
-                        this.multiplier = 1;
+                    const trackWidth = this.canvas.width / this.tracks;
+                    this.addFloatingRating('MISS', note.track * trackWidth + trackWidth / 2, hitZoneY - 10, '#ff2222', false);
+                    this.streak = 0;
+                    this.multiplier = 1;
+                    if (window.game && window.game.combat) {
+                        window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }
             });
@@ -482,14 +481,6 @@ class RhythmSystem {
                     }
                     if (window.soundEngine) window.soundEngine.playGuitarChord(l);
                     this.createHitSparks(noteX, hitZoneY, this.colors[l].main, true);
-                }
-            }
-
-            // Auto-play release when hold completes
-            if (this.autoPlay && this.laneHolding[l]) {
-                const hn = this.activeHoldNotes[l];
-                if (!hn || !hn.holding) {
-                    this.triggerLaneUp(l);
                 }
             }
         }
