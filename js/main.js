@@ -8,9 +8,8 @@ class Game {
         this.selectedSong = this.getBuiltinDefaultSong();
         this.currentMapZombies = (typeof window !== 'undefined' && window.enemyPool) ? window.enemyPool.rollMapEnemies(5) : [];
 
-        // Connect Rhythm hits directly to Combat attacks!
+        // Connect Rhythm hits directly to Combat combo & status!
         this.rhythm.onHitCallback = (isCrit, lane) => {
-            this.combat.launchAttack(isCrit, lane);
             this.combat.combo = this.rhythm.streak;
 
             // Hyper Overdrive talent boosts rock energy buildup
@@ -893,6 +892,10 @@ class Game {
             const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0');
             killsVal.innerText = tk.toLocaleString();
         }
+    }
+
+    updateMenuCurrencies() {
+        this.updateMenuHUD();
     }
 }
 

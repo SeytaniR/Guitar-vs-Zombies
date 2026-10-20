@@ -18,7 +18,7 @@ class SongStudio {
 
     setupDOM() {
         // Toggle studio modal
-        const toggleBtn = document.getElementById('songs-toggle');
+        const toggleBtn = document.getElementById('menu-btn-studio') || document.getElementById('songs-toggle');
         const modal = document.getElementById('song-studio-modal');
         const closeBtn = document.getElementById('studio-close-btn');
 

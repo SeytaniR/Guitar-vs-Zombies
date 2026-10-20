@@ -43,7 +43,7 @@ class SkillSystem {
                 icon: '💚',
                 color: '#00ff66',
                 apply: (combat, target, baseDmg) => {
-                    const healAmount = 20 + (window.talentSystem ? window.talentSystem.getStat('regen_pick') * 3 : 0);
+                    const healAmount = 20 + (window.talentSystem ? window.talentSystem.getStat('rhythmic_heal') * 3 : 0);
                     combat.healHero(healAmount);
                     return { damage: Math.round(baseDmg * 0.75), label: '💚 REGEN!', color: '#00ff66' };
                 }

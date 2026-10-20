@@ -378,6 +378,39 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
   - Proteção contra `duration` inválida/NaN em `SongStudio.handleCreateSong()`, garantindo pelo menos 15-30s e gerando notas completas pelas 4 pistas ao selecionar "Gerar Ritmo Base Automaticamente por BPM".
 - **Cache-Busting v=11:** Atualizadas todas as referências de scripts e CSS para garantir recarregamento imediato no mobile (`http://192.168.1.7:8080/?v=11`).
 
+### [v1.5.1] - 2026-10-13 (Revisão Geral de Código, Correção de Bugs e Modularização Estrita)
+- **Correção Crítica de Combate & Velocidade de Ataque (`js/main.js`):**
+  - Removido `this.combat.launchAttack(isCrit, lane)` do callback `onHitCallback`.
+  - As notas acertadas agora alimentam estritamente o sistema procedural de modificadores de precisão (Miss = -50%, Good = 1.0x, Great = 1.2x, Perfect = Crítico) e Rock Mana, respeitando rigorosamente a cadência contínua do atributo de Velocidade de Ataque do herói.
+- **Correção de Áudio (`js/audio.js`):**
+  - Implementado o método `playPowerChord(chordIndex)` no sintetizador web audio `SoundEngine`, prevenindo `TypeError` ao subir de nível ou ao ativar acordes.
+- **Correção de Habilidade (`js/skills.js`):**
+  - Corrigido `healing_melody` para consultar o talento de cura existente `'rhythmic_heal'` em vez do obsoleto `'regen_pick'`.
+- **Navegação & Modais (`js/talents.js` e `js/song-studio.js`):**
+  - Vinculados os botões `menu-btn-talents` e `menu-btn-studio` aos seus respectivos modais.
+  - Sincronizados displays de ouro dinâmicos para `menu-gold-count` e `modal-gold-count`.
+  - Adicionado método `updateMenuCurrencies()` como alias robusto para `updateMenuHUD()`.
+- **Estatísticas de Vida Útil Persistentes:**
+  - `gvs_total_kills` agora é incrementado e salvo no `localStorage` a cada abate de zumbi.
+  - `gvs_highscore` agora é persistido ao superar o recorde anterior (ao matar zumbis, concluir fases e no game over).
+- **Controle Touch Arrastado na Esteira de Ritmo (`js/rhythm.js`):**
+  - Adicionados manipuladores de `pointermove` e `touchmove` com transição suave entre pistas e debounce de captura de ponteiro, permitindo tocar e arrastar o dedo dinamicamente pelas 4 faixas.
+- **Sincronização de Encerramento de Partida (`js/rhythm.js`):**
+  - `combat.matchActive` agora é desativado ao término da música para evitar que zumbis ataquem em segundo plano atrás do modal de resultados.
+  - O botão de jogar novamente reseta o estado da batalha e respawna os inimigos correspondentes.
+- **Arquitetura Zero God Objects (< 1.000 linhas por arquivo):**
+  - Todos os 16 arquivos JavaScript do projeto estão rigorosamente abaixo de 1.000 linhas (`combat.js`: 990, `rhythm.js`: 991, `song-editor.js`: 995, etc.).
+  - Efeitos gráficos auxiliares (`drawAmpAndShadow`, `drawGameOverOverlay`, `spawnBurst`) delegados modularmente para `CombatFX` (`combat-fx.js`).
+- **Cobertura de Testes Automatizados:**
+  - Testes ampliados em `test-procedural.js` com 70 asserções automatizadas passando com 100% de sucesso.
+
+### [v1.5.0] - 2026-10-13 (Fatores Procedurais & Pool de 6 Guitarristas)
+- **Níveis Procedurais para Guitarristas (1 a 100):** Escalonamento suave de dano (+1% por nível), vida e bônus de raridade.
+- **Pool Completa de 6 Guitarristas:** Johnny Blade, Vulkan Heavy, Dr. Radix, Cypher Volt, Kragthor Titan e Riot Pixie.
+- **Nível Procedural Infinito para Fases & Zumbis:** HP, dano, velocidade e recompensas de ouro/XP escalando progressivamente.
+- **Sistema de Rock Mana & 4 Trilhos de Habilidades:** 8 habilidades ativas/passivas equipáveis por pista.
+- **Remoção de Auto-Play:** Foco 100% em gameplay manual responsivo mobile.
+
 ### [v1.0.0] - 2026-10-12 (Estúdio de Músicas & Editor de Ritmo Interativo)
 - Sistema completo de upload de áudios (.mp3, .wav, .ogg), capas (.jpg, .png), títulos, BPM e descrição.
 - Banco de dados local com IndexedDB (`GVS_MusicStudio_DB`).

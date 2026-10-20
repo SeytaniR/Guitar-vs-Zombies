@@ -352,7 +352,7 @@ class TalentSystem {
 
     setupDOM() {
         // Talent Toggle Button
-        const toggleBtn = document.getElementById('talents-toggle');
+        const toggleBtn = document.getElementById('menu-btn-talents') || document.getElementById('talents-toggle');
         const modal = document.getElementById('talent-modal');
         const closeBtn = document.getElementById('talent-close-btn');
 
@@ -398,8 +398,10 @@ class TalentSystem {
     }
 
     updateHUDGold() {
-        const el = document.getElementById('gold-count');
+        const el = document.getElementById('menu-gold-count') || document.getElementById('gold-count');
         if (el) el.innerText = this.gold.toLocaleString();
+        const modalGold = document.getElementById('modal-gold-count');
+        if (modalGold) modalGold.innerText = this.gold.toLocaleString();
     }
 
     updateUI() {

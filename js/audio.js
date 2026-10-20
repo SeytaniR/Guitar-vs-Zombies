@@ -195,6 +195,10 @@ class SoundEngine {
         osc.start(now);
         osc.stop(now + 0.35);
     }
+
+    playPowerChord(chordIndex = 0) {
+        this.playGuitarChord(chordIndex || 0);
+    }
 }
 
 window.soundEngine = new SoundEngine();

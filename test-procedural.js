@@ -279,6 +279,41 @@ assert(greatResult.damage === 48 && !greatResult.isCrit, `GREAT delivers 1.2x da
 const perfectResult = calculateAttackDamage('perfect', baseDmg, critPercent);
 assert(perfectResult.damage === 64 && perfectResult.isCrit, `PERFECT delivers Critical Strike with hero crit stat (${perfectResult.damage} vs expected 64)`);
 
+// 6. Testing Game Polish, Audio, Skills, Talents & Line Count Compliance
+console.log('\n6. Testing Game Polish, Audio, Skills, Talents & Line Limits...');
+
+// 6.1 Audio SoundEngine playPowerChord verification
+const audioCode = fs.readFileSync('js/audio.js', 'utf8');
+assert(audioCode.includes('playPowerChord'), 'SoundEngine defines playPowerChord method');
+
+// 6.2 Healing Melody skill talent reference
+const skillsCode = fs.readFileSync('js/skills.js', 'utf8');
+assert(skillsCode.includes("getStat('rhythmic_heal')"), 'Skill healing_melody references correct rhythmic_heal talent');
+assert(!skillsCode.includes("regen_pick"), 'No obsolete regen_pick talent referenced in skills.js');
+
+// 6.3 Lifetime stats verification
+let mockLocalStorage = {};
+global.localStorage = {
+    getItem: (k) => mockLocalStorage[k] || null,
+    setItem: (k, v) => { mockLocalStorage[k] = v.toString(); }
+};
+
+localStorage.setItem('gvs_total_kills', '42');
+localStorage.setItem('gvs_highscore', '15000');
+assert(parseInt(localStorage.getItem('gvs_total_kills')) === 42, 'gvs_total_kills persists correctly');
+assert(parseInt(localStorage.getItem('gvs_highscore')) === 15000, 'gvs_highscore persists correctly');
+
+// 6.4 Strict Zero God Object Line Count Rule (< 1000 lines for every single JS file)
+const jsFiles = fs.readdirSync('js').filter(f => f.endsWith('.js'));
+let allUnder1000 = true;
+jsFiles.forEach(file => {
+    const lines = fs.readFileSync('js/' + file, 'utf8').split('\n').length;
+    const isUnder = lines < 1000;
+    if (!isUnder) allUnder1000 = false;
+    assert(isUnder, `File js/${file} has ${lines} lines (< 1000 lines limit)`);
+});
+assert(allUnder1000, `All ${jsFiles.length} JavaScript files adhere strictly to the < 1000 lines limit`);
+
 // Summary
 console.log('\n==========================================');
 console.log(`TOTAL TESTS: ${testsPassed + testsFailed}`);

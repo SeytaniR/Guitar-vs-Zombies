@@ -79,17 +79,26 @@ class RhythmSystem {
             if (id !== undefined && this.pointerLaneMap.has(id)) {
                 const lane = this.pointerLaneMap.get(id);
                 this.pointerLaneMap.delete(id);
-                // Check if any other pointer is still holding this lane
                 let stillHeld = false;
                 for (const otherLane of this.pointerLaneMap.values()) {
-                    if (otherLane === lane) {
-                        stillHeld = true;
-                        break;
-                    }
+                    if (otherLane === lane) { stillHeld = true; break; }
                 }
-                if (!stillHeld) {
-                    this.triggerLaneUp(lane);
+                if (!stillHeld) this.triggerLaneUp(lane);
+            }
+        };
+
+        const onMove = (clientX, id) => {
+            if (id === undefined || !this.pointerLaneMap.has(id)) return;
+            const oldLane = this.pointerLaneMap.get(id);
+            const newLane = getLaneFromX(clientX);
+            if (oldLane !== newLane) {
+                this.pointerLaneMap.set(id, newLane);
+                let stillHeld = false;
+                for (const otherLane of this.pointerLaneMap.values()) {
+                    if (otherLane === oldLane) { stillHeld = true; break; }
                 }
+                if (!stillHeld) this.triggerLaneUp(oldLane);
+                this.triggerLaneDown(newLane);
             }
         };
 
@@ -97,46 +106,41 @@ class RhythmSystem {
         this.canvas.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             try { this.canvas.setPointerCapture(e.pointerId); } catch(err) {}
-            const lane = getLaneFromX(e.clientX);
-            onDown(lane, e.pointerId);
+            onDown(getLaneFromX(e.clientX), e.pointerId);
         });
-
+        this.canvas.addEventListener('pointermove', (e) => {
+            if (this.pointerLaneMap.has(e.pointerId)) onMove(e.clientX, e.pointerId);
+        });
         this.canvas.addEventListener('pointerup', (e) => {
             e.preventDefault();
             try { this.canvas.releasePointerCapture(e.pointerId); } catch(err) {}
             onUp(e.pointerId);
         });
-
-        this.canvas.addEventListener('pointercancel', (e) => {
-            onUp(e.pointerId);
-        });
-
-        window.addEventListener('pointerup', (e) => {
-            onUp(e.pointerId);
-        });
+        this.canvas.addEventListener('pointercancel', (e) => onUp(e.pointerId));
+        window.addEventListener('pointerup', (e) => onUp(e.pointerId));
 
         // Touch Events (reliable multi-touch fallback on mobile webviews)
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const t = e.changedTouches[i];
-                const lane = getLaneFromX(t.clientX);
-                onDown(lane, 'touch_' + t.identifier);
+                onDown(getLaneFromX(t.clientX), 'touch_' + t.identifier);
             }
         }, { passive: false });
-
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                onMove(t.clientX, 'touch_' + t.identifier);
+            }
+        }, { passive: false });
         this.canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                onUp('touch_' + e.changedTouches[i].identifier);
-            }
+            for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
-
         this.canvas.addEventListener('touchcancel', (e) => {
             e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                onUp('touch_' + e.changedTouches[i].identifier);
-            }
+            for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
 
         // Keyboard Support (A, S, D, F or 1, 2, 3, 4)
@@ -769,29 +773,10 @@ class RhythmSystem {
         for (let b = 2; b < totalBeats; b++) {
             const time = b * beatSec;
             if (time > duration - 1) break;
-            const measureBeat = b % 8;
-            let lane = 0;
-            let dur = 0;
-            if (measureBeat === 0) {
-                lane = 0;
-                dur = 1.0; // Sustained root note
-            } else if (measureBeat === 2 || measureBeat === 6) {
-                lane = 2;
-            } else if (measureBeat === 4) {
-                lane = 1;
-                dur = 0.8; // Sustained power chord
-            } else if (measureBeat === 7) {
-                lane = 3;
-            } else {
-                lane = b % 4;
-            }
-
-            notes.push({
-                time: Math.round(time * 1000) / 1000,
-                lane: lane,
-                duration: dur,
-                id: 'n_' + Math.random().toString(36).substr(2, 9)
-            });
+            const mb = b % 8;
+            const lane = (mb === 0) ? 0 : (mb === 2 || mb === 6) ? 2 : (mb === 4) ? 1 : (mb === 7) ? 3 : (b % 4);
+            const dur = (mb === 0) ? 1.0 : (mb === 4) ? 0.8 : 0;
+            notes.push({ time: Math.round(time * 1000) / 1000, lane, duration: dur, id: 'n_' + Math.random().toString(36).substr(2, 9) });
         }
         return notes;
     }
@@ -889,6 +874,9 @@ class RhythmSystem {
         if (!this.isCustomSongPlaying) return;
         const song = this.currentSong;
         const stats = { ...this.songStats };
+        if (window.game && window.game.combat) {
+            window.game.combat.matchActive = false;
+        }
         this.stopCustomSong();
         this.showSongResultsModal(song, stats);
     }
@@ -958,29 +946,25 @@ class RhythmSystem {
             window.talentSystem.addGold(rewardGold);
         }
 
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
         const coverEl = document.getElementById('result-song-cover');
-        const titleEl = document.getElementById('result-song-title');
-        const artistEl = document.getElementById('result-song-artist');
-        const accEl = document.getElementById('result-accuracy');
-        const hitsEl = document.getElementById('result-hits');
-        const streakEl = document.getElementById('result-max-streak');
-        const goldEl = document.getElementById('result-gold-reward');
-        const scoreEl = document.getElementById('result-score-gained');
-
         if (coverEl) coverEl.src = song.cover || 'assets/covers/default_cover.jpg';
-        if (titleEl) titleEl.innerText = song.title;
-        if (artistEl) artistEl.innerText = song.artist;
-        if (accEl) accEl.innerText = `${accuracy}%`;
-        if (hitsEl) hitsEl.innerText = `${stats.hitNotes} / ${stats.totalNotes}`;
-        if (streakEl) streakEl.innerText = `${stats.maxStreak} 🔥`;
-        if (goldEl) goldEl.innerText = `+${rewardGold} 🪙`;
-        if (scoreEl) scoreEl.innerText = `+${earnedScore.toLocaleString()}`;
+        setTxt('result-song-title', song.title);
+        setTxt('result-song-artist', song.artist);
+        setTxt('result-accuracy', `${accuracy}%`);
+        setTxt('result-hits', `${stats.hitNotes} / ${stats.totalNotes}`);
+        setTxt('result-max-streak', `${stats.maxStreak} 🔥`);
+        setTxt('result-gold-reward', `+${rewardGold} 🪙`);
+        setTxt('result-score-gained', `+${earnedScore.toLocaleString()}`);
 
         // Buttons
         const replayBtn = document.getElementById('result-replay-btn');
         if (replayBtn) {
             replayBtn.onclick = () => {
                 modal.classList.remove('open');
+                if (window.game && window.game.combat) {
+                    window.game.combat.resetBattle(window.game.currentMapZombies || []);
+                }
                 this.playCustomSong(song);
             };
         }

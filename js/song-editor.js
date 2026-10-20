@@ -179,84 +179,32 @@ class SongEditor {
     }
 
     setupControlsDOM() {
-        // Play / Pause Toggle
-        const playBtn = document.getElementById('editor-play-btn');
-        if (playBtn) {
-            playBtn.onclick = () => this.togglePlay();
-        }
+        const bindClick = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
 
-        // Record Toggle
-        const recBtn = document.getElementById('editor-rec-btn');
-        if (recBtn) {
-            recBtn.onclick = () => this.toggleRecord();
-        }
+        bindClick('editor-play-btn', () => this.togglePlay());
+        bindClick('editor-rec-btn', () => this.toggleRecord());
+        bindClick('editor-rew-btn', () => this.seekBy(-3));
+        bindClick('editor-fwd-btn', () => this.seekBy(3));
+        bindClick('editor-step-prev', () => this.stepByBeats(-1));
+        bindClick('editor-step-next', () => this.stepByBeats(1));
+        bindClick('editor-zoom-in', () => { this.pixelsPerSecond = Math.min(360, this.pixelsPerSecond + 30); this.drawTimeline(); });
+        bindClick('editor-zoom-out', () => { this.pixelsPerSecond = Math.max(60, this.pixelsPerSecond - 30); this.drawTimeline(); });
 
-        // Rewind & Forward by 3 seconds
-        const rewBtn = document.getElementById('editor-rew-btn');
-        if (rewBtn) rewBtn.onclick = () => this.seekBy(-3);
-
-        const fwdBtn = document.getElementById('editor-fwd-btn');
-        if (fwdBtn) fwdBtn.onclick = () => this.seekBy(3);
-
-        // Step by 1 Beat forward and backward
-        const stepPrevBtn = document.getElementById('editor-step-prev');
-        if (stepPrevBtn) stepPrevBtn.onclick = () => this.stepByBeats(-1);
-
-        const stepNextBtn = document.getElementById('editor-step-next');
-        if (stepNextBtn) stepNextBtn.onclick = () => this.stepByBeats(1);
-
-        // Zoom Controls
-        const zoomInBtn = document.getElementById('editor-zoom-in');
-        if (zoomInBtn) {
-            zoomInBtn.onclick = () => {
-                this.pixelsPerSecond = Math.min(360, this.pixelsPerSecond + 30);
-                this.drawTimeline();
-            };
-        }
-
-        const zoomOutBtn = document.getElementById('editor-zoom-out');
-        if (zoomOutBtn) {
-            zoomOutBtn.onclick = () => {
-                this.pixelsPerSecond = Math.max(60, this.pixelsPerSecond - 30);
-                this.drawTimeline();
-            };
-        }
-
-        // Snap Grid Selector
         const snapSelect = document.getElementById('editor-snap-select');
-        if (snapSelect) {
-            snapSelect.onchange = (e) => {
-                this.snapGrid = e.target.value;
-            };
-        }
+        if (snapSelect) snapSelect.onchange = (e) => { this.snapGrid = e.target.value; };
 
-        // Speed Selector
         const speedSelect = document.getElementById('editor-speed-select');
-        if (speedSelect) {
-            speedSelect.onchange = (e) => {
-                this.playbackRate = parseFloat(e.target.value) || 1.0;
-                this.audio.playbackRate = this.playbackRate;
-            };
-        }
+        if (speedSelect) speedSelect.onchange = (e) => {
+            this.playbackRate = parseFloat(e.target.value) || 1.0;
+            this.audio.playbackRate = this.playbackRate;
+        };
 
-        // Action Buttons: Undo, Auto-Generate, Clear, Save
-        const undoBtn = document.getElementById('editor-undo-btn');
-        if (undoBtn) undoBtn.onclick = () => this.undo();
-
-        const autoGenBtn = document.getElementById('editor-autogen-btn');
-        if (autoGenBtn) autoGenBtn.onclick = () => this.autoGenerateBasicChart();
-
-        const clearBtn = document.getElementById('editor-clear-btn');
-        if (clearBtn) clearBtn.onclick = () => this.clearAllNotes();
-
-        const saveBtn = document.getElementById('editor-save-btn');
-        if (saveBtn) saveBtn.onclick = () => this.saveSongToDB();
-
-        const savePlayBtn = document.getElementById('editor-save-play-btn');
-        if (savePlayBtn) savePlayBtn.onclick = () => this.saveAndPlay();
-
-        const closeBtn = document.getElementById('editor-close-btn');
-        if (closeBtn) closeBtn.onclick = () => this.close();
+        bindClick('editor-undo-btn', () => this.undo());
+        bindClick('editor-autogen-btn', () => this.autoGenerateBasicChart());
+        bindClick('editor-clear-btn', () => this.clearAllNotes());
+        bindClick('editor-save-btn', () => this.saveSongToDB());
+        bindClick('editor-save-play-btn', () => this.saveAndPlay());
+        bindClick('editor-close-btn', () => this.close());
 
         // Time Scrubber Slider
         const scrubber = document.getElementById('editor-time-scrubber');
@@ -298,18 +246,10 @@ class SongEditor {
         for (let i = 0; i < 4; i++) {
             const pad = document.getElementById(`editor-pad-${i}`);
             if (pad) {
-                const onDown = (e) => {
-                    e.preventDefault();
-                    this.onPadDown(i);
-                };
-                const onUp = (e) => {
-                    e.preventDefault();
-                    this.onPadUp(i);
-                };
+                const onDown = (e) => { e.preventDefault(); this.onPadDown(i); };
+                const onUp = (e) => { e.preventDefault(); this.onPadUp(i); };
                 pad.addEventListener('pointerdown', onDown);
-                pad.addEventListener('pointerup', onUp);
-                pad.addEventListener('pointerleave', onUp);
-                pad.addEventListener('pointercancel', onUp);
+                ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => pad.addEventListener(ev, onUp));
             }
         }
 
@@ -723,32 +663,12 @@ class SongEditor {
             const time = b * beatSec;
             if (time > duration - 1) break;
 
-            const measureBeat = b % 8;
-            let lane = 0;
-            let dur = 0;
-            if (measureBeat === 0) {
-                // Downbeat Sustained Root (Lane 0 / Green)
-                lane = 0;
-                dur = 1.0;
-            } else if (measureBeat === 2 || measureBeat === 6) {
-                // Snare Backbeat (Lane 2 / Yellow)
-                lane = 2;
-            } else if (measureBeat === 4) {
-                // Sustained Power Riff (Lane 1 / Red)
-                lane = 1;
-                dur = 0.8;
-            } else if (measureBeat === 7) {
-                // High Solo Note (Lane 3 / Blue)
-                lane = 3;
-            } else {
-                // Alternating syncopated melody
-                lane = (b % 4);
-            }
-
+            const mb = b % 8;
+            const lane = (mb === 0) ? 0 : (mb === 2 || mb === 6) ? 2 : (mb === 4) ? 1 : (mb === 7) ? 3 : (b % 4);
+            const dur = (mb === 0) ? 1.0 : (mb === 4) ? 0.8 : 0;
             this.song.notes.push({
                 time: Math.round(time * 1000) / 1000,
-                lane: lane,
-                duration: dur,
+                lane, duration: dur,
                 id: 'n_' + Math.random().toString(36).substr(2, 9)
             });
         }

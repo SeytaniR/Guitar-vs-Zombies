@@ -11,41 +11,26 @@ class CombatSystem {
         this.fx = new FXClass();
 
         // Asset Loader
-        const imgBg = new Image(); imgBg.src = 'assets/bg2.jpg';
-        const imgHero = new Image(); imgHero.src = 'assets/hero2.jpg';
-        const imgHeroVulkan = new Image(); imgHeroVulkan.src = 'assets/hero_vulkan.jpg';
-        const imgHeroHazmat = new Image(); imgHeroHazmat.src = 'assets/hero_hazmat.jpg';
-        const imgHeroCyborg = new Image(); imgHeroCyborg.src = 'assets/hero_cyborg.jpg';
-        const imgHeroGladiator = new Image(); imgHeroGladiator.src = 'assets/hero_gladiator.jpg';
-        const imgHeroAnarchy = new Image(); imgHeroAnarchy.src = 'assets/hero_anarchy.jpg';
-        const imgZombie = new Image(); imgZombie.src = 'assets/zombie2.jpg';
-        const imgMutant = new Image(); imgMutant.src = 'assets/zombie_mutant.jpg';
-        const imgLeaper = new Image(); imgLeaper.src = 'assets/zombie_leaper.jpg';
-        const imgSoldier = new Image(); imgSoldier.src = 'assets/zombie_soldier.jpg';
-        const imgSpore = new Image(); imgSpore.src = 'assets/zombie_spore.jpg';
-        const imgBloater = new Image(); imgBloater.src = 'assets/zombie_bloater.jpg';
-        const imgGladiator = new Image(); imgGladiator.src = 'assets/zombie_gladiator.jpg';
-        const imgHazmat = new Image(); imgHazmat.src = 'assets/zombie_hazmat.jpg';
-        const imgFx = new Image(); imgFx.src = 'assets/fx2.jpg';
-
         const SheetClass = window.SpriteSheet || SpriteSheet;
+        const loadImg = src => { const img = new Image(); img.src = src; return img; };
+        const loadSheet = (src, cols = 4, rows = 3) => new SheetClass(loadImg(src), cols, rows);
         this.assets = {
-            bg: imgBg,
-            heroSheet: new SheetClass(imgHero, 4, 3),
-            heroVulkanSheet: new SheetClass(imgHeroVulkan, 4, 3),
-            heroHazmatSheet: new SheetClass(imgHeroHazmat, 4, 3),
-            heroCyborgSheet: new SheetClass(imgHeroCyborg, 4, 3),
-            heroGladiatorSheet: new SheetClass(imgHeroGladiator, 4, 4),
-            heroAnarchySheet: new SheetClass(imgHeroAnarchy, 4, 3),
-            zombieSheet: new SheetClass(imgZombie, 4, 3),
-            mutantSheet: new SheetClass(imgMutant, 4, 3),
-            leaperSheet: new SheetClass(imgLeaper, 4, 3),
-            soldierSheet: new SheetClass(imgSoldier, 4, 3),
-            sporeSheet: new SheetClass(imgSpore, 4, 3),
-            bloaterSheet: new SheetClass(imgBloater, 4, 3),
-            gladiatorSheet: new SheetClass(imgGladiator, 4, 3),
-            hazmatSheet: new SheetClass(imgHazmat, 4, 3),
-            fxSheet: new SheetClass(imgFx, 4, 3)
+            bg: loadImg('assets/bg2.jpg'),
+            heroSheet: loadSheet('assets/hero2.jpg'),
+            heroVulkanSheet: loadSheet('assets/hero_vulkan.jpg'),
+            heroHazmatSheet: loadSheet('assets/hero_hazmat.jpg'),
+            heroCyborgSheet: loadSheet('assets/hero_cyborg.jpg'),
+            heroGladiatorSheet: loadSheet('assets/hero_gladiator.jpg', 4, 4),
+            heroAnarchySheet: loadSheet('assets/hero_anarchy.jpg'),
+            zombieSheet: loadSheet('assets/zombie2.jpg'),
+            mutantSheet: loadSheet('assets/zombie_mutant.jpg'),
+            leaperSheet: loadSheet('assets/zombie_leaper.jpg'),
+            soldierSheet: loadSheet('assets/zombie_soldier.jpg'),
+            sporeSheet: loadSheet('assets/zombie_spore.jpg'),
+            bloaterSheet: loadSheet('assets/zombie_bloater.jpg'),
+            gladiatorSheet: loadSheet('assets/zombie_gladiator.jpg'),
+            hazmatSheet: loadSheet('assets/zombie_hazmat.jpg'),
+            fxSheet: loadSheet('assets/fx2.jpg')
         };
 
         // Core Combat Entities with backwards-compatible accessors to FX
@@ -308,6 +293,10 @@ class CombatSystem {
             isCrit = false;
         }
 
+        // Hyper Overdrive talent bonus
+        const overdriveBonus = window.talentSystem ? window.talentSystem.getStat('hyper_overdrive') : 0;
+        manaAward *= (1.0 + overdriveBonus);
+
         this.rockMana = Math.min(this.maxRockMana, this.rockMana + manaAward);
 
         // Retrieve equipped skill for this rhythm lane
@@ -452,38 +441,14 @@ class CombatSystem {
             if (Math.random() > 0.45) {
                 this.addFloatingText(`${tickDamage}`, target.x + (Math.random() - 0.5) * 16, target.y - 30, tickColor, false);
             }
-
-            for (let i = 0; i < 4; i++) {
-                const prog = Math.random();
-                const sx = heroPos.x + 22 + (target.x - heroPos.x - 22) * prog;
-                const sy = heroPos.y - 18 + ((target.y - 18) - (heroPos.y - 18)) * prog;
-                this.fx.particles.push({
-                    x: sx,
-                    y: sy + (Math.random() - 0.5) * 12,
-                    vx: (Math.random() - 0.5) * 40,
-                    vy: (Math.random() - 0.5) * 40,
-                    color: tickColor,
-                    size: 1.5 + Math.random() * 1.5,
-                    life: 0.18,
-                    maxLife: 0.18
-                });
-            }
+            this.fx.spawnBurst(target.x, target.y - 18, tickColor, 4, 35, 1.8, 0.18);
 
             if (target.hp <= 0 && target.active) {
                 target.active = false;
                 this.onZombieKilled(target, 150, "+KILL! ⚡", tickColor);
             }
         } else {
-            this.fx.particles.push({
-                x: heroPos.x + 22,
-                y: heroPos.y - 18,
-                vx: 50 + Math.random() * 40,
-                vy: (Math.random() - 0.5) * 30,
-                color: tickColor,
-                size: 2,
-                life: 0.15,
-                maxLife: 0.15
-            });
+            this.fx.spawnBurst(heroPos.x + 22, heroPos.y - 18, tickColor, 1, 40, 2, 0.15);
         }
     }
 
@@ -491,6 +456,15 @@ class CombatSystem {
         this.zombiesKilled++;
         this.battleStats.zombiesKilled++;
         this.score += bonusScore;
+
+        try {
+            const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0', 10);
+            localStorage.setItem('gvs_total_kills', (tk + 1).toString());
+            const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
+            if (this.score > hs) {
+                localStorage.setItem('gvs_highscore', this.score.toString());
+            }
+        } catch (e) {}
 
         const activeHero = this.getActiveHeroData();
         const heroStats = this.getActiveHeroStats();
@@ -549,37 +523,24 @@ class CombatSystem {
     triggerStageClear() {
         const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
         const rewards = window.stageSystem ? window.stageSystem.getStageRewards(stage) : { coins: 80, xp: 100 };
-
-        if (window.talentSystem) {
-            window.talentSystem.addGold(rewards.coins);
-        }
-
+        if (window.talentSystem) window.talentSystem.addGold(rewards.coins);
         const activeHero = this.getActiveHeroData();
-        if (activeHero && window.guitaristPool) {
-            window.guitaristPool.addHeroXp(activeHero.id, rewards.xp);
-        }
-
-        if (window.stageSystem) {
-            window.stageSystem.unlockNextStage();
-        }
+        if (activeHero && window.guitaristPool) window.guitaristPool.addHeroXp(activeHero.id, rewards.xp);
+        if (window.stageSystem) window.stageSystem.unlockNextStage();
 
         this.triggerShake(7);
         this.fx.shockwaves.push({
-            x: this.canvas.width / 2,
-            y: this.canvas.height / 2,
-            radius: 8,
-            maxRadius: 150,
-            color: '#ffd700',
-            lineWidth: 5,
-            alpha: 1.0
+            x: this.canvas.width / 2, y: this.canvas.height / 2,
+            radius: 8, maxRadius: 150, color: '#ffd700', lineWidth: 5, alpha: 1.0
         });
-
         this.addFloatingText(`🏆 FASE ${stage} CONCLUÍDA!`, this.canvas.width / 2, this.canvas.height / 2 - 35, '#ffd700', true);
         this.addFloatingText(`+${rewards.coins} 🪙  +${rewards.xp} XP`, this.canvas.width / 2, this.canvas.height / 2 + 10, '#00ff66', true);
+        if (window.soundEngine) window.soundEngine.playExplosion();
 
-        if (window.soundEngine) {
-            window.soundEngine.playExplosion();
-        }
+        try {
+            const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
+            if (this.score > hs) localStorage.setItem('gvs_highscore', this.score.toString());
+        } catch (e) {}
     }
 
     healHero(amount) {
@@ -599,14 +560,9 @@ class CombatSystem {
 
         if (this.shockBarrierReady) {
             this.shockBarrierReady = false;
-            const barrierCd = window.talentSystem ? window.talentSystem.getStat('shock_barrier') : 18;
-            this.shockBarrierTimer = barrierCd;
+            this.shockBarrierTimer = window.talentSystem ? window.talentSystem.getStat('shock_barrier') : 18;
             this.triggerShake(5);
-            this.fx.shockwaves.push({
-                x: heroPos.x, y: heroPos.y - 15,
-                radius: 10, maxRadius: 55,
-                color: '#00a2ff', lineWidth: 4, alpha: 1.0
-            });
+            this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 10, maxRadius: 55, color: '#00a2ff', lineWidth: 4, alpha: 1.0 });
             this.addFloatingText("🛡️ BLOQUEADO!", heroPos.x, heroPos.y - 40, '#00a2ff', true);
             return;
         }
@@ -641,26 +597,16 @@ class CombatSystem {
             if (other.active && other !== sourceZombie && Math.abs(other.x - sourceZombie.x) < 140) {
                 other.hp -= damage;
                 other.flashTime = 0.15;
-
-                this.fx.shockwaves.push({
-                    x: other.x,
-                    y: other.y + (other.jumpArcY || 0) - 15,
-                    radius: 3,
-                    maxRadius: 20,
-                    color: '#00ffff',
-                    lineWidth: 2.5,
-                    alpha: 1.0
-                });
-
-                this.addFloatingText(`⚡ ${damage}`, other.x, other.y + (other.jumpArcY || 0) - 35, '#00ffff', false);
+                const oy = other.y + (other.jumpArcY || 0);
+                this.fx.shockwaves.push({ x: other.x, y: oy - 15, radius: 3, maxRadius: 20, color: '#00ffff', lineWidth: 2.5, alpha: 1.0 });
+                this.addFloatingText(`⚡ ${damage}`, other.x, oy - 35, '#00ffff', false);
 
                 if (other.hp <= 0 && other.active) {
                     other.active = false;
                     this.onZombieKilled(other, 100, '+CHAIN KILL! ⚡', '#00ffff');
                 }
 
-                hit++;
-                if (hit >= targetCount) break;
+                if (++hit >= targetCount) break;
             }
         }
     }
@@ -672,16 +618,13 @@ class CombatSystem {
         this.entities.projectiles = [];
 
         const rndBonus = window.talentSystem ? window.talentSystem.getStat('rock_never_dies') : 0;
+        const heroPos = this.getHeroPosition();
         if (rndBonus > 0) {
             this.heroImmunityTimer = rndBonus;
-            this.fx.shockwaves.push({
-                x: this.getHeroPosition().x, y: this.getHeroPosition().y - 15,
-                radius: 10, maxRadius: 120,
-                color: '#ffcc00', lineWidth: 6, alpha: 1.0
-            });
-            this.addFloatingText("⚡ ROCK NEVER DIES! ⚡", this.getHeroPosition().x + 50, this.getHeroPosition().y - 40, '#ffcc00', true);
+            this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 10, maxRadius: 120, color: '#ffcc00', lineWidth: 6, alpha: 1.0 });
+            this.addFloatingText("⚡ ROCK NEVER DIES! ⚡", heroPos.x + 50, heroPos.y - 40, '#ffcc00', true);
         } else {
-            this.addFloatingText("⚡ REVIVIDO! ⚡", this.getHeroPosition().x + 50, this.getHeroPosition().y - 40, '#ffcc00', true);
+            this.addFloatingText("⚡ REVIVIDO! ⚡", heroPos.x + 50, heroPos.y - 40, '#ffcc00', true);
         }
     }
 
@@ -702,6 +645,10 @@ class CombatSystem {
             this.isGameOver = true;
             this.triggerShake(12);
             this.addFloatingText("☠️ DERROTADO! ☠️", this.getHeroPosition().x, this.getHeroPosition().y - 50, '#ff2222', true);
+            try {
+                const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
+                if (this.score > hs) localStorage.setItem('gvs_highscore', this.score.toString());
+            } catch (e) {}
         }
 
         // 1. Rock Mana Passive Regeneration
@@ -712,9 +659,7 @@ class CombatSystem {
         // 2. Shield & Attack Speed Buff Timers
         if (this.heroShieldTimer > 0) {
             this.heroShieldTimer -= dt;
-            if (this.heroShieldTimer <= 0) {
-                this.heroShieldHp = 0;
-            }
+            if (this.heroShieldTimer <= 0) this.heroShieldHp = 0;
         }
 
         if (this.heroAttackSpeedBuffTimer > 0) {
@@ -751,11 +696,7 @@ class CombatSystem {
                     this.shockBarrierReady = true;
                     this.shockBarrierTimer = barrierCd;
                     this.triggerShake(3);
-                    this.fx.shockwaves.push({
-                        x: heroPos.x, y: heroPos.y - 15,
-                        radius: 5, maxRadius: 40,
-                        color: '#00a2ff', lineWidth: 3, alpha: 1.0
-                    });
+                    this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 5, maxRadius: 40, color: '#00a2ff', lineWidth: 3, alpha: 1.0 });
                     this.addFloatingText("🛡️ BARREIRA PRONTA!", heroPos.x, heroPos.y - 42, '#00a2ff', false);
                 }
             }
@@ -807,13 +748,7 @@ class CombatSystem {
                         p.active = false;
                         this.addFloatingText("🛡️ CORRENTE DEFLETIU!", z.x, currentY - 34, '#ff3333', true);
                         this.triggerShake(2);
-                        for (let i = 0; i < 7; i++) {
-                            this.fx.particles.push({
-                                x: p.x, y: p.y,
-                                vx: (Math.random() - 0.5) * 50 + 20, vy: (Math.random() - 0.5) * 50,
-                                color: '#ffffaa', size: 2, life: 0.25, maxLife: 0.25
-                            });
-                        }
+                        this.fx.spawnBurst(p.x, p.y, '#ffffaa', 6, 50, 2, 0.25);
                         continue;
                     }
 
@@ -839,13 +774,7 @@ class CombatSystem {
                             z.armorBroken = true;
                             this.addFloatingText("🛡️ CAPACETE QUEBRADO! STUN!", z.x, currentY - 45, '#ffff00', true);
                             this.triggerShake(6);
-                            for (let i = 0; i < 8; i++) {
-                                this.fx.particles.push({
-                                    x: z.x, y: currentY - 20,
-                                    vx: (Math.random() - 0.5) * 50, vy: -Math.random() * 40,
-                                    color: '#8899aa', size: 2.5, life: 0.35, maxLife: 0.35
-                                });
-                            }
+                            this.fx.spawnBurst(z.x, currentY - 20, '#8899aa', 7, 50, 2.5, 0.35);
                         } else {
                             const pen = heroStats.armorPen || (heroId === 'dr_radix' ? 0.50 : 0);
                             const armorReduction = 0.55 * (1 - pen);
@@ -953,7 +882,7 @@ class CombatSystem {
 
         // 3. Hero Ground Shadow & Amp
         const heroPos = this.getHeroPosition();
-        this.drawAmpAndShadow(heroPos.x, heroPos.y);
+        this.fx.drawAmpAndShadow(this.ctx, heroPos.x, heroPos.y, this.time);
 
         // 4. Acid Puddles
         this.fx.drawAcidPuddles(this.ctx);
@@ -1029,30 +958,14 @@ class CombatSystem {
         this.fx.drawVignette(this.ctx, this.canvas.width, this.canvas.height);
 
         if (this.isGameOver) {
-            this.drawGameOverOverlay();
+            this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
         }
 
         this.ctx.restore();
     }
 
     drawGameOverOverlay() {
-        const cw = this.canvas.width;
-        const ch = this.canvas.height;
-
-        this.ctx.save();
-        this.ctx.fillStyle = 'rgba(15, 0, 5, 0.75)';
-        this.ctx.fillRect(0, 0, cw, ch);
-
-        this.ctx.font = "bold 24px 'Impact', sans-serif";
-        this.ctx.fillStyle = '#ff2222';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText("ROCK OVER! ☠️", cw / 2, ch / 2 - 15);
-
-        this.ctx.font = "bold 13px 'Segoe UI', sans-serif";
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText("TOQUE PARA REVIVER E CONTINUAR", cw / 2, ch / 2 + 15);
-
-        this.ctx.restore();
+        this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
     }
 
     drawBackground() {
@@ -1069,36 +982,7 @@ class CombatSystem {
     }
 
     drawAmpAndShadow(heroX, heroY) {
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-        this.ctx.beginPath();
-        this.ctx.ellipse(heroX, heroY + 2, 16, 5, 0, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        const ampX = heroX - 28;
-        const ampY = heroY - 26;
-        const ampW = 16;
-        const ampH = 26;
-
-        this.ctx.fillStyle = '#151515';
-        this.ctx.fillRect(ampX, ampY, ampW, ampH);
-        this.ctx.strokeStyle = '#333333';
-        this.ctx.lineWidth = 1.5;
-        this.ctx.strokeRect(ampX, ampY, ampW, ampH);
-
-        const pulse = Math.sin(this.time / 80) * 1.0;
-        this.ctx.fillStyle = '#282828';
-        this.ctx.beginPath();
-        this.ctx.arc(ampX + ampW / 2, ampY + 8, 4 + pulse, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        this.ctx.beginPath();
-        this.ctx.arc(ampX + ampW / 2, ampY + 18, 4 + pulse, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        this.ctx.fillStyle = '#ff0033';
-        this.ctx.beginPath();
-        this.ctx.arc(ampX + 3, ampY + 3, 1.2, 0, Math.PI * 2);
-        this.ctx.fill();
+        this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time);
     }
 }
 

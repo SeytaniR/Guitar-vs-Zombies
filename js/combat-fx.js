@@ -50,6 +50,17 @@ class CombatFX {
         });
     }
 
+    spawnBurst(x, y, color = '#ffffff', count = 6, speed = 40, size = 2, life = 0.25) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * speed,
+                vy: (Math.random() - 0.5) * speed,
+                color, size, life, maxLife: life
+            });
+        }
+    }
+
     createExplosion(x, y, isCrit = false, soundEngine = null) {
         this.triggerShake(isCrit ? 8 : 4);
 
@@ -466,6 +477,56 @@ class CombatFX {
         ctx.shadowColor = '#ffcc00';
         ctx.shadowBlur = 15;
         ctx.stroke();
+        ctx.restore();
+    }
+
+    drawAmpAndShadow(ctx, heroX, heroY, time) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(heroX, heroY + 2, 16, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const ampX = heroX - 28;
+        const ampY = heroY - 26;
+        const ampW = 16;
+        const ampH = 26;
+
+        ctx.fillStyle = '#151515';
+        ctx.fillRect(ampX, ampY, ampW, ampH);
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(ampX, ampY, ampW, ampH);
+
+        const pulse = Math.sin(time / 80) * 1.0;
+        ctx.fillStyle = '#282828';
+        ctx.beginPath();
+        ctx.arc(ampX + ampW / 2, ampY + 8, 4 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(ampX + ampW / 2, ampY + 18, 4 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ff0033';
+        ctx.beginPath();
+        ctx.arc(ampX + 3, ampY + 3, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    drawGameOverOverlay(ctx, cw, ch) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 0, 5, 0.75)';
+        ctx.fillRect(0, 0, cw, ch);
+
+        ctx.font = "bold 24px 'Impact', sans-serif";
+        ctx.fillStyle = '#ff2222';
+        ctx.textAlign = 'center';
+        ctx.fillText("ROCK OVER! ☠️", cw / 2, ch / 2 - 15);
+
+        ctx.font = "bold 13px 'Segoe UI', sans-serif";
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText("TOQUE PARA REVIVER E CONTINUAR", cw / 2, ch / 2 + 15);
+
         ctx.restore();
     }
 }
