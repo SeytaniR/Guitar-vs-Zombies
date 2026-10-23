@@ -12,8 +12,13 @@ const MIME = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.wav': 'audio/wav',
-  '.mp3': 'audio/mpeg'
+  '.mp3': 'audio/mpeg',
+  '.ogg': 'audio/ogg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon'
 };
+
+const os = require('os');
 
 const server = http.createServer((req, res) => {
   let reqPath = decodeURI(req.url.split('?')[0]);
@@ -27,11 +32,27 @@ const server = http.createServer((req, res) => {
       return;
     }
     const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    res.writeHead(200, {
+      'Content-Type': MIME[ext] || 'application/octet-stream',
+      'Access-Control-Allow-Origin': '*'
+    });
     res.end(data);
   });
 });
 
-server.listen(8080, () => {
-  console.log('Server running on http://localhost:8080');
+const PORT = 8080;
+server.listen(PORT, '0.0.0.0', () => {
+  const nets = os.networkInterfaces();
+  let lanIp = 'localhost';
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        lanIp = net.address;
+        break;
+      }
+    }
+  }
+  console.log(`\n🎸 Guitar vs Zombies Server Online!`);
+  console.log(`> Local: http://localhost:${PORT}`);
+  console.log(`> LAN (Celular): http://${lanIp}:${PORT}\n`);
 });
