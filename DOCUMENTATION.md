@@ -378,6 +378,24 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
   - Proteção contra `duration` inválida/NaN em `SongStudio.handleCreateSong()`, garantindo pelo menos 15-30s e gerando notas completas pelas 4 pistas ao selecionar "Gerar Ritmo Base Automaticamente por BPM".
 - **Cache-Busting v=11:** Atualizadas todas as referências de scripts e CSS para garantir recarregamento imediato no mobile (`http://192.168.1.7:8080/?v=11`).
 
+### [v1.5.2] - 2026-10-23 (Visibilidade Total dos Zumbis: Zero Ghost Kills, Spawn On-Screen & Clamping)
+- **Eliminação Total de Abates Fantasma Fora da Tela (Zero Ghost Kills):**
+  - **Mira e Auto-Ataque Restritos ao Canvas (`js/combat.js`):** `performHeroAutoAttack()`, `launchSustainTick()` e `triggerChainLightning()` agora filtram candidatos estritamente com `z.x <= this.canvas.width - 5`, garantindo que notas e projéteis sônicos nunca mirem ou causem dano a zumbis que ainda não entraram no campo de visão da tela.
+  - **Dissipação de Projéteis na Borda:** Projéteis que atingem o limite direito da tela (`p.x >= this.canvas.width - 4`) faíscam e se dissipam com `spawnBurst` na borda em vez de viajar indefinidamente no vazio off-screen.
+  - **Filtro de Colisão On-Screen:** A detecção de colisão de projéteis exige `z.x <= this.canvas.width - 4`, impedindo qualquer impacto prévio fora do enquadramento.
+- **Onda de Vanguarda Imediata no Início da Partida (`resetBattle()`):**
+  - Ao iniciar ou reiniciar o combate, 2 zumbis de vanguarda são instantaneamente posicionados na faixa visível da estrada (`0.78 * cw` e `0.92 * cw`), dando alvos imediatos ao jogador a partir do primeiro compasso da música.
+- **Respawn Rápido para Jogadores Habilidosos:**
+  - Quando o jogador joga perfeitamente e limpa todos os zumbis da pista (`entities.zombies.length === 0`), o temporizador de onda adianta automaticamente para que o próximo inimigo apareça em menos de 0.4s, eliminando períodos mortos de pista vazia.
+- **Ajuste de Spawn e Clamping de Knockback:**
+  - O ponto de spawn padrão de `ZombieEntity` (`js/zombie-entity.js`) foi aproximado da borda imediata (`canvasWidth + 8px`), e o método construtor agora suporta `initialX` explícito.
+  - O recuo sísmico (knockback) é limitado com `Math.min(this.canvas.width - 15, z.x + knockDist)`, impedindo que golpes críticos empurrem zumbis de volta para fora da tela.
+  - Placas de nome, barras de vida e textos flutuantes de ouro/XP/kill têm suas coordenadas x travadas dentro da área útil da tela (`Math.min(canvas.width - 45, Math.max(30, z.x))`).
+- **Conformidade com a Regra Zero God Object (< 1.000 Linhas por Arquivo):**
+  - Todos os 16 arquivos JavaScript continuam estritamente abaixo do limite de 1.000 linhas (`combat.js`: 985, `rhythm.js`: 991, `song-editor.js`: 995, etc.).
+- **Testes Automatizados:**
+  - Suíte `test-procedural.js` expandida com a Seção 7 (80 testes automatizados, 100% aprovados).
+
 ### [v1.5.1] - 2026-10-13 (Revisão Geral de Código, Correção de Bugs e Modularização Estrita)
 - **Correção Crítica de Combate & Velocidade de Ataque (`js/main.js`):**
   - Removido `this.combat.launchAttack(isCrit, lane)` do callback `onHitCallback`.

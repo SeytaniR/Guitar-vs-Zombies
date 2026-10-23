@@ -136,17 +136,9 @@ class CombatSystem {
             return window.guitaristPool.getHeroStats(heroData.id);
         }
         return {
-            level: 1,
-            damageMult: 1.0,
-            critDamageBonusPercent: 50.0,
-            manaRegenRate: 1.0,
-            goldBonus: 0,
-            armorPen: 0,
-            slowHorde: 0,
-            burnChance: 0,
-            knockbackBonus: 0,
-            chainLightning: false,
-            chainTargets: 0
+            level: 1, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0,
+            goldBonus: 0, armorPen: 0, slowHorde: 0, burnChance: 0, knockbackBonus: 0,
+            chainLightning: false, chainTargets: 0
         };
     }
 
@@ -175,13 +167,7 @@ class CombatSystem {
         const bg = this.assets.bg;
 
         if (!bg.complete || bg.naturalWidth === 0) {
-            return {
-                drawX: 0,
-                drawY: 0,
-                drawW: cw,
-                drawH: ch,
-                laneY: ch * 0.78
-            };
+            return { drawX: 0, drawY: 0, drawW: cw, drawH: ch, laneY: ch * 0.78 };
         }
 
         const aspect = bg.naturalHeight / bg.naturalWidth; // 571 / 1024 = ~0.5576
@@ -227,17 +213,14 @@ class CombatSystem {
             ? enemyList
             : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
 
-        this.battleStats = {
-            damageDealt: 0,
-            zombiesKilled: 0,
-            coinsEarned: 0,
-            hitsReceived: 0,
-            matchStartTime: performance.now()
-        };
+        this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.matchActive = true;
+        const cw = Math.max(200, this.canvas ? this.canvas.width : 360);
+        this.spawnZombie(cw * 0.78);
+        this.spawnZombie(cw * 0.92);
     }
 
-    spawnZombie() {
+    spawnZombie(initialX = null) {
         if (this.isGameOver || !this.matchActive) return;
         const metrics = this.getRoadMetrics();
 
@@ -254,7 +237,7 @@ class CombatSystem {
         const zombieLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
 
         const ZombieClass = window.ZombieEntity || ZombieEntity;
-        const zombie = new ZombieClass(enemyDef, metrics.laneY, this.canvas.width, zombieLevel);
+        const zombie = new ZombieClass(enemyDef, metrics.laneY, this.canvas.width, zombieLevel, initialX);
         this.entities.zombies.push(zombie);
     }
 
@@ -334,7 +317,7 @@ class CombatSystem {
         let target = null;
         let minX = Infinity;
         for (const z of this.entities.zombies) {
-            if (z.active && z.x > heroPos.x - 10 && z.x < minX) {
+            if (z.active && z.x <= this.canvas.width - 5 && z.x > heroPos.x - 10 && z.x < minX) {
                 minX = z.x;
                 target = z;
             }
@@ -342,7 +325,7 @@ class CombatSystem {
 
         const startX = heroPos.x + 22;
         const startY = heroPos.y - 18;
-        const targetX = target ? target.x : this.canvas.width + 80;
+        const targetX = target ? target.x : this.canvas.width;
         const targetY = target ? (target.y + (target.jumpArcY || 0) - 18) : heroPos.y - 18;
         const angle = Math.atan2(targetY - startY, targetX - startX);
 
@@ -422,7 +405,7 @@ class CombatSystem {
         let target = null;
         let minX = Infinity;
         for (const z of this.entities.zombies) {
-            if (z.active && z.x > heroPos.x - 10 && z.x < minX) {
+            if (z.active && z.x <= this.canvas.width - 5 && z.x > heroPos.x - 10 && z.x < minX) {
                 minX = z.x;
                 target = z;
             }
@@ -491,8 +474,9 @@ class CombatSystem {
             }
         }
 
+        const textX = Math.min(this.canvas.width - 45, Math.max(30, z.x));
         const currentY = z.y + (z.jumpArcY || 0);
-        this.addFloatingText(`+${earnedGold} 🪙 (+${earnedXp} XP)`, z.x, currentY - 58, '#ffd700', false);
+        this.addFloatingText(`+${earnedGold} 🪙 (+${earnedXp} XP)`, textX, currentY - 58, '#ffd700', false);
 
         // Rock Mana bonus on kill
         this.rockMana = Math.min(this.maxRockMana, this.rockMana + 5.0);
@@ -510,13 +494,13 @@ class CombatSystem {
         } else if (z.type === 'spore') {
             this.fx.triggerSporeBurst(z.x, z.y, this.getHeroPosition(), (dmg, isHvy, lbl, col) => this.takeDamage(dmg, isHvy, lbl, col));
             this.rockMana = Math.min(this.maxRockMana, this.rockMana + 10);
-            this.addFloatingText("+KILL! 🍄", z.x, currentY - 42, '#ffaa00', true);
+            this.addFloatingText("+KILL! 🍄", textX, currentY - 42, '#ffaa00', true);
         } else if (z.type === 'hazmat') {
             this.fx.triggerHazmatMeltdown(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, '+KILL! 🧪', '#39ff14'));
             this.rockMana = Math.min(this.maxRockMana, this.rockMana + 12);
-            this.addFloatingText("+KILL! ☢️", z.x, currentY - 42, '#39ff14', true);
+            this.addFloatingText("+KILL! ☢️", textX, currentY - 42, '#39ff14', true);
         } else {
-            this.addFloatingText(label, z.x, currentY - 42, color, true);
+            this.addFloatingText(label, textX, currentY - 42, color, true);
         }
     }
 
@@ -594,7 +578,7 @@ class CombatSystem {
     triggerChainLightning(sourceZombie, targetCount, damage) {
         let hit = 0;
         for (const other of this.entities.zombies) {
-            if (other.active && other !== sourceZombie && Math.abs(other.x - sourceZombie.x) < 140) {
+            if (other.active && other !== sourceZombie && other.x <= this.canvas.width - 5 && Math.abs(other.x - sourceZombie.x) < 140) {
                 other.hp -= damage;
                 other.flashTime = 0.15;
                 const oy = other.y + (other.jumpArcY || 0);
@@ -680,6 +664,9 @@ class CombatSystem {
         // Spawn Wave Timer
         this.spawnTimer += dt;
         const targetSpawnInterval = Math.max(1.4, 3.2 - (this.zombiesKilled * 0.05));
+        if (this.entities.zombies.length === 0 && this.spawnTimer < targetSpawnInterval - 0.4) {
+            this.spawnTimer = targetSpawnInterval - 0.4;
+        }
         if (this.spawnTimer >= targetSpawnInterval) {
             this.spawnTimer = 0;
             this.spawnZombie();
@@ -732,18 +719,26 @@ class CombatSystem {
                 });
             }
 
+            // Screen boundary dissipation: spark and fizzle before exiting screen
+            if (p.x >= this.canvas.width - 4) {
+                p.active = false;
+                this.fx.spawnBurst(this.canvas.width - 4, p.y, p.projColor || '#00ffff', 3, 20, 1.2, 0.15);
+                return;
+            }
+
             for (const puddle of this.fx.acidPuddles) {
                 if (Math.abs(p.x - puddle.x) < puddle.width / 2) {
                     p.damage = Math.max(8, Math.round(p.damage * 0.985));
                 }
             }
 
-            // Collisions with Zombies
+            // Collisions with visible on-screen Zombies
             for (const z of this.entities.zombies) {
+                if (!z.active || z.x > this.canvas.width - 4) continue;
                 const currentY = z.y + (z.jumpArcY || 0);
                 const hitRadius = (z.type === 'mutant' || z.type === 'bloater') ? 34 : 22;
 
-                if (z.active && Math.abs(p.x - z.x) < hitRadius && Math.abs(p.y - (currentY - 15)) < 26) {
+                if (Math.abs(p.x - z.x) < hitRadius && Math.abs(p.y - (currentY - 15)) < 26) {
                     if (z.type === 'gladiator' && !p.isCrit && Math.random() < z.deflectChance) {
                         p.active = false;
                         this.addFloatingText("🛡️ CORRENTE DEFLETIU!", z.x, currentY - 34, '#ff3333', true);
@@ -797,22 +792,22 @@ class CombatSystem {
                     }
 
                     let isAirShot = false;
+                    let knockDist = (z.type === 'mutant' ? 4 : 8) * knockMult;
                     if (z.type === 'leaper' && z.jumpState === 'leaping') {
                         isAirShot = true;
                         z.jumpState = 'ground';
                         z.jumpArcY = 0;
                         z.hasJumped = true;
-                        z.x += 35 * knockMult;
+                        knockDist = 35 * knockMult;
                         p.isCrit = true;
                         const airBonus = window.talentSystem ? window.talentSystem.getStat('air_sniper') : 0;
                         p.damage = Math.round(p.damage * (1.8 + airBonus));
                         this.addFloatingText("🎯 AIR SHOT! CRIT!", z.x, currentY - 45, '#ffcc00', true);
                         this.triggerShake(7);
                     } else if (z.type === 'bloater') {
-                        z.x += 2 * knockMult;
-                    } else {
-                        z.x += (z.type === 'mutant' ? 4 : 8) * knockMult;
+                        knockDist = 2 * knockMult;
                     }
+                    z.x = Math.min(this.canvas.width - 15, z.x + knockDist);
 
                     z.hp -= p.damage;
                     this.battleStats.damageDealt += p.damage;
@@ -848,7 +843,7 @@ class CombatSystem {
                 }
             }
 
-            if (p.x > this.canvas.width + 80 || p.x < -60) p.active = false;
+            if (p.x > this.canvas.width + 10 || p.x < -60) p.active = false;
         });
 
         // Update VFX Module

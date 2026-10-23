@@ -1,6 +1,6 @@
 // Polymorphic Zombie Entity Class (Encapsulates AI, Animations, States, and Rendering for All 8 Archetypes)
 class ZombieEntity {
-    constructor(enemyDef, laneY, canvasWidth, level = 1) {
+    constructor(enemyDef, laneY, canvasWidth, level = 1, initialX = null) {
         this.level = Math.max(1, Math.round(level || 1));
         this.type = enemyDef.type || 'normal';
         this.baseName = enemyDef.name || 'Zumbi';
@@ -30,7 +30,7 @@ class ZombieEntity {
         this.attackSlot = Math.floor(Math.random() * 3); // Stagger stopping positions
 
         const laneOffset = (Math.random() - 0.5) * 18;
-        this.x = canvasWidth + 50 + Math.random() * 40;
+        this.x = (initialX !== null && initialX !== undefined) ? initialX : (canvasWidth + 8 + Math.random() * 10);
         this.y = laneY + laneOffset;
 
         this.frame = 0;
@@ -493,7 +493,7 @@ class ZombieEntity {
 
         // Health bar & Badge/Name Tag
         const isSpecial = this.type === 'mutant' || this.type === 'leaper' || this.type === 'soldier' || this.type === 'spore' || this.type === 'bloater' || this.type === 'gladiator' || this.type === 'hazmat';
-        if (this.hp < this.maxHp || isSpecial) {
+        if (this.x <= ctx.canvas.width - 5 && (this.hp < this.maxHp || isSpecial)) {
             const bw = (this.type === 'mutant' || this.type === 'bloater') ? 34 : (24 * (this.scale / 0.5));
             const bh = (this.type === 'mutant' || this.type === 'bloater') ? 4 : 3.5;
             const bx = this.x - bw / 2;

@@ -82,6 +82,7 @@ assert(goldCost > 0, `Gold cost for leveling up calculated: ${goldCost} gold`);
 // Mock talent system for gold purchase
 window.talentSystem = {
     gold: 5000,
+    getStat: () => 0,
     saveProgress: () => {}
 };
 const goldLvlRes = pool.levelUpWithGold('johnny_blaze', window.talentSystem);
@@ -313,6 +314,85 @@ jsFiles.forEach(file => {
     assert(isUnder, `File js/${file} has ${lines} lines (< 1000 lines limit)`);
 });
 assert(allUnder1000, `All ${jsFiles.length} JavaScript files adhere strictly to the < 1000 lines limit`);
+
+// ==========================================
+// TEST 7: ON-SCREEN SPAWN & TARGETING INTEGRITY (ZERO GHOST KILLS)
+// ==========================================
+console.log('\n7. Testing On-Screen Spawn & Targeting Integrity (Zero Ghost Kills)...');
+
+// 7.1 ZombieEntity initialX & Default Spawn Position
+const zVanguard = new ZombieEntity(mockZombieType, 100, 400, 1, 310);
+assert(zVanguard.x === 310, 'ZombieEntity respects initialX parameter for vanguard spawning');
+
+const zDefaultEdge = new ZombieEntity(mockZombieType, 100, 400, 1);
+assert(zDefaultEdge.x >= 408 && zDefaultEdge.x <= 420, `ZombieEntity default edge spawn is right at screen threshold (${zDefaultEdge.x.toFixed(1)} vs 408-418px)`);
+
+// 7.2 Mock CombatSystem Environment
+global.window.addEventListener = () => {};
+global.window.removeEventListener = () => {};
+global.document = {
+    getElementById: () => ({
+        getContext: () => ({
+            save: () => {}, restore: () => {}, fillRect: () => {}, beginPath: () => {},
+            stroke: () => {}, fill: () => {}, drawImage: () => {}, closePath: () => {},
+            arc: () => {}, ellipse: () => {}, measureText: () => ({ width: 20 })
+        }),
+        addEventListener: () => {},
+        parentElement: { clientWidth: 400, clientHeight: 300 },
+        width: 400,
+        height: 300
+    })
+};
+global.Image = class { constructor() { this.complete = true; this.naturalWidth = 1024; this.naturalHeight = 571; } };
+global.SpriteSheet = class { constructor() {} drawFrame() {} };
+
+loadScript('js/combat-fx.js');
+loadScript('js/combat.js');
+
+const combat = new CombatSystem('gameCanvas');
+combat.canvas.width = 400;
+combat.canvas.height = 300;
+
+// Test Vanguard Spawning on Battle Reset
+combat.resetBattle([mockZombieType]);
+assert(combat.entities.zombies.length === 2, 'resetBattle() spawns 2 vanguard zombies immediately');
+assert(combat.entities.zombies.every(z => z.x < 400), 'All vanguard zombies spawn visibly on screen (x < canvas.width)');
+assert(combat.entities.zombies[0].x <= 400 * 0.85, `Vanguard zombie 1 is well into view: x=${combat.entities.zombies[0].x.toFixed(1)}`);
+
+// Test Auto-Attack Target Selection (No Off-Screen Targeting)
+combat.entities.zombies = [];
+// Zombie A is off-screen at x=450
+const offScreenZombie = new ZombieEntity(mockZombieType, 100, 400, 1, 450);
+combat.entities.zombies.push(offScreenZombie);
+
+// Fire auto-attack
+combat.performHeroAutoAttack();
+const firedProj1 = combat.entities.projectiles[combat.entities.projectiles.length - 1];
+assert(firedProj1.target === null, 'Hero auto-attack ignores off-screen zombie (target is null)');
+
+// Now add Zombie B on-screen at x=320
+const onScreenZombie = new ZombieEntity(mockZombieType, 100, 400, 1, 320);
+combat.entities.zombies.push(onScreenZombie);
+
+combat.performHeroAutoAttack();
+const firedProj2 = combat.entities.projectiles[combat.entities.projectiles.length - 1];
+assert(firedProj2.target === onScreenZombie, 'Hero auto-attack locks onto visible on-screen zombie');
+
+// Test Projectile Screen Edge Dissipation
+const edgeProj = { x: 398, y: 100, vx: 440, vy: 0, frame: 3, trailTimer: 0, active: true, damage: 30 };
+combat.entities.projectiles = [edgeProj];
+combat.update(16); // 1 tick
+assert(!edgeProj.active, 'Projectile dissipates and becomes inactive at canvas boundary (x >= canvas.width - 4)');
+
+// Test Knockback Clamping (Never pushes zombies off-screen)
+onScreenZombie.x = 370;
+const currentY = onScreenZombie.y + (onScreenZombie.jumpArcY || 0);
+const knockProj = { x: 370, y: currentY - 15, vx: 0, vy: 0, frame: 3, trailTimer: 0, active: true, damage: 10, isCrit: false, heroId: null, projColor: '#00ffff' };
+combat.entities.projectiles = [knockProj];
+combat.entities.zombies = [onScreenZombie];
+combat.update(16);
+assert(onScreenZombie.x <= 400 - 15, `Knockback is strictly clamped on-screen: x=${onScreenZombie.x} <= ${400 - 15}`);
+assert(onScreenZombie.x > 370, `Zombie was knocked back to the right: x=${onScreenZombie.x.toFixed(1)} > 370`);
 
 // Summary
 console.log('\n==========================================');
