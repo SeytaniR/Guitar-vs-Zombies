@@ -95,11 +95,7 @@ class CombatSystem {
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
-        this.canvas.addEventListener('pointerdown', () => {
-            if (this.isGameOver) {
-                this.reviveHero();
-            }
-        });
+        this.canvas.addEventListener('pointerdown', () => { if (this.isGameOver) this.reviveHero(); });
     }
 
     // Rock Power backward compatibility property mapping to Rock Mana
@@ -198,6 +194,8 @@ class CombatSystem {
         this.fx.reset();
         this.heroHp = this.heroMaxHp;
         this.isGameOver = false;
+        this.isPaused = false;
+        this.isVictory = false;
         this.rockMana = 30;
         this.combo = 0;
         this.score = 0;
@@ -572,7 +570,27 @@ class CombatSystem {
         this.triggerShake(isHeavy ? 9 : 3.5);
         this.addFloatingText(label || `-${finalDamage} HP`, heroPos.x, heroPos.y - 35, color, isHeavy);
 
+        if (this.heroHp <= 0) {
+            this.handleHeroDefeat();
+            return;
+        }
+
         if (window.soundEngine) window.soundEngine.playHit();
+    }
+
+    handleHeroDefeat() {
+        if (this.isGameOver) return;
+        this.isGameOver = true;
+        this.matchActive = false;
+        this.triggerShake(12);
+        this.addFloatingText("☠️ DERROTADO! ☠️", this.getHeroPosition().x, this.getHeroPosition().y - 50, '#ff2222', true);
+        try {
+            const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
+            if (this.score > hs) localStorage.setItem('gvs_highscore', this.score.toString());
+        } catch (e) {}
+        if (window.game && typeof window.game.showDefeatModal === 'function') {
+            window.game.showDefeatModal();
+        }
     }
 
     triggerChainLightning(sourceZombie, targetCount, damage) {
@@ -613,6 +631,7 @@ class CombatSystem {
     }
 
     update(deltaTime) {
+        if (this.isPaused || !this.matchActive) return;
         this.time += deltaTime;
         const dt = deltaTime / 1000;
 
@@ -626,13 +645,8 @@ class CombatSystem {
         }
 
         if (this.heroHp <= 0 && !this.isGameOver) {
-            this.isGameOver = true;
-            this.triggerShake(12);
-            this.addFloatingText("☠️ DERROTADO! ☠️", this.getHeroPosition().x, this.getHeroPosition().y - 50, '#ff2222', true);
-            try {
-                const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
-                if (this.score > hs) localStorage.setItem('gvs_highscore', this.score.toString());
-            } catch (e) {}
+            this.handleHeroDefeat();
+            return;
         }
 
         // 1. Rock Mana Passive Regeneration
@@ -935,14 +949,7 @@ class CombatSystem {
         this.ctx.save();
         this.ctx.globalCompositeOperation = 'lighter';
         this.entities.projectiles.forEach(p => {
-            this.assets.fxSheet.drawFrame(
-                this.ctx,
-                p.frame,
-                p.x,
-                p.y,
-                p.isCrit ? 0.25 : 0.18,
-                false
-            );
+            this.assets.fxSheet.drawFrame(this.ctx, p.frame, p.x, p.y, p.isCrit ? 0.25 : 0.18, false);
         });
         this.ctx.restore();
 
@@ -951,17 +958,11 @@ class CombatSystem {
 
         // 9. Vignette & Game Over
         this.fx.drawVignette(this.ctx, this.canvas.width, this.canvas.height);
-
-        if (this.isGameOver) {
-            this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
-        }
-
+        if (this.isGameOver) this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
         this.ctx.restore();
     }
 
-    drawGameOverOverlay() {
-        this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
-    }
+    drawGameOverOverlay() { this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height); }
 
     drawBackground() {
         const bg = this.assets.bg;
@@ -970,15 +971,11 @@ class CombatSystem {
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             return;
         }
-
-        const metrics = this.getRoadMetrics();
-        if (metrics.drawW <= 0 || metrics.drawH <= 0) return;
-        this.ctx.drawImage(bg, metrics.drawX, metrics.drawY, metrics.drawW, metrics.drawH);
+        const m = this.getRoadMetrics();
+        if (m.drawW > 0 && m.drawH > 0) this.ctx.drawImage(bg, m.drawX, m.drawY, m.drawW, m.drawH);
     }
 
-    drawAmpAndShadow(heroX, heroY) {
-        this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time);
-    }
+    drawAmpAndShadow(heroX, heroY) { this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time); }
 }
 
 window.CombatSystem = CombatSystem;

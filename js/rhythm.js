@@ -63,6 +63,7 @@ class RhythmSystem {
         };
 
         const onDown = (lane, id) => {
+            if (this.isPaused) return;
             if (id !== undefined) this.pointerLaneMap.set(id, lane);
             if (window.soundEngine) window.soundEngine.resume();
 
@@ -365,6 +366,7 @@ class RhythmSystem {
     }
 
     update(deltaTime) {
+        if (this.isPaused) return;
         this.time += deltaTime;
         const dt = deltaTime / 1000;
         const hitZoneY = this.getHitZoneY();
@@ -870,15 +872,30 @@ class RhythmSystem {
         this.updateCustomSongHUD();
     }
 
+    pauseAudio() {
+        this.isPaused = true;
+        if (this.songAudio && !this.songAudio.paused) {
+            try { this.songAudio.pause(); } catch (e) {}
+        }
+    }
+
+    resumeAudio() {
+        this.isPaused = false;
+        if (this.isCustomSongPlaying && this.songAudio && this.songAudio.paused) {
+            try { this.songAudio.play().catch(e => console.warn("Audio resume", e)); } catch (e) {}
+        }
+    }
+
     finishCustomSong() {
         if (!this.isCustomSongPlaying) return;
         const song = this.currentSong;
         const stats = { ...this.songStats };
-        if (window.game && window.game.combat) {
-            window.game.combat.matchActive = false;
-        }
         this.stopCustomSong();
-        this.showSongResultsModal(song, stats);
+        if (window.game && typeof window.game.showVictoryModal === 'function') {
+            window.game.showVictoryModal(song, stats);
+        } else {
+            this.showSongResultsModal(song, stats);
+        }
     }
 
     updateCustomSongHUD() {
@@ -935,56 +952,11 @@ class RhythmSystem {
     }
 
     showSongResultsModal(song, stats) {
+        if (window.game && typeof window.game.showVictoryModal === 'function') {
+            window.game.showVictoryModal(song, stats);
+            return;
+        }
         const modal = document.getElementById('song-results-modal');
-        if (!modal) return;
-
-        const accuracy = Math.round((stats.hitNotes / Math.max(1, stats.totalNotes)) * 100);
-        const earnedScore = Math.max(0, (window.game && window.game.combat ? window.game.combat.score : 0) - (stats.scoreStart || 0));
-        const rewardGold = Math.max(15, Math.round(stats.hitNotes * 1.5 + (stats.maxStreak * 2)));
-
-        if (window.talentSystem) {
-            window.talentSystem.addGold(rewardGold);
-        }
-
-        const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
-        const coverEl = document.getElementById('result-song-cover');
-        if (coverEl) coverEl.src = song.cover || 'assets/covers/default_cover.jpg';
-        setTxt('result-song-title', song.title);
-        setTxt('result-song-artist', song.artist);
-        setTxt('result-accuracy', `${accuracy}%`);
-        setTxt('result-hits', `${stats.hitNotes} / ${stats.totalNotes}`);
-        setTxt('result-max-streak', `${stats.maxStreak} 🔥`);
-        setTxt('result-gold-reward', `+${rewardGold} 🪙`);
-        setTxt('result-score-gained', `+${earnedScore.toLocaleString()}`);
-
-        // Buttons
-        const replayBtn = document.getElementById('result-replay-btn');
-        if (replayBtn) {
-            replayBtn.onclick = () => {
-                modal.classList.remove('open');
-                if (window.game && window.game.combat) {
-                    window.game.combat.resetBattle(window.game.currentMapZombies || []);
-                }
-                this.playCustomSong(song);
-            };
-        }
-
-        const closeBtn = document.getElementById('result-close-btn');
-        if (closeBtn) {
-            closeBtn.onclick = () => {
-                modal.classList.remove('open');
-                if (window.game) window.game.switchScreen('menu');
-            };
-        }
-
-        const editBtn = document.getElementById('result-edit-btn');
-        if (editBtn) {
-            editBtn.onclick = () => {
-                modal.classList.remove('open');
-                if (window.songEditor) window.songEditor.open(song);
-            };
-        }
-
-        modal.classList.add('open');
+        if (modal) modal.classList.add('open');
     }
 }

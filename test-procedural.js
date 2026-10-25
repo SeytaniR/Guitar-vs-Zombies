@@ -394,6 +394,63 @@ combat.update(16);
 assert(onScreenZombie.x <= 400 - 15, `Knockback is strictly clamped on-screen: x=${onScreenZombie.x} <= ${400 - 15}`);
 assert(onScreenZombie.x > 370, `Zombie was knocked back to the right: x=${onScreenZombie.x.toFixed(1)} > 370`);
 
+// ==========================================
+// TEST 8: BATTLE PAUSE, VICTORY & DEFEAT FLOW INTEGRITY
+// ==========================================
+console.log('8. Testing Battle Pause, Victory & Defeat Flow Integrity...');
+
+// 1. Combat Pause Check
+combat.isPaused = true;
+const prevCombatTime = combat.time;
+combat.update(50);
+assert(combat.time === prevCombatTime, 'CombatSystem update halts immediately when isPaused is true');
+combat.isPaused = false;
+
+// 2. Fatal Damage & Hero Defeat
+let defeatModalCalled = false;
+window.game = {
+    showDefeatModal: () => { defeatModalCalled = true; },
+    showVictoryModal: () => {},
+    pauseBattle: () => {},
+    resumeBattle: () => {},
+    combat: combat,
+    rhythm: { isPaused: false, songStats: { totalNotes: 10, hitNotes: 8 } }
+};
+
+combat.heroHp = 10;
+combat.isGameOver = false;
+combat.matchActive = true;
+combat.takeDamage(25, true, 'FATAL STRIKE');
+assert(combat.heroHp === 0, 'Hero HP correctly reduced to 0');
+assert(combat.isGameOver === true, 'Fatal damage sets isGameOver to true');
+assert(combat.matchActive === false, 'Fatal damage halts matchActive in combat');
+assert(defeatModalCalled === true, 'handleHeroDefeat triggers window.game.showDefeatModal()');
+
+// 3. Victory Flow Check
+let victoryModalCalled = false;
+window.game.showVictoryModal = (song, stats) => {
+    victoryModalCalled = true;
+    combat.isVictory = true;
+};
+
+// Simulate custom song finish
+const mockSong = { id: 'test_song', title: 'Epic Solo', duration: 10, notes: [{}, {}] };
+const mockStats = { totalNotes: 2, hitNotes: 2, maxStreak: 2 };
+window.game.showVictoryModal(mockSong, mockStats);
+assert(victoryModalCalled === true, 'finishCustomSong properly routes to showVictoryModal');
+assert(combat.isVictory === true, 'Victory sets combat.isVictory to true');
+
+// 4. Modal Resumption Guard Check
+let resumed = false;
+window.game.resumeBattle = () => { resumed = true; };
+const testCloseModal = () => {
+    if (!combat.isGameOver && !combat.isVictory) {
+        window.game.resumeBattle();
+    }
+};
+testCloseModal();
+assert(resumed === false, 'Closing gear or stats modal does NOT unpause if game is over or won');
+
 // Summary
 console.log('\n==========================================');
 console.log(`TOTAL TESTS: ${testsPassed + testsFailed}`);

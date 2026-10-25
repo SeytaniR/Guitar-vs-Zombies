@@ -1588,6 +1588,23 @@ body, html {
     letter-spacing: 1px;
 }
 
+.defeat-modal-dialog {
+    border: 2px solid #ff3344 !important;
+    box-shadow: 0 0 35px rgba(255, 51, 68, 0.45) !important;
+}
+
+.defeat-header h2 {
+    color: #ff3344 !important;
+    text-shadow: 0 0 10px rgba(255, 51, 68, 0.6);
+}
+
+.defeat-subtitle {
+    font-size: 11px;
+    color: #ffaaaa;
+    margin-top: 3px;
+    font-weight: 600;
+}
+
 .results-song-card {
     display: flex;
     align-items: center;

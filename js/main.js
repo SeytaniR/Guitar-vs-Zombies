@@ -31,24 +31,15 @@ class Game {
         const bpm = 136;
         const beatSec = 60 / bpm;
         const pattern = [
-            { b: 4, l: 0 }, { b: 5, l: 1 }, { b: 6, l: 0 }, { b: 7, l: 2 },
-            { b: 8, l: 0 }, { b: 9, l: 1 }, { b: 10, l: 2 }, { b: 11, l: 3 },
-            { b: 12, l: 0 }, { b: 12.5, l: 0 }, { b: 13, l: 1 }, { b: 14, l: 2 },
-            { b: 15, l: 3 }, { b: 16, l: 2 }, { b: 17, l: 1 }, { b: 18, l: 0 },
-            { b: 19, l: 1 }, { b: 19.5, l: 2 }, { b: 20, l: 3 }, { b: 21, l: 2 },
-            { b: 22, l: 1 }, { b: 23, l: 0 },
-            { b: 24, l: 0 }, { b: 24.5, l: 1 }, { b: 25, l: 2 }, { b: 25.5, l: 3 },
-            { b: 26, l: 2 }, { b: 26.5, l: 1 }, { b: 27, l: 0 }, { b: 28, l: 3 },
-            { b: 29, l: 2 }, { b: 29.5, l: 1 }, { b: 30, l: 0 }, { b: 31, l: 1 },
-            { b: 32, l: 2 }, { b: 32.5, l: 3 }, { b: 33, l: 2 }, { b: 33.5, l: 1 },
-            { b: 34, l: 0 }, { b: 35, l: 1 }, { b: 36, l: 2 }, { b: 37, l: 3 },
-            { b: 38, l: 2 }, { b: 39, l: 1 }, { b: 40, l: 0 },
-            { b: 41, l: 3 }, { b: 41.5, l: 2 }, { b: 42, l: 1 }, { b: 42.5, l: 0 },
-            { b: 43, l: 1 }, { b: 44, l: 2 }, { b: 44.5, l: 3 }, { b: 45, l: 2 },
-            { b: 46, l: 1 }, { b: 47, l: 0 }, { b: 48, l: 3 }, { b: 49, l: 2 },
-            { b: 50, l: 1 }, { b: 50.5, l: 2 }, { b: 51, l: 3 }, { b: 52, l: 0 },
-            { b: 53, l: 1 }, { b: 54, l: 2 }, { b: 55, l: 3 }, { b: 56, l: 3 },
-            { b: 57, l: 2 }, { b: 58, l: 0 }
+            { b: 4, l: 0 }, { b: 5, l: 1 }, { b: 6, l: 0 }, { b: 7, l: 2 }, { b: 8, l: 0 }, { b: 9, l: 1 }, { b: 10, l: 2 }, { b: 11, l: 3 },
+            { b: 12, l: 0 }, { b: 12.5, l: 0 }, { b: 13, l: 1 }, { b: 14, l: 2 }, { b: 15, l: 3 }, { b: 16, l: 2 }, { b: 17, l: 1 }, { b: 18, l: 0 },
+            { b: 19, l: 1 }, { b: 19.5, l: 2 }, { b: 20, l: 3 }, { b: 21, l: 2 }, { b: 22, l: 1 }, { b: 23, l: 0 }, { b: 24, l: 0 }, { b: 24.5, l: 1 },
+            { b: 25, l: 2 }, { b: 25.5, l: 3 }, { b: 26, l: 2 }, { b: 26.5, l: 1 }, { b: 27, l: 0 }, { b: 28, l: 3 }, { b: 29, l: 2 }, { b: 29.5, l: 1 },
+            { b: 30, l: 0 }, { b: 31, l: 1 }, { b: 32, l: 2 }, { b: 32.5, l: 3 }, { b: 33, l: 2 }, { b: 33.5, l: 1 }, { b: 34, l: 0 }, { b: 35, l: 1 },
+            { b: 36, l: 2 }, { b: 37, l: 3 }, { b: 38, l: 2 }, { b: 39, l: 1 }, { b: 40, l: 0 }, { b: 41, l: 3 }, { b: 41.5, l: 2 }, { b: 42, l: 1 },
+            { b: 42.5, l: 0 }, { b: 43, l: 1 }, { b: 44, l: 2 }, { b: 44.5, l: 3 }, { b: 45, l: 2 }, { b: 46, l: 1 }, { b: 47, l: 0 }, { b: 48, l: 3 },
+            { b: 49, l: 2 }, { b: 50, l: 1 }, { b: 50.5, l: 2 }, { b: 51, l: 3 }, { b: 52, l: 0 }, { b: 53, l: 1 }, { b: 54, l: 2 }, { b: 55, l: 3 },
+            { b: 56, l: 3 }, { b: 57, l: 2 }, { b: 58, l: 0 }
         ];
         const notes = pattern.map(p => ({
             time: Math.round((p.b * beatSec) * 1000) / 1000,
@@ -92,9 +83,15 @@ class Game {
         });
 
         if (screenName === 'menu') {
+            this.isBattlePaused = false;
             this.combat.matchActive = false;
+            this.combat.isGameOver = false;
             this.rhythm.stopCustomSong();
             this.updateMenuHUD();
+            ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('open');
+            });
         } else if (screenName === 'map-select') {
             this.prepareMapScreen();
         } else if (screenName === 'battle') {
@@ -112,123 +109,42 @@ class Game {
     // SCREEN NAVIGATION & BUTTONS
     // ==========================================
     setupScreenNavigation() {
-        // --- MAIN MENU BUTTONS ---
-        const btnPlay = document.getElementById('menu-btn-play');
-        if (btnPlay) {
-            btnPlay.onclick = (e) => {
-                if (e) e.preventDefault();
-                this.switchScreen('map-select');
-            };
-        }
-
-        const btnTalents = document.getElementById('menu-btn-talents');
-        if (btnTalents) {
-            btnTalents.onclick = (e) => {
-                if (e) e.preventDefault();
-                if (window.talentSystem && typeof window.talentSystem.open === 'function') {
-                    window.talentSystem.open();
-                } else {
-                    const modal = document.getElementById('talent-modal');
-                    if (modal) modal.classList.add('open');
-                }
-            };
-        }
-
-        const btnStudio = document.getElementById('menu-btn-studio');
-        if (btnStudio) {
-            btnStudio.onclick = () => {
-                const studioModal = document.getElementById('song-studio-modal');
-                if (studioModal) {
-                    studioModal.classList.add('open');
-                    if (window.songStudio) window.songStudio.renderLibrary();
-                }
-            };
-        }
-
-        const btnSettings = document.getElementById('menu-btn-settings');
-        if (btnSettings) {
-            btnSettings.onclick = () => this.openGearModal(true);
-        }
-
-        const menuSoundBtn = document.getElementById('menu-sound-toggle');
-        if (menuSoundBtn) {
-            menuSoundBtn.onclick = () => {
-                if (window.soundEngine) {
-                    const isMuted = window.soundEngine.toggleMute();
-                    menuSoundBtn.innerText = isMuted ? '🔇' : '🔊';
-                    const battleSound = document.getElementById('battle-sound-toggle');
-                    if (battleSound) battleSound.innerText = isMuted ? '🔇' : '🔊';
-                }
-            };
-        }
-
-        // --- MAP / PRE-BATTLE SCREEN BUTTONS ---
-        const mapBackBtn = document.getElementById('map-back-btn');
-        if (mapBackBtn) {
-            mapBackBtn.onclick = () => this.switchScreen('menu');
-        }
-
-        const mapRerollBtn = document.getElementById('map-reroll-btn');
-        if (mapRerollBtn) {
-            mapRerollBtn.onclick = () => {
-                if (window.enemyPool) {
-                    this.currentMapZombies = window.enemyPool.rollMapEnemies(5);
-                    this.renderMapZombies();
-                }
-            };
-        }
-
-        const mapStartBtn = document.getElementById('map-start-battle-btn');
-        if (mapStartBtn) {
-            mapStartBtn.onclick = () => this.startMatch();
-        }
-
-        // Hero prev/next cycle navigation buttons
-        const heroPrevBtn = document.getElementById('map-hero-prev-btn');
-        if (heroPrevBtn) {
-            heroPrevBtn.onclick = () => this.cycleGuitarist(-1);
-        }
-        const heroNextBtn = document.getElementById('map-hero-next-btn');
-        if (heroNextBtn) {
-            heroNextBtn.onclick = () => this.cycleGuitarist(1);
-        }
-
-        // Song prev/next cycle navigation buttons
-        const songPrevBtn = document.getElementById('map-song-prev-btn');
-        if (songPrevBtn) {
-            songPrevBtn.onclick = () => this.cycleSong(-1);
-        }
-        const songNextBtn = document.getElementById('map-song-next-btn');
-        if (songNextBtn) {
-            songNextBtn.onclick = () => this.cycleSong(1);
-        }
-
-        // Stage prev/next cycle navigation buttons
-        const stagePrevBtn = document.getElementById('map-stage-prev-btn');
-        if (stagePrevBtn) {
-            stagePrevBtn.onclick = () => this.cycleStage(-1);
-        }
-        const stageNextBtn = document.getElementById('map-stage-next-btn');
-        if (stageNextBtn) {
-            stageNextBtn.onclick = () => this.cycleStage(1);
-        }
-
-        // Skill Picker Close button
-        const skillCloseBtn = document.getElementById('skill-picker-close-btn');
-        if (skillCloseBtn) {
-            skillCloseBtn.onclick = () => {
-                const modal = document.getElementById('skill-picker-modal');
-                if (modal) modal.classList.remove('open');
-            };
-        }
-
-        // Song selection dropdown change
+        const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+        bind('menu-btn-play', (e) => { if (e) e.preventDefault(); this.switchScreen('map-select'); });
+        bind('menu-btn-talents', (e) => {
+            if (e) e.preventDefault();
+            if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
+            else { const m = document.getElementById('talent-modal'); if (m) m.classList.add('open'); }
+        });
+        bind('menu-btn-studio', () => {
+            const m = document.getElementById('song-studio-modal');
+            if (m) { m.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); }
+        });
+        bind('menu-btn-settings', () => this.openGearModal(true));
+        bind('menu-sound-toggle', () => {
+            if (window.soundEngine) {
+                const isMuted = window.soundEngine.toggleMute();
+                const icon = isMuted ? '🔇' : '🔊';
+                const b1 = document.getElementById('menu-sound-toggle'); if (b1) b1.innerText = icon;
+                const b2 = document.getElementById('battle-sound-toggle'); if (b2) b2.innerText = icon;
+            }
+        });
+        bind('map-back-btn', () => this.switchScreen('menu'));
+        bind('map-reroll-btn', () => {
+            if (window.enemyPool) { this.currentMapZombies = window.enemyPool.rollMapEnemies(5); this.renderMapZombies(); }
+        });
+        bind('map-start-battle-btn', () => this.startMatch());
+        bind('map-hero-prev-btn', () => this.cycleGuitarist(-1));
+        bind('map-hero-next-btn', () => this.cycleGuitarist(1));
+        bind('map-song-prev-btn', () => this.cycleSong(-1));
+        bind('map-song-next-btn', () => this.cycleSong(1));
+        bind('map-stage-prev-btn', () => this.cycleStage(-1));
+        bind('map-stage-next-btn', () => this.cycleStage(1));
+        bind('skill-picker-close-btn', () => {
+            const m = document.getElementById('skill-picker-modal'); if (m) m.classList.remove('open');
+        });
         const mapSongSelect = document.getElementById('map-song-select');
-        if (mapSongSelect) {
-            mapSongSelect.onchange = (e) => {
-                this.loadSelectedSongDetails(e.target.value);
-            };
-        }
+        if (mapSongSelect) mapSongSelect.onchange = (e) => this.loadSelectedSongDetails(e.target.value);
     }
 
     // ==========================================
@@ -634,6 +550,14 @@ class Game {
             this.selectedSong = this.getBuiltinDefaultSong();
         }
 
+        this.isBattlePaused = false;
+        if (this.combat) { this.combat.isPaused = false; this.combat.isGameOver = false; this.combat.isVictory = false; }
+        if (this.rhythm) this.rhythm.isPaused = false;
+        ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('open');
+        });
+
         // Switch to Battle Screen FIRST to ensure containers have active layout
         this.switchScreen('battle');
 
@@ -659,66 +583,86 @@ class Game {
     // BATTLE CONTROLS & HUD
     // ==========================================
     setupBattleControls() {
-        // Sound Toggle
-        const soundBtn = document.getElementById('battle-sound-toggle');
-        if (soundBtn) {
-            soundBtn.onclick = () => {
-                if (window.soundEngine) {
-                    const isMuted = window.soundEngine.toggleMute();
-                    soundBtn.innerText = isMuted ? '🔇' : '🔊';
-                    const menuSound = document.getElementById('menu-sound-toggle');
-                    if (menuSound) menuSound.innerText = isMuted ? '🔇' : '🔊';
-                }
-            };
-        }
+        const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+        bind('battle-sound-toggle', () => {
+            if (window.soundEngine) {
+                const isMuted = window.soundEngine.toggleMute();
+                const icon = isMuted ? '🔇' : '🔊';
+                const b1 = document.getElementById('battle-sound-toggle'); if (b1) b1.innerText = icon;
+                const b2 = document.getElementById('menu-sound-toggle'); if (b2) b2.innerText = icon;
+            }
+        });
+        bind('battle-stats-toggle', () => this.openStatsModal());
+        bind('stats-modal-close-btn', () => this.closeStatsModal());
+        bind('stats-resume-btn', () => this.closeStatsModal());
+        bind('battle-gear-toggle', () => this.openGearModal(false));
+        bind('gear-modal-close-btn', () => this.closeGearModal());
+        bind('gear-footer-action-btn', () => this.closeGearModal());
+        bind('gear-abandon-battle-btn', () => {
+            if (confirm("⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido.")) {
+                const modal = document.getElementById('battle-gear-modal');
+                if (modal) modal.classList.remove('open');
+                this.switchScreen('menu');
+            }
+        });
+        bind('result-replay-btn', () => {
+            const m = document.getElementById('song-results-modal');
+            if (m) m.classList.remove('open');
+            this.startMatch();
+        });
+        bind('result-edit-btn', () => {
+            const m = document.getElementById('song-results-modal');
+            if (m) m.classList.remove('open');
+            this.switchScreen('menu');
+            const studio = document.getElementById('song-studio-modal');
+            if (studio) { studio.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); }
+        });
+        bind('result-close-btn', () => {
+            const m = document.getElementById('song-results-modal');
+            if (m) m.classList.remove('open');
+            this.switchScreen('menu');
+        });
+        bind('defeat-retry-btn', () => {
+            const m = document.getElementById('battle-defeat-modal');
+            if (m) m.classList.remove('open');
+            this.startMatch();
+        });
+        bind('defeat-talents-btn', () => {
+            const m = document.getElementById('battle-defeat-modal');
+            if (m) m.classList.remove('open');
+            this.switchScreen('menu');
+            if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
+        });
+        bind('defeat-close-btn', () => {
+            const m = document.getElementById('battle-defeat-modal');
+            if (m) m.classList.remove('open');
+            this.switchScreen('menu');
+        });
+    }
 
-        // Battle Stats Sheet (SS) Modal Toggle
-        const statsBtn = document.getElementById('battle-stats-toggle');
-        const statsModal = document.getElementById('battle-stats-modal');
-        const statsCloseBtn = document.getElementById('stats-modal-close-btn');
-
-        if (statsBtn && statsModal) {
-            statsBtn.onclick = () => {
-                this.updateBattleStatsModal();
-                statsModal.classList.add('open');
-            };
-        }
-
-        if (statsCloseBtn && statsModal) {
-            statsCloseBtn.onclick = () => {
-                statsModal.classList.remove('open');
-            };
-        }
-
-        // Gear / Settings Modal Toggle
-        const gearBtn = document.getElementById('battle-gear-toggle');
-        if (gearBtn) {
-            gearBtn.onclick = () => this.openGearModal(false);
-        }
-
-        const gearCloseBtn = document.getElementById('gear-modal-close-btn');
-        const gearModal = document.getElementById('battle-gear-modal');
-        if (gearCloseBtn && gearModal) {
-            gearCloseBtn.onclick = () => gearModal.classList.remove('open');
-        }
-
-        // Leave Battle & Return to Main Menu (Lose current match progress)
-        const abandonBtn = document.getElementById('gear-abandon-battle-btn');
-        if (abandonBtn) {
-            abandonBtn.onclick = () => {
-                if (confirm("⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido.")) {
-                    const modal = document.getElementById('battle-gear-modal');
-                    if (modal) modal.classList.remove('open');
-                    this.switchScreen('menu');
-                }
-            };
+    pauseBattle() {
+        this.isBattlePaused = true;
+        if (this.combat) this.combat.isPaused = true;
+        if (this.rhythm) {
+            this.rhythm.isPaused = true;
+            this.rhythm.pauseAudio();
         }
     }
 
+    resumeBattle() {
+        this.isBattlePaused = false;
+        if (this.combat) this.combat.isPaused = false;
+        if (this.rhythm) {
+            this.rhythm.isPaused = false;
+            this.rhythm.resumeAudio();
+        }
+        this.lastTime = performance.now();
+    }
+
     openGearModal(isFromMainMenu = false) {
+        this.isGearFromMenu = isFromMainMenu;
         const modal = document.getElementById('battle-gear-modal');
         if (!modal) return;
-
         const title = document.getElementById('gear-modal-title');
         const dangerZone = document.getElementById('gear-danger-zone-wrap');
         const footerBtn = document.getElementById('gear-footer-action-btn');
@@ -731,9 +675,39 @@ class Game {
             if (title) title.innerText = '⚙️ OPÇÕES & PAUSA';
             if (dangerZone) dangerZone.style.display = 'block';
             if (footerBtn) footerBtn.innerText = '▶️ CONTINUAR PARTIDA';
+            this.pauseBattle();
         }
-
         modal.classList.add('open');
+    }
+
+    closeGearModal() {
+        const modal = document.getElementById('battle-gear-modal');
+        if (modal) modal.classList.remove('open');
+        if (!this.isGearFromMenu && this.currentScreen === 'battle') {
+            if (!this.combat.isGameOver && !this.combat.isVictory) {
+                this.resumeBattle();
+            }
+        }
+    }
+
+    openStatsModal() {
+        const modal = document.getElementById('battle-stats-modal');
+        if (!modal) return;
+        this.updateBattleStatsModal();
+        if (this.currentScreen === 'battle') {
+            this.pauseBattle();
+        }
+        modal.classList.add('open');
+    }
+
+    closeStatsModal() {
+        const modal = document.getElementById('battle-stats-modal');
+        if (modal) modal.classList.remove('open');
+        if (this.currentScreen === 'battle') {
+            if (!this.combat.isGameOver && !this.combat.isVictory) {
+                this.resumeBattle();
+            }
+        }
     }
 
     updateBattleStatsModal() {
@@ -756,33 +730,75 @@ class Game {
             }
         }
 
-        const totalDmgEl = document.getElementById('ss-total-damage');
-        const heroHpEl = document.getElementById('ss-hero-hp');
-        const killsEl = document.getElementById('ss-zombies-killed');
-        const maxStreakEl = document.getElementById('ss-max-streak');
-        const comboEl = document.getElementById('ss-current-multiplier');
-        const scoreEl = document.getElementById('ss-current-score');
-        const coinsEl = document.getElementById('ss-match-coins');
-        const accuracyEl = document.getElementById('ss-accuracy-rate');
-        const elapsedEl = document.getElementById('ss-time-elapsed');
-
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
         const elapsedSec = Math.floor((performance.now() - (s.matchStartTime || performance.now())) / 1000);
         const mins = Math.floor(elapsedSec / 60);
         const secs = elapsedSec % 60;
-
         const totalNotes = r.totalNotes || 1;
         const hitNotes = r.hitNotes || 0;
         const accPct = Math.round((hitNotes / totalNotes) * 100);
 
-        if (totalDmgEl) totalDmgEl.innerText = Math.round(s.damageDealt).toLocaleString();
-        if (heroHpEl) heroHpEl.innerText = `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`;
-        if (killsEl) killsEl.innerText = s.zombiesKilled;
-        if (maxStreakEl) maxStreakEl.innerText = `${r.maxStreak || this.rhythm.streak || 0} 🔥`;
-        if (comboEl) comboEl.innerText = `x${this.rhythm.multiplier}`;
-        if (scoreEl) scoreEl.innerText = this.combat.score.toLocaleString();
-        if (coinsEl) coinsEl.innerText = `+${s.coinsEarned} 🪙`;
-        if (accuracyEl) accuracyEl.innerText = `${accPct}% (${r.perfects || 0}P / ${r.greats || 0}G / ${r.misses || 0}M)`;
-        if (elapsedEl) elapsedEl.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        setVal('ss-total-damage', Math.round(s.damageDealt).toLocaleString());
+        setVal('ss-hero-hp', `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`);
+        setVal('ss-zombies-killed', s.zombiesKilled);
+        setVal('ss-max-streak', `${r.maxStreak || this.rhythm.streak || 0} 🔥`);
+        setVal('ss-current-multiplier', `x${this.rhythm.multiplier}`);
+        setVal('ss-current-score', this.combat.score.toLocaleString());
+        setVal('ss-match-coins', `+${s.coinsEarned} 🪙`);
+        setVal('ss-accuracy-rate', `${accPct}% (${r.perfects || 0}P / ${r.greats || 0}G / ${r.misses || 0}M)`);
+        setVal('ss-time-elapsed', `${mins}:${secs < 10 ? '0' : ''}${secs}`);
+    }
+
+    showVictoryModal(song, stats = {}) {
+        this.pauseBattle();
+        if (this.combat) this.combat.isVictory = true;
+        const modal = document.getElementById('song-results-modal');
+        if (!modal) return;
+
+        const coverEl = document.getElementById('result-song-cover');
+        const titleEl = document.getElementById('result-song-title');
+        const artistEl = document.getElementById('result-song-artist');
+        if (coverEl) coverEl.src = (song && song.cover) || 'assets/covers/default_cover.jpg';
+        if (titleEl) titleEl.innerText = (song && song.title) || 'Show Concluído';
+        if (artistEl) artistEl.innerText = (song && song.artist) || 'Solo de Guitarra';
+
+        const totalNotes = stats.totalNotes || (song && song.notes ? song.notes.length : 1);
+        const hitNotes = stats.hitNotes || (totalNotes - (stats.misses || 0));
+        const accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
+
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+        setVal('result-accuracy', `${accPct}%`);
+        setVal('result-hits', `${hitNotes} / ${totalNotes}`);
+        setVal('result-zombies-killed', `${(this.combat && this.combat.battleStats ? this.combat.battleStats.zombiesKilled : 0)} 💀`);
+        setVal('result-max-streak', `${stats.maxStreak || (this.rhythm ? this.rhythm.maxStreak : 0)} 🔥`);
+        setVal('result-gold-reward', `+${(this.combat && this.combat.battleStats ? this.combat.battleStats.coinsEarned : 0)} 🪙`);
+        setVal('result-score-gained', `+${(this.combat ? this.combat.score : 0).toLocaleString()}`);
+
+        if (window.stageSystem) window.stageSystem.completeStage(window.stageSystem.selectedStage);
+        if (window.soundEngine && typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord();
+        modal.classList.add('open');
+    }
+
+    showDefeatModal() {
+        this.pauseBattle();
+        const modal = document.getElementById('battle-defeat-modal');
+        if (!modal) return;
+
+        const s = (this.combat && this.combat.battleStats) || { zombiesKilled: 0, damageDealt: 0, coinsEarned: 0 };
+        const r = (this.rhythm && this.rhythm.songStats) || {};
+        const totalNotes = r.totalNotes || 1;
+        const hitNotes = r.hitNotes || 0;
+        const accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
+
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+        setVal('defeat-zombies-killed', `${s.zombiesKilled} 💀`);
+        setVal('defeat-total-damage', Math.round(s.damageDealt).toLocaleString());
+        setVal('defeat-accuracy', `${accPct}%`);
+        setVal('defeat-gold-reward', `+${s.coinsEarned} 🪙`);
+        setVal('defeat-score-gained', (this.combat ? this.combat.score : 0).toLocaleString());
+
+        if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
+        modal.classList.add('open');
     }
 
     setupAudioGlobalUnlock() {
@@ -801,7 +817,9 @@ class Game {
             this.lastTime = currentTime;
 
             if (this.currentScreen === 'battle') {
-                this.update(deltaTime);
+                if (!this.isBattlePaused) {
+                    this.update(deltaTime);
+                }
                 this.draw();
                 this.updateBattleHUD();
             }

@@ -27,6 +27,44 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.3] - 2026-10-25 (Controle Completo de Pausa em Batalha, Tratamento das Telas de Vitória e Derrota)
+**Ajustes de Batalha & Telas de Fim de Jogo**
+- **Congelamento Completo ao Pausar Durante a Batalha (`battle-gear-modal` & `battle-stats-modal`):**
+  - Ao abrir o modal de configurações (engrenagem) ou a ficha de telemetria de batalha (SS), o jogo agora pausa completamente tanto o combate quanto o minigame de ritmo:
+    - `CombatSystem`: congela o avanço de tempo (`combat.time`), movimentação de zumbis, física de projéteis e temporizadores de spawn/buffs (`isPaused = true`).
+    - `RhythmSystem`: congela a esteira de descida das notas (`rhythm.time`), o relógio de software/áudio, desativa a resposta a toques/teclas (`pointerdown`, `touchstart`, `keydown`) e pausa a reprodução da música customizada (`pauseAudio()`).
+    - `Game`: o loop principal (`requestAnimationFrame`) ignora a chamada de `update(deltaTime)` enquanto `isBattlePaused` for verdadeiro, mantendo a renderização estática do frame de combate congelado atrás do modal translúcido.
+  - Ao fechar as configurações ou estatísticas, a batalha é retomada suavemente (`resumeBattle()`), reiniciando a música (`resumeAudio()`) e resetando `this.lastTime = performance.now()` para eliminar qualquer salto de delta-time.
+- **Tratamento da Tela de Vitória (`#song-results-modal`):**
+  - Disparada automaticamente quando a música ativa termina (fim do áudio ou duração atingida) ou quando a meta de baixas da fase é conquistada.
+  - Pausa imediatamente a batalha e o áudio, calculando e exibindo:
+    - Precisão percentual (`Precisão: X%`).
+    - Notas acertadas vs. total (`Notas Acertadas: X / Y`).
+    - Zumbis eliminados na partida (`Zumbis Derrotados: X 💀`).
+    - Maior sequência de acertos (`Maior Streak: X 🔥`).
+    - Recompensas de ouro e pontuação total obtida.
+  - Ações interativas completas:
+    - `🔄 JOGAR NOVAMENTE`: fecha o modal e reinicia a batalha e música selecionada imediatamente.
+    - `✏️ EDITAR RITMO`: redireciona para o Estúdio/Editor de Músicas.
+    - `🏠 MENU PRINCIPAL`: encerra a batalha com segurança e retorna ao menu inicial.
+- **Tratamento da Tela de Derrota (`#battle-defeat-modal`):**
+  - Disparada instantaneamente quando o HP do guitarrista atinge 0 em combate (`handleHeroDefeat()`).
+  - Pausa imediatamente a partida e o áudio, aciona tremor dramático de tela, texto sônico de derrota e exibe modal estilizado em tons carmesim com:
+    - Total de zumbis derrotados antes da queda.
+    - Dano total causado pelo guitarrista.
+    - Precisão das notas tocadas.
+    - Ouro coletado até o momento.
+    - Pontuação final alcançada.
+  - Ações interativas dedicadas:
+    - `🔄 TENTAR NOVAMENTE`: reinicia a partida do zero com vida cheia e mesma música/fase.
+    - `🌳 TALENTOS`: volta ao menu principal e abre diretamente a árvore de talentos para que o jogador use o ouro coletado em melhorias de poder e defesa.
+    - `🏠 MENU PRINCIPAL`: retorna ao menu principal.
+- **Proteção Contra Despausa Indevida (Resumption Guards):**
+  - Caso o jogador abra as opções ou estatísticas durante uma tela de vitória ou derrota, fechar esses modais não retoma a batalha, respeitando as flags `isGameOver` e `isVictory`.
+- **Conformidade Rigorosa com a Regra Zero God Object:**
+  - Todos os 16 arquivos JavaScript permanecem estritamente abaixo do limite de 1.000 linhas (`combat.js: 982`, `rhythm.js: 963`, `main.js: 938`).
+  - 100% dos testes da suíte automatizada (`test-procedural.js`) passando (88/88).
+
 ### [v1.5.0] - 2026-10-13 (Overhaul Procedural: Níveis 1-100 de Guitarristas e Zumbis, Fases Infinitas, Rock Mana, Habilidades por Trilho e Sistema de Velocidade de Ataque)
 **Novas Mecânicas & Sistemas Procedurais**
 - **Sistema Procedural de Níveis para Guitarristas (Nv. 1 a 100) (`js/guitarist-pool.js`):**
