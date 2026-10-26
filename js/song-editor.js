@@ -38,6 +38,8 @@ class SongEditor {
         this.resizeStartX = 0;
         this.resizeStartDuration = 0;
         this.padPressStartTime = [0, 0, 0, 0];
+        this.padPressPerfTime = [0, 0, 0, 0];
+        this.activePadPointers = new Map();
         this.padActiveNote = [null, null, null, null];
 
         // High-precision 60 FPS animation loop & reliable fallback software clock
@@ -142,25 +144,33 @@ class SongEditor {
             const dt = Math.min(0.1, (timestamp - this.lastFrameTime) / 1000);
             this.lastFrameTime = timestamp;
 
+            let needsRedraw = false;
             if (this.isPlaying) {
-                // If native audio is actively playing, sync to its high-resolution clock
                 const audioPlaying = this.audio && !this.audio.paused && !this.audio.ended && this.audio.currentTime > 0;
-                if (audioPlaying) {
-                    this.currentTime = this.audio.currentTime;
-                } else {
-                    // Precision software fallback: guarantees timeline conveyor rolls at 60 FPS on any mobile browser
-                    this.currentTime += dt * this.playbackRate;
-                }
-
+                this.currentTime = audioPlaying ? this.audio.currentTime : (this.currentTime + dt * this.playbackRate);
                 if (this.currentTime >= this.duration) {
                     this.currentTime = this.duration;
                     this.pause();
                 }
-
                 this.updateTimeDisplay();
                 this.updateScrubber();
-                this.drawTimeline();
+                needsRedraw = true;
             }
+
+            for (let l = 0; l < 4; l++) {
+                const activeNote = this.padActiveNote[l];
+                if (activeNote) {
+                    const held = this.isPlaying
+                        ? Math.max(0, this.currentTime - this.padPressStartTime[l])
+                        : ((performance.now() - (this.padPressPerfTime[l] || performance.now())) / 1000);
+                    if (held >= 0.15) {
+                        activeNote.duration = Math.round(held * 20) / 20;
+                        needsRedraw = true;
+                    }
+                }
+            }
+
+            if (needsRedraw) this.drawTimeline();
 
             const modal = document.getElementById('chart-editor-modal');
             if (modal && modal.classList.contains('open')) {
@@ -242,35 +252,40 @@ class SongEditor {
             };
         }
 
-        // Mobile / On-screen Tap-to-Record Buttons (4 Fret Pads with Hold Support)
+        // Robust Multi-Touch Pointer Capture for 4 Fret Pads
         for (let i = 0; i < 4; i++) {
             const pad = document.getElementById(`editor-pad-${i}`);
             if (pad) {
-                const onDown = (e) => { e.preventDefault(); this.onPadDown(i); };
-                const onUp = (e) => { e.preventDefault(); this.onPadUp(i); };
-                pad.addEventListener('pointerdown', onDown);
-                ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => pad.addEventListener(ev, onUp));
+                pad.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    try { pad.setPointerCapture(e.pointerId); } catch(err) {}
+                    this.activePadPointers.set(e.pointerId, i);
+                    this.onPadDown(i);
+                });
+                const handleUp = (e) => {
+                    e.preventDefault();
+                    if (this.activePadPointers.has(e.pointerId)) {
+                        const lane = this.activePadPointers.get(e.pointerId);
+                        this.activePadPointers.delete(e.pointerId);
+                        try { pad.releasePointerCapture(e.pointerId); } catch(err) {}
+                        this.onPadUp(lane);
+                    }
+                };
+                pad.addEventListener('pointerup', handleUp);
+                pad.addEventListener('pointercancel', handleUp);
             }
         }
 
         // Keyboard Support for Editor (Space = Play/Pause, 1,2,3,4 or A,S,D,F = Pads, Ctrl+Z = Undo)
-        const keyLaneMap = {
-            'a': 0, 'A': 0, '1': 0,
-            's': 1, 'S': 1, '2': 1,
-            'd': 2, 'D': 2, '3': 2,
-            'f': 3, 'F': 3, '4': 3
-        };
-
+        const keyLaneMap = { 'a': 0, 'A': 0, '1': 0, 's': 1, 'S': 1, '2': 1, 'd': 2, 'D': 2, '3': 2, 'f': 3, 'F': 3, '4': 3 };
         window.addEventListener('keydown', (e) => {
             const modal = document.getElementById('chart-editor-modal');
-            if (!modal || !modal.classList.contains('open')) return;
-
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
+            if (!modal || !modal.classList.contains('open') || e.repeat) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
             if (e.code === 'Space') {
                 e.preventDefault();
                 this.togglePlay();
-            } else if (keyLaneMap[e.key] !== undefined && !e.repeat) {
+            } else if (keyLaneMap[e.key] !== undefined) {
                 this.onPadDown(keyLaneMap[e.key]);
             } else if (e.ctrlKey && (e.key === 'z' || e.key === 'Z')) {
                 this.undo();
@@ -508,11 +523,10 @@ class SongEditor {
             pad.classList.add('hit');
         }
 
-        if (window.soundEngine) {
-            window.soundEngine.playGuitarChord(lane);
-        }
+        if (window.soundEngine) window.soundEngine.playGuitarChord(lane);
 
         this.padPressStartTime[lane] = this.currentTime;
+        this.padPressPerfTime[lane] = performance.now();
         let noteTime = this.quantizeTime(this.currentTime);
         const dur = (this.noteMode === 'hold') ? this.holdDuration : 0;
 
@@ -536,15 +550,17 @@ class SongEditor {
 
     onPadUp(lane) {
         const pad = document.getElementById(`editor-pad-${lane}`);
-        if (pad) {
-            pad.classList.remove('hit');
-        }
+        if (pad) pad.classList.remove('hit');
 
         const activeNote = this.padActiveNote[lane];
         if (activeNote) {
-            const heldDuration = Math.max(0, this.currentTime - this.padPressStartTime[lane]);
-            if (heldDuration >= 0.25) {
+            const heldDuration = this.isPlaying
+                ? Math.max(0, this.currentTime - this.padPressStartTime[lane])
+                : Math.max(0, (performance.now() - (this.padPressPerfTime[lane] || performance.now())) / 1000);
+            if (heldDuration >= 0.20) {
                 activeNote.duration = Math.round(heldDuration * 10) / 10;
+            } else if (this.noteMode === 'hold') {
+                activeNote.duration = this.holdDuration;
             }
             this.padActiveNote[lane] = null;
             this.updateStatsDisplay();
@@ -652,27 +668,15 @@ class SongEditor {
     autoGenerateBasicChart() {
         this.pushUndo();
         const duration = Math.max(15, this.duration || (this.song && this.song.duration) || 30);
-        const bpm = Math.max(60, (this.song && this.song.bpm) || 120);
-        const beatSec = 60 / bpm;
-        const totalBeats = Math.floor(duration / beatSec);
-
-        // Reset notes and generate an authentic, multi-lane rock solo rhythm chart
+        const bpm = Math.max(60, (this.song && this.song.bpm) || 120), beatSec = 60 / bpm, totalBeats = Math.floor(duration / beatSec);
         this.song.notes = [];
-
         for (let b = 2; b < totalBeats; b++) {
             const time = b * beatSec;
             if (time > duration - 1) break;
-
             const mb = b % 8;
             const lane = (mb === 0) ? 0 : (mb === 2 || mb === 6) ? 2 : (mb === 4) ? 1 : (mb === 7) ? 3 : (b % 4);
-            const dur = (mb === 0) ? 1.0 : (mb === 4) ? 0.8 : 0;
-            this.song.notes.push({
-                time: Math.round(time * 1000) / 1000,
-                lane, duration: dur,
-                id: 'n_' + Math.random().toString(36).substr(2, 9)
-            });
+            this.song.notes.push({ time: Math.round(time * 1000) / 1000, lane, duration: (mb === 0) ? 1.0 : (mb === 4) ? 0.8 : 0, id: 'n_' + Math.random().toString(36).substr(2, 9) });
         }
-
         this.song.notes.sort((a, b) => a.time - b.time);
         this.updateStatsDisplay();
         this.drawTimeline();
@@ -694,9 +698,7 @@ class SongEditor {
             this.song.updatedAt = Date.now();
             await window.songDB.saveSong(this.song);
             this.showToast("💾 Ritmo salvo com sucesso!");
-            if (window.songStudio) {
-                window.songStudio.renderLibrary();
-            }
+            if (window.songStudio) window.songStudio.renderLibrary();
             return true;
         } catch (e) {
             alert("Erro ao salvar música: " + e.message);
@@ -710,12 +712,8 @@ class SongEditor {
         const songToPlay = JSON.parse(JSON.stringify(this.song));
         this.close();
         if (window.game) {
-            if (window.game.startMatchWithSong) {
-                window.game.startMatchWithSong(songToPlay);
-            } else {
-                window.game.selectSong(songToPlay);
-                window.game.startMatch();
-            }
+            if (window.game.startMatchWithSong) window.game.startMatchWithSong(songToPlay);
+            else { window.game.selectSong(songToPlay); window.game.startMatch(); }
         }
     }
 
@@ -927,48 +925,32 @@ class SongEditor {
     }
 
     updateHeaderInfo() {
-        const titleEl = document.getElementById('editor-song-title');
-        const artistEl = document.getElementById('editor-song-artist');
-        if (titleEl && this.song) titleEl.innerText = this.song.title || 'Sem Título';
-        if (artistEl && this.song) artistEl.innerText = this.song.artist || 'Artista';
+        const t = document.getElementById('editor-song-title'), a = document.getElementById('editor-song-artist');
+        if (t && this.song) t.innerText = this.song.title || 'Sem Título';
+        if (a && this.song) a.innerText = this.song.artist || 'Artista';
     }
 
     updateTimeDisplay() {
-        const timeEl = document.getElementById('editor-time-display');
-        if (timeEl) {
-            const formatTime = (t) => {
-                const m = Math.floor(t / 60);
-                const s = Math.floor(t % 60);
-                const ms = Math.floor((t % 1) * 10);
-                return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}.${ms}`;
-            };
-            timeEl.innerText = `${formatTime(this.currentTime)} / ${formatTime(this.duration)}`;
+        const el = document.getElementById('editor-time-display');
+        if (el) {
+            const fmt = (t) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}.${Math.floor((t % 1) * 10)}`;
+            el.innerText = `${fmt(this.currentTime)} / ${fmt(this.duration)}`;
         }
     }
 
     updateScrubber() {
-        const scrubber = document.getElementById('editor-time-scrubber');
-        if (scrubber) {
-            scrubber.max = Math.max(15, this.duration || 30);
-            scrubber.value = this.currentTime;
-        }
+        const s = document.getElementById('editor-time-scrubber');
+        if (s) { s.max = Math.max(15, this.duration || 30); s.value = this.currentTime; }
     }
 
     updateStatsDisplay() {
-        const statsEl = document.getElementById('editor-notes-count');
-        if (statsEl && this.song) {
-            statsEl.innerText = `${(this.song.notes || []).length} notas mapeadas`;
-        }
+        const s = document.getElementById('editor-notes-count');
+        if (s && this.song) s.innerText = `${(this.song.notes || []).length} notas mapeadas`;
     }
 
     open(song) {
         const modal = document.getElementById('chart-editor-modal');
-        if (modal) {
-            modal.classList.add('open');
-            this.initDOM();
-            this.loadSong(song);
-            this.startAnimationLoop();
-        }
+        if (modal) { modal.classList.add('open'); this.initDOM(); this.loadSong(song); this.startAnimationLoop(); }
     }
 
     close() {
@@ -984,10 +966,7 @@ class SongEditor {
         toast.innerText = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 10);
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 2200);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2200);
     }
 }
 

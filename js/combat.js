@@ -140,13 +140,10 @@ class CombatSystem {
 
     getHeroAttackSpeed() {
         let spd = this.baseAttackSpeed || 1.30;
-        if (this.heroAttackSpeedBuffTimer > 0) {
-            spd *= (this.heroAttackSpeedBuffMult || 1.4);
-        }
-        if (window.talentSystem) {
-            spd += window.talentSystem.getStat('speed_shred') * 0.04;
-        }
-        return spd;
+        if (this.heroAttackSpeedBuffTimer > 0) spd *= (this.heroAttackSpeedBuffMult || 1.4);
+        if (window.talentSystem) spd += window.talentSystem.getStat('speed_shred') * 0.04;
+        const comboBonus = Math.min(2.0, Math.max(0, (this.combo || 0) * 0.01));
+        return spd + comboBonus;
     }
 
     getActiveHeroSheet() {
@@ -239,17 +236,24 @@ class CombatSystem {
         this.entities.zombies.push(zombie);
     }
 
+    registerWrongTap(laneIndex = 0) {
+        if (this.isGameOver) return;
+        this.combo = 0;
+        const heroPos = this.getHeroPosition();
+        this.addFloatingText('ERROU! 💨', heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
+        this.pendingAttackModifiers.unshift({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
+        if (this.heroAttackTimer >= 0.12 || this.entities.projectiles.filter(p => p.isMiss).length < 2) {
+            this.heroAttackTimer = 0;
+            this.performHeroAutoAttack();
+        }
+    }
+
     registerRhythmNote(rating, laneIndex = 0) {
         if (this.isGameOver) return;
         const heroPos = this.getHeroPosition();
 
         if (rating === 'miss') {
-            this.pendingAttackModifiers.push({
-                mult: 0.5,
-                isCrit: false,
-                skill: null,
-                isMiss: true
-            });
+            this.pendingAttackModifiers.push({ mult: 0.5, isCrit: false, skill: null, isMiss: false });
             this.addFloatingText('MISS (-50%)', heroPos.x, heroPos.y - 45, '#ff3333', false);
             this.combo = 0;
             return;
@@ -321,55 +325,46 @@ class CombatSystem {
             }
         }
 
-        const startX = heroPos.x + 22;
-        const startY = heroPos.y - 18;
-        const targetX = target ? target.x : this.canvas.width;
-        const targetY = target ? (target.y + (target.jumpArcY || 0) - 18) : heroPos.y - 18;
+        const startX = heroPos.x + 22, startY = heroPos.y - 18;
+        const mod = this.pendingAttackModifiers.length > 0
+            ? this.pendingAttackModifiers.shift()
+            : { mult: 1.0, isCrit: false, skill: null, lane: 0 };
+
+        const isMiss = !!mod.isMiss;
+        let targetX = target ? target.x : this.canvas.width;
+        let targetY = target ? (target.y + (target.jumpArcY || 0) - 18) : heroPos.y - 18;
+        if (isMiss) {
+            target = null;
+            targetX = this.canvas.width + 40;
+            targetY += (Math.random() > 0.5 ? 65 : -65);
+        }
         const angle = Math.atan2(targetY - startY, targetX - startX);
 
         const activeHero = this.getActiveHeroData();
         const heroStats = this.getActiveHeroStats();
         const talentBaseBonus = window.talentSystem ? window.talentSystem.getStat('power_chord') : 0;
-
-        // Consume queued modifier or fallback to neutral shot
-        const mod = this.pendingAttackModifiers.length > 0
-            ? this.pendingAttackModifiers.shift()
-            : { mult: 1.0, isCrit: false, skill: null, lane: 0 };
-
         const baseDmg = (45 + talentBaseBonus) * (heroStats.damageMult || 1.0) * (mod.mult || 1.0);
-        let calcDamage = Math.round(baseDmg);
-        const isCrit = mod.isCrit;
+        let calcDamage = isMiss ? 0 : Math.round(baseDmg);
+        const isCrit = !isMiss && mod.isCrit;
 
         if (isCrit) {
-            // Attribute-based Crit Damage: Character's crit percentage bonus
             const critBonusPercent = (heroStats.critDamageBonusPercent || 50) + (window.talentSystem ? window.talentSystem.getStat('ferocious_solo') * 6 : 0);
             calcDamage = Math.round(baseDmg * (1 + critBonusPercent / 100));
         }
+        if (!isMiss) calcDamage = Math.max(1, calcDamage);
 
-        calcDamage = Math.max(1, calcDamage);
+        let projColor = isMiss ? '#777777' : (isCrit ? '#ff00ff' : '#00ffff');
+        if (!isMiss && mod.skill && mod.skill.color) projColor = mod.skill.color;
+        else if (!isMiss && activeHero && activeHero.projectileColor) projColor = activeHero.projectileColor;
 
-        let projColor = isCrit ? '#ff00ff' : '#00ffff';
-        if (mod.skill && mod.skill.color) {
-            projColor = mod.skill.color;
-        } else if (activeHero && activeHero.projectileColor) {
-            projColor = activeHero.projectileColor;
-        }
-
-        const projSpeed = 440;
-
+        const projSpeed = isMiss ? 380 : 440;
         this.entities.projectiles.push({
-            x: startX,
-            y: startY,
-            vx: Math.cos(angle) * projSpeed,
-            vy: Math.sin(angle) * projSpeed,
-            target: target,
-            isCrit: isCrit,
-            damage: calcDamage,
-            skill: mod.skill,
-            frame: 3 + Math.floor(Math.random() * 4),
-            trailTimer: 0,
-            active: true,
-            heroId: activeHero ? activeHero.id : null,
+            x: startX, y: startY,
+            vx: Math.cos(angle) * projSpeed, vy: Math.sin(angle) * projSpeed,
+            target: target, isCrit: isCrit, isMiss: isMiss,
+            damage: calcDamage, skill: isMiss ? null : mod.skill,
+            frame: 3 + Math.floor(Math.random() * 4), trailTimer: 0,
+            active: true, heroId: activeHero ? activeHero.id : null,
             projColor: projColor
         });
 
@@ -746,7 +741,8 @@ class CombatSystem {
                 }
             }
 
-            // Collisions with visible on-screen Zombies
+            // Collisions with visible on-screen Zombies (miss shots bypass zombies)
+            if (p.isMiss) return;
             for (const z of this.entities.zombies) {
                 if (!z.active || z.x > this.canvas.width - 4) continue;
                 const currentY = z.y + (z.jumpArcY || 0);
@@ -933,17 +929,9 @@ class CombatSystem {
             this.ctx.restore();
         }
 
-        if (this.rockPower > 30) {
-            this.fx.drawElectricAura(this.ctx, heroPos.x + 10, heroPos.y - 18);
-        }
-
-        if (this.shockBarrierReady) {
-            this.fx.drawShockBarrier(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
-        }
-
-        if (this.heroImmunityTimer > 0) {
-            this.fx.drawImmunityAura(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
-        }
+        if (this.rockPower > 30) this.fx.drawElectricAura(this.ctx, heroPos.x + 10, heroPos.y - 18);
+        if (this.shockBarrierReady) this.fx.drawShockBarrier(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
+        if (this.heroImmunityTimer > 0) this.fx.drawImmunityAura(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
 
         // 7. Projectiles
         this.ctx.save();

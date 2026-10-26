@@ -46,6 +46,21 @@ class StageSystem {
         }
     }
 
+    completeStage(stage = this.selectedStage) {
+        this.unlockNextStage();
+        const rewards = this.getStageRewards(stage);
+        if (window.talentSystem && typeof window.talentSystem.addGold === 'function') {
+            window.talentSystem.addGold(rewards.coins);
+        }
+        if (window.guitaristPool && typeof window.guitaristPool.getSelectedGuitarist === 'function') {
+            const hero = window.guitaristPool.getSelectedGuitarist();
+            if (hero && typeof window.guitaristPool.addHeroXp === 'function') {
+                window.guitaristPool.addHeroXp(hero.id, rewards.xp);
+            }
+        }
+        return { stage, rewards };
+    }
+
     getStageName(stage) {
         const namedPrefixes = [
             'Rua das Garagens',

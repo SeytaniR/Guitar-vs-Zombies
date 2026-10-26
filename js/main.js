@@ -774,7 +774,12 @@ class Game {
         setVal('result-gold-reward', `+${(this.combat && this.combat.battleStats ? this.combat.battleStats.coinsEarned : 0)} 🪙`);
         setVal('result-score-gained', `+${(this.combat ? this.combat.score : 0).toLocaleString()}`);
 
-        if (window.stageSystem) window.stageSystem.completeStage(window.stageSystem.selectedStage);
+        try {
+            if (window.stageSystem && typeof window.stageSystem.completeStage === 'function') {
+                window.stageSystem.completeStage(window.stageSystem.selectedStage);
+            }
+        } catch(err) { console.warn("Stage completion error:", err); }
+
         if (window.soundEngine && typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord();
         modal.classList.add('open');
     }
@@ -880,7 +885,8 @@ class Game {
 
         if (comboEl) {
             const streak = this.rhythm.streak || 0;
-            comboEl.innerText = `${streak} COMBO`;
+            const spdBonus = Math.min(2.0, streak * 0.01);
+            comboEl.innerText = `${streak} COMBO (+${spdBonus.toFixed(2)} SPD)`;
         }
 
         if (multEl) {

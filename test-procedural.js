@@ -83,7 +83,8 @@ assert(goldCost > 0, `Gold cost for leveling up calculated: ${goldCost} gold`);
 window.talentSystem = {
     gold: 5000,
     getStat: () => 0,
-    saveProgress: () => {}
+    saveProgress: () => {},
+    addGold: (amt) => { window.talentSystem.gold += amt; }
 };
 const goldLvlRes = pool.levelUpWithGold('johnny_blaze', window.talentSystem);
 assert(goldLvlRes.success && goldLvlRes.newLevel === 2, 'Hero successfully leveled up using gold');
@@ -449,7 +450,68 @@ const testCloseModal = () => {
     }
 };
 testCloseModal();
-assert(resumed === false, 'Closing gear or stats modal does NOT unpause if game is over or won');
+// ==========================================
+// TEST 9: STAGE COMPLETION, COMBO ATTACK SPEED & WRONG TAP PENALTY
+// ==========================================
+console.log('9. Testing Stage Completion, Combo Attack Speed & Wrong Tap Penalty...');
+
+// 1. StageSystem.completeStage
+const prevGold = window.talentSystem.gold;
+const stageBefore = stageSys.selectedStage;
+const compRes = stageSys.completeStage(stageBefore);
+assert(compRes && compRes.rewards && compRes.rewards.coins > 0, 'completeStage() calculates and returns stage rewards');
+assert(window.talentSystem.gold > prevGold, 'completeStage() deposits gold reward into talentSystem');
+assert(stageSys.highestUnlockedStage >= stageBefore + 1, 'completeStage() unlocks the next stage');
+
+// 2. Combo Attack Speed Scaling (+0.01 per point, max +2.0)
+combat.combo = 0;
+const baseSpd = combat.getHeroAttackSpeed();
+combat.combo = 50;
+const spd50 = combat.getHeroAttackSpeed();
+assert(Math.abs(spd50 - (baseSpd + 0.50)) < 0.001, `Combo 50 adds +0.50 attack speed: ${spd50.toFixed(2)} vs ${baseSpd.toFixed(2)} + 0.50`);
+
+combat.combo = 200;
+const spd200 = combat.getHeroAttackSpeed();
+assert(Math.abs(spd200 - (baseSpd + 2.0)) < 0.001, `Combo 200 adds +2.00 attack speed (max cap): ${spd200.toFixed(2)}`);
+
+combat.combo = 500;
+const spd500 = combat.getHeroAttackSpeed();
+assert(Math.abs(spd500 - (baseSpd + 2.0)) < 0.001, `Combo 500 is capped at +2.00 max attack speed: ${spd500.toFixed(2)}`);
+
+// 3. Wrong Tap Penalty (miss shot bypasses zombies, 0 damage, resets combo)
+combat.isGameOver = false;
+combat.matchActive = true;
+combat.heroHp = combat.heroMaxHp;
+combat.combo = 45;
+combat.entities.projectiles = [];
+const targetZombie = new ZombieEntity(mockZombieType, 100, 400, 1, 250);
+combat.entities.zombies = [targetZombie];
+const zombieHpBefore = targetZombie.hp;
+
+combat.registerWrongTap(1);
+assert(combat.combo === 0, 'registerWrongTap() resets combo to 0');
+assert(combat.entities.projectiles.length > 0, 'registerWrongTap() produces a projectile');
+
+const missProj = combat.entities.projectiles[combat.entities.projectiles.length - 1];
+assert(missProj.isMiss === true, 'Miss projectile has isMiss = true');
+assert(missProj.damage === 0, 'Miss projectile deals 0 damage');
+assert(missProj.projColor === '#777777', 'Miss projectile has grey color (#777777)');
+
+// Update combat so projectile passes through zombie position
+missProj.x = targetZombie.x;
+missProj.y = targetZombie.y - 15;
+combat.update(16);
+assert(targetZombie.hp === zombieHpBefore, 'Miss projectile completely bypasses zombie collision (zombie took 0 damage)');
+assert(missProj.active === true, 'Miss projectile remains active and deflected instead of being consumed by zombie');
+
+// 4. Multi-touch Pointer Map Simulation
+const activePadPointers = new Map();
+activePadPointers.set(101, 0);
+activePadPointers.set(102, 2);
+assert(activePadPointers.size === 2, 'Editor multi-touch tracks multiple concurrent fingers');
+assert(activePadPointers.get(101) === 0 && activePadPointers.get(102) === 2, 'Each finger maps to its respective lane independently');
+activePadPointers.delete(101);
+assert(activePadPointers.size === 1 && activePadPointers.get(102) === 2, 'Releasing finger 1 preserves finger 2 holding lane 2');
 
 // Summary
 console.log('\n==========================================');

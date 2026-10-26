@@ -27,6 +27,30 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.4] - 2026-10-26 (Correção de Fim de Música, Multi-Toque no Editor, Penalidade de Disparo Errado & Escala de Velocidade por Combo)
+**Correções Críticas & Novos Recursos**
+- **Correção da Conclusão de Música (`StageSystem.completeStage` em `js/stage-system.js` & `js/main.js`):**
+  - Resolvido o erro `TypeError: window.stageSystem.completeStage is not a function` que travava o jogo quando a música chegava ao fim.
+  - Adicionado o método seguro `completeStage(stage = this.selectedStage)` que destrava a próxima fase e concede as moedas de ouro e XP de herói adequadas.
+  - A tela de vitória agora é exibida perfeitamente ao fim de qualquer música sem travar o motor.
+- **Correção do Multi-Toque e Notas Seguradas no Editor DAW (`css/style.css` & `js/song-editor.js`):**
+  - Adicionadas diretivas `touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;` na barra de pads do editor para eliminar gestos indesejados de zoom/pan em navegadores mobile.
+  - Implementado sistema de rastreamento de múltiplos ponteiros (`activePadPointers = new Map()`) com `setPointerCapture(e.pointerId)` nativo.
+  - Agora é possível segurar uma tecla/pad enquanto toca em outras notas simultaneamente no celular sem cancelamento de toque.
+  - As notas seguradas agora crescem e estendem sua duração em tempo real na tela durante o playback e gravação.
+- **Penalidade para Toques Errados (Disparo Desviado com Erro de Alvo):**
+  - Tocar em um trilho quando não há nota válida na linha de batida agora aciona `registerWrongTap(lane)`:
+    - O combo é imediatamente zerado (`combo = 0`).
+    - Exibe o aviso flutuante `"ERROU! 💨"` no guitarrista.
+    - O disparo correspondente da guitarra é desviado em ângulo aleatório para longe dos alvos com coloração cinza (`#777777`) e dano 0.
+    - Projéteis com `isMiss = true` ignoram colisões com zumbis, atravessando a pista sem causar dano e se dissipando na borda da tela.
+- **Aceleração de Ataque Escalonada por Combo (+0,01 SPD por ponto, Máximo +2,00 SPD):**
+  - A velocidade de ataque do guitarrista agora recebe um bônus de `+0.01` por cada ponto acumulado no combo, limitado a até `+2.00` de velocidade adicional.
+  - O HUD da batalha agora exibe em tempo real o bônus: `${streak} COMBO (+${spdBonus.toFixed(2)} SPD)`.
+- **Zero God Object & 100% de Testes Aprovados:**
+  - Todos os 16 arquivos JavaScript em `js/` mantêm-se estritamente abaixo do limite de 1.000 linhas.
+  - Suíte de 103 testes automatizados passando 100% (`test-procedural.js`).
+
 ### [v1.5.3] - 2026-10-25 (Controle Completo de Pausa em Batalha, Tratamento das Telas de Vitória e Derrota)
 **Ajustes de Batalha & Telas de Fim de Jogo**
 - **Congelamento Completo ao Pausar Durante a Batalha (`battle-gear-modal` & `battle-stats-modal`):**

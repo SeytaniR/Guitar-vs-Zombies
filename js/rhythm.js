@@ -274,8 +274,9 @@ class RhythmSystem {
 
             this.createHitSparks(noteX, hitZoneY, this.colors[lane].main, isCrit);
 
-            // Register note rating with CombatSystem (charges Rock Mana & applies note damage modifier / skill)
+            // Register note rating with CombatSystem (sync combo & apply note damage modifier / skill)
             if (window.game && window.game.combat) {
+                window.game.combat.combo = this.streak;
                 window.game.combat.registerRhythmNote(ratingKey, lane);
             }
 
@@ -283,8 +284,17 @@ class RhythmSystem {
                 this.onHitCallback(isCrit, lane);
             }
         } else {
-            // Miss on empty tap
+            // Penalty for wrong tap: tapping with no valid note
+            this.streak = 0;
+            this.multiplier = 1;
+            if (this.songStats) this.songStats.misses++;
+            this.addFloatingRating('ERROU! 💨', noteX, hitZoneY - 25, '#ff4444', false);
             this.createHitSparks(noteX, hitZoneY, '#555555', false);
+            if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
+            if (window.game && window.game.combat) {
+                window.game.combat.combo = 0;
+                window.game.combat.registerWrongTap(lane);
+            }
         }
     }
 

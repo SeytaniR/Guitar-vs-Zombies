@@ -1480,18 +1480,28 @@ body, html {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .pads-instructions {
     font-size: 9px;
     color: #8899aa;
     text-align: center;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .editor-pads-bar {
     display: flex;
     gap: 8px;
     height: 52px;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .editor-fret-pad {
@@ -1504,6 +1514,10 @@ body, html {
     cursor: pointer;
     border: 2px solid;
     transition: transform 0.08s ease, filter 0.08s ease;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .editor-fret-pad:active, .editor-fret-pad.hit {
