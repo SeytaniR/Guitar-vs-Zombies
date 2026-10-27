@@ -62,8 +62,12 @@ class RhythmSystem {
             return Math.min(this.tracks - 1, Math.max(0, Math.floor(x / trackWidth)));
         };
 
+        const lastTapTime = [0, 0, 0, 0];
         const onDown = (lane, id) => {
             if (this.isPaused) return;
+            const now = performance.now();
+            if (now - lastTapTime[lane] < 60) return;
+            lastTapTime[lane] = now;
             if (id !== undefined) this.pointerLaneMap.set(id, lane);
             if (window.soundEngine) window.soundEngine.resume();
 
@@ -99,12 +103,13 @@ class RhythmSystem {
                     if (otherLane === oldLane) { stillHeld = true; break; }
                 }
                 if (!stillHeld) this.triggerLaneUp(oldLane);
-                this.triggerLaneDown(newLane);
             }
         };
 
+        let hasPointerEvents = false;
         // Pointer Events (supports stylus, mouse, and unified pointers)
         this.canvas.addEventListener('pointerdown', (e) => {
+            hasPointerEvents = true;
             e.preventDefault();
             try { this.canvas.setPointerCapture(e.pointerId); } catch(err) {}
             onDown(getLaneFromX(e.clientX), e.pointerId);
@@ -120,8 +125,9 @@ class RhythmSystem {
         this.canvas.addEventListener('pointercancel', (e) => onUp(e.pointerId));
         window.addEventListener('pointerup', (e) => onUp(e.pointerId));
 
-        // Touch Events (reliable multi-touch fallback on mobile webviews)
+        // Touch Events fallback (only runs on devices without pointer events)
         this.canvas.addEventListener('touchstart', (e) => {
+            if (hasPointerEvents) return;
             e.preventDefault();
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const t = e.changedTouches[i];
@@ -129,20 +135,19 @@ class RhythmSystem {
             }
         }, { passive: false });
         this.canvas.addEventListener('touchmove', (e) => {
+            if (hasPointerEvents) return;
             e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                const t = e.changedTouches[i];
-                onMove(t.clientX, 'touch_' + t.identifier);
-            }
+            for (let i = 0; i < e.changedTouches.length; i++) onMove(e.changedTouches[i].clientX, 'touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
         this.canvas.addEventListener('touchend', (e) => {
+            if (hasPointerEvents) return;
             e.preventDefault();
             for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
         this.canvas.addEventListener('touchcancel', (e) => {
-            e.preventDefault();
+            if (hasPointerEvents) return;
             for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
-        }, { passive: false });
+        });
 
         // Keyboard Support (A, S, D, F or 1, 2, 3, 4)
         const keyMap = {
@@ -179,7 +184,7 @@ class RhythmSystem {
         this.laneHolding[lane] = true;
         this.lanePresses[lane] = true;
         const hitZoneY = this.getHitZoneY();
-        const hitWindow = 70; // Generous window for mobile fingers
+        const hitWindow = 95; // Balanced generous window for mobile touch latency
 
         // Find closest note in this lane
         let closestNote = null;
@@ -205,8 +210,8 @@ class RhythmSystem {
             let ratingColor = '#00d4ff';
 
             const syncBonus = window.talentSystem ? window.talentSystem.getStat('fine_sync') : 0;
-            const perfectWindow = Math.round(18 * (1.0 + syncBonus));
-            const greatWindow = Math.round(42 * (1.0 + syncBonus * 0.5));
+            const perfectWindow = Math.round(24 * (1.0 + syncBonus));
+            const greatWindow = Math.round(54 * (1.0 + syncBonus * 0.5));
 
             let ratingKey = 'good';
             if (minDist <= perfectWindow) {
@@ -227,7 +232,7 @@ class RhythmSystem {
                 rating = 'GOOD';
                 ratingKey = 'good';
                 ratingColor = '#00d4ff';
-                this.streak = Math.max(1, this.streak);
+                this.streak++;
                 if (this.songStats) this.songStats.goods++;
             }
 
@@ -411,7 +416,7 @@ class RhythmSystem {
                 }
 
                 // Missed note passed hit zone (if not struck and not holding)
-                if (note.active && !note.hit && !note.holding && curTime > note.time + 0.22) {
+                if (note.active && !note.hit && !note.holding && curTime > note.time + 0.28) {
                     note.active = false;
                     note.missed = true;
                     if (this.songStats) this.songStats.misses++;
@@ -419,6 +424,7 @@ class RhythmSystem {
                     this.streak = 0;
                     this.multiplier = 1;
                     if (window.game && window.game.combat) {
+                        window.game.combat.combo = 0;
                         window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }
@@ -443,7 +449,7 @@ class RhythmSystem {
                 }
 
                 // Missed note
-                if (note.y > hitZoneY + 55 && note.active && !note.hit && !note.holding) {
+                if (note.y > hitZoneY + 95 && note.active && !note.hit && !note.holding) {
                     note.active = false;
                     note.missed = true;
                     const trackWidth = this.canvas.width / this.tracks;
@@ -451,6 +457,7 @@ class RhythmSystem {
                     this.streak = 0;
                     this.multiplier = 1;
                     if (window.game && window.game.combat) {
+                        window.game.combat.combo = 0;
                         window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }

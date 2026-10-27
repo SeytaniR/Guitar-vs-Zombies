@@ -237,12 +237,12 @@ class CombatSystem {
     }
 
     registerWrongTap(laneIndex = 0) {
-        if (this.isGameOver) return;
+        if (this.isGameOver || !this.matchActive) return;
         this.combo = 0;
         const heroPos = this.getHeroPosition();
         this.addFloatingText('ERROU! 💨', heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
-        this.pendingAttackModifiers.unshift({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
-        if (this.heroAttackTimer >= 0.12 || this.entities.projectiles.filter(p => p.isMiss).length < 2) {
+        this.pendingAttackModifiers.push({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
+        if (this.heroAttackTimer >= 0.15 || this.entities.projectiles.filter(p => p.isMiss).length < 2) {
             this.heroAttackTimer = 0;
             this.performHeroAutoAttack();
         }

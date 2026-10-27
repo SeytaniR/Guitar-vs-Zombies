@@ -27,6 +27,26 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.5] - 2026-10-26 (Correção de Taxa de Erros em Toques no Mobile & Alinhamento de Hit Windows)
+**Correções de Precisão e Mecânica de Ritmo**
+- **Eliminação de Eventos Duplicados no Celular (`setupInputHandlers` em `js/rhythm.js`):**
+  - Identificada e corrigida a causa raiz da falha em que notas acertadas geravam disparo de erro: navegadores mobile emitiam simultaneamente `pointerdown` e `touchstart` no mesmo toque físico.
+  - O primeiro evento consumia a nota (`note.hit = true`), e o segundo evento (1ms após) encontrava o trilho vazio, disparando indevidamente a penalidade de toque errado ("ERROU! 💨"), zerando o combo e defletindo o projétil.
+  - Implementado bloqueio condicional: caso o navegador processe eventos de ponteiro nativos (`hasPointerEvents`), o listener de `touchstart` é suprimido.
+  - Adicionado debounce temporal inteligente de 60ms por trilho (`lastTapTime`), impedindo qualquer reacionamento acidental de hardware ou emulação de clique.
+- **Remoção de Disparo Acidental ao Deslizar o Dedo (`onMove` em `js/rhythm.js`):**
+  - Removida a chamada de `triggerLaneDown(newLane)` no evento de movimento (`pointermove`/`touchmove`), garantindo que pequenas oscilações de dedo entre trilhos vizinhos não disparem toques errados.
+- **Expansão e Calibração das Janelas de Precisão (`triggerLaneDown` em `js/rhythm.js`):**
+  - Expandida a janela de acerto (`hitWindow`) de 70px para 95px (~280ms), compensando com perfeição a latência tátil de telas de smartphones.
+  - `PERFECT`: calibrado para 24px (~70ms).
+  - `GREAT`: calibrado para 54px (~160ms).
+  - `GOOD`: corrigido bug crítico onde `this.streak` não incrementava (fazia `Math.max(1, streak)` estagnando a sequência). Agora notas GOOD incrementam o combo normalmente (`this.streak++`).
+- **Alinhamento do Despawn de Notas com a Hit Window:**
+  - O limiar de nota perdida na esteira foi sincronizado para 0.28s / +95px, eliminando casos onde a nota sumia como MISS enquanto ainda estava dentro da área de alcance visual da palheta.
+- **Fila Cronológica Justa de Projéteis no Combate (`registerWrongTap` em `js/combat.js`):**
+  - Substituído `unshift` por `push` na fila de modificadores de ataque (`pendingAttackModifiers`), garantindo que toques errados legítimos respeitem a ordem cronológica estrita e nunca suprimam notas acertadas anteriormente.
+- **Cache-Busting v=26:** Atualizadas todas as referências em `index.html` para `?v=26`.
+
 ### [v1.5.4] - 2026-10-26 (Correção de Fim de Música, Multi-Toque no Editor, Penalidade de Disparo Errado & Escala de Velocidade por Combo)
 **Correções Críticas & Novos Recursos**
 - **Correção da Conclusão de Música (`StageSystem.completeStage` em `js/stage-system.js` & `js/main.js`):**
