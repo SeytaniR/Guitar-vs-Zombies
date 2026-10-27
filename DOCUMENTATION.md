@@ -27,6 +27,33 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.7] - 2026-10-27 (Menu de Edição Exclusivo, Banners Multikill Radicais, Ritmo de Kills e Screen Shake)
+**Design de Interface & Efeitos Visuais de Adrenalina**
+- **Remoção de Botões de Edição Durante o Jogo (`index.html` & `js/main.js`):**
+  - Removido o botão `#result-edit-btn` ("✏️ EDITAR RITMO") da tela de vitória pós-partida (`#song-results-modal`).
+  - O estúdio de músicas e o editor de ritmos agora são acessados estrita e exclusivamente a partir do menu inicial (`#screen-main-menu` -> `#menu-studio-btn`), deixando as telas de gameplay limpas e focadas na progressão do jogo.
+- **Efeitos Visuais de Multikill com Alta Adrenalina (`CombatFX.addMultiKillBanner` em `js/combat-fx.js`):**
+  - Implementado sistema de banners animados de multikill com estética rock/arcade radical e alta octanagem:
+    - **1 Kill:** `1 KILL! ⚡` (Ciano elétrico `#00ffff`, tremor 3)
+    - **2 Kills (Double Kill):** `DOUBLE KILL! 🔥` (Âmbar brilhante `#ffaa00`, tremor 5)
+    - **3 Kills (Triple Kill):** `TRIPLE KILL! ⚡🔥` (Vermelho labareda `#ff3300`, tremor 7)
+    - **4 Kills (Multi Kill):** `MULTI KILL! 💥` (Magenta neon `#ff00aa`, tremor 9)
+    - **5 Kills (Ultra Kill):** `ULTRA KILL! ⚡💥` (Carmesim violento `#ff0055`, tremor 12)
+    - **6 Kills (Fantástico):** `FANTÁSTICO! 🎸🔥` (Roxo mítico `#9900ff`, tremor 14)
+    - **7+ Kills (Unbelievable):** `UNBELIEVABLE! 👑⚡` / `UNBELIEVABLE xN! 👑⚡` (Ouro celestial `#ffd700`, tremor 16)
+  - Animação de impacto: texto inicia com escala 2.2x e faz transição "slam punch" para 1.0x, seguido de pulso senoidal contínuo e inclinação radical (`transform`).
+  - Renderização multicamada: traço preto de 6px para alto contraste arcade, preenchimento neon brilhante com brilho dinâmico (`shadowBlur`) e reflexo specular branco interno.
+  - Efeitos complementares: ondas de choque radiais coloridas expansivas e faíscas incandescentes em cada eliminação.
+- **Ritmo de Kills Conectado ao Combo ("Ritmo de Kills" em `js/combat.js` & `js/rhythm.js`):**
+  - Adicionado contador `comboKills` no combate: sobe a cada zumbi derrotado enquanto o jogador mantiver a sequência de acertos ativa.
+  - Vínculo estrito com o combo: caso o combo seja quebrado (seja por toque errado ou por nota perdida), tanto o combo rítmico quanto o ritmo de kills quebram imediatamente e ambos reiniciam do zero.
+- **Tremer a Tela em Combos Altos (`rhythm.js` & `combat.js`):**
+  - Implementado efeito de impacto na tela (`triggerShake`) disparado nos marcos de combos altos (a cada múltiplo de 5 ou 10 acertos consecutivos a partir de 10), com intensidade crescente proporcional ao combo do jogador.
+- **Efeitos de Áudio Procedural para Multikills (`SoundEngine.playMultiKill` em `js/audio.js`):**
+  - Adicionado sintetizador de som procedural que gera riffs e acordes de frequência ascendente, com batidas de bumbo em tiers médios e explosões nos tiers mais radicais.
+- **Testes Automatizados:** Suíte expandida para 134 testes automatizados cobrindo todos os tiers de multikill, vinculação de comboKills, tremor de tela e remoção de botões (`test-procedural.js`).
+- **Cache-Busting v=28:** Atualizadas todas as referências em `index.html` para `?v=28`.
+
 ### [v1.5.6] - 2026-10-27 (Rebalanceamento Econômico: Custo de Talentos Dobrado & Nível de Guitarristas Triplicado)
 **Economia & Progressão de Longo Prazo**
 - **Custo de Upgrade de Talentos Dobrado (`TalentSystem.getCost` em `js/talents.js`):**

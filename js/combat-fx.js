@@ -7,6 +7,7 @@ class CombatFX {
         this.floatingTexts = [];
         this.ambientEmbers = [];
         this.acidPuddles = [];
+        this.multiKillBanners = [];
         this.shakePower = 0;
     }
 
@@ -31,6 +32,7 @@ class CombatFX {
         this.particles = [];
         this.floatingTexts = [];
         this.acidPuddles = [];
+        this.multiKillBanners = [];
         this.shakePower = 0;
     }
 
@@ -59,6 +61,75 @@ class CombatFX {
                 color, size, life, maxLife: life
             });
         }
+    }
+
+    getMultiKillDef(count) {
+        if (count <= 1) return { title: '1 KILL! ⚡', color: '#00ffff', sub: 'PRIMEIRA VÍTIMA! 🔥', shake: 3 };
+        if (count === 2) return { title: 'DOUBLE KILL! 🔥', color: '#ffaa00', sub: 'RITMO ACELERANDO! ⚡', shake: 5 };
+        if (count === 3) return { title: 'TRIPLE KILL! ⚡🔥', color: '#ff3300', sub: 'TRIPLA CHACINA! 💥', shake: 7 };
+        if (count === 4) return { title: 'MULTI KILL! 💥', color: '#ff00aa', sub: 'MASSACRE NO PALCO! 🎸', shake: 9 };
+        if (count === 5) return { title: 'ULTRA KILL! ⚡💥', color: '#ff0055', sub: 'ADRENALINA MÁXIMA! ⚡', shake: 12 };
+        if (count === 6) return { title: 'FANTÁSTICO! 🎸🔥', color: '#9900ff', sub: 'DEUS DO ROCK AND ROLL! 🤘', shake: 14 };
+        return {
+            title: count === 7 ? 'UNBELIEVABLE! 👑⚡' : `UNBELIEVABLE x${count}! 👑⚡`,
+            color: '#ffd700',
+            sub: 'LENDÁRIO & IMBATÍVEL! 👑',
+            shake: 16
+        };
+    }
+
+    addMultiKillBanner(killCount, x, y) {
+        const def = this.getMultiKillDef(killCount);
+        this.triggerShake(def.shake);
+
+        if (window.soundEngine && typeof window.soundEngine.playMultiKill === 'function') {
+            window.soundEngine.playMultiKill(killCount);
+        }
+
+        const shockRadius = 40 + Math.min(65, killCount * 8);
+        this.shockwaves.push({
+            x: x, y: y,
+            radius: 8, maxRadius: shockRadius,
+            color: def.color, lineWidth: Math.min(7, 3 + killCount), alpha: 1.0
+        });
+
+        if (killCount >= 4) {
+            this.shockwaves.push({
+                x: x, y: y,
+                radius: 4, maxRadius: shockRadius * 1.4,
+                color: '#ffffff', lineWidth: 2, alpha: 0.9
+            });
+        }
+
+        const particleCount = Math.min(22, 6 + killCount * 2);
+        for (let i = 0; i < particleCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const spd = 40 + Math.random() * (70 + killCount * 12);
+            this.particles.push({
+                x: x + (Math.random() - 0.5) * 40,
+                y: y + (Math.random() - 0.5) * 20,
+                vx: Math.cos(angle) * spd,
+                vy: Math.sin(angle) * spd,
+                color: Math.random() > 0.4 ? def.color : '#ffffff',
+                size: 2.0 + Math.random() * 2.5,
+                life: 0.45, maxLife: 0.45
+            });
+        }
+
+        this.multiKillBanners = [{
+            count: killCount,
+            title: def.title,
+            sub: def.sub,
+            color: def.color,
+            x: x,
+            y: y,
+            scale: 2.2,
+            targetScale: 1.0,
+            alpha: 1.0,
+            life: 1.35,
+            maxLife: 1.35,
+            age: 0
+        }];
     }
 
     createExplosion(x, y, isCrit = false, soundEngine = null) {
@@ -326,12 +397,21 @@ class CombatFX {
             }
         });
 
+        // Update MultiKill Banners
+        this.multiKillBanners.forEach(b => {
+            b.age += dt;
+            b.scale += (b.targetScale - b.scale) * Math.min(1.0, 18 * dt);
+            b.life -= dt;
+            b.alpha = Math.min(1.0, b.life / 0.35);
+        });
+
         // Clean dead entities
         this.explosions = this.explosions.filter(ex => ex.active);
         this.shockwaves = this.shockwaves.filter(sw => sw.alpha > 0);
         this.particles = this.particles.filter(pt => pt.life > 0);
         this.floatingTexts = this.floatingTexts.filter(ft => ft.alpha > 0);
         this.acidPuddles = this.acidPuddles.filter(p => p.life > 0);
+        this.multiKillBanners = this.multiKillBanners.filter(b => b.life > 0);
     }
 
     drawAcidPuddles(ctx) {
@@ -398,6 +478,61 @@ class CombatFX {
             ctx.strokeText(ft.text, ft.x, ft.y);
             ctx.fillStyle = ft.color;
             ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore();
+        });
+
+        // MultiKill Radical Adrenaline Banners
+        this.drawMultiKillBanners(ctx);
+    }
+
+    drawMultiKillBanners(ctx) {
+        if (!this.multiKillBanners || this.multiKillBanners.length === 0) return;
+        this.multiKillBanners.forEach(b => {
+            if (b.alpha <= 0) return;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, b.alpha);
+
+            const pulse = 1.0 + Math.sin(b.age * 12) * 0.04;
+            const currentScale = b.scale * pulse;
+
+            ctx.translate(b.x, b.y);
+            ctx.scale(currentScale, currentScale);
+            ctx.transform(1, 0, -0.12, 1, 0, 0);
+
+            // Background dynamic neon flare
+            const flareW = 220;
+            const flareGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, flareW / 2);
+            flareGrad.addColorStop(0, b.color + '44');
+            flareGrad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = flareGrad;
+            ctx.fillRect(-flareW / 2, -35, flareW, 70);
+
+            ctx.shadowColor = b.color;
+            ctx.shadowBlur = 18;
+
+            ctx.font = "900 italic 28px 'Impact', 'Arial Black', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#000000';
+            ctx.strokeText(b.title, 0, -6);
+
+            ctx.fillStyle = b.color;
+            ctx.fillText(b.title, 0, -6);
+
+            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#ffffff';
+            ctx.strokeText(b.title, 0, -6);
+
+            ctx.shadowBlur = 8;
+            ctx.font = "bold italic 11px 'Segoe UI', 'Impact', sans-serif";
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = '#000000';
+            ctx.strokeText(b.sub, 0, 18);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(b.sub, 0, 18);
+
             ctx.restore();
         });
     }

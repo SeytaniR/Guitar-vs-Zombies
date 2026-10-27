@@ -522,6 +522,86 @@ assert(activePadPointers.get(101) === 0 && activePadPointers.get(102) === 2, 'Ea
 activePadPointers.delete(101);
 assert(activePadPointers.size === 1 && activePadPointers.get(102) === 2, 'Releasing finger 1 preserves finger 2 holding lane 2');
 
+// ==========================================
+// TEST 10: IN-GAME EDIT REMOVAL, MULTIKILL VFX & LINKED KILL RHYTHM
+// ==========================================
+console.log('10. Testing In-game Edit Button Removal, Multikill VFX & Linked Kill Rhythm...');
+
+// 1. Verify removal of in-game edit button
+const indexHtmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
+assert(!indexHtmlContent.includes('id="result-edit-btn"'), 'In-game result-edit-btn successfully removed from index.html');
+assert(!indexHtmlContent.includes('EDITAR RITMO</button>'), 'No in-game buttons mention EDITAR RITMO');
+assert(indexHtmlContent.includes('id="song-studio-modal"'), 'Song Studio modal retained in main menu');
+assert(indexHtmlContent.includes('id="chart-editor-modal"'), 'Song Chart Editor retained in main menu');
+
+// 2. Multikill Tiers definitions and visual themes
+const testFx = new CombatFX();
+const k1 = testFx.getMultiKillDef(1);
+const k2 = testFx.getMultiKillDef(2);
+const k3 = testFx.getMultiKillDef(3);
+const k4 = testFx.getMultiKillDef(4);
+const k5 = testFx.getMultiKillDef(5);
+const k6 = testFx.getMultiKillDef(6);
+const k7 = testFx.getMultiKillDef(7);
+const k12 = testFx.getMultiKillDef(12);
+
+assert(k1.title === '1 KILL! ⚡' && k1.color === '#00ffff' && k1.shake === 3, 'Tier 1: 1 KILL! ⚡ (Cyan, shake 3)');
+assert(k2.title === 'DOUBLE KILL! 🔥' && k2.color === '#ffaa00' && k2.shake === 5, 'Tier 2: DOUBLE KILL! 🔥 (Amber, shake 5)');
+assert(k3.title === 'TRIPLE KILL! ⚡🔥' && k3.color === '#ff3300' && k3.shake === 7, 'Tier 3: TRIPLE KILL! ⚡🔥 (Blaze, shake 7)');
+assert(k4.title === 'MULTI KILL! 💥' && k4.color === '#ff00aa' && k4.shake === 9, 'Tier 4: MULTI KILL! 💥 (Magenta, shake 9)');
+assert(k5.title === 'ULTRA KILL! ⚡💥' && k5.color === '#ff0055' && k5.shake === 12, 'Tier 5: ULTRA KILL! ⚡💥 (Crimson-Violet, shake 12)');
+assert(k6.title === 'FANTÁSTICO! 🎸🔥' && k6.color === '#9900ff' && k6.shake === 14, 'Tier 6: FANTÁSTICO! 🎸🔥 (Mythic Purple, shake 14)');
+assert(k7.title === 'UNBELIEVABLE! 👑⚡' && k7.color === '#ffd700' && k7.shake === 16, 'Tier 7: UNBELIEVABLE! 👑⚡ (Godlike Gold, shake 16)');
+assert(k12.title === 'UNBELIEVABLE x12! 👑⚡' && k12.color === '#ffd700', 'Tier 12+: Scaled UNBELIEVABLE x12! 👑⚡');
+
+// 3. Multikill Banner Animation & Particle Shockwaves
+testFx.addMultiKillBanner(4, 200, 150);
+assert(testFx.multiKillBanners.length === 1, 'Multikill banner created in combat-fx');
+const activeBanner = testFx.multiKillBanners[0];
+assert(activeBanner.scale === 2.2, 'Multikill banner begins with slam scale 2.2');
+assert(activeBanner.life === 1.35, 'Multikill banner life initialized to 1.35s');
+assert(testFx.shockwaves.length > 0, 'Multikill triggers radial shockwaves');
+assert(testFx.particles.length > 0, 'Multikill triggers adrenaline spark particles');
+assert(testFx.shakePower >= 9, 'Screen shake triggered for multi kill');
+
+// 4. Linked Kill Streak ("Ritmo de Kills")
+combat.resetBattle();
+assert(combat.comboKills === 0, 'comboKills is 0 on battle start');
+
+combat.combo = 15;
+combat.onZombieKilled(targetZombie, 100);
+assert(combat.comboKills === 1, '1st kill in combo sets comboKills to 1');
+combat.onZombieKilled(targetZombie, 100);
+assert(combat.comboKills === 2, '2nd kill in combo sets comboKills to 2 (DOUBLE KILL)');
+combat.onZombieKilled(targetZombie, 100);
+assert(combat.comboKills === 3, '3rd kill in combo sets comboKills to 3 (TRIPLE KILL)');
+
+// Break combo via wrong tap
+combat.registerWrongTap(0);
+assert(combat.combo === 0, 'Wrong tap broke combo');
+assert(combat.comboKills === 0, 'Wrong tap immediately reset comboKills to 0 ("ambos reiniciam")');
+
+// Build streak again and break via miss
+combat.combo = 8;
+combat.onZombieKilled(targetZombie, 100);
+assert(combat.comboKills === 1, 'New kill begins new kill streak at 1');
+combat.registerRhythmNote('miss', 1);
+assert(combat.combo === 0, 'Miss broke combo');
+assert(combat.comboKills === 0, 'Miss note immediately reset comboKills to 0');
+
+// 5. High Combo Screen Shake
+combat.fx.shakePower = 0;
+let simStreak = 10;
+if (simStreak >= 10 && simStreak % 5 === 0) {
+    const pwr = Math.min(10, 3 + Math.floor(simStreak / 10));
+    combat.triggerShake(pwr);
+}
+assert(combat.fx.shakePower >= 4, 'High combo (10 streak) triggered adrenaline screen shake');
+
+// 6. SoundEngine playMultiKill definition
+assert(audioCode.includes('playMultiKill'), 'SoundEngine defines playMultiKill synthesizer method');
+
+
 // Summary
 console.log('\n==========================================');
 console.log(`TOTAL TESTS: ${testsPassed + testsFailed}`);

@@ -199,6 +199,27 @@ class SoundEngine {
     playPowerChord(chordIndex = 0) {
         this.playGuitarChord(chordIndex || 0);
     }
+
+    playMultiKill(tier = 1) {
+        if (!this.ctx || this.muted) return;
+        this.resume();
+        const now = this.ctx.currentTime;
+        const baseFreq = 120 * Math.pow(1.14, Math.min(8, tier));
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = tier >= 4 ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.55, now + 0.16);
+        gain.gain.setValueAtTime(Math.min(0.42, 0.2 + tier * 0.03), now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.22);
+
+        if (tier >= 3) this.playDrum('kick');
+        if (tier >= 5) this.playExplosion();
+    }
 }
 
 window.soundEngine = new SoundEngine();

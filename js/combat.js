@@ -195,6 +195,7 @@ class CombatSystem {
         this.isVictory = false;
         this.rockMana = 30;
         this.combo = 0;
+        this.comboKills = 0;
         this.score = 0;
         this.zombiesKilled = 0;
         this.spawnTimer = 0;
@@ -239,6 +240,7 @@ class CombatSystem {
     registerWrongTap(laneIndex = 0) {
         if (this.isGameOver || !this.matchActive) return;
         this.combo = 0;
+        this.comboKills = 0;
         const heroPos = this.getHeroPosition();
         this.addFloatingText('ERROU! 💨', heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
         this.pendingAttackModifiers.push({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
@@ -256,6 +258,7 @@ class CombatSystem {
             this.pendingAttackModifiers.push({ mult: 0.5, isCrit: false, skill: null, isMiss: false });
             this.addFloatingText('MISS (-50%)', heroPos.x, heroPos.y - 45, '#ff3333', false);
             this.combo = 0;
+            this.comboKills = 0;
             return;
         }
 
@@ -432,6 +435,8 @@ class CombatSystem {
         this.zombiesKilled++;
         this.battleStats.zombiesKilled++;
         this.score += bonusScore;
+        this.comboKills = (this.comboKills || 0) + 1;
+        this.fx.addMultiKillBanner(this.comboKills, this.canvas.width / 2, this.canvas.height * 0.38);
 
         try {
             const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0', 10);

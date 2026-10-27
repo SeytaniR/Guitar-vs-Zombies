@@ -610,13 +610,6 @@ class Game {
             if (m) m.classList.remove('open');
             this.startMatch();
         });
-        bind('result-edit-btn', () => {
-            const m = document.getElementById('song-results-modal');
-            if (m) m.classList.remove('open');
-            this.switchScreen('menu');
-            const studio = document.getElementById('song-studio-modal');
-            if (studio) { studio.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); }
-        });
         bind('result-close-btn', () => {
             const m = document.getElementById('song-results-modal');
             if (m) m.classList.remove('open');

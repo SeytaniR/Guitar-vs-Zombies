@@ -259,6 +259,12 @@ class RhythmSystem {
                 }
             }
 
+            // High Combo Screen Shake (Combos altos tremem a tela com adrenalina)
+            if (this.streak >= 10 && this.streak % 5 === 0) {
+                const shakeIntensity = Math.min(10, 3 + Math.floor(this.streak / 10));
+                if (window.game && window.game.combat) window.game.combat.triggerShake(shakeIntensity);
+            }
+
             // Solo Mastery Talent: maximum multiplier up to x9
             const maxMult = window.talentSystem ? window.talentSystem.getStat('solo_mastery') : 4;
             this.multiplier = Math.min(maxMult, 1 + Math.floor(this.streak / 6));
@@ -298,6 +304,7 @@ class RhythmSystem {
             if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
             if (window.game && window.game.combat) {
                 window.game.combat.combo = 0;
+                window.game.combat.comboKills = 0;
                 window.game.combat.registerWrongTap(lane);
             }
         }
@@ -425,6 +432,7 @@ class RhythmSystem {
                     this.multiplier = 1;
                     if (window.game && window.game.combat) {
                         window.game.combat.combo = 0;
+                        window.game.combat.comboKills = 0;
                         window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }
@@ -458,6 +466,7 @@ class RhythmSystem {
                     this.multiplier = 1;
                     if (window.game && window.game.combat) {
                         window.game.combat.combo = 0;
+                        window.game.combat.comboKills = 0;
                         window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }
