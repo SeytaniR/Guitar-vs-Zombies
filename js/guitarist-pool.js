@@ -218,7 +218,7 @@ class GuitaristPoolSystem {
     getGoldCostForLevelUp(levelOrHeroId) {
         const level = typeof levelOrHeroId === 'number' ? levelOrHeroId : (this.getHeroLevelData(levelOrHeroId).level);
         if (level >= this.maxLevel) return Infinity;
-        return Math.floor(32 * Math.pow(1.054, level - 1) + level * 7);
+        return Math.floor(3 * (32 * Math.pow(1.054, level - 1) + level * 7));
     }
 
     addHeroXp(heroId, amount) {

@@ -27,6 +27,17 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.6] - 2026-10-27 (Rebalanceamento Econômico: Custo de Talentos Dobrado & Nível de Guitarristas Triplicado)
+**Economia & Progressão de Longo Prazo**
+- **Custo de Upgrade de Talentos Dobrado (`TalentSystem.getCost` em `js/talents.js`):**
+  - Fórmula exponencial atualizada para `2 * baseCost * (costMult ^ level)`.
+  - Dobra os valores de moedas de ouro necessários para todos os 15 talentos em todas as suas ramificações (Ofensiva, Defensiva e Suporte), proporcionando um ciclo de progressão e valorização do ouro ainda mais duradouro.
+- **Custo de Nível dos Guitarristas Triplicado (`GuitaristPoolSystem.getGoldCostForLevelUp` em `js/guitarist-pool.js`):**
+  - Fórmula de compra direta de níveis com ouro atualizada para `3 * (32 * 1.054^(level - 1) + level * 7)`.
+  - Custo inicial no Nível 1 passa de 39 para 117 moedas de ouro, escalando proporcionalmente até o nível máximo (100).
+- **Testes Automatizados:** 105 de 105 testes aprovados (`test-procedural.js`).
+- **Cache-Busting v=27:** Atualizadas todas as referências em `index.html` para `?v=27`.
+
 ### [v1.5.5] - 2026-10-26 (Correção de Taxa de Erros em Toques no Mobile & Alinhamento de Hit Windows)
 **Correções de Precisão e Mecânica de Ritmo**
 - **Eliminação de Eventos Duplicados no Celular (`setupInputHandlers` em `js/rhythm.js`):**

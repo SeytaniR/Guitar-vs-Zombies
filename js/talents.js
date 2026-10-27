@@ -243,10 +243,10 @@ class TalentSystem {
         this.setupDOM();
     }
 
-    // Cost formula with exponential slow progression
+    // Cost formula with exponential slow progression (doubled base cost for long-term progression)
     getCost(talent) {
         if (talent.level >= talent.maxLevel) return Infinity;
-        return Math.floor(talent.baseCost * Math.pow(talent.costMult, talent.level));
+        return Math.floor(2 * talent.baseCost * Math.pow(talent.costMult, talent.level));
     }
 
     isUnlocked(talent) {

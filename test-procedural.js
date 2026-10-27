@@ -77,7 +77,16 @@ assert(resXp.newLevel > 1, `Hero leveled up via XP from Level 1 to Level ${resXp
 // Test Gold Level Up
 pool.setLevel('johnny_blaze', 1);
 const goldCost = pool.getGoldCostForLevelUp('johnny_blaze');
-assert(goldCost > 0, `Gold cost for leveling up calculated: ${goldCost} gold`);
+assert(goldCost === 117, `Gold cost for Level 1 guitarist is tripled to 117 gold (was 39)`);
+
+// Test Talent Cost Doubling
+global.document = { getElementById: () => null, querySelectorAll: () => [] };
+loadScript('js/talents.js');
+const talentSysInstance = new TalentSystem();
+const powerChordCost = talentSysInstance.getCost(talentSysInstance.talents['power_chord']);
+assert(powerChordCost === 160, `Level 0 Power Chord upgrade cost is doubled to 160 gold (was 80)`);
+const soloCost = talentSysInstance.getCost(talentSysInstance.talents['ferocious_solo']);
+assert(soloCost === 400, `Level 0 Ferocious Solo upgrade cost is doubled to 400 gold (was 200)`);
 
 // Mock talent system for gold purchase
 window.talentSystem = {
@@ -88,7 +97,7 @@ window.talentSystem = {
 };
 const goldLvlRes = pool.levelUpWithGold('johnny_blaze', window.talentSystem);
 assert(goldLvlRes.success && goldLvlRes.newLevel === 2, 'Hero successfully leveled up using gold');
-assert(window.talentSystem.gold < 5000, 'Gold correctly deducted from player balance');
+assert(window.talentSystem.gold === 5000 - 117, `Gold correctly deducted from player balance (5000 - 117 = ${window.talentSystem.gold})`);
 
 // Test Higher Rarity Bonus Scaling (Roxie - Mítico)
 const roxieStatsLv1 = pool.getHeroStats('roxie_anarchy');
