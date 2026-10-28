@@ -11,11 +11,6 @@ class Game {
         // Connect Rhythm hits directly to Combat combo & status!
         this.rhythm.onHitCallback = (isCrit, lane) => {
             this.combat.combo = this.rhythm.streak;
-
-            // Hyper Overdrive talent boosts rock energy buildup
-            const overdriveBonus = window.talentSystem ? window.talentSystem.getStat('hyper_overdrive') : 0;
-            const rockGain = (isCrit ? 4.5 : 2.5) * (1.0 + overdriveBonus);
-            this.combat.rockPower = Math.min(100, this.combat.rockPower + rockGain);
         };
 
         this.lastTime = performance.now();
@@ -355,13 +350,16 @@ class Game {
 
         for (let l = 0; l < 4; l++) {
             const skill = window.skillSystem.getEquippedSkill(l, hid);
+            const badge = window.skillSystem.getSkillTypeBadge ? window.skillSystem.getSkillTypeBadge(skill) : { label: 'SKILL', color: '#00d4ff', bg: 'rgba(0,0,0,0.3)' };
+            const dmgText = skill.damageMult ? `${Math.round(skill.damageMult * 100)}%` : '100%';
             const slot = document.createElement('div');
             slot.className = `lane-skill-slot lane-${l}`;
             slot.innerHTML = `
                 <span class="lane-tag-num" style="color: ${laneColors[l]};">Trilho ${l + 1}</span>
                 <span class="lane-skill-icon">${skill.icon}</span>
                 <span class="lane-skill-title">${skill.name}</span>
-                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} Mana` : 'Básico (0 MP)'}</span>
+                <span class="lane-skill-type-pill" style="color: ${badge.color}; background: ${badge.bg};">${badge.label} (${dmgText})</span>
+                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} MP` : 'BÁSICO (0 MP)'}</span>
             `;
 
             slot.onclick = () => this.openSkillPickerModal(l);
@@ -375,6 +373,7 @@ class Game {
         const modal = document.getElementById('skill-picker-modal');
         const titleEl = document.getElementById('skill-picker-title');
         const listEl = document.getElementById('skill-picker-list');
+        const resetBtn = document.getElementById('skill-restore-default-btn');
         if (!modal || !listEl) return;
 
         const laneNames = ['Trilho 1 (Verde)', 'Trilho 2 (Vermelho)', 'Trilho 3 (Amarelo)', 'Trilho 4 (Azul)'];
@@ -382,6 +381,16 @@ class Game {
         const hid = hero ? hero.id : null;
         const heroName = hero ? hero.name : 'Guitarrista';
         if (titleEl) titleEl.innerText = `⚡ ${laneNames[laneIndex] || `Trilho ${laneIndex + 1}`} • ${heroName}`;
+
+        if (resetBtn) {
+            resetBtn.onclick = () => {
+                window.skillSystem.resetHeroLoadout(hid);
+                this.showToast('Loadout padrão restaurado!');
+                if (window.soundEngine) window.soundEngine.playPowerChord();
+                this.openSkillPickerModal(laneIndex);
+                this.renderLaneSkills();
+            };
+        }
 
         const currentSkill = window.skillSystem.getEquippedSkill(laneIndex, hid);
         const heroSkills = window.skillSystem.getSkillsForHero(hid);
@@ -391,15 +400,25 @@ class Game {
             const isEquipped = (s.id === currentSkill.id);
             const check = window.skillSystem.canEquipSkill(laneIndex, s.id, hid);
             const isBlocked = !check.allowed;
+            const badge = window.skillSystem.getSkillTypeBadge ? window.skillSystem.getSkillTypeBadge(s) : { label: 'SKILL', color: '#00d4ff', bg: 'rgba(0,0,0,0.3)' };
+            const dmgText = s.damageMult ? `${Math.round(s.damageMult * 100)}% Dano` : '100% Dano';
 
             const card = document.createElement('div');
             card.className = `skill-card-choice ${isEquipped ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
             card.innerHTML = `
                 <div class="skill-choice-icon">${s.icon}</div>
                 <div class="skill-choice-info">
-                    <div class="skill-choice-name">${s.name} ${isEquipped ? '✓ (Equipada)' : ''}</div>
+                    <div class="skill-choice-header">
+                        <span class="skill-choice-name">${s.name}</span>
+                        <span class="skill-type-pill" style="color: ${badge.color}; background: ${badge.bg};">${badge.label}</span>
+                    </div>
+                    <div class="skill-choice-stats">
+                        <span class="skill-dmg-tag">💥 ${dmgText}</span>
+                        <span class="skill-cost-tag" style="color: ${s.manaCost > 0 ? '#00d4ff' : '#00ff66'};">⚡ ${s.manaCost > 0 ? `${s.manaCost} Rock Mana` : '0 MP (Básico)'}</span>
+                    </div>
                     <div class="skill-choice-desc">${s.desc}</div>
-                    <span class="skill-choice-cost" style="${isBlocked ? 'color: #ffaa00;' : ''}">${isBlocked ? '⚠️ Bloqueado: Mantenha ≥ 1 Ataque Básico' : (s.manaCost > 0 ? `⚡ Custo: ${s.manaCost} Rock Mana` : '⚡ Custo: 0 (Ataque Básico Padrão)')}</span>
+                    ${isEquipped ? '<span class="skill-status-tag equipped">✅ Equipada neste trilho</span>' : ''}
+                    ${isBlocked ? '<span class="skill-status-tag blocked">🔒 Bloqueado: Mantenha ≥ 1 Ataque Básico</span>' : ''}
                 </div>
             `;
 

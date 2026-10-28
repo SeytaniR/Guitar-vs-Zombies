@@ -672,6 +672,38 @@ allHeroes.forEach(hid => {
 });
 
 
+// 4. Testing Skill Polishing, SFX, Badges, Reset & Damage Scaling
+console.log('\n12. Testing Skill Polishing, SFX, Badges, Reset & Damage Scaling...');
+
+// 4.1. Badge helper tests
+const powerChordSkill = skillSys.getSkillById('blaze_power_chord');
+const badge = skillSys.getSkillTypeBadge(powerChordSkill);
+assert(badge && badge.label && badge.color, 'getSkillTypeBadge returns valid badge definition');
+
+const basicSkill = skillSys.getSkillById('basic_strike');
+const basicBadge = skillSys.getSkillTypeBadge(basicSkill);
+assert(basicBadge && basicBadge.label.includes('BÁSICO'), 'Basic strike badge includes BÁSICO');
+
+// 4.2. Reset Hero Loadout test
+skillSys.equipSkill(1, 'basic_strike', 'johnny_blaze');
+skillSys.equipSkill(2, 'basic_strike', 'johnny_blaze');
+const resetLoadout = skillSys.resetHeroLoadout('johnny_blaze');
+assert(Array.isArray(resetLoadout) && resetLoadout.length === 4, 'resetHeroLoadout returns 4-slot array');
+assert(skillSys.hasAtLeastOneBasicStrike(resetLoadout), 'resetHeroLoadout maintains >= 1 basic strike');
+
+// 4.3. Skill Damage Scaling Verification
+const testTarget = { hp: 200, active: true, x: 100, y: 100 };
+const applyRes = powerChordSkill.apply(combat, testTarget, 50);
+assert(applyRes && applyRes.damage === 110, `Power Chord deals scaled 220% damage (expected 110, got ${applyRes ? applyRes.damage : 0})`);
+assert(applyRes.label && applyRes.label.includes('POWER CHORD'), 'Power Chord returns floating impact label');
+
+// 4.4. SoundEngine SFX test
+const audioCodeContent = fs.readFileSync(path.resolve(__dirname, 'js/audio.js'), 'utf8');
+assert(audioCodeContent.includes('playSkillSfx'), 'SoundEngine implements playSkillSfx synthesizer method');
+
+// 4.5. Overlay helper test
+assert(typeof skillSys.drawLaneFretOverlay === 'function', 'SkillSystem defines drawLaneFretOverlay helper');
+
 // Summary
 console.log('\n==========================================');
 console.log(`TOTAL TESTS: ${testsPassed + testsFailed}`);

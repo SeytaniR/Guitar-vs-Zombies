@@ -286,6 +286,9 @@ class CombatSystem {
         manaAward *= (1.0 + overdriveBonus);
 
         this.rockMana = Math.min(this.maxRockMana, this.rockMana + manaAward);
+        if (rating === 'perfect' || rating === 'great') {
+            this.addFloatingText(`+${Math.round(manaAward)} MP ⚡`, heroPos.x - 10, heroPos.y - 32, '#00e5ff', false);
+        }
 
         // Retrieve equipped skill for this rhythm lane
         const skill = window.skillSystem ? window.skillSystem.getEquippedSkill(laneIndex) : null;
@@ -295,7 +298,7 @@ class CombatSystem {
         if (skill && skill.manaCost > 0) {
             if (this.rockMana >= skill.manaCost) {
                 this.rockMana -= skill.manaCost;
-                this.addFloatingText(`${skill.icon} ${skill.name}`, heroPos.x + 20, heroPos.y - 50, skill.color || '#ff00ff', true);
+                this.addFloatingText(`${skill.icon} ${skill.name} (-${skill.manaCost} MP)`, heroPos.x + 20, heroPos.y - 50, skill.color || '#ff00ff', true);
             } else {
                 // Insufficient Mana: note becomes a common basic attack (no skill applied, normal basic damage, 0 MP spent)
                 skillToApply = null;
@@ -368,7 +371,8 @@ class CombatSystem {
             damage: calcDamage, skill: isMiss ? null : mod.skill,
             frame: 3 + Math.floor(Math.random() * 4), trailTimer: 0,
             active: true, heroId: activeHero ? activeHero.id : null,
-            projColor: projColor
+            projColor: projColor,
+            isSkillShot: !isMiss && !!mod.skill && mod.skill.manaCost > 0
         });
 
         // Muzzle sonic shockwave
@@ -770,8 +774,18 @@ class CombatSystem {
                     const heroId = p.heroId || (activeHero ? activeHero.id : null);
 
                     // Execute Equipped Lane Skill effect if present on projectile
+                    let skillLabel = null;
+                    let skillColor = p.projColor || '#ff00ff';
                     if (p.skill && typeof p.skill.apply === 'function') {
-                        p.skill.apply(this, z, p.damage);
+                        const sRes = p.skill.apply(this, z, p.damage);
+                        if (sRes) {
+                            if (typeof sRes.damage === 'number' && !isNaN(sRes.damage)) p.damage = sRes.damage;
+                            if (sRes.label) skillLabel = sRes.label;
+                            if (sRes.color) skillColor = sRes.color;
+                        }
+                        if (window.soundEngine && typeof window.soundEngine.playSkillSfx === 'function') {
+                            window.soundEngine.playSkillSfx(p.skill.type);
+                        }
                     }
 
                     if (heroStats.slowHorde > 0 || heroId === 'dr_radix') {
@@ -834,6 +848,9 @@ class CombatSystem {
                             p.isCrit ? (p.projColor || '#ff00ff') : '#ffffff',
                             p.isCrit
                         );
+                        if (skillLabel) {
+                            this.addFloatingText(skillLabel, z.x, currentY - 58, skillColor, true);
+                        }
                     }
 
                     this.createExplosion(p.x, p.y, p.isCrit);
@@ -942,7 +959,8 @@ class CombatSystem {
         this.ctx.save();
         this.ctx.globalCompositeOperation = 'lighter';
         this.entities.projectiles.forEach(p => {
-            this.assets.fxSheet.drawFrame(this.ctx, p.frame, p.x, p.y, p.isCrit ? 0.25 : 0.18, false);
+            const sc = p.isSkillShot ? 0.28 : (p.isCrit ? 0.25 : 0.18);
+            this.assets.fxSheet.drawFrame(this.ctx, p.frame, p.x, p.y, sc, false);
         });
         this.ctx.restore();
 

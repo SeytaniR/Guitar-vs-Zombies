@@ -27,6 +27,34 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.9] - 2026-10-28 (Revisão Completa do Sistema de Habilidades, HUD nos Trilhos, Correção de Dano e SFX)
+**Polimento Profundo, Correção de Bugs e Elevação Visual/Sonora**
+- **Correção Crítica de Dano das Habilidades (`js/combat.js`):**
+  - O dano escalonado retornado pelas habilidades (ex: 2.2x, 2.6x, 2.8x) era descartado no momento da colisão, aplicando apenas o dano base. Agora `p.damage` é atualizado corretamente com o dano total da habilidade, e o banner flutuante de impacto (`💥 POWER CHORD!`, `🔨 MARTELADA!`, `⚡ ARCO TESLA!`) é exibido com a cor do elemento sobre o zumbi atingido.
+- **Resposta Instantânea dos Disparos ao Ritmo (`js/rhythm.js`):**
+  - Ao acertar uma nota no ritmo, o disparo sônico é executado imediatamente (`performHeroAutoAttack()`) e o timer de ataque automático é zerado, sincronizando visual e auditivamente cada toque com o ataque do guitarrista.
+- **HUD Dinâmico de Habilidades e Mana nos Trilhos Rítmicos (`js/skills.js` & `js/rhythm.js`):**
+  - Os 4 botões de fret (alvos inferiores do ritmo) agora exibem em tempo real:
+    - O ícone representativo da habilidade equipada (⚡, 💥, 🎸, 🔥, 🧪, 🛡️, etc.).
+    - Badge inferior com o custo de Mana (`⚡ X MP` ou `BÁSICO`).
+    - Iluminação e anel de halo pulsante quando o herói possui Mana suficiente para a habilidade.
+    - Indicador `⚡ SEM MP` em vermelho e ícone atenuado quando a Mana é insuficiente, alertando visualmente que o disparo executará como ataque básico comum.
+- **Sintetizador Procedural de SFX para Habilidades (`SoundEngine.playSkillSfx` em `js/audio.js`):**
+  - Criado sintetizador com timbres dedicados para cada arquétipo de habilidade:
+    - Chamas/Napalm: ruído com sweep subsônico.
+    - Choque/EMP/Laser: onda quadrada de alta frequência modulada.
+    - Terremoto/Cataclismo: sub-grave sísmico combinado a bumbo de bateria.
+    - Cura/Escudo/Buff: arpejo harmônico cristalino ascendente.
+    - Dano Físico/Corte/Sangramento: ataque serrilhado com punch metálico.
+- **Interface Enriquecida de Habilidades no Menu de Preparação (`index.html`, `js/main.js` & `css/style.css`):**
+  - Modal e trilhos com badges temáticos (`💥 DANO`, `💫 STUN`, `🌋 ÁREA`, `💚 CURA`, etc.), porcentagem de dano (`220% Dano`), custo em Mana e aviso claro da Regra do Palco quando uma habilidade está bloqueada.
+  - Adicionado botão `↺ Padrão` no modal para restaurar instantaneamente a combinação inicial do guitarrista.
+- **Feedback Flutuante de Ganho de Mana & Fim da Duplicidade (`js/combat.js` & `js/main.js`):**
+  - Notas GREAT e PERFECT flutuam `+3 MP ⚡` e `+4 MP ⚡` em ciano próximo ao guitarrista.
+  - Corrigida a duplicidade na adição de Mana entre `combat.js` e `main.js`.
+- **Testes Automatizados:** Expandido para 264 testes passando com 100% de sucesso (`test-procedural.js`).
+- **Cache-Busting v=30:** Atualizado em `index.html`.
+
 ### [v1.5.8] - 2026-10-27 (Acervo de Habilidades Únicas por Guitarrista, Regra do Palco e Fallback de Mana)
 **Habilidades Específicas, Restrição de Slots e Sistema de Mana**
 - **Acervo de Habilidades Únicas por Guitarrista (`js/skills.js`):**

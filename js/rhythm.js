@@ -289,6 +289,8 @@ class RhythmSystem {
             if (window.game && window.game.combat) {
                 window.game.combat.combo = this.streak;
                 window.game.combat.registerRhythmNote(ratingKey, lane);
+                window.game.combat.performHeroAutoAttack();
+                window.game.combat.heroAttackTimer = 0;
             }
 
             if (this.onHitCallback) {
@@ -619,6 +621,10 @@ class RhythmSystem {
             this.ctx.fill();
 
             this.ctx.restore();
+
+            if (window.skillSystem && typeof window.skillSystem.drawLaneFretOverlay === 'function') {
+                window.skillSystem.drawLaneFretOverlay(this.ctx, i, bx, hitZoneY, isPressed, trackW);
+            }
         }
 
         // 4.1. Draw Sustain / Hold Ribbons (behind note heads)
@@ -634,18 +640,13 @@ class RhythmSystem {
 
             let tailY = headY;
             if (this.isCustomSongPlaying) {
-                const curTime = (this.songAudio && !this.songAudio.paused && this.songAudio.currentTime > 0)
-                    ? this.songAudio.currentTime
-                    : this.customSongTime;
+                const curTime = (this.songAudio && !this.songAudio.paused && this.songAudio.currentTime > 0) ? this.songAudio.currentTime : this.customSongTime;
                 tailY = hitZoneY - ((note.time + note.duration) - curTime) * this.noteSpeed;
             } else {
                 tailY = headY - (note.duration * this.noteSpeed);
             }
-
             if (tailY > ch + 40 || headY < -60) return;
-
-            const ribTop = Math.min(tailY, headY);
-            const ribBottom = Math.max(tailY, headY);
+            const ribTop = Math.min(tailY, headY), ribBottom = Math.max(tailY, headY);
             const ribHeight = ribBottom - ribTop;
             if (ribHeight <= 2) return;
 

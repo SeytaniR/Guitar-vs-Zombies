@@ -758,6 +758,98 @@ class SkillSystem {
     getAllSkills() {
         return this.skills;
     }
+
+    getSkillTypeBadge(skill) {
+        if (!skill) return { label: 'BÁSICO', color: '#00ff66', bg: 'rgba(0,255,102,0.15)' };
+        switch (skill.type) {
+            case 'basic': return { label: '⚡ BÁSICO', color: '#00ff66', bg: 'rgba(0,255,102,0.18)' };
+            case 'dps': case 'heavy_dps': case 'riot_dps': return { label: '💥 DANO', color: '#ff5500', bg: 'rgba(255,85,0,0.18)' };
+            case 'dps_crit': return { label: '🔮 CRÍTICO', color: '#00ffff', bg: 'rgba(0,255,255,0.18)' };
+            case 'aoe': case 'heavy_aoe': return { label: '💥 ÁREA', color: '#ff3300', bg: 'rgba(255,51,0,0.18)' };
+            case 'stun': case 'earthquake': return { label: '💫 STUN', color: '#ffcc00', bg: 'rgba(255,204,0,0.18)' };
+            case 'burn': case 'aoe_burn': return { label: '🔥 CHAMA', color: '#ff4400', bg: 'rgba(255,68,0,0.18)' };
+            case 'acid': case 'radiation': return { label: '☢️ TÓXICO', color: '#39ff14', bg: 'rgba(57,255,20,0.18)' };
+            case 'chain_lightning': return { label: '⚡ RELÂMPAGO', color: '#00f0ff', bg: 'rgba(0,240,255,0.18)' };
+            case 'buff': return { label: '🚀 BUFF', color: '#b000ff', bg: 'rgba(176,0,255,0.18)' };
+            case 'heal': return { label: '💚 CURA', color: '#00e676', bg: 'rgba(0,230,118,0.18)' };
+            case 'shield': return { label: '🛡️ ESCUDO', color: '#00a2ff', bg: 'rgba(0,162,255,0.18)' };
+            case 'lifesteal': return { label: '🩸 VAMPIRISMO', color: '#e6004c', bg: 'rgba(230,0,76,0.18)' };
+            case 'bleed': return { label: '🪓 SANGRAMENTO', color: '#ff0055', bg: 'rgba(255,0,85,0.18)' };
+            case 'pierce': return { label: '🗡️ PERFURAÇÃO', color: '#ffaa00', bg: 'rgba(255,170,0,0.18)' };
+            case 'cataclysm': return { label: '👑 CATACLISMO', color: '#ff00aa', bg: 'rgba(255,0,170,0.22)' };
+            default: return { label: '⚡ ESPECIAL', color: '#ffaa00', bg: 'rgba(255,170,0,0.15)' };
+        }
+    }
+
+    resetHeroLoadout(heroId = null) {
+        const hid = heroId || this.getActiveHeroId();
+        const def = this.getDefaultLoadoutForHero(hid);
+        this.heroLoadouts[hid] = [...def];
+        this.saveEquipped(hid);
+        return this.heroLoadouts[hid];
+    }
+
+    drawLaneFretOverlay(ctx, laneIndex, bx, hitZoneY, isPressed, trackW) {
+        const skill = this.getEquippedSkill(laneIndex);
+        if (!skill || !ctx) return;
+        const combat = (typeof window !== 'undefined' && window.game) ? window.game.combat : null;
+        const currentMana = combat ? combat.rockMana : 100;
+        const hasMana = !skill.manaCost || currentMana >= skill.manaCost;
+
+        ctx.save();
+        // 1. Draw Skill Icon inside fret button
+        ctx.font = '13px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = hasMana ? 1.0 : 0.45;
+        ctx.fillText(skill.icon || '⚡', bx, hitZoneY);
+
+        // 2. Halo effect if ready special skill
+        if (hasMana && skill.manaCost > 0) {
+            const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+            const pulse = (Math.sin(now * 0.006 + laneIndex * 1.5) + 1) * 0.5;
+            ctx.strokeStyle = skill.color || '#00d4ff';
+            ctx.lineWidth = 1.5 + pulse * 1.5;
+            ctx.shadowColor = skill.color || '#00d4ff';
+            ctx.shadowBlur = 6 + pulse * 8;
+            ctx.beginPath();
+            ctx.arc(bx, hitZoneY, 19 + pulse * 2, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // 3. Mini Mana Badge underneath the target circle
+        const badgeY = hitZoneY + 27;
+        const badgeText = skill.manaCost > 0 
+            ? (hasMana ? `⚡ ${skill.manaCost} MP` : '⚡ SEM MP')
+            : 'BÁSICO';
+        const badgeColor = skill.manaCost > 0
+            ? (hasMana ? '#00ffff' : '#ff4444')
+            : '#00ff66';
+
+        ctx.font = 'bold 8.5px "Segoe UI", sans-serif';
+        const textMetrics = ctx.measureText(badgeText);
+        const bw = Math.max(38, textMetrics.width + 10);
+        const bh = 14;
+
+        ctx.fillStyle = hasMana ? 'rgba(10, 15, 28, 0.85)' : 'rgba(38, 10, 10, 0.88)';
+        ctx.strokeStyle = badgeColor;
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = hasMana ? 6 : 2;
+        ctx.shadowColor = badgeColor;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(bx - bw / 2, badgeY - bh / 2, bw, bh, 4);
+        } else {
+            ctx.rect(bx - bw / 2, badgeY - bh / 2, bw, bh);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = badgeColor;
+        ctx.shadowBlur = 0;
+        ctx.fillText(badgeText, bx, badgeY + 0.5);
+        ctx.restore();
+    }
 }
 
 window.skillSystem = new SkillSystem();

@@ -3365,6 +3365,20 @@ button.hero-roster-card {
     max-width: 100%;
 }
 
+.lane-skill-type-pill {
+    font-size: 8px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin: 2px 0 1px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .lane-skill-cost {
     font-size: 9px;
     font-weight: 800;
@@ -3373,8 +3387,31 @@ button.hero-roster-card {
 
 /* Skill Picker Modal */
 .skill-modal-dialog {
-    max-width: 420px;
+    max-width: 440px;
     max-height: 85vh;
+}
+
+.skill-modal-actions-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.skill-restore-btn {
+    background: rgba(0, 212, 255, 0.12);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    color: #00d4ff;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.skill-restore-btn:hover {
+    background: rgba(0, 212, 255, 0.25);
+    border-color: #00ffff;
 }
 
 .skill-picker-list {
@@ -3408,31 +3445,67 @@ button.hero-roster-card {
 .skill-card-choice.active {
     border-color: #00ff66;
     background: rgba(0, 255, 102, 0.12);
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
+}
+
+.skill-card-choice.blocked {
+    opacity: 0.72;
+    border-color: rgba(255, 170, 0, 0.4);
+    background: rgba(30, 20, 15, 0.85);
 }
 
 .skill-choice-icon {
     font-size: 26px;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 8px;
     flex-shrink: 0;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
 }
 
 .skill-choice-info {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
+}
+
+.skill-choice-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
 }
 
 .skill-choice-name {
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 800;
     color: #fff;
+}
+
+.skill-type-pill {
+    font-size: 8.5px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.skill-choice-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.skill-dmg-tag {
+    color: #ffaa00;
 }
 
 .skill-choice-desc {
@@ -3441,11 +3514,23 @@ button.hero-roster-card {
     line-height: 1.25;
 }
 
-.skill-choice-cost {
-    font-size: 10px;
+.skill-status-tag {
+    font-size: 9px;
     font-weight: 800;
-    color: #00d4ff;
+    padding: 2px 6px;
+    border-radius: 4px;
     align-self: flex-start;
+    margin-top: 2px;
+}
+
+.skill-status-tag.equipped {
+    background: rgba(0, 255, 102, 0.2);
+    color: #00ff66;
+}
+
+.skill-status-tag.blocked {
+    background: rgba(255, 170, 0, 0.2);
+    color: #ffcc00;
 }
 
 /* Responsive adjustment for small screens */
