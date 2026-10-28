@@ -299,6 +299,7 @@ class Game {
                     window.soundEngine.playGuitarChord(2);
                 }
                 this.renderHeroRoster();
+                this.renderLaneSkills();
             };
 
             card.onclick = chooseHero;
@@ -316,6 +317,7 @@ class Game {
         window.guitaristPool.setSelectedGuitarist(all[nextIdx].id);
         if (window.soundEngine) window.soundEngine.playGuitarChord(2);
         this.renderHeroRoster();
+        this.renderLaneSkills();
     }
 
     renderMapZombies() {
@@ -348,16 +350,18 @@ class Game {
 
         grid.innerHTML = '';
         const laneColors = ['#00ff66', '#ff0055', '#ffcc00', '#00d4ff'];
+        const hero = window.guitaristPool ? window.guitaristPool.getActiveGuitarist() : null;
+        const hid = hero ? hero.id : null;
 
         for (let l = 0; l < 4; l++) {
-            const skill = window.skillSystem.getEquippedSkill(l);
+            const skill = window.skillSystem.getEquippedSkill(l, hid);
             const slot = document.createElement('div');
             slot.className = `lane-skill-slot lane-${l}`;
             slot.innerHTML = `
                 <span class="lane-tag-num" style="color: ${laneColors[l]};">Trilho ${l + 1}</span>
                 <span class="lane-skill-icon">${skill.icon}</span>
                 <span class="lane-skill-title">${skill.name}</span>
-                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} Mana` : 'Grátis'}</span>
+                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} Mana` : 'Básico (0 MP)'}</span>
             `;
 
             slot.onclick = () => this.openSkillPickerModal(l);
@@ -374,27 +378,40 @@ class Game {
         if (!modal || !listEl) return;
 
         const laneNames = ['Trilho 1 (Verde)', 'Trilho 2 (Vermelho)', 'Trilho 3 (Amarelo)', 'Trilho 4 (Azul)'];
-        if (titleEl) titleEl.innerText = `⚡ Equipar no ${laneNames[laneIndex] || `Trilho ${laneIndex + 1}`}`;
+        const hero = window.guitaristPool ? window.guitaristPool.getActiveGuitarist() : null;
+        const hid = hero ? hero.id : null;
+        const heroName = hero ? hero.name : 'Guitarrista';
+        if (titleEl) titleEl.innerText = `⚡ ${laneNames[laneIndex] || `Trilho ${laneIndex + 1}`} • ${heroName}`;
 
-        const currentSkill = window.skillSystem.getEquippedSkill(laneIndex);
-        const allSkills = window.skillSystem.getAllSkills();
+        const currentSkill = window.skillSystem.getEquippedSkill(laneIndex, hid);
+        const heroSkills = window.skillSystem.getSkillsForHero(hid);
 
         listEl.innerHTML = '';
-        allSkills.forEach(s => {
+        heroSkills.forEach(s => {
             const isEquipped = (s.id === currentSkill.id);
+            const check = window.skillSystem.canEquipSkill(laneIndex, s.id, hid);
+            const isBlocked = !check.allowed;
+
             const card = document.createElement('div');
-            card.className = `skill-card-choice ${isEquipped ? 'active' : ''}`;
+            card.className = `skill-card-choice ${isEquipped ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
             card.innerHTML = `
                 <div class="skill-choice-icon">${s.icon}</div>
                 <div class="skill-choice-info">
                     <div class="skill-choice-name">${s.name} ${isEquipped ? '✓ (Equipada)' : ''}</div>
                     <div class="skill-choice-desc">${s.desc}</div>
-                    <span class="skill-choice-cost">${s.manaCost > 0 ? `⚡ Custo: ${s.manaCost} Rock Mana` : '⚡ Custo: 0 (Ataque Padrão)'}</span>
+                    <span class="skill-choice-cost" style="${isBlocked ? 'color: #ffaa00;' : ''}">${isBlocked ? '⚠️ Bloqueado: Mantenha ≥ 1 Ataque Básico' : (s.manaCost > 0 ? `⚡ Custo: ${s.manaCost} Rock Mana` : '⚡ Custo: 0 (Ataque Básico Padrão)')}</span>
                 </div>
             `;
 
             card.onclick = () => {
-                window.skillSystem.equipSkill(laneIndex, s.id);
+                if (!check.allowed) {
+                    this.showToast(check.reason);
+                    if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') {
+                        window.soundEngine.playMiss();
+                    }
+                    return;
+                }
+                window.skillSystem.equipSkill(laneIndex, s.id, hid);
                 if (window.soundEngine) window.soundEngine.playPowerChord();
                 modal.classList.remove('open');
                 this.renderLaneSkills();
@@ -404,6 +421,18 @@ class Game {
         });
 
         modal.classList.add('open');
+    }
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'studio-toast';
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2600);
     }
 
     async populateSongDropdown() {

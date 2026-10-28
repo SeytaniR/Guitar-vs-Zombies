@@ -297,10 +297,10 @@ class CombatSystem {
                 this.rockMana -= skill.manaCost;
                 this.addFloatingText(`${skill.icon} ${skill.name}`, heroPos.x + 20, heroPos.y - 50, skill.color || '#ff00ff', true);
             } else {
-                // Insufficient Mana: replaced by reduced basic attack (damage * 0.5)
+                // Insufficient Mana: note becomes a common basic attack (no skill applied, normal basic damage, 0 MP spent)
                 skillToApply = null;
-                manaPenalty = 0.5;
-                this.addFloatingText('⚡ SEM MANA! (50%)', heroPos.x, heroPos.y - 45, '#00d4ff', false);
+                manaPenalty = 1.0;
+                this.addFloatingText('⚡ SEM MP! (BÁSICO)', heroPos.x, heroPos.y - 45, '#00d4ff', false);
             }
         }
 

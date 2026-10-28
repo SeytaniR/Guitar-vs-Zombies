@@ -27,6 +27,26 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.5.8] - 2026-10-27 (Acervo de Habilidades Únicas por Guitarrista, Regra do Palco e Fallback de Mana)
+**Habilidades Específicas, Restrição de Slots e Sistema de Mana**
+- **Acervo de Habilidades Únicas por Guitarrista (`js/skills.js`):**
+  - Implementado acervo exclusivo com pelo menos 5 habilidades únicas para cada um dos 6 guitarristas (30 habilidades exclusivas + 1 Ataque Básico universal = 31 habilidades no total):
+    - **Johnny Blaze:** `blaze_power_chord` (8 MP, 2.2x), `blaze_garage_shred` (11 MP, 1.4x +35% vel.), `blaze_stage_dive` (13 MP, 1.8x + 80% AoE), `blaze_sound_concussion` (10 MP, 1.25x + 2.0s stun), `blaze_adrenaline_surge` (12 MP, 1.1x + 22 HP cura).
+    - **Vulkan Ironhead:** `vulkan_flamethrower` (10 MP, 1.35x + 26 DPS burn), `vulkan_v8_backfire` (12 MP, 2.15x + 35px knockback), `vulkan_napalm_wave` (14 MP, 1.5x + 16 DPS AoE burn), `vulkan_molten_pick` (9 MP, 1.85x perfura armadura), `vulkan_ember_shield` (13 MP, 0.85x + 42 HP escudo).
+    - **Dr. Radix:** `radix_caustic_spray` (8 MP, 1.6x + 20 corrosivo), `radix_uranium_ray` (13 MP, 2.35x raio penetrante), `radix_decay_cloud` (11 MP, 1.0x + 50% slow AoE), `radix_mutant_burst` (14 MP, 1.75x + 70% AoE tóxico), `radix_antidote_infusion` (12 MP, 0.85x + 26 HP cura).
+    - **Cypher-7:** `cypher_tesla_chain` (10 MP, 1.65x chain a 2 zumbis), `cypher_emp_stun` (12 MP, 1.3x + 2.4s EMP stun), `cypher_neural_overclock` (11 MP, 1.35x + 55% vel.), `cypher_plasma_lance` (14 MP, 2.4x crítico plasma), `cypher_cyber_barrier` (13 MP, 0.9x + 45 HP escudo).
+    - **Kragthor Titan:** `kragthor_earthquake` (11 MP, 1.75x + 2.2s stun), `kragthor_magma_hammer` (14 MP, 2.6x + 42px knockback), `kragthor_war_roar` (10 MP, 1.25x + 55% slow AoE), `kragthor_stone_fortress` (15 MP, 0.8x + 60 HP escudo), `kragthor_valhalla_thunder` (16 MP, 2.2x + 90% AoE trovão).
+    - **Roxie Anarchy:** `roxie_riot_riff` (9 MP, 1.85x riot strike), `roxie_double_cleave` (13 MP, 2.45x + 24 DPS bleed), `roxie_vampiric_drain` (12 MP, 1.5x + 50% lifesteal), `roxie_anarchy_frenzy` (14 MP, 1.45x + 50% vel. e reembolso +10 MP), `roxie_chaos_cataclysm` (17 MP, 2.8x + 35px knockback e 75% AoE).
+    - **Ataque Básico Universal:** `basic_strike` ("Ataque Sônico", 0 MP, 1.0x dano).
+- **Regra Obrigatória do Palco (`js/skills.js`, `js/main.js` & `index.html`):**
+  - O jogador é estritamente obrigado a manter pelo menos 1 slot equipado com o Ataque Básico (`basic_strike`).
+  - O sistema impede a troca do último slot básico por uma habilidade especial, exibindo bloqueio visual no modal e toast com feedback amigável.
+- **Sistema de Consumo de Mana & Fallback para Ataque Básico Comum (`js/combat.js`):**
+  - Cada habilidade especial gasta a quantidade de Rock Mana especificada ao ser executada.
+  - Se uma nota for tocada sem MP suficiente, a nota é convertida automaticamente em um ataque básico comum (1.0x dano, sem penalidade de dano), consome 0 MP e emite o texto `⚡ SEM MP! (BÁSICO)`.
+- **Testes Automatizados:** Expandido para 256 testes passando com 100% de sucesso (`test-procedural.js`).
+- **Cache-Busting v=29:** Atualizado em `index.html`.
+
 ### [v1.5.7] - 2026-10-27 (Menu de Edição Exclusivo, Banners Multikill Radicais, Ritmo de Kills e Screen Shake)
 **Design de Interface & Efeitos Visuais de Adrenalina**
 - **Remoção de Botões de Edição Durante o Jogo (`index.html` & `js/main.js`):**

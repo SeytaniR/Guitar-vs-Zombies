@@ -192,39 +192,50 @@ console.log('\n4. Testing 4-Lane Skill System & Rock Mana...');
 const skillSys = new SkillSystem();
 window.skillSystem = skillSys;
 
-assert(skillSys.getAllSkills().length === 8, 'All 8 skills are registered in SkillSystem');
+assert(skillSys.getAllSkills().length === 31, 'All 31 skills are registered in SkillSystem (30 unique + 1 universal basic)');
 
-const defaultEquipped = skillSys.getEquippedSkills();
+const defaultEquipped = skillSys.getEquippedSkills('johnny_blaze');
 assert(defaultEquipped.length === 4, '4 lanes are equipped');
-assert(defaultEquipped[0].id === 'basic_strike', 'Default lane 0 is Basic Strike');
+assert(skillSys.hasAtLeastOneBasicStrike(skillSys.loadEquipped('johnny_blaze')), 'Default loadout maintains at least one basic strike');
 
-// Equip custom skills to lanes
-skillSys.equipSkillToLane(0, 'power_chord');
-skillSys.equipSkillToLane(1, 'healing_melody');
-skillSys.equipSkillToLane(2, 'acoustic_stun');
-skillSys.equipSkillToLane(3, 'pyro_riff');
+// Check unique skills per guitarist (at least 5 unique each)
+const heroCatalogues = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy'];
+heroCatalogues.forEach(hid => {
+    const uniqueSkills = skillSys.getSkillsForHero(hid).filter(s => s.id !== 'basic_strike');
+    assert(uniqueSkills.length >= 5, `Hero ${hid} has at least 5 unique skills (${uniqueSkills.length} found)`);
+});
 
-const updatedEquipped = skillSys.getEquippedSkills();
-assert(updatedEquipped[0].id === 'power_chord', 'Lane 0 equipped with Power Chord');
-assert(updatedEquipped[1].id === 'healing_melody', 'Lane 1 equipped with Healing Melody');
-assert(updatedEquipped[2].id === 'acoustic_stun', 'Lane 2 equipped with Acoustic Stun');
-assert(updatedEquipped[3].id === 'pyro_riff', 'Lane 3 equipped with Pyro Riff');
+// Test stage rule: player cannot equip 4 special skills; at least 1 must remain basic strike
+skillSys.equipSkill(3, 'basic_strike', 'johnny_blaze');
+skillSys.equipSkill(0, 'blaze_power_chord', 'johnny_blaze');
+skillSys.equipSkill(1, 'blaze_garage_shred', 'johnny_blaze');
+skillSys.equipSkill(2, 'blaze_stage_dive', 'johnny_blaze');
 
-// Simulate Mana and Skill Execution
-let currentRockMana = 30;
-let maxRockMana = 100;
+// Slot 3 is currently basic_strike. Trying to replace slot 3 with a special skill MUST be blocked!
+const checkBlock = skillSys.canEquipSkill(3, 'blaze_sound_concussion', 'johnny_blaze');
+assert(checkBlock.allowed === false, 'canEquipSkill() blocks equipping 4th special skill (rule: must keep >= 1 basic strike)');
+assert(checkBlock.reason && checkBlock.reason.includes('Ataque Básico'), 'Blocked reason specifies keeping at least 1 Ataque Básico');
 
+const equipBlockedResult = skillSys.equipSkill(3, 'blaze_sound_concussion', 'johnny_blaze');
+assert(equipBlockedResult === false, 'equipSkill() returns false when stage rule is violated');
+assert(skillSys.getEquippedSkill(3, 'johnny_blaze').id === 'basic_strike', 'Slot 3 remains basic_strike');
+
+// Replacing slot 3 with basic_strike is allowed
+const allowBasic = skillSys.canEquipSkill(3, 'basic_strike', 'johnny_blaze');
+assert(allowBasic.allowed === true, 'canEquipSkill() permits equipping basic_strike');
+
+// Simulate Mana and Skill Execution in Combat
 function simulateSkillExecution(lane, baseDamage, currentMana) {
-    const skill = skillSys.getSkillForLane(lane);
+    const skill = skillSys.getEquippedSkill(lane, 'johnny_blaze');
     const manaCost = skill ? skill.manaCost : 0;
     
     if (manaCost > 0 && currentMana < manaCost) {
-        // Insufficient mana fallback: basic strike with 0.5x damage
+        // Insufficient mana: note becomes a common basic attack! (1.0x damage, 0 mana spent)
         return {
-            executedSkill: 'insufficient_mana_fallback',
-            damage: Math.round(baseDamage * 0.5),
+            executedSkill: 'common_basic_attack',
+            damage: Math.round(baseDamage * 1.0),
             manaSpent: 0,
-            feedback: '⚡ SEM MANA! (50%)'
+            feedback: '⚡ SEM MP! (BÁSICO)'
         };
     } else {
         return {
@@ -238,14 +249,14 @@ function simulateSkillExecution(lane, baseDamage, currentMana) {
 
 // Case A: Lane 0 (Power Chord, cost 8) with 30 mana -> Should succeed
 const execSuccess = simulateSkillExecution(0, 50, 30);
-assert(execSuccess.executedSkill === 'power_chord' && execSuccess.damage === 110, `Power chord executed with full 2.2x damage (${execSuccess.damage})`);
+assert(execSuccess.executedSkill === 'blaze_power_chord' && execSuccess.damage === 110, `Power chord executed with full 2.2x damage (${execSuccess.damage})`);
 assert(execSuccess.manaSpent === 8, '8 mana spent');
 
-// Case B: Lane 0 (Power Chord, cost 8) with only 3 mana -> Should fallback to 0.5x basic strike!
+// Case B: Lane 0 (Power Chord, cost 8) with only 3 mana -> Becomes common basic attack (deals 1.0x basic damage, 0 mana spent)
 const execFallback = simulateSkillExecution(0, 50, 3);
-assert(execFallback.executedSkill === 'insufficient_mana_fallback', 'Fallback triggered when mana is insufficient');
-assert(execFallback.damage === 25, `Damage reduced to 50% (25 vs 50 base): ${execFallback.damage}`);
-assert(execFallback.manaSpent === 0, 'Zero mana deducted on fallback');
+assert(execFallback.executedSkill === 'common_basic_attack', 'Note becomes common basic attack when mana is insufficient');
+assert(execFallback.damage === 50, `Deals common basic attack damage (50 vs 50 base): ${execFallback.damage}`);
+assert(execFallback.manaSpent === 0, 'Zero mana deducted on insufficient mana fallback');
 
 // ==========================================
 // TEST 5: ATTACK SPEED & RHYTHM ACCURACY MODIFIERS
@@ -600,6 +611,65 @@ assert(combat.fx.shakePower >= 4, 'High combo (10 streak) triggered adrenaline s
 
 // 6. SoundEngine playMultiKill definition
 assert(audioCode.includes('playMultiKill'), 'SoundEngine defines playMultiKill synthesizer method');
+
+// ==========================================
+// TEST 11: GUITARIST UNIQUE SKILL CATALOGUES, MANA SPENDING & BASIC STRIKE RULE
+// ==========================================
+console.log('\n11. Testing Unique Guitarist Skills, Mana Spending & Stage Rules...');
+
+// 1. Verify 5+ skills per guitarist
+const allHeroes = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy'];
+allHeroes.forEach(hid => {
+    const list = skillSys.getSkillsForHero(hid);
+    const uniqueOnly = list.filter(s => s.id !== 'basic_strike');
+    assert(uniqueOnly.length >= 5, `Guitarist ${hid} has ${uniqueOnly.length} unique skills (>= 5 required)`);
+    // Verify each skill has required properties
+    uniqueOnly.forEach(s => {
+        assert(s.manaCost > 0, `Skill ${s.id} has manaCost > 0 (${s.manaCost})`);
+        assert(s.damageMult > 0, `Skill ${s.id} has valid damageMult (${s.damageMult})`);
+        assert(typeof s.apply === 'function', `Skill ${s.id} has apply function`);
+    });
+});
+
+// 2. In-Battle Mana Deduction vs Common Basic Attack Fallback
+combat.resetBattle();
+skillSys.equipSkill(0, 'blaze_power_chord', 'johnny_blaze');
+combat.rockMana = 20;
+
+// Test 2.1: Sufficient Mana (20 MP >= 8 MP cost)
+combat.pendingAttackModifiers = [];
+combat.registerRhythmNote('great', 0);
+assert(combat.pendingAttackModifiers.length === 1, 'Attack modifier queued for great note');
+const suffMod = combat.pendingAttackModifiers[0];
+assert(suffMod.skill && suffMod.skill.id === 'blaze_power_chord', 'Skill power_chord applied when mana is sufficient');
+assert(combat.rockMana <= (20 - 8 + 5), 'Mana was deducted for skill execution');
+
+// Test 2.2: Insufficient Mana (set rockMana to 1 MP, skill costs 8 MP)
+combat.rockMana = 1;
+combat.pendingAttackModifiers = [];
+combat.registerRhythmNote('good', 0);
+assert(combat.pendingAttackModifiers.length === 1, 'Attack modifier queued for note with low mana');
+const lowManaMod = combat.pendingAttackModifiers[0];
+assert(lowManaMod.skill === null, 'Note became a common basic attack (skill is null) when MP is insufficient');
+assert(Math.abs(lowManaMod.mult - 1.0) < 0.001, 'Deals full standard basic attack damage (1.0x mult, no 50% penalty)');
+assert(combat.rockMana >= 1, 'No skill mana deducted on insufficient MP');
+
+// 3. Stage Rule Enforcement Across Guitarists
+allHeroes.forEach(hid => {
+    const loadout = skillSys.loadEquipped(hid);
+    assert(skillSys.hasAtLeastOneBasicStrike(loadout), `Guitarist ${hid} loadout satisfies Stage Rule (has at least 1 basic strike)`);
+    
+    // Simulate equipping slots 0, 1, 2 with special skills
+    const heroSkills = skillSys.getSkillsForHero(hid).filter(s => s.id !== 'basic_strike');
+    skillSys.equipSkill(0, heroSkills[0].id, hid);
+    skillSys.equipSkill(1, heroSkills[1].id, hid);
+    skillSys.equipSkill(2, heroSkills[2].id, hid);
+    skillSys.equipSkill(3, 'basic_strike', hid);
+
+    // Attempting to replace the sole basic strike in slot 3 with another special skill MUST be blocked
+    const blockRes = skillSys.canEquipSkill(3, heroSkills[3].id, hid);
+    assert(blockRes.allowed === false, `Stage Rule correctly blocks replacing last basic strike for ${hid}`);
+});
 
 
 // Summary
