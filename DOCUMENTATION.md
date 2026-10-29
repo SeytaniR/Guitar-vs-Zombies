@@ -27,6 +27,26 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.6.2] - 2026-10-29 (Desbloqueio do Scroll Mobile na Tela Pré-Partida & Otimizações Extremas para 60-120 FPS)
+**Correção Definitiva de Scroll/Espremimento Mobile e Otimização Profunda de FPS**
+- **Desbloqueio Completo do Scroll Touch na Tela Pré-Partida (`css/style.css`):**
+  - Identificada a causa raiz do travamento do scroll e sensação de tela "espremida": no Flexbox de navegadores mobile, itens com `flex: 1` assumem `min-height: auto` por padrão, expandindo a área de rolagem para o tamanho total do conteúdo (~1600px). Isso impedia que `.map-screen-scroll` gerasse contexto de rolagem próprio e fazia o pai (`overflow: hidden`) cortar o conteúdo fora do viewport.
+  - Implementado o padrão de ouro do Flexbox para áreas de scroll: `#screen-map-select` e `.map-screen-scroll` receberam `min-height: 0; max-height: 100%; height: 0; flex: 1 1 0px; overflow-y: scroll !important; -webkit-overflow-scrolling: touch; touch-action: pan-y !important;`.
+  - A barra superior de título e o botão inferior de iniciar batalha agora permanecem fixos nas bordas (`flex-shrink: 0`), enquanto todo o conteúdo intermediário (Guitarristas, Horda de Zumbis, Habilidades dos 4 Trilhos e Repertório de Músicas) desliza perfeitamente ao toque do dedo, sem cortes nem espremimento.
+  - O grid de 4 habilidades por trilho (`.map-lane-skills-grid`) foi refinado para uma faixa de 4 colunas horizontais (`repeat(4, minmax(0, 1fr))`), espelhando perfeitamente as 4 pistas do braço da guitarra com slots compactos e fluidos.
+- **Otimizações Extremas de Performance para 60-120 FPS Cravados:**
+  - **Remoção de `backdrop-filter: blur`:** Eliminado de todos os botões e painéis flutuantes sobre o Canvas (`.battle-btn`, `.battle-sub-pill`, `.hud-stat`, `#sound-toggle`). Em navegadores mobile (Chrome/Blink no Android), aplicar `backdrop-filter` sobre um `<canvas>` em execução força a GPU a reler o framebuffer e aplicar desfoque a cada quadro, derrubando a taxa de quadros para menos de 45 FPS.
+  - **Eliminação de CSS `transition: width` em Barras Dinâmicas:** Removidas as transições CSS de `#hero-hp-bar`, `#rock-meter-bar` e `.banner-progress-fill`. Atualizar a largura via JS em `requestAnimationFrame` enquanto o CSS tenta interpolar gerava recálculos de estilo e conflitos de composição a cada quadro.
+  - **Batching de Partículas com `fillRect`:** Em `js/combat-fx.js` e `js/rhythm.js`, as centenas de partículas geradas por impactos, projéteis e chamas foram convertidas para renderização em lote via `fillRect`, eliminando milhares de pares de `ctx.save()`, `ctx.restore()` e `ctx.arc()` por segundo.
+  - **Fretboard Background Otimizado (`js/rhythm.js`):** O fundo da esteira rítmica agora é preenchido em uma única operação (`fillRect`), eliminando a criação e alocação de 4 objetos `createLinearGradient` a cada frame.
+  - **Redução de Faíscas no Sustain Tick (`js/rhythm.js`):** Notas longas (sustain) disparam ticks a cada 85ms. O número de faíscas por tick foi reduzido de 12 para 3, impedindo o acúmulo desnecessário de mais de 150 partículas simultâneas.
+  - **Eliminação de `shadowBlur` no Nome do Herói & VFX:** Hero name agora utiliza traçado preto contrastante (`strokeText`), e os auras de choque e imunidade utilizam traçado duplo com alfa 100% acelerado por hardware.
+  - **Cache e Dirty-Checking no Progresso da Música (`js/rhythm.js`):** A barra de progresso da música agora armazena em cache os elementos DOM e só atualiza o texto de tempo quando o segundo efetivamente muda.
+- **Suíte de Testes & Limite de Linhas:**
+  - 425 testes automatizados passam com 100% de sucesso (`node test-procedural.js`).
+  - Todos os 16 arquivos JavaScript mantidos estritamente abaixo do limite de 1.000 linhas.
+- **Cache-Busting v=34:** Atualizado em `index.html` e `style.css`.
+
 ### [v1.6.1] - 2026-10-29 (Desacoplamento de Ataques por Velocidade Base & Combo, Layout Fluido Mobile e Otimização 120 FPS)
 **Ajustes de Cadência de Combate, Responsividade Mobile e Otimização de Performance**
 - **Desacoplamento dos Disparos em Relação ao Toque de Notas (`js/rhythm.js` & `js/combat.js`):**

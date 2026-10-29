@@ -339,8 +339,8 @@ class RhythmSystem {
         }
     }
 
-    createHitSparks(x, y, color, isCrit) {
-        const count = isCrit ? 22 : 12;
+    createHitSparks(x, y, color, isCrit, sparkCount = null) {
+        const count = sparkCount || (isCrit ? 14 : 7);
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = 60 + Math.random() * 180;
@@ -350,8 +350,8 @@ class RhythmSystem {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 20,
                 color: color,
-                size: 2.5 + Math.random() * 3,
-                life: 0.45
+                size: 2.2 + Math.random() * 2.5,
+                life: 0.35
             });
         }
     }
@@ -496,7 +496,7 @@ class RhythmSystem {
                     if (this.songStats) {
                         this.songStats.sustainTicks = (this.songStats.sustainTicks || 0) + 1;
                     }
-                    this.createHitSparks(noteX, hitZoneY, this.colors[l].main, false);
+                    this.createHitSparks(noteX, hitZoneY, this.colors[l].main, false, 3);
                 }
 
                 // Natural completion when held to duration
@@ -552,14 +552,11 @@ class RhythmSystem {
         const hitZoneY = this.getHitZoneY();
 
         // 1. Draw Fretboard Background & Strings
+        this.ctx.fillStyle = '#0f0f18';
+        this.ctx.fillRect(0, 0, cw, ch);
+
         for (let i = 0; i < this.tracks; i++) {
             const tx = i * trackW;
-
-            const laneGrad = this.ctx.createLinearGradient(0, 0, 0, ch);
-            laneGrad.addColorStop(0, '#0d0d15');
-            laneGrad.addColorStop(1, '#181824');
-            this.ctx.fillStyle = laneGrad;
-            this.ctx.fillRect(tx, 0, trackW, ch);
 
             if (this.laneFlashes[i] > 0) {
                 this.ctx.fillStyle = this.colors[i].glow;
@@ -758,16 +755,15 @@ class RhythmSystem {
             this.ctx.restore();
         });
 
-        // 5. Hit Sparks
-        this.particles.forEach(p => {
-            this.ctx.save();
+        // 5. Hit Sparks (Fast GPU rect batch)
+        this.ctx.save();
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
             this.ctx.fillStyle = p.color;
-            this.ctx.globalAlpha = p.life / 0.45;
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.restore();
-        });
+            this.ctx.globalAlpha = Math.max(0, p.life / 0.35);
+            this.ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        }
+        this.ctx.restore();
 
         // 6. Floating Ratings
         this.floatingRatings.forEach(r => {
@@ -956,13 +952,28 @@ class RhythmSystem {
 
     updateCustomSongProgressBar() {
         if (!this.isCustomSongPlaying || !this.currentSong) return;
-        const bar = document.getElementById('active-song-progress-fill'), timeEl = document.getElementById('active-song-time');
+        if (!this.hudBarCache) {
+            this.hudBarCache = {
+                bar: document.getElementById('active-song-progress-fill'),
+                timeEl: document.getElementById('active-song-time'),
+                lastW: '',
+                lastSec: -1
+            };
+        }
+        const h = this.hudBarCache;
         const cur = (this.songAudio && !this.songAudio.paused && this.songAudio.currentTime > 0) ? this.songAudio.currentTime : (this.customSongTime || 0);
         const total = Math.max(10, this.currentSong.duration || 30);
-        if (bar) bar.style.width = `${Math.min(100, Math.max(0, (cur / total) * 100))}%`;
-        if (timeEl) {
+        const pct = Math.min(100, Math.max(0, Math.round((cur / total) * 100)));
+        const w = `${pct}%`;
+        if (h.bar && w !== h.lastW) {
+            h.lastW = w;
+            h.bar.style.width = w;
+        }
+        const curSec = Math.floor(cur);
+        if (h.timeEl && curSec !== h.lastSec) {
+            h.lastSec = curSec;
             const fmt = s => `${Math.floor(s / 60)}:${Math.floor(s % 60) < 10 ? '0' : ''}${Math.floor(s % 60)}`;
-            timeEl.innerText = `${fmt(cur)} / ${fmt(total)}`;
+            h.timeEl.innerText = `${fmt(cur)} / ${fmt(total)}`;
         }
     }
 

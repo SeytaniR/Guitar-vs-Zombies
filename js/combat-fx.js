@@ -455,16 +455,13 @@ class CombatFX {
             ctx.restore();
         });
 
-        // Particles
-        this.particles.forEach(pt => {
-            ctx.save();
+        // Particles (Fast GPU rect batch)
+        for (let i = 0; i < this.particles.length; i++) {
+            const pt = this.particles[i];
             ctx.fillStyle = pt.color;
             ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        });
+            ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
+        }
         ctx.restore();
 
         // Floating Text
@@ -507,9 +504,6 @@ class CombatFX {
             ctx.fillStyle = flareGrad;
             ctx.fillRect(-flareW / 2, -35, flareW, 70);
 
-            ctx.shadowColor = b.color;
-            ctx.shadowBlur = 18;
-
             ctx.font = "900 italic 28px 'Impact', 'Arial Black', sans-serif";
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -525,7 +519,6 @@ class CombatFX {
             ctx.strokeStyle = '#ffffff';
             ctx.strokeText(b.title, 0, -6);
 
-            ctx.shadowBlur = 8;
             ctx.font = "bold italic 11px 'Segoe UI', 'Impact', sans-serif";
             ctx.lineWidth = 3.5;
             ctx.strokeStyle = '#000000';
@@ -539,13 +532,12 @@ class CombatFX {
 
     drawAmbientEmbers(ctx) {
         ctx.save();
-        this.ambientEmbers.forEach(em => {
+        for (let i = 0; i < this.ambientEmbers.length; i++) {
+            const em = this.ambientEmbers[i];
             ctx.fillStyle = em.hue;
             ctx.globalAlpha = em.alpha;
-            ctx.beginPath();
-            ctx.arc(em.x, em.y, em.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
+            ctx.fillRect(em.x, em.y, em.size, em.size);
+        }
         ctx.restore();
     }
 
@@ -585,12 +577,15 @@ class CombatFX {
         const pulse = Math.sin(time / 120) * 3;
         const radius = 28 + pulse;
 
+        // Fast GPU dual-stroke halo
         ctx.beginPath();
         ctx.arc(x, y, radius, -Math.PI * 0.45, Math.PI * 0.45);
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+        ctx.lineWidth = 7;
+        ctx.stroke();
+
         ctx.strokeStyle = '#00a2ff';
         ctx.lineWidth = 3.5;
-        ctx.shadowColor = '#00f0ff';
-        ctx.shadowBlur = 12;
         ctx.stroke();
 
         ctx.beginPath();
@@ -607,10 +602,14 @@ class CombatFX {
         const pulse = (Math.sin(time / 90) + 1) * 0.5;
         ctx.beginPath();
         ctx.arc(x, y, 32 + pulse * 6, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 204, 0, ${0.4 + pulse * 0.5})`;
+
+        // Fast GPU dual-stroke aura
+        ctx.strokeStyle = `rgba(255, 204, 0, ${0.2 + pulse * 0.25})`;
+        ctx.lineWidth = 7;
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgba(255, 204, 0, ${0.6 + pulse * 0.4})`;
         ctx.lineWidth = 3;
-        ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = 15;
         ctx.stroke();
         ctx.restore();
     }

@@ -912,13 +912,11 @@ class CombatSystem {
         // 4. Acid Puddles
         this.fx.drawAcidPuddles(this.ctx);
 
-        // 5. Draw Zombies (Sorted by depth)
-        const sortedZombies = [...this.entities.zombies].sort((a, b) => {
-            const ay = a.y + (a.jumpArcY || 0);
-            const by = b.y + (b.jumpArcY || 0);
-            return ay - by;
-        });
-        sortedZombies.forEach(z => z.draw(this.ctx, this.assets));
+        // 5. Draw Zombies (Sorted by depth without per-frame array allocation)
+        if (this.entities.zombies.length > 1) {
+            this.entities.zombies.sort((a, b) => (a.y + (a.jumpArcY || 0)) - (b.y + (b.jumpArcY || 0)));
+        }
+        this.entities.zombies.forEach(z => z.draw(this.ctx, this.assets));
 
         // 6. Draw Hero
         const activeSheet = this.getActiveHeroSheet();
@@ -941,10 +939,11 @@ class CombatSystem {
         if (activeHero) {
             this.ctx.save();
             this.ctx.font = "bold 9px 'Segoe UI', sans-serif";
-            this.ctx.fillStyle = activeHero.accentColor || '#ffaa00';
             this.ctx.textAlign = 'center';
-            this.ctx.shadowColor = 'rgba(0,0,0,0.8)';
-            this.ctx.shadowBlur = 4;
+            this.ctx.lineWidth = 2.5;
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.strokeText(activeHero.name, heroPos.x + 8, heroPos.y - 42);
+            this.ctx.fillStyle = activeHero.accentColor || '#ffaa00';
             this.ctx.fillText(activeHero.name, heroPos.x + 8, heroPos.y - 42);
             this.ctx.restore();
         }
