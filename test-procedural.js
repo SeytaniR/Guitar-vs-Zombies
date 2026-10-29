@@ -727,6 +727,47 @@ const roxiePool = pool.guitarists.find(g => g.id === 'roxie_anarchy');
 assert(roxiePool && roxiePool.instrument.toLowerCase().includes('guitarra'), `Roxie instrument is an electric guitar ("${roxiePool ? roxiePool.instrument : ''}")`);
 assert(!roxiePool.instrument.toLowerCase().includes('machado'), 'Roxie instrument does not mention "machado"');
 
+// 4.7. Screen Isolation & Pre-Battle Responsiveness Regression Tests
+console.log('\n14. Testing Screen Isolation, Pre-Battle Layout & Modal CSS...');
+const htmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
+const cssContent = fs.readFileSync(path.resolve(__dirname, 'css/style.css'), 'utf8');
+const mainJsContent = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
+
+// Screen Isolation
+assert(cssContent.includes('.game-screen {\n    display: none !important;'), 'CSS enforces .game-screen { display: none !important; }');
+assert(cssContent.includes('.game-screen.active {\n    display: flex !important;'), 'CSS enforces .game-screen.active { display: flex !important; }');
+assert(!cssContent.includes('#screen-map-select {\n    background: radial-gradient(circle at 50% 20%, #171026 0%, #0a0812 70%, #040308 100%);\n    display: flex;'), '#screen-map-select does not hardcode display: flex in ID rule');
+assert(mainJsContent.includes("this.switchScreen('menu');"), "main.js constructor enforces switchScreen('menu') on startup");
+
+// HTML Initial State
+assert(htmlContent.includes('id="screen-main-menu" class="game-screen active"'), 'index.html initializes #screen-main-menu as only active screen');
+assert(htmlContent.includes('id="screen-map-select" class="game-screen"'), 'index.html initializes #screen-map-select as inactive');
+assert(htmlContent.includes('id="screen-battle" class="game-screen"'), 'index.html initializes #screen-battle as inactive');
+
+// Pre-Battle Scrolling & Fluid Layout
+assert(cssContent.includes('.map-screen-scroll {\n    flex: 1 1 0%;\n    min-height: 0;\n    overflow-y: auto !important;'), '.map-screen-scroll uses flex: 1 1 0% with overflow-y: auto');
+assert(cssContent.includes('touch-action: pan-y !important;'), '.map-screen-scroll enforces touch-action: pan-y !important');
+assert(htmlContent.includes('class="hero-showcase-top-row"'), 'Hero showcase uses top-row for portrait and names');
+assert(cssContent.includes('.map-heroes-roster-grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));'), '.map-heroes-roster-grid uses 3 columns on mobile to prevent overflow');
+assert(cssContent.includes('.map-lane-skills-grid {\n    display: grid;\n    grid-template-columns: repeat(2, minmax(0, 1fr));'), '.map-lane-skills-grid uses 2 columns on mobile to ensure readable cards');
+
+// Skill Picker Modal CSS
+assert(cssContent.includes('.game-modal,\n.skill-modal-overlay {\n    position: fixed;'), 'CSS defines .game-modal and .skill-modal-overlay with position: fixed');
+assert(cssContent.includes('.game-modal.open,\n.skill-modal-overlay.open {\n    display: flex !important;'), 'CSS defines .game-modal.open with display: flex !important');
+assert(htmlContent.includes('id="skill-picker-modal" class="game-modal skill-modal-overlay"'), 'index.html includes skill-modal-overlay on #skill-picker-modal');
+
+// Cache Buster Version
+assert(htmlContent.includes('css/style.css?v=35'), 'index.html links style.css with v=35');
+assert(htmlContent.includes('js/main.js?v=35'), 'index.html links main.js with v=35');
+assert(htmlContent.includes('v1.6.3 (Build 35)'), 'index.html footer specifies v1.6.3 (Build 35)');
+
+// Zero God Object rule check
+const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));
+allJsFiles.forEach(f => {
+    const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;
+    assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
+});
+
 // Summary
 console.log('\n==========================================');
 console.log(`TOTAL TESTS: ${testsPassed + testsFailed}`);

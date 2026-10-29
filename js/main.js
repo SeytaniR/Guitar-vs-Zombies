@@ -19,6 +19,7 @@ class Game {
         this.setupScreenNavigation();
         this.setupBattleControls();
         this.setupAudioGlobalUnlock();
+        this.switchScreen('menu');
         this.start();
     }
 
@@ -83,7 +84,7 @@ class Game {
             this.combat.isGameOver = false;
             this.rhythm.stopCustomSong();
             this.updateMenuHUD();
-            ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal'].forEach(id => {
+            ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal', 'skill-picker-modal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.remove('open');
             });

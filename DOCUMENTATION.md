@@ -27,6 +27,30 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.6.3] - 2026-10-29 (Correção Definitiva de Isolamento de Telas, Layout Fluido Mobile AAA & Modal de Habilidades)
+**Eliminação do Vazamento de Telas no Menu, Desbloqueio Total de Scroll e Responsividade Perfeita**
+- **Isolamento Estrito das Telas e Eliminação do Vazamento no Menu Inicial:**
+  - *Causa Raiz Identificada:* A regra `#screen-map-select` possuía seletor por ID com `display: flex;`, vencendo a especificidade da classe `.game-screen { display: none; }`. Além disso, o construtor da classe `Game` inicializava `this.currentScreen = 'menu'` sem invocar `this.switchScreen('menu')`. Como consequência, o navegador renderizava tanto o Menu Inicial quanto a Tela de Pré-Batalha ao mesmo tempo no carregamento inicial da página dentro de `#game-container`, comprimindo ambas verticalmente para ~50% de altura e exibindo botões e elementos quebrados na parte inferior da tela inicial.
+  - *Correção Definitiva:*
+    - `.game-screen` agora possui `display: none !important; width: 100%; height: 100%; flex: 1 1 0%; min-height: 0; max-height: 100%; overflow: hidden; box-sizing: border-box;`.
+    - `.game-screen.active` possui `display: flex !important;`.
+    - A declaração `display: flex;` foi completamente removida da regra de ID `#screen-map-select`.
+    - O construtor de `Game` em `js/main.js` agora invoca explicitamente `this.switchScreen('menu')` no ciclo de vida de inicialização, garantindo que desde o primeiro frame apenas o Menu Inicial esteja visível.
+- **Reformulação Responsiva Completa da Tela de Pré-Batalha (`#screen-map-select`):**
+  - *Causa Raiz de Espremimento e Falta de Scroll:* `.map-screen-scroll` possuía `height: 0;`, e o grid fixo de 6 colunas do catálogo de heróis ultrapassava 390px de largura somando padding e bordas, provocando transbordamento horizontal (*overflow-x*) em celulares (como Xiaomi 14 Pro, ~393px de largura) e travando a rolagem vertical suave do navegador.
+  - *Showcase de Herói Espaçoso e Legível:* O cartão `#map-selected-hero-showcase` foi reestruturado com uma linha superior (`.hero-showcase-top-row`) para o retrato (64x64px), nome, subtítulo e instrumento. O painel da habilidade passiva e o painel de progressão de nível com o botão "⬆️ SUBIR NÍVEL" agora ocupam a largura total do cartão abaixo do topo, eliminando qualquer espremimento de texto e proporcionando um alvo de toque amplo e confortável.
+  - *Roster de Guitarristas Fluido:* O grid `.map-heroes-roster-grid` passa a exibir 3 colunas (2 linhas de 3 heróis) em telas mobile (< 480px) com largura de ~110px por cartão, garantindo que nomes, retratos e badges de raridade fiquem legíveis e sem cortes. Em telas maiores, adapta-se automaticamente a 6 colunas.
+  - *Grid de Habilidades dos 4 Trilhos Adaptativo:* `.map-lane-skills-grid` passa a se organizar em um grid 2x2 no mobile com slots espaçosos de ~160px de largura, permitindo que nomes longos de habilidades (como "Palhetada Dupla Lacerante" e "Acorde Dissonante Bioacústico"), badges e custos em MP apareçam integralmente. Em desktops/telas largas, expande-se para 4 colunas.
+  - *Scroll Touch Desbloqueado:* `.map-screen-scroll` agora opera com `flex: 1 1 0%; min-height: 0; overflow-y: auto !important; touch-action: pan-y !important; overscroll-behavior-y: contain;`, permitindo que o usuário deslize o dedo sobre qualquer área, cartão ou botão para rolar a tela com fluidez absoluta.
+  - *Suporte Nativo a Áreas Seguras (Safe Area Insets):* Barra superior (`.map-header-bar`) e barra inferior (`.map-bottom-bar`) utilizam `env(safe-area-inset-top)` e `env(safe-area-inset-bottom)`, protegendo botões contra entalhes de câmera (punch-hole) e barras de navegação por gestos do sistema Android/iOS.
+- **Correção do Modal de Escolha de Habilidades (`#skill-picker-modal`):**
+  - Identificado que as classes `.game-modal` e `.skill-modal-dialog` não possuíam regras de overlay e centralização no CSS, o que impedia que o modal se abrisse na tela ao tocar em qualquer slot de trilho.
+  - Implementado sistema completo de overlay com `position: fixed; inset: 0; backdrop-filter: blur(8px); display: none;` e `.open { display: flex !important; }`, com caixa de diálogo estilizada e rolagem interna independente.
+- **Suíte de Testes Expandida para 459 Testes:**
+  - Adicionados testes automatizados de regressão em `test-procedural.js` cobrindo isolamento de telas, propriedades de scroll, classes de modal, estrutura DOM do showcase de herói e limites de linha do Zero God Object rule. Todos os 459 testes passam com 100% de sucesso.
+- **Cache-Busting v=35:**
+  - Atualizado em `index.html` e `css/style.css`.
+
 ### [v1.6.2] - 2026-10-29 (Desbloqueio do Scroll Mobile na Tela Pré-Partida & Otimizações Extremas para 60-120 FPS)
 **Correção Definitiva de Scroll/Espremimento Mobile e Otimização Profunda de FPS**
 - **Desbloqueio Completo do Scroll Touch na Tela Pré-Partida (`css/style.css`):**
