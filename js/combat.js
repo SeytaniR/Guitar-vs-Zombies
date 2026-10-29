@@ -244,10 +244,8 @@ class CombatSystem {
         const heroPos = this.getHeroPosition();
         this.addFloatingText('ERROU! 💨', heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
         this.pendingAttackModifiers.push({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
-        if (this.heroAttackTimer >= 0.15 || this.entities.projectiles.filter(p => p.isMiss).length < 2) {
-            this.heroAttackTimer = 0;
-            this.performHeroAutoAttack();
-        }
+        this.heroAttackTimer = 0;
+        this.performHeroAutoAttack();
     }
 
     registerRhythmNote(rating, laneIndex = 0) {

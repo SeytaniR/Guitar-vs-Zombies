@@ -27,6 +27,26 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.6.1] - 2026-10-29 (Desacoplamento de Ataques por Velocidade Base & Combo, Layout Fluido Mobile e Otimização 120 FPS)
+**Ajustes de Cadência de Combate, Responsividade Mobile e Otimização de Performance**
+- **Desacoplamento dos Disparos em Relação ao Toque de Notas (`js/rhythm.js` & `js/combat.js`):**
+  - Os guitarristas não disparam mais instantaneamente a cada nota rítmica tocada. O disparo é estritamente regido pelo ciclo procedural de ataque do herói (`heroAttackTimer >= 1.0 / getHeroAttackSpeed()`).
+  - O acerto rítmico alimenta o sistema de combo (`combo`), que concede um bônus dinâmico de `+0.01` na velocidade de ataque por ponto de combo, limitado a um bônus máximo de `+2.00` (ex: 200 de combo = +2.00 vel. de ataque).
+  - Ao quebrar o combo (por nota perdida `MISS` ou toque em trilho sem nota `ERROU!`), o contador de combo zera imediatamente, removendo todo o bônus de velocidade de ataque e reiniciando a contagem do zero.
+  - O toque incorreto em trilhos sem notas preserva a mecânica de penalidade: deflete imediatamente um tiro cinza nulo (0 de dano) que passa pelos zumbis sem surtir efeito, quebrando o combo e o ritmo de kills.
+- **Correção da Quebra de Resolução e Overflow na Tela Pré-Batalha (`css/style.css`):**
+  - Identificada e corrigida a causa raiz do vazamento lateral direito no Xiaomi 14 Pro e outros dispositivos mobile: o grid de 4 habilidades equipadas (`.map-lane-skills-grid`) forçava a largura mínima além da resolução do aparelho.
+  - Implementado layout fluido adaptativo: `.map-lane-skills-grid` passa a se organizar em um grid 2x2 (`repeat(2, minmax(0, 1fr))`) em telas menores que 440px, e em 4 colunas em telas maiores (tablets/desktops).
+  - Adicionado `min-width: 0`, `max-width: 100%`, `box-sizing: border-box` e `text-overflow: ellipsis` em todos os cartões, slots de habilidades, tags e na barra de ação inferior (`.map-bottom-bar` e `.map-start-battle-action`), eliminando qualquer vazamento lateral e garantindo adaptação perfeita a qualquer largura de viewport.
+- **Otimização Extrema de Performance (60-120 FPS sem Quedas):**
+  - Identificado gargalo crítico de GPU/CPU no Canvas 2D: o uso intensivo de `ctx.shadowBlur` nos ribbons de sustain, palhetas caindo, botões de fret e anéis de halo de mana disparava filtros Gaussianos de software caros a cada quadro (mais de 3.700 chamadas por segundo em telas de 120Hz).
+  - Reescrita a renderização visual em `js/rhythm.js` e `js/skills.js` para duplo traçado com alfa e gradientes leves 100% acelerados por hardware via GPU.
+  - Otimizado o HUD de batalha (`updateBattleHUD` em `js/main.js`): implementado cache de elementos e dirty-checking, evitando que mutações de DOM sejam executadas quando os valores de texto ou largura de barra permanecem inalterados.
+- **Suíte de Testes & Limite de Linhas:**
+  - 425 testes automatizados passam com 100% de aprovação (`node test-procedural.js`).
+  - Todos os 16 arquivos JavaScript mantidos rigorosamente abaixo do limite de 1.000 linhas.
+- **Cache-Busting v=32:** Atualizado em `index.html` e `style.css`.
+
 ### [v1.6.0] - 2026-10-29 (Purificação Temática: 100% Universo Rock, Guitarras, Amplificadores e Zumbis)
 **Eliminação de Tropos Medievais e Alinhamento Total à Cultura do Rock n' Roll**
 - **Revisão e Adaptação Temática de Todas as 31 Habilidades (`js/skills.js`):**

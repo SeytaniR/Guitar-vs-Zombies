@@ -886,58 +886,59 @@ class Game {
     }
 
     updateBattleHUD() {
-        // Hero HP in Battle
-        const hpBar = document.getElementById('hero-hp-bar');
-        const hpText = document.getElementById('battle-hero-hp-text');
-        if (hpBar) {
-            const pct = Math.max(0, Math.min(100, (this.combat.heroHp / this.combat.heroMaxHp) * 100));
-            hpBar.style.width = `${pct}%`;
-            if (pct < 30) {
-                hpBar.style.backgroundColor = '#ff2222';
-            } else if (pct < 60) {
-                hpBar.style.backgroundColor = '#ffaa00';
-            } else {
-                hpBar.style.backgroundColor = '#00ff66';
+        if (!this.hudCache) {
+            this.hudCache = {
+                hpBar: document.getElementById('hero-hp-bar'),
+                hpText: document.getElementById('battle-hero-hp-text'),
+                rockBar: document.getElementById('rock-meter-bar'),
+                manaText: document.getElementById('battle-hero-mana-text'),
+                scoreEl: document.getElementById('battle-score-val'),
+                comboEl: document.getElementById('battle-combo-val'),
+                multEl: document.getElementById('battle-mult-val'),
+                lastHpPct: -1, lastHpText: '', lastRockW: '', lastManaText: '',
+                lastScore: '', lastCombo: '', lastMult: ''
+            };
+        }
+        const h = this.hudCache;
+        if (h.hpBar) {
+            const pct = Math.max(0, Math.min(100, Math.round((this.combat.heroHp / this.combat.heroMaxHp) * 100)));
+            if (pct !== h.lastHpPct) {
+                h.lastHpPct = pct;
+                h.hpBar.style.width = `${pct}%`;
+                h.hpBar.style.backgroundColor = pct < 30 ? '#ff2222' : (pct < 60 ? '#ffaa00' : '#00ff66');
             }
         }
-        if (hpText) {
-            hpText.innerText = `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`;
+        if (h.hpText) {
+            const t = `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`;
+            if (t !== h.lastHpText) { h.lastHpText = t; h.hpText.innerText = t; }
         }
-
-        // Rock Mana Meter
-        const rockBar = document.getElementById('rock-meter-bar');
-        const manaText = document.getElementById('battle-hero-mana-text');
-        if (rockBar) {
-            rockBar.style.width = `${this.combat.rockPower}%`;
+        if (h.rockBar) {
+            const w = `${Math.round(this.combat.rockPower)}%`;
+            if (w !== h.lastRockW) { h.lastRockW = w; h.rockBar.style.width = w; }
         }
-        if (manaText) {
-            manaText.innerText = `${Math.floor(this.combat.rockMana)} / ${this.combat.maxRockMana}`;
+        if (h.manaText) {
+            const t = `${Math.floor(this.combat.rockMana)} / ${this.combat.maxRockMana}`;
+            if (t !== h.lastManaText) { h.lastManaText = t; h.manaText.innerText = t; }
         }
-
-        // Real-Time Battle Score, Combo and Multiplier
-        const scoreEl = document.getElementById('battle-score-val');
-        const comboEl = document.getElementById('battle-combo-val');
-        const multEl = document.getElementById('battle-mult-val');
-        const comboPill = document.getElementById('battle-combo-pill');
-
-        if (scoreEl) {
-            scoreEl.innerText = (this.combat.score || 0).toLocaleString();
+        if (h.scoreEl) {
+            const t = (this.combat.score || 0).toLocaleString();
+            if (t !== h.lastScore) { h.lastScore = t; h.scoreEl.innerText = t; }
         }
-
-        if (comboEl) {
+        if (h.comboEl) {
             const streak = this.rhythm.streak || 0;
             const spdBonus = Math.min(2.0, streak * 0.01);
-            comboEl.innerText = `${streak} COMBO (+${spdBonus.toFixed(2)} SPD)`;
+            const t = `${streak} COMBO (+${spdBonus.toFixed(2)} SPD)`;
+            if (t !== h.lastCombo) { h.lastCombo = t; h.comboEl.innerText = t; }
         }
-
-        if (multEl) {
-            multEl.innerText = `x${this.rhythm.multiplier || 1}`;
+        if (h.multEl) {
+            const t = `x${this.rhythm.multiplier || 1}`;
+            if (t !== h.lastMult) { h.lastMult = t; h.multEl.innerText = t; }
         }
-
-        if (comboPill) {
+        if (!h.comboPill) h.comboPill = document.getElementById('battle-combo-pill');
+        if (h.comboPill) {
             const streak = this.rhythm.streak || 0;
-            comboPill.classList.toggle('active', streak >= 5);
-            comboPill.classList.toggle('on-fire', streak >= 15);
+            h.comboPill.classList.toggle('active', streak >= 5);
+            h.comboPill.classList.toggle('on-fire', streak >= 15);
         }
     }
 

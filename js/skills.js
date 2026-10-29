@@ -808,12 +808,16 @@ class SkillSystem {
         if (hasMana && skill.manaCost > 0) {
             const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
             const pulse = (Math.sin(now * 0.006 + laneIndex * 1.5) + 1) * 0.5;
-            ctx.strokeStyle = skill.color || '#00d4ff';
-            ctx.lineWidth = 1.5 + pulse * 1.5;
-            ctx.shadowColor = skill.color || '#00d4ff';
-            ctx.shadowBlur = 6 + pulse * 8;
+            ctx.strokeStyle = (skill.color || '#00d4ff') + '44';
+            ctx.lineWidth = 3.5 + pulse * 2;
             ctx.beginPath();
-            ctx.arc(bx, hitZoneY, 19 + pulse * 2, 0, Math.PI * 2);
+            ctx.arc(bx, hitZoneY, 20 + pulse * 2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = skill.color || '#00d4ff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(bx, hitZoneY, 18 + pulse * 1.5, 0, Math.PI * 2);
             ctx.stroke();
         }
 
@@ -834,8 +838,6 @@ class SkillSystem {
         ctx.fillStyle = hasMana ? 'rgba(10, 15, 28, 0.85)' : 'rgba(38, 10, 10, 0.88)';
         ctx.strokeStyle = badgeColor;
         ctx.lineWidth = 1;
-        ctx.shadowBlur = hasMana ? 6 : 2;
-        ctx.shadowColor = badgeColor;
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {
             ctx.roundRect(bx - bw / 2, badgeY - bh / 2, bw, bh, 4);
@@ -846,7 +848,6 @@ class SkillSystem {
         ctx.stroke();
 
         ctx.fillStyle = badgeColor;
-        ctx.shadowBlur = 0;
         ctx.fillText(badgeText, bx, badgeY + 0.5);
         ctx.restore();
     }

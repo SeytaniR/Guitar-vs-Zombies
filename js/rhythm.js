@@ -289,8 +289,6 @@ class RhythmSystem {
             if (window.game && window.game.combat) {
                 window.game.combat.combo = this.streak;
                 window.game.combat.registerRhythmNote(ratingKey, lane);
-                window.game.combat.performHeroAutoAttack();
-                window.game.combat.heroAttackTimer = 0;
             }
 
             if (this.onHitCallback) {
@@ -587,10 +585,15 @@ class RhythmSystem {
 
         // 2. Draw Hit Zone Bar
         this.ctx.save();
-        this.ctx.shadowBlur = 14;
-        this.ctx.shadowColor = '#00ffff';
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.28)';
+        this.ctx.lineWidth = 7;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, hitZoneY);
+        this.ctx.lineTo(cw, hitZoneY);
+        this.ctx.stroke();
+
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 2.5;
         this.ctx.beginPath();
         this.ctx.moveTo(0, hitZoneY);
         this.ctx.lineTo(cw, hitZoneY);
@@ -607,10 +610,15 @@ class RhythmSystem {
             this.ctx.translate(bx, hitZoneY);
             if (isPressed) this.ctx.scale(1.18, 1.18);
 
-            this.ctx.shadowBlur = isPressed ? 18 : 8;
-            this.ctx.shadowColor = col.main;
+            // Fast GPU halo stroke instead of multi-pass shadowBlur
+            this.ctx.strokeStyle = col.main + (isPressed ? '66' : '33');
+            this.ctx.lineWidth = isPressed ? 7 : 5;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 19, 0, Math.PI * 2);
+            this.ctx.stroke();
+
             this.ctx.strokeStyle = col.main;
-            this.ctx.lineWidth = 3;
+            this.ctx.lineWidth = 2.5;
             this.ctx.beginPath();
             this.ctx.arc(0, 0, 18, 0, Math.PI * 2);
             this.ctx.stroke();
@@ -651,11 +659,7 @@ class RhythmSystem {
             if (ribHeight <= 2) return;
 
             const ribWidth = 14;
-
             this.ctx.save();
-            this.ctx.shadowBlur = note.holding ? 22 : 12;
-            this.ctx.shadowColor = col.main;
-
             const grad = this.ctx.createLinearGradient(0, ribTop, 0, ribBottom);
             grad.addColorStop(0, col.main);
             grad.addColorStop(0.5, note.holding ? '#ffffff' : col.glow);
@@ -666,7 +670,11 @@ class RhythmSystem {
 
             // Rounded sustain ribbon
             this.ctx.beginPath();
-            this.ctx.roundRect(x - ribWidth / 2, ribTop, ribWidth, ribHeight, 6);
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.roundRect(x - ribWidth / 2, ribTop, ribWidth, ribHeight, 6);
+            } else {
+                this.ctx.rect(x - ribWidth / 2, ribTop, ribWidth, ribHeight);
+            }
             this.ctx.fill();
 
             // Core electric laser line inside ribbon
@@ -718,7 +726,6 @@ class RhythmSystem {
 
             let drawY = note.y;
             if (note.holding) drawY = hitZoneY;
-
             if (drawY < -50 || drawY > ch + 50) return;
 
             const x = note.track * trackW + trackW / 2;
@@ -727,10 +734,16 @@ class RhythmSystem {
             this.ctx.save();
             this.ctx.translate(x, drawY);
 
-            this.ctx.shadowBlur = note.holding ? 24 : 16;
-            this.ctx.shadowColor = col.main;
-            this.ctx.fillStyle = col.main;
+            // Fast GPU halo stroke instead of multi-pass shadowBlur
+            this.ctx.strokeStyle = col.main + (note.holding ? '88' : '44');
+            this.ctx.lineWidth = note.holding ? 6 : 4;
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, -19);
+            this.ctx.bezierCurveTo(21, -19, 19, 13, 0, 21);
+            this.ctx.bezierCurveTo(-19, 13, -21, -19, 0, -19);
+            this.ctx.stroke();
 
+            this.ctx.fillStyle = col.main;
             this.ctx.beginPath();
             this.ctx.moveTo(0, -18);
             this.ctx.bezierCurveTo(20, -18, 18, 12, 0, 20);
@@ -926,55 +939,30 @@ class RhythmSystem {
     }
 
     updateCustomSongHUD() {
-        const banner = document.getElementById('active-song-banner');
-        const defaultDivider = document.getElementById('default-divider-content');
-        if (banner && defaultDivider) {
-            if (this.isCustomSongPlaying && this.currentSong) {
-                banner.style.display = 'flex';
-                defaultDivider.style.display = 'none';
-
-                const titleEl = document.getElementById('active-song-title');
-                const artistEl = document.getElementById('active-song-artist');
-                const coverEl = document.getElementById('active-song-cover');
-                if (titleEl) titleEl.innerText = this.currentSong.title;
-                if (artistEl) artistEl.innerText = this.currentSong.artist;
-                if (coverEl) coverEl.src = this.currentSong.cover || 'assets/covers/default_cover.jpg';
-
-                const exitBtn = document.getElementById('active-song-exit-btn');
-                if (exitBtn) {
-                    exitBtn.onclick = () => {
-                        if (confirm("⚠️ Deseja encerrar a música e voltar ao menu principal?")) {
-                            this.stopCustomSong();
-                            if (window.game) window.game.switchScreen('menu');
-                        }
-                    };
-                }
-            } else {
-                banner.style.display = 'none';
-                defaultDivider.style.display = 'block';
-            }
+        const banner = document.getElementById('active-song-banner'), def = document.getElementById('default-divider-content');
+        if (!banner || !def) return;
+        if (this.isCustomSongPlaying && this.currentSong) {
+            banner.style.display = 'flex'; def.style.display = 'none';
+            const t = document.getElementById('active-song-title'), a = document.getElementById('active-song-artist'), c = document.getElementById('active-song-cover');
+            if (t) t.innerText = this.currentSong.title;
+            if (a) a.innerText = this.currentSong.artist;
+            if (c) c.src = this.currentSong.cover || 'assets/covers/default_cover.jpg';
+            const exitBtn = document.getElementById('active-song-exit-btn');
+            if (exitBtn) exitBtn.onclick = () => { if (confirm("⚠️ Encerrar a música e voltar ao menu?")) { this.stopCustomSong(); if (window.game) window.game.switchScreen('menu'); } };
+        } else {
+            banner.style.display = 'none'; def.style.display = 'block';
         }
     }
 
     updateCustomSongProgressBar() {
         if (!this.isCustomSongPlaying || !this.currentSong) return;
-        const bar = document.getElementById('active-song-progress-fill');
-        const timeEl = document.getElementById('active-song-time');
+        const bar = document.getElementById('active-song-progress-fill'), timeEl = document.getElementById('active-song-time');
         const cur = (this.songAudio && !this.songAudio.paused && this.songAudio.currentTime > 0) ? this.songAudio.currentTime : (this.customSongTime || 0);
         const total = Math.max(10, this.currentSong.duration || 30);
-
-        if (bar) {
-            const pct = Math.min(100, Math.max(0, (cur / total) * 100));
-            bar.style.width = `${pct}%`;
-        }
-
+        if (bar) bar.style.width = `${Math.min(100, Math.max(0, (cur / total) * 100))}%`;
         if (timeEl) {
-            const formatSec = (s) => {
-                const m = Math.floor(s / 60);
-                const sec = Math.floor(s % 60);
-                return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-            };
-            timeEl.innerText = `${formatSec(cur)} / ${formatSec(total)}`;
+            const fmt = s => `${Math.floor(s / 60)}:${Math.floor(s % 60) < 10 ? '0' : ''}${Math.floor(s % 60)}`;
+            timeEl.innerText = `${fmt(cur)} / ${fmt(total)}`;
         }
     }
 
