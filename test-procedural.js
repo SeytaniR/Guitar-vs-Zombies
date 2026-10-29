@@ -704,6 +704,29 @@ assert(audioCodeContent.includes('playSkillSfx'), 'SoundEngine implements playSk
 // 4.5. Overlay helper test
 assert(typeof skillSys.drawLaneFretOverlay === 'function', 'SkillSystem defines drawLaneFretOverlay helper');
 
+// 4.6. Thematic Purity Test (100% Rock & Guitar Universe, No Medieval RPG Tropes)
+console.log('\n13. Testing Thematic Purity (Rock, Guitars, Amps & Stage Universe)...');
+const allSkills = skillSys.getAllSkills();
+allSkills.forEach(s => {
+    assert(!s.name.toLowerCase().includes('machado'), `Skill ${s.id} name does not mention "machado": "${s.name}"`);
+    assert(!s.name.toLowerCase().includes('martel'), `Skill ${s.id} name does not mention "martelo": "${s.name}"`);
+    assert(s.icon !== '🪓', `Skill ${s.id} does not use axe icon 🪓`);
+    assert(s.icon !== '🗡️', `Skill ${s.id} does not use dagger icon 🗡️`);
+    assert(s.icon !== '🔨', `Skill ${s.id} does not use hammer icon 🔨`);
+});
+
+const roxieCleave = skillSys.getSkillById('roxie_double_cleave');
+assert(roxieCleave.name.includes('Palhetada Dupla') || roxieCleave.name.includes('Tremolo'), `Roxie cleave skill is guitar-themed ("${roxieCleave.name}")`);
+assert(roxieCleave.icon === '🎸', `Roxie cleave skill icon is electric guitar 🎸`);
+
+const kragthorHammer = skillSys.getSkillById('kragthor_magma_hammer');
+assert(kragthorHammer.name.includes('Flying-V') || kragthorHammer.name.includes('Slam'), `Kragthor heavy strike is Flying-V slam ("${kragthorHammer.name}")`);
+assert(kragthorHammer.icon === '🎸', `Kragthor heavy strike icon is electric guitar 🎸`);
+
+const roxiePool = pool.guitarists.find(g => g.id === 'roxie_anarchy');
+assert(roxiePool && roxiePool.instrument.toLowerCase().includes('guitarra'), `Roxie instrument is an electric guitar ("${roxiePool ? roxiePool.instrument : ''}")`);
+assert(!roxiePool.instrument.toLowerCase().includes('machado'), 'Roxie instrument does not mention "machado"');
+
 // Summary
 console.log('\n==========================================');
 console.log(`TOTAL TESTS: ${testsPassed + testsFailed}`);

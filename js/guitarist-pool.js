@@ -154,10 +154,10 @@ class GuitaristPoolSystem {
                 sheetSrc: 'assets/hero_anarchy.jpg',
                 cols: 4,
                 rows: 3,
-                instrument: 'Machado Duplo "Riot Axe"',
+                instrument: 'Guitarra Custom "Riot Slash"',
                 themeColor: '#ff00a0',
                 projectileColor: '#ff00a0',
-                desc: 'Lenda viva da anarquia musical. Concede multiplicação acelerada de ouro e geração extrema de Rock Mana.',
+                desc: 'Lenda viva da anarquia musical. Seus solos de alta voltagem concedem multiplicação de ouro e geração acelerada de Rock Mana.',
                 passiveName: 'Anarquia Absoluta',
                 passiveDesc: '+1.20% de Dano, +0.70% de Dano Crítico, +0.25% de Ouro Extra e +0.50% de Mana Regen por nível!',
                 baseStats: {

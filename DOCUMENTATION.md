@@ -27,7 +27,22 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
-### [v1.5.9] - 2026-10-28 (Revisão Completa do Sistema de Habilidades, HUD nos Trilhos, Correção de Dano e SFX)
+### [v1.6.0] - 2026-10-29 (Purificação Temática: 100% Universo Rock, Guitarras, Amplificadores e Zumbis)
+**Eliminação de Tropos Medievais e Alinhamento Total à Cultura do Rock n' Roll**
+- **Revisão e Adaptação Temática de Todas as 31 Habilidades (`js/skills.js`):**
+  - Todas as habilidades que continham armas medievais ou conceitos de RPG de fantasia descontextualizados foram completamente reformuladas para instrumentos musicais, técnicas de guitarra, equipamentos de som (pedais, gabinetes, válvulas, captadores) e cultura do rock:
+    - **Roxie Anarchy:** Substituição completa do "Corte Duplo de Machado" (🪓) por **"Palhetada Dupla Lacerante"** (🎸) — sequência veloz de *tremolo picking* que desfere 245% de dano e sangramento sônico (24 DPS). O instrumento de Roxie foi atualizado para a lendária **Guitarra Custom "Riot Slash"** em `js/guitarist-pool.js`.
+    - **Kragthor Titan:** Substituição da "Martelada de Magma" (🔨) por **"Slam Titânico de Flying-V"** (🎸) — o bárbaro esmaga sua pesada Flying-V de magma no chão gerando recuo sísmico brutal; "Muralha dos Titãs" renomeada para **"Muralha de Gabinetes de Som"** (🔊 - pilhas 4x12); "Brado de Guerra" atualizado para **"Grito Gutural de Death Metal"** (🎙️); "Trovão de Thor" para **"Solo Trovejante de Valhalla"** (⚡).
+    - **Vulkan Ironhead:** "Palheta Incandescente" com ícone de espada (🗡️) substituída por **"Palheta Incandescente de Metal"** (🎸); "Barreira de Brasas" (🛡️) transformada no temático **"Paredão Valvulado Incandescente"** (🔊); "Onda de Napalm" e "Lança-Chamas" integrados à pirotecnia de palco e escapamento V8 valvulado.
+    - **Dr. Radix Biohazard:** Transição de ataques químicos genéricos para conceitos bioacústicos de Rock Ácido e Grunge: **"Riff Ácido Corrosivo"** (distorção com pedal Fuzz), **"Solo Radioativo de Alta Frequência"** (harmônicos de radiação gama), **"Distorção Tóxica de Fuzz"** (ondas graves asfixiantes) e **"Acorde Dissonante Bioacústico"**.
+    - **Cypher-7 Volt:** "Lança de Plasma Neon" (arma medieval) substituída por **"Laser-Caster Concentrado"** (🔮 - disparo sônico pelo captador ótico da guitarra); "Relâmpago Tesla" transformado em **"Arpejo Tesla em Cadeia"** (⚡); "Escudo de Força Hex" em **"Barreira Eletroacústica Hex"** (🛡️).
+    - **Johnny Blaze:** "Pancada Concussiva" renomeada para a autêntica **"Microfonia Ensurdecedora"** (🔊 - captadores aproximados das caixas de retorno).
+- **Badges de Habilidades Sem Ícones Medievais (`js/skills.js`):**
+  - Substituídos os ícones `🪓 SANGRAMENTO` e `🗡️ PERFURAÇÃO` por `🩸 SANGRAMENTO` e `🎸 PERFURAÇÃO`.
+- **Garantia de Regressão e Testes Automatizados (`test-procedural.js`):**
+  - Criada suíte de testes de Pureza Temática verificando automaticamente todas as 31 habilidades para garantir a ausência de termos como "machado", "martelo" ou ícones medievais (🪓, 🗡️, 🔨).
+  - Suíte expandida para **425 testes automatizados** passando com 100% de sucesso.
+- **Cache-Busting v=31:** Atualizado em `index.html`.
 **Polimento Profundo, Correção de Bugs e Elevação Visual/Sonora**
 - **Correção Crítica de Dano das Habilidades (`js/combat.js`):**
   - O dano escalonado retornado pelas habilidades (ex: 2.2x, 2.6x, 2.8x) era descartado no momento da colisão, aplicando apenas o dano base. Agora `p.damage` é atualizado corretamente com o dano total da habilidade, e o banner flutuante de impacto (`💥 POWER CHORD!`, `🔨 MARTELADA!`, `⚡ ARCO TESLA!`) é exibido com a cor do elemento sobre o zumbi atingido.

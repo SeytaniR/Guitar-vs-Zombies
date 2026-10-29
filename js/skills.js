@@ -6,11 +6,11 @@ class SkillSystem {
             {
                 id: 'basic_strike',
                 heroId: 'all',
-                name: 'Ataque Sônico',
+                name: 'Palhetada Sônica',
                 type: 'basic',
                 manaCost: 0,
                 damageMult: 1.0,
-                desc: 'Disparo sônico equilibrado e constante. Ataque básico padrão sem consumo de MP.',
+                desc: 'Palhetada rítmica constante disparada contra os zumbis. Ataque básico padrão sem consumo de MP.',
                 icon: '🎵',
                 color: '#00ffff',
                 apply: (combat, target, baseDmg) => {
@@ -41,11 +41,11 @@ class SkillSystem {
             {
                 id: 'blaze_garage_shred',
                 heroId: 'johnny_blaze',
-                name: 'Solo de Garagem',
+                name: 'Solo Punk de Garagem',
                 type: 'buff',
                 manaCost: 11,
                 damageMult: 1.4,
-                desc: 'Sequência veloz de notas que causa 140% de dano e eleva o ataque em +35% por 3.5s.',
+                desc: 'Sequência veloz de palhetadas que causa 140% de dano e eleva o ritmo de ataque em +35% por 3.5s.',
                 icon: '🎸',
                 color: '#ffaa00',
                 apply: (combat, target, baseDmg) => {
@@ -63,7 +63,7 @@ class SkillSystem {
                 type: 'aoe',
                 manaCost: 13,
                 damageMult: 1.8,
-                desc: 'Impacto sísmico frontal: 180% no alvo e 80% de dano colateral em área a até 90px.',
+                desc: 'Salto sísmico de palco: 180% no alvo e 80% de dano colateral em área a até 90px.',
                 icon: '💥',
                 color: '#ff3300',
                 apply: (combat, target, baseDmg) => {
@@ -84,20 +84,20 @@ class SkillSystem {
             {
                 id: 'blaze_sound_concussion',
                 heroId: 'johnny_blaze',
-                name: 'Pancada Concussiva',
+                name: 'Microfonia Ensurdecedora',
                 type: 'stun',
                 manaCost: 10,
                 damageMult: 1.25,
-                desc: 'Acorde de reverberação pesada que causa 125% de dano e atordoa o zumbi por 2.0s.',
-                icon: '💫',
+                desc: 'Aproxima os captadores da caixa gerando microfonia violenta: causa 125% de dano e atordoa o zumbi por 2.0s.',
+                icon: '🔊',
                 color: '#ffcc00',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.25);
                     if (target) {
                         target.stunTimer = 2.0;
-                        combat.addFloatingText('💫 ATORDOADO!', target.x, target.y - 48, '#ffcc00', true);
+                        combat.addFloatingText('🔊 ENSURDECIDO!', target.x, target.y - 48, '#ffcc00', true);
                     }
-                    return { damage: dmg, label: '💫 ATORDOAR!', color: '#ffcc00' };
+                    return { damage: dmg, label: '🔊 MICROFONIA!', color: '#ffcc00' };
                 }
             },
             {
@@ -107,14 +107,14 @@ class SkillSystem {
                 type: 'heal',
                 manaCost: 12,
                 damageMult: 1.1,
-                desc: 'Injeção de adrenalina do rock que restaura +22 HP e cura o guitarrista.',
+                desc: 'Êxtase de rock n roll que revigora o músico, restaurando +22 HP do guitarrista.',
                 icon: '💚',
                 color: '#00ff66',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.1);
                     const healBonus = window.talentSystem ? window.talentSystem.getStat('rhythmic_heal') * 3 : 0;
                     combat.healHero(22 + healBonus);
-                    return { damage: dmg, label: '💚 +22 HP!', color: '#00ff66' };
+                    return { damage: dmg, label: '💚 +22 HP ROCK!', color: '#00ff66' };
                 }
             },
 
@@ -124,11 +124,11 @@ class SkillSystem {
             {
                 id: 'vulkan_flamethrower',
                 heroId: 'vulkan_ironhead',
-                name: 'Lança-Chamas Acústico',
+                name: 'Riff Pirotécnico de Palco',
                 type: 'burn',
                 manaCost: 10,
                 damageMult: 1.35,
-                desc: 'Labareda sônica que inflige queimadura contínua (26 DPS por 4.0s).',
+                desc: 'Labareda sônica expelida pelo braço da guitarra que incendeia o zumbi (26 DPS por 4.0s).',
                 icon: '🔥',
                 color: '#ff3300',
                 apply: (combat, target, baseDmg) => {
@@ -138,18 +138,18 @@ class SkillSystem {
                         target.burnDps = 26;
                         combat.addFloatingText('🔥 EM CHAMAS!', target.x, target.y - 48, '#ff3300', true);
                     }
-                    return { damage: dmg, label: '🔥 QUEIMA!', color: '#ff3300' };
+                    return { damage: dmg, label: '🔥 PIROTECNIA!', color: '#ff3300' };
                 }
             },
             {
                 id: 'vulkan_v8_backfire',
                 heroId: 'vulkan_ironhead',
-                name: 'Tiro de Escape V8',
+                name: 'Riff V8 Valvulado',
                 type: 'dps',
                 manaCost: 12,
                 damageMult: 2.15,
-                desc: 'Combustão mecânica violenta: 215% de dano e recuo brutal de 35px no zumbi frontal.',
-                icon: '🚗',
+                desc: 'Riff estrondoso acoplado a válvulas de alta octanagem: 215% de dano e recuo brutal de 35px no zumbi frontal.',
+                icon: '🏎️',
                 color: '#ff6600',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.15);
@@ -161,11 +161,11 @@ class SkillSystem {
             {
                 id: 'vulkan_napalm_wave',
                 heroId: 'vulkan_ironhead',
-                name: 'Onda de Napalm',
+                name: 'Onda Piromusical de Palco',
                 type: 'aoe_burn',
                 manaCost: 14,
                 damageMult: 1.5,
-                desc: 'Onda térmica que queima todos os zumbis ativos na pista (16 DPS por 3.5s).',
+                desc: 'Detona pirotecnia de palco em toda a pista, espalhando chamas sobre todos os zumbis ativos (16 DPS por 3.5s).',
                 icon: '🌋',
                 color: '#ff1100',
                 apply: (combat, target, baseDmg) => {
@@ -176,42 +176,42 @@ class SkillSystem {
                             z.burnDps = 16;
                         }
                     });
-                    combat.addFloatingText('🌋 NAPALM COLETIVO!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ff1100', true);
-                    return { damage: dmg, label: '🌋 NAPALM!', color: '#ff1100' };
+                    combat.addFloatingText('🌋 SHOW DE FOGO!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ff1100', true);
+                    return { damage: dmg, label: '🌋 PIROTECNIA!', color: '#ff1100' };
                 }
             },
             {
                 id: 'vulkan_molten_pick',
                 heroId: 'vulkan_ironhead',
-                name: 'Palheta Incandescente',
+                name: 'Palheta Incandescente de Metal',
                 type: 'pierce',
                 manaCost: 9,
                 damageMult: 1.85,
-                desc: 'Disparo de aço fundido com 185% de dano que ignora resistências e fura armaduras.',
-                icon: '🗡️',
+                desc: 'Palhetada pesada de aço fundido com 185% de dano que rasga blindagens e perfura zumbis.',
+                icon: '🎸',
                 color: '#ff9900',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.85);
                     combat.triggerShake(3);
-                    return { damage: dmg, label: '🗡️ PERFURAÇÃO!', color: '#ff9900' };
+                    return { damage: dmg, label: '🎸 PALHETA EM BRASA!', color: '#ff9900' };
                 }
             },
             {
                 id: 'vulkan_ember_shield',
                 heroId: 'vulkan_ironhead',
-                name: 'Barreira de Brasas',
+                name: 'Paredão Valvulado Incandescente',
                 type: 'shield',
                 manaCost: 13,
                 damageMult: 0.85,
-                desc: 'Escudo incandescente de sucata que absorve até 42 de dano recebido por 4.5s.',
-                icon: '🛡️',
+                desc: 'Ergue uma muralha de amplificadores valvulados incandescentes que absorve até 42 de dano recebido por 4.5s.',
+                icon: '🔊',
                 color: '#cc3300',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.85);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 42;
                     combat.heroShieldTimer = 4.5;
-                    combat.addFloatingText('🛡️ ESCUDO BRASAS (+42)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#cc3300', true);
-                    return { damage: dmg, label: '🛡️ BRASAS!', color: '#cc3300' };
+                    combat.addFloatingText('🔊 PAREDÃO VALVULADO (+42)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#cc3300', true);
+                    return { damage: dmg, label: '🔊 PAREDÃO VALVULADO!', color: '#cc3300' };
                 }
             },
 
@@ -221,46 +221,46 @@ class SkillSystem {
             {
                 id: 'radix_caustic_spray',
                 heroId: 'dr_radix',
-                name: 'Jato Cáustico',
+                name: 'Riff Ácido Corrosivo',
                 type: 'acid',
                 manaCost: 8,
                 damageMult: 1.6,
-                desc: 'Disparo de ácido concentrado com 160% de dano e corrosão que enfraquece a defesa zumbi.',
+                desc: 'Acordes saturados com pedal Fuzz ácido: causa 160% de dano e corrói a carcaça do zumbi (-20 HP).',
                 icon: '🧪',
                 color: '#39ff14',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.6);
                     if (target) {
                         target.hp -= 20;
-                        combat.addFloatingText('🧪 CORROSÃO (-20)', target.x, target.y - 45, '#39ff14', false);
+                        combat.addFloatingText('🧪 CORROSÃO SÔNICA (-20)', target.x, target.y - 45, '#39ff14', false);
                     }
-                    return { damage: dmg, label: '🧪 CÁUSTICO!', color: '#39ff14' };
+                    return { damage: dmg, label: '🧪 RIFF CÁUSTICO!', color: '#39ff14' };
                 }
             },
             {
                 id: 'radix_uranium_ray',
                 heroId: 'dr_radix',
-                name: 'Feixe de Urânio-235',
+                name: 'Solo Radioativo de Alta Frequência',
                 type: 'radiation',
                 manaCost: 13,
                 damageMult: 2.35,
-                desc: 'Raio gama ionizante com 235% de dano que irradia o alvo com choque radioativo.',
+                desc: 'Solo agudo e estridente modulado em radiação gama com 235% de dano que irradia o alvo com choque bioacústico.',
                 icon: '☢️',
                 color: '#00ff66',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.35);
                     combat.triggerShake(5);
-                    return { damage: dmg, label: '☢️ FEIXE URÂNIO!', color: '#00ff66' };
+                    return { damage: dmg, label: '☢️ SOLO RADIOATIVO!', color: '#00ff66' };
                 }
             },
             {
                 id: 'radix_decay_cloud',
                 heroId: 'dr_radix',
-                name: 'Névoa de Decomposição',
+                name: 'Distorção Tóxica de Fuzz',
                 type: 'slow_toxic',
                 manaCost: 11,
                 damageMult: 1.0,
-                desc: 'Gás asfixiante que desacelera todos os zumbis em 50% por 4.0s.',
+                desc: 'Ondas graves e fumaça tóxica de amplificador que reduzem a velocidade da marcha zumbi em 50% por 4.0s.',
                 icon: '☣️',
                 color: '#33cc33',
                 apply: (combat, target, baseDmg) => {
@@ -271,18 +271,18 @@ class SkillSystem {
                             z.slowFactor = 0.50;
                         }
                     });
-                    combat.addFloatingText('☣️ DECOMPOSIÇÃO (LENTO)!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#33cc33', true);
-                    return { damage: dmg, label: '☣️ NÉVOA!', color: '#33cc33' };
+                    combat.addFloatingText('☣️ MARCHA DESACELERADA!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#33cc33', true);
+                    return { damage: dmg, label: '☣️ DISTORÇÃO TÓXICA!', color: '#33cc33' };
                 }
             },
             {
                 id: 'radix_mutant_burst',
                 heroId: 'dr_radix',
-                name: 'Detonação Mutagênica',
+                name: 'Acorde Dissonante Bioacústico',
                 type: 'aoe',
                 manaCost: 14,
                 damageMult: 1.75,
-                desc: 'Detona uma bolsa tóxica no alvo causando 175% de dano e espirrando ácido nos arredores.',
+                desc: 'Acorde dissonante de grunge tóxico com 175% de dano que reverbera em explosão ácida nos zumbis vizinhos.',
                 icon: '💥',
                 color: '#76ff03',
                 apply: (combat, target, baseDmg) => {
@@ -296,23 +296,23 @@ class SkillSystem {
                             }
                         });
                     }
-                    return { damage: dmg, label: '💥 DETONAÇÃO TÓXICA!', color: '#76ff03' };
+                    return { damage: dmg, label: '💥 ACORDE DISSONANTE!', color: '#76ff03' };
                 }
             },
             {
                 id: 'radix_antidote_infusion',
                 heroId: 'dr_radix',
-                name: 'Infusão Biológica',
+                name: 'Dose Energética Bio-Rock',
                 type: 'heal',
                 manaCost: 12,
                 damageMult: 0.85,
-                desc: 'Coquetel antitóxico que purifica o organismo e restaura +26 HP do herói.',
+                desc: 'Mistura estimulante de laboratório do rockstar que purifica o organismo e restaura +26 HP do herói.',
                 icon: '🧬',
                 color: '#00e676',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.85);
                     combat.healHero(26);
-                    return { damage: dmg, label: '🧬 +26 HP CURA!', color: '#00e676' };
+                    return { damage: dmg, label: '🧬 +26 HP BIO-ROCK!', color: '#00e676' };
                 }
             },
 
@@ -322,11 +322,11 @@ class SkillSystem {
             {
                 id: 'cypher_tesla_chain',
                 heroId: 'cypher_volt',
-                name: 'Relâmpago Tesla em Cadeia',
+                name: 'Arpejo Tesla em Cadeia',
                 type: 'chain_lightning',
                 manaCost: 10,
                 damageMult: 1.65,
-                desc: 'Arco elétrico bionico com 165% de dano que encadeia em mais 2 zumbis próximos.',
+                desc: 'Arpejo elétrico disparado pelos captadores eletromagnéticos com 165% de dano que encadeia em mais 2 zumbis.',
                 icon: '⚡',
                 color: '#00f0ff',
                 apply: (combat, target, baseDmg) => {
@@ -334,36 +334,36 @@ class SkillSystem {
                     if (target && typeof combat.triggerChainLightning === 'function') {
                         combat.triggerChainLightning(target, 2, Math.round(dmg * 0.5));
                     }
-                    return { damage: dmg, label: '⚡ ARCO TESLA!', color: '#00f0ff' };
+                    return { damage: dmg, label: '⚡ ARPEJO TESLA!', color: '#00f0ff' };
                 }
             },
             {
                 id: 'cypher_emp_stun',
                 heroId: 'cypher_volt',
-                name: 'Pulso Eletromagnético PEM',
+                name: 'Pulso Eletrostático de Palco (PEM)',
                 type: 'stun',
                 manaCost: 12,
                 damageMult: 1.3,
-                desc: 'Sobrecarga eletrostática que paralisa o alvo por 2.4 segundos.',
-                icon: '🌐',
+                desc: 'Descarga sintetizada de alto pulso elétrico que sobrecarrega os nervos dos zumbis, paralisando-os por 2.4s.',
+                icon: '⚡',
                 color: '#00a2ff',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.3);
                     if (target) {
                         target.stunTimer = 2.4;
-                        combat.addFloatingText('🌐 PEM PARALISANTE!', target.x, target.y - 48, '#00a2ff', true);
+                        combat.addFloatingText('⚡ PEM PARALISANTE!', target.x, target.y - 48, '#00a2ff', true);
                     }
-                    return { damage: dmg, label: '🌐 PEM CHOQUE!', color: '#00a2ff' };
+                    return { damage: dmg, label: '⚡ PEM PARALISANTE!', color: '#00a2ff' };
                 }
             },
             {
                 id: 'cypher_neural_overclock',
                 heroId: 'cypher_volt',
-                name: 'Overclock Cibernético',
+                name: 'Overclock Neural de Shredding',
                 type: 'buff',
                 manaCost: 11,
                 damageMult: 1.35,
-                desc: 'Processamento quântico acelerado: +55% na velocidade de ataque por 4.0s.',
+                desc: 'Processamento bionico ultrarrápido dos dedos sobre a escala da guitarra: +55% na velocidade de ataque por 4.0s.',
                 icon: '🚀',
                 color: '#b000ff',
                 apply: (combat, target, baseDmg) => {
@@ -371,41 +371,41 @@ class SkillSystem {
                     combat.heroAttackSpeedBuffTimer = 4.0;
                     combat.heroAttackSpeedBuffMult = 1.55;
                     combat.addFloatingText('🚀 OVERCLOCK +55%!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#b000ff', true);
-                    return { damage: dmg, label: '🚀 OVERCLOCK!', color: '#b000ff' };
+                    return { damage: dmg, label: '🚀 OVERCLOCK SHRED!', color: '#b000ff' };
                 }
             },
             {
                 id: 'cypher_plasma_lance',
                 heroId: 'cypher_volt',
-                name: 'Lança de Plasma Neon',
+                name: 'Laser-Caster Concentrado',
                 type: 'dps_crit',
                 manaCost: 14,
                 damageMult: 2.4,
-                desc: 'Disparo de plasma concentrado de alta precisão com 240% de dano crítico.',
+                desc: 'Disparo sônico de alta precisão através do captador laser da guitarra customizada com 240% de dano crítico.',
                 icon: '🔮',
                 color: '#00ffff',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.4);
                     combat.triggerShake(5);
-                    return { damage: dmg, label: '🔮 PLASMA CRÍTICO!', color: '#00ffff' };
+                    return { damage: dmg, label: '🔮 LASER-CASTER CRÍTICO!', color: '#00ffff' };
                 }
             },
             {
                 id: 'cypher_cyber_barrier',
                 heroId: 'cypher_volt',
-                name: 'Escudo de Força Hex',
+                name: 'Barreira Eletroacústica Hex',
                 type: 'shield',
                 manaCost: 13,
                 damageMult: 0.9,
-                desc: 'Matriz holográfica de proteção que absorve até 45 de dano recebido por 4.5s.',
+                desc: 'Frequências sonoras moduladas em campo de proteção acústica que absorve até 45 de dano recebido por 4.5s.',
                 icon: '🛡️',
                 color: '#0080ff',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.9);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 45;
                     combat.heroShieldTimer = 4.5;
-                    combat.addFloatingText('🛡️ ESCUDO HEX (+45)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#0080ff', true);
-                    return { damage: dmg, label: '🛡️ CAMPO HEX!', color: '#0080ff' };
+                    combat.addFloatingText('🛡️ BARREIRA ACÚSTICA (+45)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#0080ff', true);
+                    return { damage: dmg, label: '🛡️ BARREIRA ACÚSTICA!', color: '#0080ff' };
                 }
             },
 
@@ -415,46 +415,46 @@ class SkillSystem {
             {
                 id: 'kragthor_earthquake',
                 heroId: 'kragthor_titan',
-                name: 'Terremoto Sísmico',
+                name: 'Riff Sísmico do Valhalla',
                 type: 'earthquake',
                 manaCost: 11,
                 damageMult: 1.75,
-                desc: 'Onda de choque subterrânea que abala a rua, atordoando o alvo por 2.2s.',
+                desc: 'Riff brutal nas cordas mais graves que faz o asfalto tremer em reverberação sísmica, atordoando o alvo por 2.2s.',
                 icon: '🌋',
                 color: '#ffaa00',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.75);
                     combat.triggerShake(7);
                     if (target) target.stunTimer = 2.2;
-                    return { damage: dmg, label: '🌋 TERREMOTO!', color: '#ffaa00' };
+                    return { damage: dmg, label: '🌋 RIFF SÍSMICO!', color: '#ffaa00' };
                 }
             },
             {
                 id: 'kragthor_magma_hammer',
                 heroId: 'kragthor_titan',
-                name: 'Martelada de Magma',
+                name: 'Slam Titânico de Flying-V',
                 type: 'heavy_dps',
                 manaCost: 14,
                 damageMult: 2.6,
-                desc: 'Pancada monumental que causa 260% de dano e arremessa o zumbi 42px para trás.',
-                icon: '🔨',
+                desc: 'Kragthor esmaga sua pesada guitarra Flying-V de magma no chão com 260% de dano, arremessando o zumbi 42px para trás.',
+                icon: '🎸',
                 color: '#ff5500',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.6);
                     if (target) target.x += 42;
                     combat.triggerShake(7.5);
-                    return { damage: dmg, label: '🔨 MARTELADA!', color: '#ff5500' };
+                    return { damage: dmg, label: '🎸 SLAM DE FLYING-V!', color: '#ff5500' };
                 }
             },
             {
                 id: 'kragthor_war_roar',
                 heroId: 'kragthor_titan',
-                name: 'Brado de Guerra do Valhalla',
+                name: 'Grito Gutural de Death Metal',
                 type: 'slow_aoe',
                 manaCost: 10,
                 damageMult: 1.25,
-                desc: 'Rugido estarrecedor que amedronta os zumbis com lentidão de 55% por 3.5s.',
-                icon: '📯',
+                desc: 'Rugido gutural amplificado em decibéis extremos que aterroriza os zumbis com lentidão de 55% por 3.5s.',
+                icon: '🎙️',
                 color: '#ffd700',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.25);
@@ -464,36 +464,36 @@ class SkillSystem {
                             z.slowFactor = 0.45;
                         }
                     });
-                    combat.addFloatingText('📯 RUGIDO DE GUERRA!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ffd700', true);
-                    return { damage: dmg, label: '📯 BRADO!', color: '#ffd700' };
+                    combat.addFloatingText('🎙️ GUTURAL METAL!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ffd700', true);
+                    return { damage: dmg, label: '🎙️ GUTURAL METAL!', color: '#ffd700' };
                 }
             },
             {
                 id: 'kragthor_stone_fortress',
                 heroId: 'kragthor_titan',
-                name: 'Muralha dos Titãs',
+                name: 'Muralha de Gabinetes de Som',
                 type: 'shield',
                 manaCost: 15,
                 damageMult: 0.8,
-                desc: 'Endurece a carne como granito, gerando barreira que absorve 60 de dano por 5s.',
-                icon: '🛡️',
-                color: '#d4af37',
+                desc: 'Ergue uma fortaleza impenetrável de caixas acústicas 4x12 empilhadas que absorve 60 de dano recebido por 5.0s.',
+                icon: '🔊',
+                color: '#ffd700',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.8);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 60;
                     combat.heroShieldTimer = 5.0;
-                    combat.addFloatingText('🛡️ MURALHA TITÃ (+60)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffd700', true);
-                    return { damage: dmg, label: '🛡️ MURALHA!', color: '#ffd700' };
+                    combat.addFloatingText('🔊 MURALHA DE SOM (+60)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffd700', true);
+                    return { damage: dmg, label: '🔊 MURALHA DE SOM!', color: '#ffd700' };
                 }
             },
             {
                 id: 'kragthor_valhalla_thunder',
                 heroId: 'kragthor_titan',
-                name: 'Trovão de Thor',
+                name: 'Solo Trovejante de Valhalla',
                 type: 'heavy_aoe',
                 manaCost: 16,
                 damageMult: 2.2,
-                desc: 'Invoca raios celestiais nórdicos que atingem a linha de frente e causam tremor violento.',
+                desc: 'Solo monumental de heavy metal nórdico que invoca raios sônicos com 220% de dano e abalo sísmico na pista inteira.',
                 icon: '⚡',
                 color: '#ffcc00',
                 apply: (combat, target, baseDmg) => {
@@ -507,7 +507,7 @@ class SkillSystem {
                             }
                         });
                     }
-                    return { damage: dmg, label: '⚡ TROVÃO DE THOR!', color: '#ffcc00' };
+                    return { damage: dmg, label: '⚡ SOLO TROVEJANTE!', color: '#ffcc00' };
                 }
             },
 
@@ -517,84 +517,84 @@ class SkillSystem {
             {
                 id: 'roxie_riot_riff',
                 heroId: 'roxie_anarchy',
-                name: 'Riff de Rebelião',
+                name: 'Riff de Rebelião Punk',
                 type: 'riot_dps',
                 manaCost: 9,
                 damageMult: 1.85,
-                desc: 'Acordes rebeldes ensurdecedores que golpeiam o alvo com 185% de dano.',
+                desc: 'Sequência de acordes rebeldes ensurdecedores que golpeia o alvo com 185% de dano e distorção pura.',
                 icon: '🎸',
                 color: '#ff00a0',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.85);
                     combat.triggerShake(4.5);
-                    return { damage: dmg, label: '🎸 REBELIÃO!', color: '#ff00a0' };
+                    return { damage: dmg, label: '🎸 RIFF REBELDE!', color: '#ff00a0' };
                 }
             },
             {
                 id: 'roxie_double_cleave',
                 heroId: 'roxie_anarchy',
-                name: 'Corte Duplo de Machado',
+                name: 'Palhetada Dupla Lacerante',
                 type: 'bleed',
                 manaCost: 13,
                 damageMult: 2.45,
-                desc: 'Golpe duplo do machado que desfere 245% de dano e sangramento profundo (24 DPS por 3.0s).',
-                icon: '🪓',
+                desc: 'Ataque em tremolo picking ultra-veloz que rasga a matéria zumbi com 245% de dano e sangramento sônico (24 DPS por 3.0s).',
+                icon: '🎸',
                 color: '#ff0055',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.45);
                     if (target) {
                         target.burnTimer = 3.0;
                         target.burnDps = 24;
-                        combat.addFloatingText('🩸 SANGRAMENTO!', target.x, target.y - 48, '#ff0055', true);
+                        combat.addFloatingText('🩸 SANGRAMENTO SÔNICO!', target.x, target.y - 48, '#ff0055', true);
                     }
                     combat.triggerShake(5);
-                    return { damage: dmg, label: '🪓 CORTE DUPLO!', color: '#ff0055' };
+                    return { damage: dmg, label: '🎸 PALHETADA LACERANTE!', color: '#ff0055' };
                 }
             },
             {
                 id: 'roxie_vampiric_drain',
                 heroId: 'roxie_anarchy',
-                name: 'Drenagem Sônica Vampírica',
+                name: 'Solo Sônico Vampírico',
                 type: 'lifesteal',
                 manaCost: 12,
                 damageMult: 1.5,
-                desc: 'Acordes predatórios que causam 150% de dano e sugam 50% do dano causado como cura direta.',
+                desc: 'Solo sombrio de gothic metal que inflige 150% de dano e drena a essência vital dos mortos-vivos (50% como cura direta).',
                 icon: '🩸',
                 color: '#e6004c',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.5);
                     const lifesteal = Math.max(15, Math.round(dmg * 0.5));
                     combat.healHero(lifesteal);
-                    return { damage: dmg, label: `🩸 VAMPIRISMO (+${lifesteal})`, color: '#e6004c' };
+                    return { damage: dmg, label: `🩸 SOLO VAMPÍRICO (+${lifesteal})`, color: '#e6004c' };
                 }
             },
             {
                 id: 'roxie_anarchy_frenzy',
                 heroId: 'roxie_anarchy',
-                name: 'Frenesi Anárquico',
+                name: 'Mosh Pit Anárquico',
                 type: 'buff',
                 manaCost: 14,
                 damageMult: 1.45,
-                desc: 'Estado de euforia punk: velocidade de ataque +50% por 4.0s e recarga imediata de +10 MP.',
-                icon: '👑',
+                desc: 'Caos do mosh pit punk: eleva a velocidade de ataque em +50% por 4.0s e recarrega imediatamente +10 MP de Rock.',
+                icon: '🤘',
                 color: '#ff1493',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.45);
                     combat.heroAttackSpeedBuffTimer = 4.0;
                     combat.heroAttackSpeedBuffMult = 1.50;
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 10);
-                    combat.addFloatingText('👑 FRENESI ANÁRQUICO!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff1493', true);
-                    return { damage: dmg, label: '👑 ANARQUIA!', color: '#ff1493' };
+                    combat.addFloatingText('🤘 MOSH PIT (+50% VELOCIDADE)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff1493', true);
+                    return { damage: dmg, label: '🤘 MOSH PIT!', color: '#ff1493' };
                 }
             },
             {
                 id: 'roxie_chaos_cataclysm',
                 heroId: 'roxie_anarchy',
-                name: 'Cataclismo Mítico do Caos',
+                name: 'Solo Cataclísmico do Caos',
                 type: 'cataclysm',
                 manaCost: 17,
                 damageMult: 2.8,
-                desc: 'Apoteose musical destrutiva: 280% de dano monumental, onda de choque roxa e recuo em massa.',
+                desc: 'Apoteose sônica punk com quebra de palco: 280% de dano monumental, onda de choque estéreo e recuo massivo na horda.',
                 icon: '💥',
                 color: '#ff00aa',
                 apply: (combat, target, baseDmg) => {
@@ -608,7 +608,7 @@ class SkillSystem {
                             z.flashTime = 0.2;
                         }
                     });
-                    return { damage: dmg, label: '💥 CATACLISMO DO CAOS!', color: '#ff00aa' };
+                    return { damage: dmg, label: '💥 SOLO CATACLÍSMICO!', color: '#ff00aa' };
                 }
             }
         ];
@@ -774,8 +774,8 @@ class SkillSystem {
             case 'heal': return { label: '💚 CURA', color: '#00e676', bg: 'rgba(0,230,118,0.18)' };
             case 'shield': return { label: '🛡️ ESCUDO', color: '#00a2ff', bg: 'rgba(0,162,255,0.18)' };
             case 'lifesteal': return { label: '🩸 VAMPIRISMO', color: '#e6004c', bg: 'rgba(230,0,76,0.18)' };
-            case 'bleed': return { label: '🪓 SANGRAMENTO', color: '#ff0055', bg: 'rgba(255,0,85,0.18)' };
-            case 'pierce': return { label: '🗡️ PERFURAÇÃO', color: '#ffaa00', bg: 'rgba(255,170,0,0.18)' };
+            case 'bleed': return { label: '🩸 SANGRAMENTO', color: '#ff0055', bg: 'rgba(255,0,85,0.18)' };
+            case 'pierce': return { label: '🎸 PERFURAÇÃO', color: '#ffaa00', bg: 'rgba(255,170,0,0.18)' };
             case 'cataclysm': return { label: '👑 CATACLISMO', color: '#ff00aa', bg: 'rgba(255,0,170,0.22)' };
             default: return { label: '⚡ ESPECIAL', color: '#ffaa00', bg: 'rgba(255,170,0,0.15)' };
         }
