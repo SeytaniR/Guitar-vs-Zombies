@@ -59,7 +59,7 @@ class CombatSystem {
 
         // Rock Mana & Attack Speed System (replaces old rock power)
         this.rockMana = 30; this.maxRockMana = 100; this.rockManaRegen = 2.0;
-        this.baseAttackSpeed = 1.30; this.heroAttackTimer = 0;
+        this.baseAttackSpeed = 1.0; this.heroAttackTimer = 0;
         this.heroAttackSpeedBuffTimer = 0; this.heroAttackSpeedBuffMult = 1.0;
         this.heroShieldHp = 0; this.heroShieldTimer = 0;
         this.pendingAttackModifiers = []; this.stageCompleted = false;
@@ -126,14 +126,15 @@ class CombatSystem {
             return window.guitaristPool.getHeroStats(heroData.id);
         }
         return {
-            level: 1, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0,
+            level: 1, baseAttackSpeed: 1.0, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0,
             goldBonus: 0, armorPen: 0, slowHorde: 0, burnChance: 0, knockbackBonus: 0,
             chainLightning: false, chainTargets: 0
         };
     }
 
     getHeroAttackSpeed() {
-        let spd = this.baseAttackSpeed || 1.30;
+        const heroStats = this.getActiveHeroStats();
+        let spd = (heroStats && heroStats.baseAttackSpeed) ? heroStats.baseAttackSpeed : (this.baseAttackSpeed || 1.0);
         if (this.heroAttackSpeedBuffTimer > 0) spd *= (this.heroAttackSpeedBuffMult || 1.4);
         if (window.talentSystem) spd += window.talentSystem.getStat('speed_shred') * 0.04;
         const comboBonus = Math.min(2.0, Math.max(0, (this.combo || 0) * 0.01));

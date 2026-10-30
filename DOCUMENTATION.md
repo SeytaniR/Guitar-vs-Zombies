@@ -27,6 +27,32 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.6.9] - 2026-10-30 (Ajuste da Velocidade Base de Ataque para 1.0/s em Todos os Guitarristas - Build 41)
+**Balanceamento Estratégico do Ataque Automático para Valorizar Combos e Precisão no Minigame de Ritmo**
+- **Padronização da Velocidade de Ataque Base em 1.0/s (`baseAttackSpeed: 1.0`):**
+  - Configurado nos atributos base de todos os 6 guitarristas em `js/guitarist-pool.js`:
+    - Johnny "Riff" Blaze (`johnny_blaze`): `baseAttackSpeed: 1.0` (1 ataque/s).
+    - Vulkan "Ironhead" (`vulkan_ironhead`): `baseAttackSpeed: 1.0` (1 ataque/s).
+    - Dr. Radix Biohazard (`dr_radix`): `baseAttackSpeed: 1.0` (1 ataque/s).
+    - Cypher-7 Volt (`cypher_volt`): `baseAttackSpeed: 1.0` (1 ataque/s).
+    - Kragthor, o Bárbaro (`kragthor_titan`): `baseAttackSpeed: 1.0` (1 ataque/s).
+    - Roxie "Anarchy" Slash (`roxie_anarchy`): `baseAttackSpeed: 1.0` (1 ataque/s).
+  - O getter `pool.getHeroStats(heroId)` agora retorna `baseAttackSpeed: 1.0` como atributo dinâmico e rastreável.
+- **Sinergia Tática com o Minigame de Ritmo e Combos (`CombatSystem`):**
+  - Ajustado `this.baseAttackSpeed = 1.0` no construtor de `js/combat.js` (anteriormente `1.30`).
+  - O método `getHeroAttackSpeed()` lê diretamente `heroStats.baseAttackSpeed` e calcula a velocidade final somando o bônus de combo de ritmo:
+    - **Combo 0 (base):** `1.00 atk/s` (intervalo de 1.00s entre disparos).
+    - **Combo 50:** `1.50 atk/s` (intervalo de 0.66s entre disparos, +50% velocidade).
+    - **Combo 100:** `2.00 atk/s` (intervalo de 0.50s entre disparos, dobro da velocidade).
+    - **Combo 200 (teto):** `3.00 atk/s` (intervalo de 0.33s entre disparos, triplo da velocidade).
+  - Ao errar notas no ritmo (`miss`), o combo reseta para 0 imediatamente, reduzindo o herói de volta à cadência base de 1.0/s, tornando o engajamento e a precisão do jogador no minigame essenciais para derrotar as ondas de zumbis.
+- **Exibição Visual na Pré-Batalha (`js/main.js`):**
+  - O showcase do guitarrista agora exibe claramente o instrumento e cadência base: `⚡ 1.0/s` (ex: `Guitarra Custom "Riot Slash" • ⚡ 1.0/s`).
+- **Zero God Object Rule & Suíte de Testes (560 Testes):**
+  - Todos os 16 arquivos JS e 10 arquivos CSS estritamente abaixo de 1.000 linhas.
+  - 560 testes aprovados com 100% de sucesso em `test-procedural.js`.
+  - Cache buster e versão do rodapé atualizados para `v1.6.9 (Build 41)` (`?v=41`).
+
 ### [v1.6.8] - 2026-10-30 (Sistema de 3 Mapas & Arenas de Batalha com Seleção Interativa - Build 40)
 **Adição de 3 Mapas Oficiais em Alta Definição (1024x572), Seletor de Arenas na Pré-Batalha e Paletas de Partículas Temáticas**
 - **Processamento e Integração dos 3 Mapas Oficiais (`assets/maps/`):**

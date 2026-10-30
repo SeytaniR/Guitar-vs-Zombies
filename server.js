@@ -46,16 +46,20 @@ const server = http.createServer((req, res) => {
 const PORT = 8080;
 server.listen(PORT, '0.0.0.0', () => {
   const nets = os.networkInterfaces();
-  let lanIp = 'localhost';
+  let lanIps = [];
   for (const name of Object.keys(nets)) {
     for (const net of nets[name]) {
       if (net.family === 'IPv4' && !net.internal) {
-        lanIp = net.address;
-        break;
+        if (net.address.startsWith('192.168.') || net.address.startsWith('10.')) {
+          lanIps.unshift(net.address);
+        } else {
+          lanIps.push(net.address);
+        }
       }
     }
   }
+  const mainLanIp = lanIps[0] || 'localhost';
   console.log(`\n🎸 Guitar vs Zombies Server Online!`);
   console.log(`> Local: http://localhost:${PORT}`);
-  console.log(`> LAN (Celular): http://${lanIp}:${PORT}\n`);
+  console.log(`> LAN (Celular): http://${mainLanIp}:${PORT}\n`);
 });

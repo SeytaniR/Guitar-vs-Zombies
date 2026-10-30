@@ -53,6 +53,13 @@ window.guitaristPool = pool;
 
 assert(pool.guitarists.length === 6, 'Pool contains all 6 unique guitarists');
 
+// Test 1.1: Base Attack Speed 1.0/s for all guitarists
+pool.guitarists.forEach(g => {
+    assert(g.baseStats.baseAttackSpeed === 1.0, `Guitarist ${g.name} (${g.id}) baseAttackSpeed is configured to 1.0/s`);
+    const st = pool.getHeroStats(g.id);
+    assert(st.baseAttackSpeed === 1.0, `pool.getHeroStats('${g.id}') returns baseAttackSpeed === 1.0`);
+});
+
 const johnny = pool.guitarists[0];
 const initialStats = pool.getHeroStats('johnny_blaze');
 assert(initialStats.level === 1, 'Johnny starts at Level 1');
@@ -373,6 +380,18 @@ loadScript('js/combat.js');
 const combat = new CombatSystem('gameCanvas');
 combat.canvas.width = 400;
 combat.canvas.height = 300;
+
+// Test 7.0: Combat Attack Speed & Rhythm Combo Synergy (v1.6.9)
+combat.combo = 0;
+assert(combat.getHeroAttackSpeed() === 1.0, `Combat base attack speed at 0 combo is exactly 1.0/s (${combat.getHeroAttackSpeed()})`);
+combat.combo = 50;
+assert(Math.abs(combat.getHeroAttackSpeed() - 1.5) < 0.001, `Attack speed at combo 50 scales to 1.50/s (+0.5/s bonus): ${combat.getHeroAttackSpeed()}`);
+combat.combo = 100;
+assert(Math.abs(combat.getHeroAttackSpeed() - 2.0) < 0.001, `Attack speed at combo 100 scales to 2.00/s (+1.0/s bonus): ${combat.getHeroAttackSpeed()}`);
+combat.combo = 200;
+assert(Math.abs(combat.getHeroAttackSpeed() - 3.0) < 0.001, `Attack speed at combo 200 hits +2.0 cap reaching 3.00/s: ${combat.getHeroAttackSpeed()}`);
+combat.combo = 0; // Simulated miss
+assert(combat.getHeroAttackSpeed() === 1.0, `Miss resets combo to 0 and drops attack speed back to base 1.0/s: ${combat.getHeroAttackSpeed()}`);
 
 // Test Vanguard Spawning on Battle Reset
 combat.resetBattle([mockZombieType]);
@@ -831,17 +850,17 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 assert(cssContent.includes('.arena-roster-card'), 'CSS includes styling for .arena-roster-card');
 
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=40'), 'index.html links base.css with v=40');
-assert(htmlContent.includes('css/menu.css?v=40'), 'index.html links menu.css with v=40');
-assert(htmlContent.includes('css/map-select.css?v=40'), 'index.html links map-select.css with v=40');
-assert(htmlContent.includes('css/battle.css?v=40'), 'index.html links battle.css with v=40');
-assert(htmlContent.includes('css/skills.css?v=40'), 'index.html links skills.css with v=40');
-assert(htmlContent.includes('css/talents.css?v=40'), 'index.html links talents.css with v=40');
-assert(htmlContent.includes('css/song-studio.css?v=40'), 'index.html links song-studio.css with v=40');
-assert(htmlContent.includes('css/editor.css?v=40'), 'index.html links editor.css with v=40');
-assert(htmlContent.includes('css/results.css?v=40'), 'index.html links results.css with v=40');
-assert(htmlContent.includes('js/main.js?v=40'), 'index.html links main.js with v=40');
-assert(htmlContent.includes('v1.6.8 (Build 40)'), 'index.html footer specifies v1.6.8 (Build 40)');
+assert(htmlContent.includes('css/base.css?v=41'), 'index.html links base.css with v=41');
+assert(htmlContent.includes('css/menu.css?v=41'), 'index.html links menu.css with v=41');
+assert(htmlContent.includes('css/map-select.css?v=41'), 'index.html links map-select.css with v=41');
+assert(htmlContent.includes('css/battle.css?v=41'), 'index.html links battle.css with v=41');
+assert(htmlContent.includes('css/skills.css?v=41'), 'index.html links skills.css with v=41');
+assert(htmlContent.includes('css/talents.css?v=41'), 'index.html links talents.css with v=41');
+assert(htmlContent.includes('css/song-studio.css?v=41'), 'index.html links song-studio.css with v=41');
+assert(htmlContent.includes('css/editor.css?v=41'), 'index.html links editor.css with v=41');
+assert(htmlContent.includes('css/results.css?v=41'), 'index.html links results.css with v=41');
+assert(htmlContent.includes('js/main.js?v=41'), 'index.html links main.js with v=41');
+assert(htmlContent.includes('v1.6.9 (Build 41)'), 'index.html footer specifies v1.6.9 (Build 41)');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

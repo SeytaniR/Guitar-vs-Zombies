@@ -22,6 +22,7 @@ class GuitaristPoolSystem {
                 passiveName: 'Espírito do Rock',
                 passiveDesc: '+1.0% de Dano e +0.4% de Dano Crítico por nível (chegando a +99% de dano e +89% de crítico no Nv. 100).',
                 baseStats: {
+                    baseAttackSpeed: 1.0,            // 1 ataque por segundo base (1.0/s)
                     damageMultPerLevel: 0.010,       // +1% damage per level
                     baseCritBonusPercent: 50.0,      // +50% base crit damage
                     critBonusPerLevel: 0.40,         // +0.4% crit bonus per level
@@ -49,6 +50,7 @@ class GuitaristPoolSystem {
                 passiveName: 'Pirotecnia Brutal',
                 passiveDesc: '+1.0% de Dano, +0.3% de Mana Regen e chance de queimadura contínua que cresce a cada nível.',
                 baseStats: {
+                    baseAttackSpeed: 1.0,
                     damageMultPerLevel: 0.010,
                     baseCritBonusPercent: 52.0,
                     critBonusPerLevel: 0.45,
@@ -77,6 +79,7 @@ class GuitaristPoolSystem {
                 passiveName: 'Radiação Acústica',
                 passiveDesc: '+1.0% de Dano, +0.35% de Perfuração de Armadura e +0.12% de lentidão contínua da marcha zumbi por nível.',
                 baseStats: {
+                    baseAttackSpeed: 1.0,
                     damageMultPerLevel: 0.010,
                     baseCritBonusPercent: 50.0,
                     critBonusPerLevel: 0.45,
@@ -106,6 +109,7 @@ class GuitaristPoolSystem {
                 passiveName: 'Overdrive Bionico',
                 passiveDesc: '+1.1% de Dano e +0.6% de Dano Crítico por nível, com arcos elétricos devastadores em notas PERFECT.',
                 baseStats: {
+                    baseAttackSpeed: 1.0,
                     damageMultPerLevel: 0.011,
                     baseCritBonusPercent: 55.0,
                     critBonusPerLevel: 0.60,
@@ -134,6 +138,7 @@ class GuitaristPoolSystem {
                 passiveName: 'Fúria dos Titãs',
                 passiveDesc: '+1.15% de Dano, +0.85% de Dano Crítico por nível e repelência brutal contra zumbis pesados.',
                 baseStats: {
+                    baseAttackSpeed: 1.0,
                     damageMultPerLevel: 0.0115,
                     baseCritBonusPercent: 65.0,
                     critBonusPerLevel: 0.85,
@@ -161,6 +166,7 @@ class GuitaristPoolSystem {
                 passiveName: 'Anarquia Absoluta',
                 passiveDesc: '+1.20% de Dano, +0.70% de Dano Crítico, +0.25% de Ouro Extra e +0.50% de Mana Regen por nível!',
                 baseStats: {
+                    baseAttackSpeed: 1.0,
                     damageMultPerLevel: 0.0120,
                     baseCritBonusPercent: 60.0,
                     critBonusPerLevel: 0.70,
@@ -295,6 +301,7 @@ class GuitaristPoolSystem {
 
         return {
             level: lvl,
+            baseAttackSpeed: b.baseAttackSpeed || 1.0,
             damageMult: damageMult,
             critDamageBonusPercent: critDamageBonusPercent,
             manaRegenRate: manaRegenRate,

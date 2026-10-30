@@ -246,7 +246,7 @@ class Game {
         }
         if (nameEl) nameEl.innerText = currentHero.name;
         if (titleEl) titleEl.innerText = currentHero.title;
-        if (instrumentEl) instrumentEl.innerText = currentHero.instrument;
+        if (instrumentEl) instrumentEl.innerText = `${currentHero.instrument} • ⚡ 1.0/s`;
         if (passiveNameEl) passiveNameEl.innerText = (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva';
         if (passiveDescEl) passiveDescEl.innerText = (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '';
         if (showcaseBox) {
