@@ -669,6 +669,25 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - **Cobertura de Testes Automatizados:**
   - Testes ampliados em `test-procedural.js` com 70 asserções automatizadas passando com 100% de sucesso.
 
+### [v1.6.5] - 2026-10-30 (Build 37 - Eliminação de God Object no CSS & Modularização Completa)
+- **Refatoração Completa do CSS (Zero God Object: Todos os arquivos < 1.000 linhas):**
+  - O antigo arquivo monolítico `css/style.css` (com mais de 3.700 linhas) foi totalmente refatorado e particionado em 9 módulos independentes de alta coesão estrutural dentro da pasta `css/`:
+    1. `css/base.css` (264 linhas): Reset global, reset de box-sizing, `#game-container`, zonas de tela dividida (`#combat-zone`, `#rhythm-zone`), divisor `#zone-divider` e container de telas (`.game-screen`).
+    2. `css/menu.css` (242 linhas): Tela 1 `#screen-main-menu`, barra superior de HUD, estatísticas, vitrine de herói, logo em chamas, cartão de fase e botões de ação principal.
+    3. `css/map-select.css` (788 linhas): Tela 2 `#screen-map-select`, contêiner com rolagem touch, cards de seção com `flex-shrink: 0`, grade de seleção dos 6 guitarristas, preview dos 5 zumbis, carrossel de músicas e barra inferior fixa.
+    4. `css/battle.css` (613 linhas): Tela 3 `#screen-battle`, HUD superior in-game, banner da música ativa, medidor flutuante de combo e pontuação, modal de estatísticas SS e modal de configurações/pausa (Gear).
+    5. `css/skills.css` (428 linhas): Medidor de Rock Mana, progressão e barra de nível do guitarrista, grade dos 4 slots de habilidades equipadas nos trilhos e modal de seleção de habilidades (`#skill-picker-modal`).
+    6. `css/talents.css` (412 linhas): Modal completo da Árvore de Talentos AAA, abas de ramificação, nós de talentos, insígnia de nível máximo, inspetor de atributos e botão de upgrade.
+    7. `css/song-studio.css` (476 linhas): Modal do Estúdio de Músicas, biblioteca de faixas, formulário de upload de áudio/capa e painel de importação/exportação de pacotes `.gvsong`.
+    8. `css/editor.css` (332 linhas): Modal do Beat Mapper / Editor DAW multi-pista, régua de compassos, cursor síncrono, velocidade de reprodução, grade de quantização e gravador em tempo real.
+    9. `css/results.css` (189 lines): Modal de resultados pós-partida, medalhas de ranking, detalhamento de precisão, recompensas de moedas e toasts informativos.
+    10. `css/style.css` (15 lines): Orquestrador master que importa os 9 módulos via `@import` para total retrocompatibilidade.
+- **Carregamento Otimizado em Paralelo no `index.html`:**
+  - `index.html` agora referencia diretamente os 9 arquivos modulares com cache-busting `?v=37`, garantindo download simultâneo em paralelo e facilitando a inspeção no DevTools (cada regra aponta diretamente para o seu respectivo arquivo e linha de origem).
+- **Cobertura Total de Testes Automatizados:**
+  - Bateria de testes em `test-procedural.js` expandida para **487 testes automatizados** com 100% de sucesso.
+  - A regra Zero God Object agora audita automaticamente **tanto os 16 arquivos JavaScript quanto os 10 arquivos CSS** do projeto, garantindo que nenhum ultrapasse 1.000 linhas.
+
 ### [v1.6.4] - 2026-10-30 (Build 36 - Correção Definitiva do Menu Pré-Batalha & Scroll Mobile)
 - **Correção de Colapso de Altura dos Cards Pré-Batalha (`css/style.css`):**
   - Identificada e corrigida a causa raiz do layout espremido: os cartões `.map-section-card` dentro do container flexível `.map-screen-scroll` possuíam `flex-shrink: 1` padrão combinado com `overflow: hidden`, o que fazia o flexbox encolher forçadamente todos os 5 cards para dentro da altura da tela (641px), impedindo o scroll vertical e cortando mais de 70% das informações visuais.

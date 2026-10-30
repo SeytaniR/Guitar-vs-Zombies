@@ -1,0 +1,331 @@
+/* ==========================================================================
+   8. BEAT MAPPER / RHYTHM TIMELINE EDITOR MODAL (DAW)
+   ========================================================================== */
+
+/* =========================================
+   CHART EDITOR MODAL (DAW / TIMELINE)
+   ========================================= */
+.editor-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: #080811;
+    z-index: 1100;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-modal-overlay.open {
+    display: flex;
+}
+
+.editor-modal-dialog {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #0a0a14;
+}
+
+.editor-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: #111122;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.editor-header-info h2 {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1px;
+}
+
+.editor-artist-sub {
+    font-size: 9.5px;
+    color: #00d4ff;
+    font-weight: 600;
+}
+
+.editor-header-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.editor-clock {
+    font-size: 13px;
+    font-family: monospace;
+    font-weight: 800;
+    color: #00ff66;
+    background: #000;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 102, 0.3);
+}
+
+.editor-notes-badge {
+    font-size: 10px;
+    color: #ffcc00;
+    font-weight: 700;
+}
+
+.editor-btn-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Toolbar */
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #0d0d1a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tool-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #eee;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.tool-btn.btn-play {
+    background: #0070f3;
+    border-color: #00d4ff;
+    color: #fff;
+}
+
+.tool-btn.btn-rec {
+    background: rgba(255, 0, 85, 0.2);
+    border-color: #ff0055;
+    color: #ff0055;
+}
+
+.tool-btn.btn-rec.recording {
+    background: #ff0055;
+    color: #fff;
+    animation: recBlink 1s infinite;
+}
+
+@keyframes recBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.tool-select-label {
+    font-size: 9px;
+    color: #8899aa;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.tool-select {
+    background: #111122;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 3px 6px;
+    font-size: 10px;
+    border-radius: 4px;
+    outline: none;
+}
+
+.tool-group.note-type-group {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 2px 4px;
+    border-radius: 6px;
+}
+
+.tool-btn.mode-btn {
+    border-radius: 4px;
+    color: #8899aa;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.tool-btn.mode-btn.active {
+    background: linear-gradient(135deg, #0070f3, #00d4ff);
+    color: #fff;
+    border-color: #00ffff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+.tool-btn.mode-btn#editor-mode-hold.active {
+    background: linear-gradient(135deg, #ff0055, #ff5500);
+    border-color: #ff9900;
+    box-shadow: 0 0 8px rgba(255, 85, 0, 0.6);
+}
+
+.tool-btn.btn-danger {
+    color: #ff3366;
+    border-color: rgba(255, 51, 102, 0.4);
+}
+
+.tool-btn.btn-save {
+    background: rgba(255, 204, 0, 0.2);
+    color: #ffcc00;
+    border-color: #ffcc00;
+}
+
+.tool-btn.btn-save-play {
+    background: linear-gradient(135deg, #00d4ff, #00ff66);
+    color: #000;
+    font-weight: 800;
+    border: none;
+}
+
+/* Canvas Wrapper */
+.editor-canvas-wrapper {
+    flex: 1;
+    position: relative;
+    background: #080811;
+    overflow: hidden;
+}
+
+#editor-timeline-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+/* Scrubber Row */
+.editor-scrubber-row {
+    background: #090914;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scrub-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #ffcc00;
+    white-space: nowrap;
+}
+
+.editor-time-slider {
+    flex: 1;
+    accent-color: #ff0055;
+    height: 6px;
+    cursor: pointer;
+}
+
+/* Fret Pads Section */
+.editor-pads-section {
+    background: #0d0d18;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.pads-instructions {
+    font-size: 9px;
+    color: #8899aa;
+    text-align: center;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.editor-pads-bar {
+    display: flex;
+    gap: 8px;
+    height: 52px;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.editor-fret-pad {
+    flex: 1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid;
+    transition: transform 0.08s ease, filter 0.08s ease;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.editor-fret-pad:active, .editor-fret-pad.hit {
+    transform: scale(0.94);
+    filter: brightness(1.6);
+}
+
+.pad-green {
+    background: rgba(0, 255, 102, 0.12);
+    border-color: #00ff66;
+    color: #00ff66;
+}
+
+.pad-red {
+    background: rgba(255, 0, 85, 0.12);
+    border-color: #ff0055;
+    color: #ff0055;
+}
+
+.pad-yellow {
+    background: rgba(255, 204, 0, 0.12);
+    border-color: #ffcc00;
+    color: #ffcc00;
+}
+
+.pad-blue {
+    background: rgba(0, 212, 255, 0.12);
+    border-color: #00d4ff;
+    color: #00d4ff;
+}
+
+.pad-num {
+    font-size: 16px;
+    font-weight: 900;
+    font-family: 'Impact', sans-serif;
+}
+
+.pad-label {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}

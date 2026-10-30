@@ -1,0 +1,787 @@
+/* ==========================================================================
+   3. SCREEN 2: PRE-BATTLE PREPARATION & MAP SELECT
+   ========================================================================== */
+
+/* ==========================================================================
+   SCREEN 2: MAP / PRE-BATTLE PREPARATION
+   ========================================================================== */
+#screen-map-select {
+    background: radial-gradient(circle at 50% 20%, #171026 0%, #0a0812 70%, #040308 100%);
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+.map-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+    background: rgba(15, 10, 25, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.map-header-btn {
+    background: rgba(30, 25, 45, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #eee;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.map-header-btn.map-reroll {
+    background: linear-gradient(135deg, #2b1055, #7928ca);
+    border-color: #d44dff;
+    color: #fff;
+}
+
+.map-header-title {
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.map-header-title h2 {
+    font-size: 13px;
+    font-weight: 900;
+    color: #ffcc00;
+    letter-spacing: 0.5px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.map-header-title .map-sub {
+    font-size: 7.5px;
+    color: #8899aa;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.map-screen-scroll {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain;
+    padding: 10px 10px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.map-section-card {
+    background: rgba(18, 14, 28, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.section-card-header {
+    margin-bottom: 10px;
+}
+
+.section-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.danger-badge {
+    background: rgba(255, 34, 68, 0.25);
+    color: #ff3366;
+    border: 1px solid rgba(255, 34, 68, 0.5);
+}
+
+.music-badge {
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+    border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+.hero-badge {
+    background: rgba(255, 170, 0, 0.2);
+    color: #ffaa00;
+    border: 1px solid rgba(255, 170, 0, 0.5);
+}
+
+/* Hero Showcase & Roster Selection */
+.selected-hero-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(25, 20, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.hero-showcase-top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+}
+
+.hero-showcase-portrait-wrap {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: #000;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+}
+
+.showcase-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-rarity-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 7.5px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    padding: 2px 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.badge-common {
+    background: rgba(160, 170, 184, 0.95);
+    color: #111;
+}
+
+.badge-rare {
+    background: linear-gradient(135deg, #0070f3, #00d4ff);
+    color: #fff;
+}
+
+.badge-epic {
+    background: linear-gradient(135deg, #7928ca, #d800ff);
+    color: #fff;
+}
+
+.badge-legendary {
+    background: linear-gradient(135deg, #ff8800, #ffea00);
+    color: #2b1100;
+}
+
+.badge-mythic {
+    background: linear-gradient(135deg, #ff0055, #ff00c8);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(255, 0, 150, 0.8);
+}
+
+.hero-showcase-details {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.showcase-hero-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.showcase-hero-header h4 {
+    font-size: 14px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.showcase-hero-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #ffaa00;
+}
+
+.showcase-hero-instrument {
+    font-size: 10px;
+    color: #00d4ff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.showcase-hero-passive-box {
+    background: rgba(0, 0, 0, 0.45);
+    border-left: 3px solid #00ff66;
+    padding: 6px 8px;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.passive-tag {
+    font-size: 9px;
+    font-weight: 900;
+    color: #00ff66;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.passive-desc {
+    font-size: 9.5px;
+    color: #ccd6e8;
+    margin: 0;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.hero-roster-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #8899aa;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.map-heroes-roster-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 480px) {
+    .map-heroes-roster-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
+.hero-roster-card {
+    position: relative;
+    background: rgba(25, 20, 38, 0.7);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 8px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    min-height: 84px;
+    transition: all 0.15s ease;
+    touch-action: pan-y;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hero-roster-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(40, 30, 60, 0.85);
+}
+
+.hero-roster-card.active {
+    border-color: #00ff66;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.5);
+    background: rgba(0, 255, 102, 0.12);
+}
+
+.hero-roster-card.active .hero-roster-name {
+    color: #00ff66;
+}
+
+.hero-roster-art {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #000;
+}
+
+.hero-roster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-roster-name {
+    font-size: 8.5px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.hero-roster-mini-badge {
+    font-size: 6.5px;
+    font-weight: 900;
+    padding: 1px 4px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+}
+
+.section-card-header h3 {
+    font-size: 13px;
+    font-weight: 900;
+    color: #fff;
+    margin: 2px 0;
+}
+
+.section-subtext {
+    font-size: 10px;
+    color: #8899aa;
+    line-height: 1.3;
+}
+
+/* 5 Zombies Preview Grid */
+.map-zombies-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.zombie-preview-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(25, 20, 38, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 8px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.zombie-preview-card:hover {
+    border-color: rgba(255, 51, 102, 0.4);
+    transform: translateX(2px);
+}
+
+.zombie-card-art {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #000;
+}
+
+.zombie-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.zombie-card-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 7px;
+    font-weight: 800;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffaa00;
+    padding: 1px 0;
+}
+
+.badge-danger { color: #ff3366 !important; }
+.badge-tank { color: #ffaa00 !important; }
+.badge-toxic { color: #33ff77 !important; }
+.badge-rusher { color: #ff5533 !important; }
+.badge-agile { color: #00d4ff !important; }
+.badge-common { color: #a0aab8 !important; }
+
+.zombie-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.zombie-card-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: #ffdd44;
+    margin-bottom: 2px;
+}
+
+.zombie-card-desc {
+    font-size: 9.5px;
+    color: #a0aab8;
+    line-height: 1.3;
+}
+
+/* Song Selection Section */
+.map-song-selector-row {
+    margin-bottom: 10px;
+}
+
+.map-song-dropdown {
+    width: 100%;
+    background: rgba(25, 20, 40, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    outline: none;
+}
+
+.map-selected-song-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(25, 20, 40, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.map-song-cover-wrap {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.map-song-cover-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+    display: block;
+}
+
+.map-song-active-pill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 255, 102, 0.9);
+    color: #000;
+    font-size: 6.5px;
+    font-weight: 900;
+    text-align: center;
+    padding: 1px 0;
+}
+
+.map-song-current-title {
+    font-size: 13px;
+    font-weight: 900;
+    color: #00ffff;
+    margin: 0;
+}
+
+.map-selected-song-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.map-song-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.map-song-tag-bpm {
+    font-size: 9px;
+    font-weight: 800;
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+    border: 1px solid rgba(0, 212, 255, 0.5);
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.map-song-tag-notes {
+    font-size: 9px;
+    font-weight: 800;
+    background: rgba(255, 170, 0, 0.2);
+    color: #ffaa00;
+    border: 1px solid rgba(255, 170, 0, 0.4);
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.map-song-meta-text {
+    font-size: 10px;
+    color: #a0aab8;
+    font-weight: 600;
+}
+
+/* Cycle navigation & Section Header Row */
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.cycle-nav-group {
+    display: flex;
+    gap: 4px;
+}
+
+.cycle-nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    padding: 3px 8px;
+    font-size: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    touch-action: manipulation;
+}
+
+.cycle-nav-btn:hover, .cycle-nav-btn:active {
+    background: rgba(0, 255, 102, 0.25);
+    border-color: #00ff66;
+}
+
+/* Song Roster List & Select Cards */
+.song-roster-header {
+    margin-top: 10px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.song-roster-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #8899aa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.map-songs-roster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.map-song-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(25, 20, 38, 0.7);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 6px 8px;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+}
+
+.map-song-card:hover {
+    border-color: rgba(0, 212, 255, 0.4);
+    background: rgba(40, 30, 60, 0.85);
+}
+
+.map-song-card.active {
+    border-color: #00ff66;
+    background: rgba(0, 255, 102, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 102, 0.35);
+}
+
+.map-song-card-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.map-song-card-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+    pointer-events: none;
+    background: #000;
+}
+
+.map-song-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.map-song-card-title {
+    font-size: 11px;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.map-song-card.active .map-song-card-title {
+    color: #00ff66;
+}
+
+.map-song-card-meta {
+    font-size: 8.5px;
+    color: #8899aa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-card-action-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+}
+
+.song-card-action-btn.active {
+    background: linear-gradient(135deg, #00b050, #00ff66);
+    color: #000;
+    border-color: #00ff66;
+    font-weight: 900;
+    box-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+
+.hero-card-check {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: #00ff66;
+    color: #000;
+    font-size: 8px;
+    font-weight: 900;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 6px rgba(0, 255, 102, 0.8);
+    pointer-events: none;
+}
+
+button.hero-roster-card {
+    font-family: inherit;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+.map-bottom-bar {
+    padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(15, 10, 25, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    z-index: 20;
+}
+
+.map-start-battle-action {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    background: linear-gradient(135deg, #ff1744 0%, #ff9100 100%);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 23, 68, 0.6);
+    transition: transform 0.1s ease;
+}
+
+.map-start-battle-action:active {
+    transform: scale(0.98);
+}

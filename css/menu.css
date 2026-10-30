@@ -1,0 +1,241 @@
+/* ==========================================================================
+   2. SCREEN 1: MAIN MENU
+   ========================================================================== */
+
+/* ==========================================================================
+   SCREEN 1: MAIN MENU
+   ========================================================================== */
+#screen-main-menu {
+    background: radial-gradient(circle at 50% 30%, #1e1338 0%, #0d081a 60%, #05040a 100%);
+    justify-content: space-between;
+    padding: 14px 16px;
+    z-index: 10;
+}
+
+.menu-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menu-hud-stats {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.menu-stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(20, 15, 35, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.menu-stat-badge .stat-icon {
+    font-size: 12px;
+}
+
+.gold-badge .stat-val {
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+
+.score-badge .stat-val {
+    color: #00d4ff;
+    text-shadow: 0 0 6px rgba(0, 212, 255, 0.5);
+}
+
+.kills-badge .stat-val {
+    color: #ff3366;
+    text-shadow: 0 0 6px rgba(255, 51, 102, 0.5);
+}
+
+.menu-quick-tools {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.menu-tool-btn {
+    background: rgba(30, 25, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.menu-tool-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.menu-lang-group {
+    display: flex;
+    gap: 2px;
+}
+
+.menu-lang-group .lang-btn {
+    background: rgba(30, 25, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #bbb;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.menu-lang-group .lang-btn:hover {
+    color: #00ff66;
+    border-color: #00ff66;
+}
+
+/* Menu Hero Showcase & Logo */
+.menu-hero-showcase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.menu-logo-wrap {
+    margin-bottom: 12px;
+}
+
+.logo-sub {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #ff3366;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.8);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.logo-title {
+    font-size: 32px;
+    font-weight: 900;
+    font-family: 'Impact', -apple-system, sans-serif;
+    letter-spacing: 1.5px;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255, 204, 0, 0.8), 0 0 25px rgba(255, 0, 85, 0.6);
+    line-height: 1.1;
+    margin: 0;
+}
+
+.logo-title span {
+    color: #ffcc00;
+    font-style: italic;
+}
+
+.logo-divider {
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ff0055, #ffcc00, transparent);
+    margin: 6px auto 0;
+    border-radius: 2px;
+}
+
+.menu-stage-card {
+    background: rgba(20, 15, 32, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 14px;
+    max-width: 380px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.stage-tag {
+    font-size: 10px;
+    font-weight: 800;
+    color: #00d4ff;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.stage-desc {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #c0c6d8;
+}
+
+/* Action Buttons Stack */
+.menu-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.menu-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.menu-action-btn:active {
+    transform: scale(0.97);
+}
+
+.btn-play-battle {
+    background: linear-gradient(135deg, #ff1744 0%, #ff9100 100%);
+    color: #fff;
+    font-size: 15px;
+    padding: 15px 18px;
+    box-shadow: 0 0 20px rgba(255, 23, 68, 0.6), 0 4px 15px rgba(0,0,0,0.5);
+    animation: battlePlayPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes battlePlayPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 23, 68, 0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 28px rgba(255, 145, 0, 0.85); transform: scale(1.02); }
+}
+
+.btn-talents {
+    background: linear-gradient(135deg, #00b050 0%, #00e676 100%);
+    color: #032b12;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+}
+
+.btn-studio {
+    background: linear-gradient(135deg, #7928ca 0%, #ff0080 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 0, 128, 0.35);
+}
+
+.btn-settings {
+    background: rgba(30, 25, 45, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #d8d8e8;
+}
+
+.menu-footer {
+    text-align: center;
+    font-size: 9px;
+    color: #606078;
+    padding-top: 6px;
+}

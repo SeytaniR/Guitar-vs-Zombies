@@ -1,0 +1,411 @@
+/* ==========================================================================
+   6. TALENT TREE MODAL (AAA MOBILE)
+   ========================================================================== */
+
+/* =========================================
+   ADVANCED TALENT TREE MODAL (AAA MOBILE)
+   ========================================= */
+.talent-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 4, 10, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.talent-modal-overlay.open {
+    display: flex;
+}
+
+.talent-modal-dialog {
+    width: 100%;
+    max-width: 480px;
+    max-height: 94dvh;
+    background: #0d0d18;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 14px;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 212, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #eee;
+}
+
+/* Modal Header */
+.talent-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: linear-gradient(to right, #141428, #1a1a36);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.talent-header-title h2 {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #ffcc00;
+    text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+    margin-bottom: 2px;
+}
+
+.talent-header-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.modal-gold-tag {
+    color: #ffd700;
+}
+
+.modal-upgrades-tag {
+    color: #00d4ff;
+}
+
+.talent-modal-close {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.talent-modal-close:hover {
+    background: #ff3366;
+    border-color: #ff3366;
+}
+
+/* Branch Tabs */
+.talent-tabs-bar {
+    display: flex;
+    background: #090912;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 6px;
+    gap: 4px;
+}
+
+.talent-tab {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid transparent;
+    color: #8899aa;
+    padding: 7px 4px;
+    font-size: 10.5px;
+    font-weight: 800;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.talent-tab.active {
+    background: rgba(0, 212, 255, 0.15);
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.45);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.25);
+}
+
+/* Modal Body */
+.talent-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Nodes Grid */
+.talent-nodes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.talent-node {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(22, 22, 38, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.talent-node:hover {
+    background: rgba(30, 30, 52, 0.85);
+}
+
+.talent-node.selected {
+    background: rgba(0, 212, 255, 0.12);
+    border-color: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+}
+
+.talent-node.locked {
+    opacity: 0.55;
+    filter: grayscale(0.5);
+}
+
+.talent-node.maxed {
+    border-color: #ffcc00;
+    box-shadow: 0 0 8px rgba(255, 204, 0, 0.25);
+}
+
+.node-icon-wrap {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #000;
+}
+
+.node-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.node-lock-badge {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.node-max-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffcc00;
+    color: #000;
+    font-size: 8px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 12px;
+}
+
+.node-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.node-name {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.node-level {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #88aacc;
+}
+
+.node-benefit-preview {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #00ff66;
+    text-align: right;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Inspector Card */
+.talent-inspector-card {
+    background: #111120;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.inspector-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.inspector-icon-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border: 2px solid #ffcc00;
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.35);
+    object-fit: cover;
+}
+
+.inspector-meta {
+    flex: 1;
+}
+
+.inspector-meta h3 {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.inspector-level-badge {
+    display: inline-block;
+    background: rgba(0, 212, 255, 0.15);
+    color: #00d4ff;
+    border: 1px solid rgba(0, 212, 255, 0.35);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 800;
+}
+
+.inspector-desc-text {
+    font-size: 11px;
+    color: #bbccdd;
+    line-height: 1.35;
+}
+
+/* Progress Track */
+.inspector-progress-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.inspector-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #00ff66);
+    box-shadow: 0 0 6px rgba(0, 255, 102, 0.6);
+    transition: width 0.2s ease;
+}
+
+/* Benefits Box */
+.inspector-benefits-box {
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 6px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.benefit-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+}
+
+.benefit-label {
+    color: #8899aa;
+    font-weight: 600;
+}
+
+.benefit-row.current .benefit-value {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.benefit-row.next .benefit-value {
+    color: #00ff66;
+    font-weight: 700;
+}
+
+.inspector-prereq-alert {
+    background: rgba(255, 51, 102, 0.15);
+    border: 1px solid rgba(255, 51, 102, 0.4);
+    color: #ff3366;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    display: none;
+}
+
+/* Upgrade Button */
+.inspector-actions {
+    margin-top: 2px;
+}
+
+.upgrade-btn {
+    width: 100%;
+    padding: 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+}
+
+.upgrade-btn.ready {
+    background: linear-gradient(135deg, #ffd700, #ff8800);
+    color: #000;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.45);
+}
+
+.upgrade-btn.ready:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.7);
+}
+
+.upgrade-btn.broke {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ff5577;
+    border: 1px solid rgba(255, 85, 119, 0.3);
+    cursor: not-allowed;
+}
+
+.upgrade-btn.locked {
+    background: rgba(255, 255, 255, 0.05);
+    color: #667788;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+}
+
+.upgrade-btn.maxed {
+    background: rgba(0, 255, 102, 0.15);
+    color: #00ff66;
+    border: 1px solid rgba(0, 255, 102, 0.35);
+    cursor: default;
+}

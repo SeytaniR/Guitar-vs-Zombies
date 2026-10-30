@@ -730,8 +730,21 @@ assert(!roxiePool.instrument.toLowerCase().includes('machado'), 'Roxie instrumen
 // 4.7. Screen Isolation & Pre-Battle Responsiveness Regression Tests
 console.log('\n14. Testing Screen Isolation, Pre-Battle Layout & Modal CSS...');
 const htmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
-const cssContent = fs.readFileSync(path.resolve(__dirname, 'css/style.css'), 'utf8');
+const allCssFiles = fs.readdirSync(path.resolve(__dirname, 'css')).filter(f => f.endsWith('.css'));
+const cssContent = allCssFiles.map(f => fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8')).join('\n');
+const masterStyleContent = fs.readFileSync(path.resolve(__dirname, 'css/style.css'), 'utf8');
 const mainJsContent = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
+
+// Master CSS Orchestrator
+assert(masterStyleContent.includes("@import url('base.css');"), "style.css imports base.css");
+assert(masterStyleContent.includes("@import url('menu.css');"), "style.css imports menu.css");
+assert(masterStyleContent.includes("@import url('map-select.css');"), "style.css imports map-select.css");
+assert(masterStyleContent.includes("@import url('battle.css');"), "style.css imports battle.css");
+assert(masterStyleContent.includes("@import url('skills.css');"), "style.css imports skills.css");
+assert(masterStyleContent.includes("@import url('talents.css');"), "style.css imports talents.css");
+assert(masterStyleContent.includes("@import url('song-studio.css');"), "style.css imports song-studio.css");
+assert(masterStyleContent.includes("@import url('editor.css');"), "style.css imports editor.css");
+assert(masterStyleContent.includes("@import url('results.css');"), "style.css imports results.css");
 
 // Screen Isolation
 assert(cssContent.includes('.game-screen {\n    display: none !important;'), 'CSS enforces .game-screen { display: none !important; }');
@@ -759,16 +772,30 @@ assert(htmlContent.includes('id="skill-picker-modal" class="game-modal skill-mod
 // Pre-Battle Card flex-shrink check
 assert(cssContent.includes('.map-section-card {\n    background: rgba(18, 14, 28, 0.7);\n    border: 1px solid rgba(255, 255, 255, 0.1);\n    border-radius: 12px;\n    padding: 10px;\n    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n    width: 100%;\n    max-width: 100%;\n    box-sizing: border-box;\n    overflow: hidden;\n    flex-shrink: 0;\n}'), '.map-section-card enforces flex-shrink: 0 to prevent vertical card collapse');
 
-// Cache Buster Version
-assert(htmlContent.includes('css/style.css?v=36'), 'index.html links style.css with v=36');
-assert(htmlContent.includes('js/main.js?v=36'), 'index.html links main.js with v=36');
-assert(htmlContent.includes('v1.6.4 (Build 36)'), 'index.html footer specifies v1.6.4 (Build 36)');
+// Cache Buster Version & Modular CSS Links
+assert(htmlContent.includes('css/base.css?v=37'), 'index.html links base.css with v=37');
+assert(htmlContent.includes('css/menu.css?v=37'), 'index.html links menu.css with v=37');
+assert(htmlContent.includes('css/map-select.css?v=37'), 'index.html links map-select.css with v=37');
+assert(htmlContent.includes('css/battle.css?v=37'), 'index.html links battle.css with v=37');
+assert(htmlContent.includes('css/skills.css?v=37'), 'index.html links skills.css with v=37');
+assert(htmlContent.includes('css/talents.css?v=37'), 'index.html links talents.css with v=37');
+assert(htmlContent.includes('css/song-studio.css?v=37'), 'index.html links song-studio.css with v=37');
+assert(htmlContent.includes('css/editor.css?v=37'), 'index.html links editor.css with v=37');
+assert(htmlContent.includes('css/results.css?v=37'), 'index.html links results.css with v=37');
+assert(htmlContent.includes('js/main.js?v=37'), 'index.html links main.js with v=37');
+assert(htmlContent.includes('v1.6.5 (Build 37)'), 'index.html footer specifies v1.6.5 (Build 37)');
 
-// Zero God Object rule check
+// Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));
 allJsFiles.forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;
     assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
+});
+
+// Zero God Object rule check (CSS files)
+allCssFiles.forEach(f => {
+    const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length;
+    assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`);
 });
 
 // Summary
