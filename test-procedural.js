@@ -885,17 +885,49 @@ assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #ma
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=42'), 'index.html links base.css with v=42');
-assert(htmlContent.includes('css/menu.css?v=42'), 'index.html links menu.css with v=42');
-assert(htmlContent.includes('css/map-select.css?v=42'), 'index.html links map-select.css with v=42');
-assert(htmlContent.includes('css/battle.css?v=42'), 'index.html links battle.css with v=42');
-assert(htmlContent.includes('css/skills.css?v=42'), 'index.html links skills.css with v=42');
-assert(htmlContent.includes('css/talents.css?v=42'), 'index.html links talents.css with v=42');
-assert(htmlContent.includes('css/song-studio.css?v=42'), 'index.html links song-studio.css with v=42');
-assert(htmlContent.includes('css/editor.css?v=42'), 'index.html links editor.css with v=42');
-assert(htmlContent.includes('css/results.css?v=42'), 'index.html links results.css with v=42');
-assert(htmlContent.includes('js/main.js?v=42'), 'index.html links main.js with v=42');
-assert(htmlContent.includes('v1.7.0 (Build 42)'), 'index.html footer specifies v1.7.0 (Build 42)');
+assert(htmlContent.includes('css/base.css?v=43'), 'index.html links base.css with v=43');
+assert(htmlContent.includes('css/menu.css?v=43'), 'index.html links menu.css with v=43');
+assert(htmlContent.includes('css/map-select.css?v=43'), 'index.html links map-select.css with v=43');
+assert(htmlContent.includes('css/battle.css?v=43'), 'index.html links battle.css with v=43');
+assert(htmlContent.includes('css/skills.css?v=43'), 'index.html links skills.css with v=43');
+assert(htmlContent.includes('css/talents.css?v=43'), 'index.html links talents.css with v=43');
+assert(htmlContent.includes('css/song-studio.css?v=43'), 'index.html links song-studio.css with v=43');
+assert(htmlContent.includes('css/editor.css?v=43'), 'index.html links editor.css with v=43');
+assert(htmlContent.includes('css/results.css?v=43'), 'index.html links results.css with v=43');
+assert(htmlContent.includes('js/main.js?v=43'), 'index.html links main.js with v=43');
+assert(htmlContent.includes('v1.7.1 (Build 43)'), 'index.html footer specifies v1.7.1 (Build 43)');
+
+// ==========================================
+// 17. Testing Zombie Balance & Explosion AoE Damage Reduction (v1.7.1)
+// ==========================================
+console.log('\n17. Testing Zombie Balance (+30% Base HP) & Explosion AoE Reduction (-70%)...');
+const poolZombies = enemyPool.masterPool;
+const expectedHps = {
+    punk_walker: 104,
+    feral_leaper: 85,
+    toxic_mutant: 299,
+    armored_soldier: 273,
+    fungal_spore: 163,
+    bloater_pounder: 572,
+    chained_gladiator: 254,
+    toxic_hazmat: 208
+};
+Object.entries(expectedHps).forEach(([id, expectedHp]) => {
+    const z = poolZombies.find(item => item.id === id);
+    assert(z && z.hp === expectedHp, `Zombie ${id} base HP is scaled +30% to ${expectedHp} (actual: ${z ? z.hp : 'not found'})`);
+});
+
+// Test Mutant Blast AoE Damage Reduction to other zombies (reduced by 70%: 70 -> 21)
+const mutantFx = new CombatFX();
+const victimZombie1 = { x: 200, y: 150, hp: 100, active: true, flashTime: 0 };
+mutantFx.triggerMutantBlast(150, 150, [victimZombie1], null, null);
+assert(victimZombie1.hp === 79, `Mutant blast dealt exactly 21 damage to victim zombie (100 - 21 = 79, down 70% from 70)`);
+
+// Test Hazmat Meltdown AoE Damage Reduction to other zombies (reduced by 70%: 40 -> 12)
+const hazmatFx = new CombatFX();
+const victimZombie2 = { x: 180, y: 150, hp: 100, active: true, flashTime: 0 };
+hazmatFx.triggerHazmatMeltdown(150, 150, [victimZombie2], null, null);
+assert(victimZombie2.hp === 88, `Hazmat meltdown dealt exactly 12 damage to nearby zombie (100 - 12 = 88, down 70% from 40)`);
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

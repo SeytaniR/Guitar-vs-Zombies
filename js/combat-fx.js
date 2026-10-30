@@ -214,13 +214,13 @@ class CombatFX {
             });
         }
 
-        // Damage and knock back all other zombies on the street
+        // Damage and knock back all other zombies on the street (reduced by 70%: 70 -> 21)
         zombies.forEach(other => {
             if (other.active) {
-                other.hp -= 70;
+                other.hp -= 21;
                 other.x += 24;
                 other.flashTime = 0.2;
-                this.addFloatingText("-70 ☢️", other.x, other.y - 35, '#39ff14', true);
+                this.addFloatingText("-21 ☢️", other.x, other.y - 35, '#39ff14', true);
 
                 if (other.hp <= 0) {
                     other.active = false;
@@ -287,9 +287,9 @@ class CombatFX {
 
         zombies.forEach(other => {
             if (other.active && Math.abs(other.x - x) < 110) {
-                other.hp -= 40;
+                other.hp -= 12;
                 other.flashTime = 0.2;
-                this.addFloatingText("-40 🧪", other.x, other.y - 30, '#39ff14', false);
+                this.addFloatingText("-12 🧪", other.x, other.y - 30, '#39ff14', false);
                 if (other.hp <= 0) {
                     other.active = false;
                     if (onKilledCallback) onKilledCallback(other, 150);

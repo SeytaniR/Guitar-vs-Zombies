@@ -27,6 +27,33 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.1] - 2026-10-30 (Aumento de 30% no HP Base dos Zumbis & Redução de 70% no Dano de Explosão em Área - Build 43)
+**Balanceamento Geral de Sobrevivência dos Zumbis e Ajuste Estratégico no Fogo Amigo de Explosões**
+- **Aumento de 30% na Vida Base (HP) de Todos os Zumbis (`EnemyPoolSystem` & `ZombieEntity`):**
+  - O HP base de todos os 8 arquétipos de zumbis do catálogo oficial foi elevado em +30%:
+    - `Punk Walker` (`punk_walker`): `80` ➔ `104 HP` (+30%).
+    - `Feral Leaper` (`feral_leaper`): `65` ➔ `85 HP` (+30%).
+    - `Toxic Mutant` (`toxic_mutant`): `230` ➔ `299 HP` (+30%).
+    - `Armored Soldier` (`armored_soldier`): `210` ➔ `273 HP` (+30%).
+    - `Fungal Spore` (`fungal_spore`): `125` ➔ `163 HP` (+30%).
+    - `Bloater Pounder` (`bloater_pounder`): `440` ➔ `572 HP` (+30%).
+    - `Chained Gladiator` (`chained_gladiator`): `195` ➔ `254 HP` (+30%).
+    - `Toxic Hazmat` (`toxic_hazmat`): `160` ➔ `208 HP` (+30%).
+  - Atualizados os valores de fallback de HP padrão em `js/combat.js` e `js/zombie-entity.js` de `80` para `104 HP`.
+  - Como o escalonamento procedural por nível de fase (`ZombieEntity.calculateHp`) multiplica o valor base, todas as fases do jogo (Fase 1 até o infinito) agora apresentam hordas 30% mais resistentes, exigindo melhor ritmo, sinergia de habilidades e acúmulo de críticos.
+- **Redução de 70% no Dano em Área Causal entre Zumbis por Explosões (`CombatFX`):**
+  - **Mutant Overload (`triggerMutantBlast`):**
+    - Reduzido o dano em área causado a outros zumbis na rua em 70%: de `70` para `21 de dano` (`70 * (1 - 0.70) = 21`).
+    - Texto flutuante atualizado para `"-21 ☢️"`.
+  - **Hazmat Meltdown (`triggerHazmatMeltdown`):**
+    - Reduzido o dano em raio de 110px causado a outros zumbis em 70%: de `40` para `12 de dano` (`40 * (1 - 0.70) = 12`).
+    - Texto flutuante atualizado para `"-12 🧪"`.
+  - Evita que a detonação em cadeia de zumbis explosivos limpe automaticamente toda a tela sem esforço do jogador, valorizando os disparos e habilidades do guitarrista.
+- **Conformidade Estrita com Regra Zero God Object & Suíte de Testes (579 Testes):**
+  - Todos os 16 arquivos JS e 10 arquivos CSS estritamente abaixo de 1.000 linhas (`combat.js`: 988, `rhythm.js`: 989, `main.js`: 959).
+  - 579 testes automatizados com 100% de aprovação em `test-procedural.js`.
+  - Cache buster e versão do rodapé atualizados para `v1.7.1 (Build 43)` (`?v=43`).
+
 ### [v1.7.0] - 2026-10-30 (Mapas Aleatórios por Fase & Nova Regra de Crítico Natural por 5 Notas Perfeitas - Build 42)
 **Remoção da Seleção Manual de Mapas, Randomização por Fase e Sistema de Acúmulo de Crítico Natural por Sequência de Notas Perfeitas**
 - **Cenário de Batalha Aleatório a Cada Fase (`StageSystem` & `#screen-map-select`):**

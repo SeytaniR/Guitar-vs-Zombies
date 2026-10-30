@@ -207,7 +207,7 @@ class CombatSystem {
 
         const enemyDef = pool.length > 0
             ? pool[Math.floor(Math.random() * pool.length)]
-            : { type: 'normal', scale: 0.50, speed: 38, hp: 80, attackInterval: 1.1, attackDamage: 7, name: 'Zumbi Punk' };
+            : { type: 'normal', scale: 0.50, speed: 38, hp: 104, attackInterval: 1.1, attackDamage: 7, name: 'Zumbi Punk' };
 
         const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
         const range = window.stageSystem ? window.stageSystem.getZombieLevelRange(stage) : { min: 1, max: 2 };

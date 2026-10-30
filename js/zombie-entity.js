@@ -14,7 +14,7 @@ class ZombieEntity {
 
         // Procedural HP Scaling
         const hpMult = Math.pow(1 + 0.09 * (this.level - 1), 1.04);
-        const baseHp = enemyDef.hp || 80;
+        const baseHp = enemyDef.hp || 104;
         const hp = Math.round(baseHp * hpMult);
         this.hp = hp;
         this.maxHp = hp;
