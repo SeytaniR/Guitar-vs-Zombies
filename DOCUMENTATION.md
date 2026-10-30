@@ -28,6 +28,31 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.6] - 2026-10-30 (Mestria dos Guitarristas & Rebalanceamento das Recompensas Meta - Build 48)
+**Sistema Procedural de Mestria para Guitarristas e Rebalanceamento da Economia Meta (-90%)**
+- **Sistema de Mestria dos Guitarristas (`MetaMissionSystem` / `js/missions.js`):**
+  - Todo guitarrista da pool (`Johnny Blaze`, `Vulkan Ironhead`, `Roxie Anarchy`, `Dr. Radix`, `Cypher Volt`, `Kragthor Titan` e novos adicionados) entra automaticamente no sistema.
+  - Métrica de contagem baseada em abates gerais: qualquer eliminação de zumbi enquanto o guitarrista estiver ativo conta para sua mestria.
+  - Mesma progressão de marcos procedurais: 10 ➔ 100 ➔ 1.000 ➔ 10.000 ➔ 100.000 eliminações.
+  - Títulos de Mestria por marco: *Rocker Iniciante 🥉*, *Rocker Veterano 🥈*, *Virtuoso do Palco 🥇*, *Lenda da Guitarra 💎*, *DEUS DO ROCK 👑⚡*.
+- **Rebalanceamento Econômico das Recompensas Meta (-90%):**
+  - Recompensas em ouro das missões de zumbis reduzidas em 90% (Tier 5: de 1.000.000 para 100.000 ouro).
+  - Tiers de recompensas rebalanceados:
+    - Tier 1 (10 kills): 25 Ouro, 10 XP
+    - Tier 2 (100 kills): 150 Ouro, 60 XP
+    - Tier 3 (1.000 kills): 1.200 Ouro, 400 XP
+    - Tier 4 (10.000 kills): 10.000 Ouro, 3.000 XP
+    - Tier 5 (100.000 kills): 100.000 Ouro, 25.000 XP
+  - Recompensas de mestria dos guitarristas utilizam a mesma métrica dos 10% com bônus de raridade e direcionamento direto de XP para a evolução do guitarrista.
+- **Interface e Navegação no Painel de Missões (`index.html` & `css/missions.css`):**
+  - Alternador por abas entre `🧟 Hordas Zumbi` e `🎸 Mestria Guitarristas`.
+  - Badges individuais de notificação para cada categoria.
+  - Cards de guitarristas exibindo retrato, instrumento, badge de raridade, kills e títulos de mestria.
+- **Conformidade e Testes Automatizados:**
+  - Suíte `test-procedural.js` com 521 testes cobrindo todas as 19 seções (100% de aprovação).
+  - Todos os 17 arquivos JS e 11 arquivos CSS estritamente abaixo de 1.000 linhas.
+  - Cache-busting atualizado para `v=48` e rodapé para `v1.7.6 (Build 48)`.
+
 ### [v1.7.5] - 2026-10-30 (Sistema Procedural de Missões Meta & Caçada de Zumbis - Build 47)
 **Sistema de Metas Longas e Recompensas Procedurais com Inclusão Automática de Todos os Zumbis do Pool**
 - **Inclusão Dinâmica & Procedural (`MetaMissionSystem` / `js/missions.js`):**
@@ -957,41 +982,11 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
   - Todos os 16 arquivos JavaScript do projeto continuam rigorosamente abaixo de 1.000 linhas (Regra Zero God Objects).
 
 ### [v1.5.0] - 2026-10-13 (Fatores Procedurais & Pool de 6 Guitarristas)
-- **Níveis Procedurais para Guitarristas (1 a 100):** Escalonamento suave de dano (+1% por nível), vida e bônus de raridade.
-- **Pool Completa de 6 Guitarristas:** Johnny Blade, Vulkan Heavy, Dr. Radix, Cypher Volt, Kragthor Titan e Riot Pixie.
-- **Nível Procedural Infinito para Fases & Zumbis:** HP, dano, velocidade e recompensas de ouro/XP escalando progressivamente.
-- **Sistema de Rock Mana & 4 Trilhos de Habilidades:** 8 habilidades ativas/passivas equipáveis por pista.
-- **Remoção de Auto-Play:** Foco 100% em gameplay manual responsivo mobile.
+- Níveis procedurais para guitarristas (1-100), pool de 6 heróis, fases infinitas, Rock Mana e 4 trilhos de habilidades equipáveis.
 
-### [v1.0.0] - 2026-10-12 (Estúdio de Músicas & Editor de Ritmo Interativo)
-- Sistema completo de upload de áudios (.mp3, .wav, .ogg), capas (.jpg, .png), títulos, BPM e descrição.
-- Banco de dados local com IndexedDB (`GVS_MusicStudio_DB`).
-- Editor de Ritmo visual estilo DAW (Beatmapper multi-pistas) com gravação em tempo real e atalhos de teclado.
-- Importação e exportação de pacotes completos `.gvsong`.
+### [v0.8.0 - v1.0.0] - 2026-10-12 (Estúdio de Músicas & Zumbi Saltador)
+- Estúdio de músicas e Beatmapper DAW com IndexedDB (`.gvsong`), e Zumbi Leaper com mecânica de salto parabólico e Air Shot crítico.
 
-### [v0.8.0] - 2026-10-12 (Zumbi Corredor Saltador & Mecânica de Air Shot)
-**Adicionado & Corrigido**
-- **Novo Inimigo: Zumbi Corredor Saltador (`zombie_leaper.jpg`):**
-  - **Galope Feral:** Corre em quatro apoios em altíssima velocidade (Frames 0, 1, 2, 3).
-  - **Mecânica de Salto Acrobático:** Ao chegar a cerca de 140px do herói, agacha-se para pegar impulso (Frame 5), decola (Frame 6), mergulha em arco parabólico no ar a mais de 55px de altura sobre outros zumbis (Frame 7) e pousa violentamente na frente do guitarrista (Frame 10).
-  - **Ataques de Garras Velozes:** Ao chegar no herói, desfere golpes rápidos com efeito de motion blur nas garras (Frames 8 e 9) a cada 0.55s.
-- **Mecânica "Air Shot" (Tiro Aéreo Crítico):** Se o jogador acertar uma nota musical e atingir o saltador enquanto ele está voando no ar, o salto é cancelado imediatamente, o zumbi é arremessado de volta para o asfalto com knockback massivo e sofre dano crítico aumentado com o texto especial `🎯 AIR SHOT! CRIT!`.
-- **Sombra Dinâmica de Altura:** A sombra projetada do zumbi permanece na rua mesmo quando ele está no ar, encolhendo e clareando conforme ele sobe no arco de pulo.
+### [v0.1.0 - v0.7.0] - 2026-10-08 a 2026-10-11
+- Criação inicial do projeto, layout mobile 50/50, i18n, spritesheets com Chroma Key, combate contínuo, projéteis sônicos e Zumbi Mutante Radioativo com explosão em área.
 
-### [v0.7.0] - 2026-10-11
-- Combate contínuo corpo a corpo (zumbis atacam até o fim sem morrer ao encostar) e Zumbi Mutante Radioativo com explosão em área.
-
-### [v0.6.0] - 2026-10-11
-- Projétil compacto de notas (escala 0.18) e regra estrita de combate: 1 nota acertada no ritmo = 1 disparo sônico.
-
-### [v0.5.0] - 2026-10-11
-- Câmera recuada (zoom out), enquadramento dos personagens na faixa de asfalto do cenário e correção definitiva do bug do quadrado branco com silhuetas pré-renderizadas.
-
-### [v0.4.0] - 2026-10-11
-- Herói fixo na esquerda e zumbis vindo da direita com Chroma Key e sistema de partículas.
-
-### [v0.3.0] - 2026-10-09
-- Integração das sprite sheets fornecidas pelo usuário.
-
-### [v0.1.0] - 2026-10-08
-- Estrutura inicial do projeto com layout mobile 50/50 e i18n.

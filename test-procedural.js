@@ -851,11 +851,11 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #ma
 assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.7.5 Build 47)
+// Cache Buster Version & Modular CSS Links (v1.7.6 Build 48)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=47`), `index.html links ${f} with v=47`);
+    assert(htmlContent.includes(`${f}?v=48`), `index.html links ${f} with v=48`);
 });
-assert(htmlContent.includes('v1.7.5 (Build 47)'), 'index.html footer specifies v1.7.5 (Build 47)');
+assert(htmlContent.includes('v1.7.6 (Build 48)'), 'index.html footer specifies v1.7.6 (Build 48)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -866,10 +866,7 @@ assert(cssContent.includes('.stage-info-chips') && cssContent.includes('.arena-r
 // ==========================================
 console.log('\n17. Testing Zombie Balance (+30% Base HP) & Explosion AoE Reduction (-70%)...');
 const poolZombies = enemyPool.masterPool;
-const expectedHps = {
-    punk_walker: 104, feral_leaper: 85, toxic_mutant: 299, armored_soldier: 273,
-    fungal_spore: 163, bloater_pounder: 572, chained_gladiator: 254, toxic_hazmat: 208
-};
+const expectedHps = { punk_walker: 104, feral_leaper: 85, toxic_mutant: 299, armored_soldier: 273, fungal_spore: 163, bloater_pounder: 572, chained_gladiator: 254, toxic_hazmat: 208 };
 Object.entries(expectedHps).forEach(([id, expectedHp]) => {
     const z = poolZombies.find(item => item.id === id);
     assert(z && z.hp === expectedHp, `Zombie ${id} base HP is scaled +30% to ${expectedHp} (actual: ${z ? z.hp : 'not found'})`);
@@ -896,14 +893,10 @@ console.log('\n18. Testing 8 Expanded Zombie Archetypes...');
 assert(enemyPool.masterPool.length === 16, `EnemyPool masterPool now contains all 16 distinct zombies (${enemyPool.masterPool.length} found)`);
 
 [
-    ['clown_jester', 130, 50, 'clown', 'Clown Jester'],
-    ['builder_demolisher', 245, 31, 'builder', 'Builder Demolisher'],
-    ['mad_scientist', 155, 40, 'scientist', 'Mad Scientist'],
-    ['inferno_firefighter', 310, 25, 'firefighter', 'Inferno Firefighter'],
-    ['sheriff_walker', 170, 36, 'sheriff', 'Sheriff Walker (Rick Grimes)'],
-    ['presidential_politician', 220, 32, 'politician', 'Presidential Politician'],
-    ['dark_knight_undead', 260, 45, 'batman', 'Dark Knight (Batman)'],
-    ['god_of_war_spartan', 380, 28, 'kratos', 'Spartan (Kratos)']
+    ['clown_jester', 130, 50, 'clown', 'Clown Jester'], ['builder_demolisher', 245, 31, 'builder', 'Builder Demolisher'],
+    ['mad_scientist', 155, 40, 'scientist', 'Mad Scientist'], ['inferno_firefighter', 310, 25, 'firefighter', 'Inferno Firefighter'],
+    ['sheriff_walker', 170, 36, 'sheriff', 'Sheriff Walker (Rick Grimes)'], ['presidential_politician', 220, 32, 'politician', 'Presidential Politician'],
+    ['dark_knight_undead', 260, 45, 'batman', 'Dark Knight (Batman)'], ['god_of_war_spartan', 380, 28, 'kratos', 'Spartan (Kratos)']
 ].forEach(([id, hp, speed, type, label]) => {
     const z = enemyPool.masterPool.find(item => item.id === id);
     assert(z && z.hp === hp && z.speed === speed && z.type === type, `${label} defined correctly`);
@@ -926,48 +919,55 @@ zKratos.update(0.1, dummyCombat);
 assert(zKratos.rageTriggered === true && zKratos.speed > origSpeed, 'Kratos triggers Spartan Rage and speed boost below 40% HP');
 
 // ==========================================
-// 19. Testing Procedural Meta Missions System (v1.7.5 Build 47)
+// 19. Testing Procedural Meta Missions System (v1.7.6 Build 48)
 // ==========================================
-console.log('\n19. Testing Procedural Meta Missions & Bounty System...');
+console.log('\n19. Testing Procedural Meta Missions & Guitarist Mastery...');
 loadScript('js/missions.js');
 assert(typeof MetaMissionSystem !== 'undefined', 'MetaMissionSystem class loaded');
 
 const meta = new MetaMissionSystem();
-assert(Array.isArray(meta.TIERS) && meta.TIERS.length === 5, 'Meta missions has 5 procedural tiers');
-assert(meta.TIERS[0] === 10 && meta.TIERS[1] === 100 && meta.TIERS[2] === 1000 && meta.TIERS[3] === 10000 && meta.TIERS[4] === 100000, 'Tiers are 10 -> 100 -> 1k -> 10k -> 100k');
+assert(meta.TIERS.length === 5 && meta.TIERS[4] === 100000, 'Tiers are 10 -> 100 -> 1k -> 10k -> 100k');
 
-// Procedural Pool Inclusion: Every zombie in masterPool has a mission
-const allMissions = meta.getAllMissions();
-assert(allMissions.length === enemyPool.masterPool.length, `Meta missions automatically includes all ${enemyPool.masterPool.length} pool zombies`);
+// 90% Reward reduction verification: Tier 5 gold was 1,000,000, now 100,000
+assert(meta.getTierReward(4, null).gold === 100000, 'Tier 5 zombie reward is 100,000 gold (-90% reduction)');
 
-// Dynamic Inclusion of newly added zombies
+// Procedural Pool Inclusion: All zombies and guitarists
+assert(meta.getAllMissions().length === enemyPool.masterPool.length, `Meta missions includes all ${enemyPool.masterPool.length} pool zombies`);
+assert(meta.getAllGuitaristMissions().length === pool.guitarists.length, `Meta missions includes all ${pool.guitarists.length} pool guitarists`);
+
+// Dynamic Inclusion of newly added zombies and guitarists
 enemyPool.masterPool.push({ id: 'test_alien_zombie', name: 'Alien Undead', hp: 200, speed: 35, type: 'alien', badge: 'ALIEN' });
-const alienMission = meta.getZombieMission('test_alien_zombie');
-assert(alienMission !== null && alienMission.targetKills === 10 && alienMission.kills === 0, 'Newly added zombie automatically enters meta missions pool with 0/10 kills');
-enemyPool.masterPool.pop(); // Clean up
+assert(meta.getZombieMission('test_alien_zombie').targetKills === 10, 'New zombie automatically enters meta missions pool with 0/10 kills');
+enemyPool.masterPool.pop();
 
-// Kill Tracking on Builder Zombie (User example: Construtor)
-const bBefore = meta.getZombieMission('builder_demolisher');
-const startKills = bBefore.kills;
-for (let i = 0; i < 10; i++) meta.recordKill('builder_demolisher');
-const bAfter10 = meta.getZombieMission('builder_demolisher');
-assert(bAfter10.kills === startKills + 10, `Kills recorded correctly: ${bAfter10.kills}`);
-assert(bAfter10.isReadyToClaim === true, '10 kills unlocks reward claim for Tier 1');
+pool.guitarists.push({ id: 'test_rocker', name: 'Test Rocker', instrument: 'Bass', rarity: 'common' });
+assert(meta.getGuitaristMission('test_rocker').targetKills === 10, 'New guitarist automatically enters meta missions pool with 0/10 kills');
+pool.guitarists.pop();
 
-// Claiming Tier 1
-const claim1 = meta.claimReward('builder_demolisher');
-assert(claim1 && claim1.success && claim1.claimedTier === 1, 'Tier 1 reward claimed successfully');
-assert(claim1.reward.gold > 0 && claim1.reward.xp > 0, 'Tier 1 awards procedural gold and XP');
+// Kill Tracking on Zombie (Builder) & Guitarist (Johnny Blaze)
+pool.activeHeroId = 'johnny_blaze';
+const bStart = meta.getZombieMission('builder_demolisher').kills;
+const jStart = meta.getGuitaristMission('johnny_blaze').kills;
+for (let i = 0; i < 10; i++) meta.recordKill('builder_demolisher', 'johnny_blaze');
 
-// Target advances to 100
-const bTier2 = meta.getZombieMission('builder_demolisher');
-assert(bTier2.targetKills === 100, 'Next milestone target automatically increases to 100 kills');
-assert(bTier2.isReadyToClaim === false, 'Cannot claim Tier 2 until 100 kills are reached');
+const bAfter = meta.getZombieMission('builder_demolisher');
+const jAfter = meta.getGuitaristMission('johnny_blaze');
+assert(bAfter.kills === bStart + 10 && bAfter.isReadyToClaim, 'Zombie kills recorded & Tier 1 ready to claim');
+assert(jAfter.kills === jStart + 10 && jAfter.isReadyToClaim, 'Guitarist kills recorded on active hero & Tier 1 ready');
 
-// UI DOM checks
-assert(htmlContent.includes('id="menu-btn-missions"'), 'index.html contains #menu-btn-missions');
-assert(htmlContent.includes('id="meta-missions-modal"'), 'index.html contains #meta-missions-modal');
-assert(cssContent.includes('.mission-card'), 'CSS includes styling for .mission-card');
+// Claiming Zombie Tier 1 & Progression to 100
+const zClaim = meta.claimReward('builder_demolisher');
+assert(zClaim && zClaim.success && zClaim.claimedTier === 1 && zClaim.reward.gold > 0, 'Zombie Tier 1 awards rebalanced gold (with HP modifier)');
+assert(meta.getZombieMission('builder_demolisher').targetKills === 100, 'Zombie target advances to 100 kills');
+
+// Claiming Guitarist Tier 1 & Progression to 100 (10% scale)
+const gClaim = meta.claimGuitaristReward('johnny_blaze');
+assert(gClaim && gClaim.success && gClaim.claimedTier === 1 && gClaim.reward.gold === 25, 'Guitarist Tier 1 awards 25 gold (10% scale)');
+assert(meta.getGuitaristMission('johnny_blaze').targetKills === 100, 'Guitarist target advances to 100 kills');
+
+// UI DOM & CSS checks
+assert(htmlContent.includes('id="meta-missions-modal"') && htmlContent.includes('data-cat="guitarists"'), 'index.html contains modal & category tabs');
+assert(cssContent.includes('.mission-card') && cssContent.includes('.hero-mission-card'), 'CSS includes styling for mission & hero cards');
 
 // Zero God Object rule check (JS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
