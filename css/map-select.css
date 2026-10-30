@@ -6,7 +6,9 @@
    SCREEN 2: MAP / PRE-BATTLE PREPARATION
    ========================================================================== */
 #screen-map-select {
-    background: radial-gradient(circle at 50% 20%, #171026 0%, #0a0812 70%, #040308 100%);
+    background:
+        radial-gradient(circle at 50% 20%, rgba(23, 16, 38, 0.88) 0%, rgba(10, 8, 18, 0.94) 70%, #040308 100%),
+        url('../assets/branding/wallpaper.jpg') center top / cover no-repeat;
     flex-direction: column;
     width: 100%;
     height: 100%;

@@ -785,18 +785,32 @@ enemyPool.masterPool.forEach(z => {
     assert(z.fullBadge && z.fullBadge.length > 0, `Zombie ${z.id} has fullBadge descriptor: "${z.fullBadge}"`);
 });
 
+// Branding & Visual Identity Checks (v1.6.7)
+console.log('\n15. Testing Branding Assets & Visual Identity Integration...');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/logo.png')), 'assets/branding/logo.png exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/wallpaper.jpg')), 'assets/branding/wallpaper.jpg exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/app-icon.png')), 'assets/branding/app-icon.png exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/favicon-32.png')), 'assets/branding/favicon-32.png exists');
+assert(fs.existsSync(path.resolve(__dirname, 'favicon.png')), 'favicon.png exists at project root');
+
+assert(htmlContent.includes('assets/branding/logo.png'), 'index.html includes official brand logo image');
+assert(htmlContent.includes('class="menu-brand-logo"'), 'index.html gives brand logo the .menu-brand-logo class');
+assert(htmlContent.includes('href="assets/branding/favicon-32.png"'), 'index.html specifies high-res favicon');
+assert(cssContent.includes("assets/branding/wallpaper.jpg"), 'CSS references cinematic wallpaper background');
+assert(cssContent.includes('.menu-brand-logo'), 'CSS includes styling for .menu-brand-logo');
+
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=38'), 'index.html links base.css with v=38');
-assert(htmlContent.includes('css/menu.css?v=38'), 'index.html links menu.css with v=38');
-assert(htmlContent.includes('css/map-select.css?v=38'), 'index.html links map-select.css with v=38');
-assert(htmlContent.includes('css/battle.css?v=38'), 'index.html links battle.css with v=38');
-assert(htmlContent.includes('css/skills.css?v=38'), 'index.html links skills.css with v=38');
-assert(htmlContent.includes('css/talents.css?v=38'), 'index.html links talents.css with v=38');
-assert(htmlContent.includes('css/song-studio.css?v=38'), 'index.html links song-studio.css with v=38');
-assert(htmlContent.includes('css/editor.css?v=38'), 'index.html links editor.css with v=38');
-assert(htmlContent.includes('css/results.css?v=38'), 'index.html links results.css with v=38');
-assert(htmlContent.includes('js/main.js?v=38'), 'index.html links main.js with v=38');
-assert(htmlContent.includes('v1.6.6 (Build 38)'), 'index.html footer specifies v1.6.6 (Build 38)');
+assert(htmlContent.includes('css/base.css?v=39'), 'index.html links base.css with v=39');
+assert(htmlContent.includes('css/menu.css?v=39'), 'index.html links menu.css with v=39');
+assert(htmlContent.includes('css/map-select.css?v=39'), 'index.html links map-select.css with v=39');
+assert(htmlContent.includes('css/battle.css?v=39'), 'index.html links battle.css with v=39');
+assert(htmlContent.includes('css/skills.css?v=39'), 'index.html links skills.css with v=39');
+assert(htmlContent.includes('css/talents.css?v=39'), 'index.html links talents.css with v=39');
+assert(htmlContent.includes('css/song-studio.css?v=39'), 'index.html links song-studio.css with v=39');
+assert(htmlContent.includes('css/editor.css?v=39'), 'index.html links editor.css with v=39');
+assert(htmlContent.includes('css/results.css?v=39'), 'index.html links results.css with v=39');
+assert(htmlContent.includes('js/main.js?v=39'), 'index.html links main.js with v=39');
+assert(htmlContent.includes('v1.6.7 (Build 39)'), 'index.html footer specifies v1.6.7 (Build 39)');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

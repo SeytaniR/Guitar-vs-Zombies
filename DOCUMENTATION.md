@@ -27,6 +27,25 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.6.7] - 2026-10-30 (Identidade Visual Oficial: Wallpaper Cinemático, Logo Neon e Ícone Transparente - Build 39)
+**Integração Estratégica da Nova Identidade Visual Oficial e Processamento de Ícone com Transparência de Bordas**
+- **Processamento Automatizado do Ícone do App / Favicon com Remoção de Bordas Pretas:**
+  - O ícone original continha cantos externos pretos contrastando com o formato squircle e a borda neon verde.
+  - Implementado algoritmo de Flood Fill (BFS) com suavização anti-aliasing (feathering) para isolar estritamente os pixels dos 4 cantos externos pretos (100.072 pixels no total), tornando-os 100% transparentes em canal alfa sem afetar o conteúdo da ilustração nem a moldura neon.
+  - Geração de pacote completo de branding em `assets/branding/`:
+    - `assets/branding/app-icon.png` (1024x1024 RGBA com transparência nos cantos).
+    - Favicons dedicados em múltiplas resoluções: `favicon-32.png`, `favicon-192.png`, `favicon-512.png` e `favicon.png` na raiz do projeto.
+    - Metatags de Web App adicionadas ao `<head>` do `index.html` (`apple-touch-icon`, `shortcut icon`, etc.).
+- **Posicionamento Estratégico do Wallpaper Cinemático:**
+  - Integrado em `assets/branding/wallpaper.jpg` (1024x576) como plano de fundo imersivo no Menu Principal (`#screen-main-menu`) e na Tela de Pré-Batalha (`#screen-map-select`).
+  - Aplicação de vinheta radial escura (`radial-gradient`) com sobreposição de profundidade, garantindo contraste perfeito para textos, botões e elementos de interface.
+- **Logo Oficial com Animação de Brilho Neon Pulsante:**
+  - Integrado em `assets/branding/logo.png` com tipografia metal/rock, textura de limo e caveira estilizada.
+  - Substituído o texto estático de boas-vindas do Menu Principal pela logo oficial com efeito de animação suave (`@keyframes logoPulseGlow`), conferindo acabamento visual padrão AAA.
+- **Cache-Busting v=39 & Suíte de Testes com 523 Testes 100% Passantes:**
+  - Todos os assets CSS e JS receberam o parâmetro `?v=39`.
+  - Zero God Object Rule estritamente mantida (todos os 16 arquivos JS e 10 arquivos CSS com menos de 1.000 linhas).
+
 ### [v1.6.3] - 2026-10-29 (Correção Definitiva de Isolamento de Telas, Layout Fluido Mobile AAA & Modal de Habilidades)
 **Eliminação do Vazamento de Telas no Menu, Desbloqueio Total de Scroll e Responsividade Perfeita**
 - **Isolamento Estrito das Telas e Eliminação do Vazamento no Menu Inicial:**
