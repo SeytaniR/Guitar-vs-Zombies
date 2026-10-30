@@ -21,11 +21,39 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - `CombatSystem` (`js/combat.js`): Orquestrador central e coordenador de combate (~730 linhas), gerenciando ondas de inimigos, projéteis sónicos com curvas de dano e acertos aéreos, telemetria de batalha e delegação limpa aos módulos `CombatFX` e `ZombieEntity`.
 - `RhythmSystem` (`js/rhythm.js`): Pistas neon interativas com controle manual do jogador, modo de músicas customizadas com sincronização por relógio de áudio (`currentTime`), avaliação de ritmo, tela de resultados com premiações em ouro e multiplicador até x9.
 - `Game` (`js/main.js`): Máquina de estados de telas (`menu`, `map-select`, `battle`), HUD minimalista de batalha (Auto, Mute, SS, Engrenagem), orquestrador da preparação de mapa e modais de estatísticas (SS) e pausa/abandono.
+- `MetaMissionSystem` (`js/missions.js`): Sistema procedural de missões meta e caçada de zumbis permanente. Rastreia eliminações individuais por arquétipo com escalonamento procedural de metas (10 ➔ 100 ➔ 1.000 ➔ 10.000 ➔ 100.000 kills), integração dinâmica com o pool mestre de zumbis, premiações em ouro e XP com bônus de periculosidade, e painel modal com filtros e coleta em massa.
 - `I18n` (`js/i18n.js`): Suporte a idiomas (Português do Brasil e Inglês).
 
 ---
 
 ## Changelog
+
+### [v1.7.5] - 2026-10-30 (Sistema Procedural de Missões Meta & Caçada de Zumbis - Build 47)
+**Sistema de Metas Longas e Recompensas Procedurais com Inclusão Automática de Todos os Zumbis do Pool**
+- **Inclusão Dinâmica & Procedural (`MetaMissionSystem` / `js/missions.js`):**
+  - Todo zumbi presente no `EnemyPoolSystem` entra automaticamente no sistema de missões.
+  - Novos zumbis adicionados ao pool no futuro são descobertos e integrados em tempo de execução sem necessidade de configuração manual.
+- **Marcos de Eliminação Escalonados (10x a 100.000x):**
+  - **Tier 1:** 10 eliminações ➔ Recompensa: Base +250 Ouro, +100 XP, Título: *Iniciante 🥉*
+  - **Tier 2:** 100 eliminações ➔ Recompensa: Base +1.500 Ouro, +600 XP, Título: *Veterano 🥈*
+  - **Tier 3:** 1.000 eliminações ➔ Recompensa: Base +12.000 Ouro, +4.000 XP, Título: *Carrasco 🥇*
+  - **Tier 4:** 10.000 eliminações ➔ Recompensa: Base +100.000 Ouro, +30.000 XP, Título: *Mestre Lendário 💎*
+  - **Tier 5:** 100.000 eliminações (Limite Máximo) ➔ Recompensa: Base +1.000.000 Ouro, +250.000 XP, Título: *DEUS DA CAÇADA 👑⚡*
+  - Bônus de periculosidade procedural (até +45% de recompensa) para zumbis tanques, chefes e arquétipos de alta vida (Kratos, Mutante, Bloater, Cavaleiro das Trevas, etc.).
+- **Rastreamento em Batalha & Telemetria:**
+  - `CombatSystem.onZombieKilled()` notifica o `MetaMissionSystem` a cada abate.
+  - Feedback visual e sonoro em tempo real no combate ao atingir um novo marco (`🎯 META CONCLUÍDA: [Zumbi] ([Kills]/[Meta])!`).
+  - Persistência contínua em `localStorage` sob a chave `gvs_meta_missions`.
+- **Interface e Painel de Caçadas (`css/missions.css` & `index.html`):**
+  - Botão dedicado no Menu Principal (`#menu-btn-missions`) com badge animado contador de recompensas prontas para resgate.
+  - Modal estilizado em dark-glass e neon dourado com barra de estatísticas globais (Kills acumulados, Ouro resgatado, Mestres 100k).
+  - Botão de conveniência `[✨ REIVINDICAR TODAS]` para coletar todas as recompensas prontas com um único toque.
+  - Filtros interativos (`Todos`, `Prontos ✨`, `Em Progresso 🔒`, `Mestres 👑`) e campo de busca instantânea por nome ou arquétipo.
+  - Cards detalhados com retrato HD, badge temático, barra de progresso suave e botão de coleta com pulso dourado.
+- **Conformidade de Arquitetura & Testes:**
+  - Todos os 17 arquivos JS e 11 arquivos CSS permanecem estritamente abaixo do teto de 1.000 linhas (Regra Zero God Object).
+  - Suíte procedural `test-procedural.js` expandida para 520 testes cobrindo todas as 19 seções do sistema, 100% aprovada.
+  - Cache-busting atualizado para `v=47`.
 
 ### [v1.7.4] - 2026-10-30 (Redesign Clean & Minimalista do Menu Pré-Batalha - Build 46)
 **Interface Moderna, Despoluída e Foco em Informações Táticas Essenciais na Preparação de Batalha**

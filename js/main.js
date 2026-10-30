@@ -104,6 +104,10 @@ class Game {
             if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
             else { const m = document.getElementById('talent-modal'); if (m) m.classList.add('open'); }
         });
+        bind('menu-btn-missions', (e) => {
+            if (e) e.preventDefault();
+            if (window.metaMissionSystem) window.metaMissionSystem.open();
+        });
         bind('menu-btn-studio', () => {
             const m = document.getElementById('song-studio-modal');
             if (m) { m.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); }
@@ -940,6 +944,7 @@ class Game {
         if (goldCount && window.talentSystem) goldCount.innerText = window.talentSystem.gold;
         if (highscoreVal) highscoreVal.innerText = parseInt(localStorage.getItem('gvs_highscore') || '0').toLocaleString();
         if (killsVal) killsVal.innerText = parseInt(localStorage.getItem('gvs_total_kills') || '0').toLocaleString();
+        if (window.metaMissionSystem) window.metaMissionSystem.updateBadgeCounter();
     }
 
     updateMenuCurrencies() {
@@ -957,6 +962,9 @@ window.addEventListener('load', () => {
     }
     if (typeof SongStudio !== 'undefined' && window.songStudio) {
         window.songStudio.init();
+    }
+    if (typeof MetaMissionSystem !== 'undefined' && !window.metaMissionSystem) {
+        window.metaMissionSystem = new MetaMissionSystem();
     }
 
     window.game = new Game();

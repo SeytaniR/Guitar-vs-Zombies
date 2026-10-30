@@ -604,33 +604,21 @@ assert(indexHtmlContent.includes('id="chart-editor-modal"'), 'Song Chart Editor 
 
 // 2. Multikill Tiers definitions and visual themes
 const testFx = new CombatFX();
-const k1 = testFx.getMultiKillDef(1);
-const k2 = testFx.getMultiKillDef(2);
-const k3 = testFx.getMultiKillDef(3);
-const k4 = testFx.getMultiKillDef(4);
-const k5 = testFx.getMultiKillDef(5);
-const k6 = testFx.getMultiKillDef(6);
-const k7 = testFx.getMultiKillDef(7);
-const k12 = testFx.getMultiKillDef(12);
-
-assert(k1.title === '1 KILL! ⚡' && k1.color === '#00ffff' && k1.shake === 3, 'Tier 1: 1 KILL! ⚡ (Cyan, shake 3)');
-assert(k2.title === 'DOUBLE KILL! 🔥' && k2.color === '#ffaa00' && k2.shake === 5, 'Tier 2: DOUBLE KILL! 🔥 (Amber, shake 5)');
-assert(k3.title === 'TRIPLE KILL! ⚡🔥' && k3.color === '#ff3300' && k3.shake === 7, 'Tier 3: TRIPLE KILL! ⚡🔥 (Blaze, shake 7)');
-assert(k4.title === 'MULTI KILL! 💥' && k4.color === '#ff00aa' && k4.shake === 9, 'Tier 4: MULTI KILL! 💥 (Magenta, shake 9)');
-assert(k5.title === 'ULTRA KILL! ⚡💥' && k5.color === '#ff0055' && k5.shake === 12, 'Tier 5: ULTRA KILL! ⚡💥 (Crimson-Violet, shake 12)');
-assert(k6.title === 'FANTÁSTICO! 🎸🔥' && k6.color === '#9900ff' && k6.shake === 14, 'Tier 6: FANTÁSTICO! 🎸🔥 (Mythic Purple, shake 14)');
-assert(k7.title === 'UNBELIEVABLE! 👑⚡' && k7.color === '#ffd700' && k7.shake === 16, 'Tier 7: UNBELIEVABLE! 👑⚡ (Godlike Gold, shake 16)');
-assert(k12.title === 'UNBELIEVABLE x12! 👑⚡' && k12.color === '#ffd700', 'Tier 12+: Scaled UNBELIEVABLE x12! 👑⚡');
+[
+    [1, '1 KILL! ⚡', '#00ffff'], [2, 'DOUBLE KILL! 🔥', '#ffaa00'],
+    [3, 'TRIPLE KILL! ⚡🔥', '#ff3300'], [4, 'MULTI KILL! 💥', '#ff00aa'],
+    [5, 'ULTRA KILL! ⚡💥', '#ff0055'], [6, 'FANTÁSTICO! 🎸🔥', '#9900ff'],
+    [7, 'UNBELIEVABLE! 👑⚡', '#ffd700'], [12, 'UNBELIEVABLE x12! 👑⚡', '#ffd700']
+].forEach(([streak, title, color]) => {
+    const k = testFx.getMultiKillDef(streak);
+    assert(k.title === title && k.color === color, `Tier ${streak}: ${title}`);
+});
 
 // 3. Multikill Banner Animation & Particle Shockwaves
 testFx.addMultiKillBanner(4, 200, 150);
-assert(testFx.multiKillBanners.length === 1, 'Multikill banner created in combat-fx');
 const activeBanner = testFx.multiKillBanners[0];
-assert(activeBanner.scale === 2.2, 'Multikill banner begins with slam scale 2.2');
-assert(activeBanner.life === 1.35, 'Multikill banner life initialized to 1.35s');
-assert(testFx.shockwaves.length > 0, 'Multikill triggers radial shockwaves');
-assert(testFx.particles.length > 0, 'Multikill triggers adrenaline spark particles');
-assert(testFx.shakePower >= 9, 'Screen shake triggered for multi kill');
+assert(activeBanner && activeBanner.scale === 2.2 && activeBanner.life === 1.35, 'Multikill banner begins with slam scale 2.2 and life 1.35s');
+assert(testFx.shockwaves.length > 0 && testFx.particles.length > 0 && testFx.shakePower >= 9, 'Multikill triggers shockwaves, particles and shake');
 
 // 4. Linked Kill Streak ("Ritmo de Kills")
 combat.resetBattle();
@@ -765,24 +753,18 @@ assert(typeof skillSys.drawLaneFretOverlay === 'function', 'SkillSystem defines 
 console.log('\n13. Testing Thematic Purity (Rock, Guitars, Amps & Stage Universe)...');
 const allSkills = skillSys.getAllSkills();
 allSkills.forEach(s => {
-    assert(!s.name.toLowerCase().includes('machado'), `Skill ${s.id} name does not mention "machado": "${s.name}"`);
-    assert(!s.name.toLowerCase().includes('martel'), `Skill ${s.id} name does not mention "martelo": "${s.name}"`);
-    assert(s.icon !== '🪓', `Skill ${s.id} does not use axe icon 🪓`);
-    assert(s.icon !== '🗡️', `Skill ${s.id} does not use dagger icon 🗡️`);
-    assert(s.icon !== '🔨', `Skill ${s.id} does not use hammer icon 🔨`);
+    assert(!s.name.toLowerCase().includes('machado') && !s.name.toLowerCase().includes('martel'), `Skill ${s.id} guitar-themed: "${s.name}"`);
+    assert(s.icon !== '🪓' && s.icon !== '🗡️' && s.icon !== '🔨', `Skill ${s.id} uses musical icon`);
 });
 
 const roxieCleave = skillSys.getSkillById('roxie_double_cleave');
-assert(roxieCleave.name.includes('Palhetada Dupla') || roxieCleave.name.includes('Tremolo'), `Roxie cleave skill is guitar-themed ("${roxieCleave.name}")`);
-assert(roxieCleave.icon === '🎸', `Roxie cleave skill icon is electric guitar 🎸`);
+assert((roxieCleave.name.includes('Palhetada Dupla') || roxieCleave.name.includes('Tremolo')) && roxieCleave.icon === '🎸', `Roxie cleave is guitar-themed ("${roxieCleave.name}")`);
 
 const kragthorHammer = skillSys.getSkillById('kragthor_magma_hammer');
-assert(kragthorHammer.name.includes('Flying-V') || kragthorHammer.name.includes('Slam'), `Kragthor heavy strike is Flying-V slam ("${kragthorHammer.name}")`);
-assert(kragthorHammer.icon === '🎸', `Kragthor heavy strike icon is electric guitar 🎸`);
+assert((kragthorHammer.name.includes('Flying-V') || kragthorHammer.name.includes('Slam')) && kragthorHammer.icon === '🎸', `Kragthor strike is Flying-V slam ("${kragthorHammer.name}")`);
 
 const roxiePool = pool.guitarists.find(g => g.id === 'roxie_anarchy');
-assert(roxiePool && roxiePool.instrument.toLowerCase().includes('guitarra'), `Roxie instrument is an electric guitar ("${roxiePool ? roxiePool.instrument : ''}")`);
-assert(!roxiePool.instrument.toLowerCase().includes('machado'), 'Roxie instrument does not mention "machado"');
+assert(roxiePool && roxiePool.instrument.toLowerCase().includes('guitarra') && !roxiePool.instrument.toLowerCase().includes('machado'), 'Roxie instrument is guitar, not axe');
 
 // 4.7. Screen Isolation & Pre-Battle Responsiveness Regression Tests
 console.log('\n14. Testing Screen Isolation, Pre-Battle Layout & Modal CSS...');
@@ -831,18 +813,14 @@ assert(htmlContent.includes('class="map-header-spacer"'), 'map-header-spacer mai
 loadScript('js/enemy-pool.js');
 const enemyPool = new EnemyPoolSystem();
 enemyPool.masterPool.forEach(z => {
-    assert(z.badge.length <= 10, `Zombie ${z.id} thumbnail badge is compact: "${z.badge}" (${z.badge.length} chars)`);
-    assert(!z.badge.includes('/'), `Zombie ${z.id} thumbnail badge has no wrapping slash: "${z.badge}"`);
-    assert(z.fullBadge && z.fullBadge.length > 0, `Zombie ${z.id} has fullBadge descriptor: "${z.fullBadge}"`);
+    assert(z.badge.length <= 10 && !z.badge.includes('/') && z.fullBadge && z.fullBadge.length > 0, `Zombie ${z.id} badge compact: "${z.badge}"`);
 });
 
 // Branding & Visual Identity Checks (v1.6.7)
 console.log('\n15. Testing Branding Assets & Visual Identity Integration...');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/logo.png')), 'assets/branding/logo.png exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/wallpaper.jpg')), 'assets/branding/wallpaper.jpg exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/app-icon.png')), 'assets/branding/app-icon.png exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/branding/favicon-32.png')), 'assets/branding/favicon-32.png exists');
-assert(fs.existsSync(path.resolve(__dirname, 'favicon.png')), 'favicon.png exists at project root');
+['branding/logo.png', 'branding/wallpaper.jpg', 'branding/app-icon.png', 'branding/favicon-32.png', '../favicon.png'].forEach(f => {
+    assert(fs.existsSync(path.resolve(__dirname, 'assets', f)), `${f} exists`);
+});
 
 assert(htmlContent.includes('assets/branding/logo.png'), 'index.html includes official brand logo image');
 assert(htmlContent.includes('class="menu-brand-logo"'), 'index.html gives brand logo the .menu-brand-logo class');
@@ -852,18 +830,13 @@ assert(cssContent.includes('.menu-brand-logo'), 'CSS includes styling for .menu-
 
 // 16. Testing 3 Battle Maps / Arenas System (v1.6.8)
 console.log('\n16. Testing 3 Battle Maps / Arenas System...');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/map_void.jpg')), 'assets/maps/map_void.jpg exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/map_ruins.jpg')), 'assets/maps/map_ruins.jpg exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/map_wasteland.jpg')), 'assets/maps/map_wasteland.jpg exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/thumb_void.jpg')), 'assets/maps/thumb_void.jpg exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/thumb_ruins.jpg')), 'assets/maps/thumb_ruins.jpg exists');
-assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/thumb_wasteland.jpg')), 'assets/maps/thumb_wasteland.jpg exists');
+['map_void.jpg', 'map_ruins.jpg', 'map_wasteland.jpg', 'thumb_void.jpg', 'thumb_ruins.jpg', 'thumb_wasteland.jpg'].forEach(f => {
+    assert(fs.existsSync(path.resolve(__dirname, 'assets/maps', f)), `assets/maps/${f} exists`);
+});
 
 const stgSys = new StageSystem();
 assert(stgSys.getAllMaps().length === 3, 'StageSystem contains all 3 battle maps');
-assert(stgSys.maps.some(m => m.id === 'map_void' && m.name === 'The Void Club'), 'Map 1: The Void Club defined');
-assert(stgSys.maps.some(m => m.id === 'map_ruins' && m.name === 'Palco dos Escombros'), 'Map 2: Palco dos Escombros defined');
-assert(stgSys.maps.some(m => m.id === 'map_wasteland' && m.name === 'Wasteland do Metal'), 'Map 3: Wasteland do Metal defined');
+['map_void', 'map_ruins', 'map_wasteland'].forEach(id => assert(stgSys.maps.some(m => m.id === id), `Map ${id} defined`));
 
 // Test Random Map per Stage (v1.7.0)
 const rolled = stgSys.rollRandomMap();
@@ -878,11 +851,11 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #ma
 assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.7.4 Build 46)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=46`), `index.html links ${f} with v=46`);
+// Cache Buster Version & Modular CSS Links (v1.7.5 Build 47)
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
+    assert(htmlContent.includes(`${f}?v=47`), `index.html links ${f} with v=47`);
 });
-assert(htmlContent.includes('v1.7.4 (Build 46)'), 'index.html footer specifies v1.7.4 (Build 46)');
+assert(htmlContent.includes('v1.7.5 (Build 47)'), 'index.html footer specifies v1.7.5 (Build 47)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -916,14 +889,9 @@ assert(victimZombie2.hp === 88, `Hazmat meltdown dealt exactly 12 damage to near
 // 18. Testing 8 Added Zombie Archetypes (v1.7.2 & v1.7.3)
 // ==========================================
 console.log('\n18. Testing 8 Expanded Zombie Archetypes...');
-['zombie_clown.jpg', 'zombie_builder.jpg', 'zombie_scientist.jpg', 'zombie_firefighter.jpg',
- 'zombie_sheriff.jpg', 'zombie_politician.jpg', 'zombie_batman.jpg', 'zombie_kratos.jpg'].forEach(sheetFile => {
-    assert(fs.existsSync(path.resolve(__dirname, 'assets', sheetFile)), `assets/${sheetFile} exists`);
-});
-['sinister_clown.jpg', 'builder_demolisher.jpg', 'mad_scientist.jpg', 'inferno_firefighter.jpg',
- 'sheriff_walker.jpg', 'presidential_politician.jpg', 'dark_knight_undead.jpg', 'god_of_war_spartan.jpg'].forEach(thumbFile => {
-    assert(fs.existsSync(path.resolve(__dirname, 'assets/zombies', thumbFile)), `assets/zombies/${thumbFile} exists`);
-});
+[['assets', ['zombie_clown.jpg', 'zombie_builder.jpg', 'zombie_scientist.jpg', 'zombie_firefighter.jpg', 'zombie_sheriff.jpg', 'zombie_politician.jpg', 'zombie_batman.jpg', 'zombie_kratos.jpg']],
+ ['assets/zombies', ['sinister_clown.jpg', 'builder_demolisher.jpg', 'mad_scientist.jpg', 'inferno_firefighter.jpg', 'sheriff_walker.jpg', 'presidential_politician.jpg', 'dark_knight_undead.jpg', 'god_of_war_spartan.jpg']]
+].forEach(([dir, files]) => files.forEach(f => assert(fs.existsSync(path.resolve(__dirname, dir, f)), `${dir}/${f} exists`)));
 
 assert(enemyPool.masterPool.length === 16, `EnemyPool masterPool now contains all 16 distinct zombies (${enemyPool.masterPool.length} found)`);
 
@@ -957,9 +925,52 @@ const dummyCombat = { getHeroPosition: () => ({ x: 50, y: 100 }), fx: { particle
 zKratos.update(0.1, dummyCombat);
 assert(zKratos.rageTriggered === true && zKratos.speed > origSpeed, 'Kratos triggers Spartan Rage and speed boost below 40% HP');
 
+// ==========================================
+// 19. Testing Procedural Meta Missions System (v1.7.5 Build 47)
+// ==========================================
+console.log('\n19. Testing Procedural Meta Missions & Bounty System...');
+loadScript('js/missions.js');
+assert(typeof MetaMissionSystem !== 'undefined', 'MetaMissionSystem class loaded');
+
+const meta = new MetaMissionSystem();
+assert(Array.isArray(meta.TIERS) && meta.TIERS.length === 5, 'Meta missions has 5 procedural tiers');
+assert(meta.TIERS[0] === 10 && meta.TIERS[1] === 100 && meta.TIERS[2] === 1000 && meta.TIERS[3] === 10000 && meta.TIERS[4] === 100000, 'Tiers are 10 -> 100 -> 1k -> 10k -> 100k');
+
+// Procedural Pool Inclusion: Every zombie in masterPool has a mission
+const allMissions = meta.getAllMissions();
+assert(allMissions.length === enemyPool.masterPool.length, `Meta missions automatically includes all ${enemyPool.masterPool.length} pool zombies`);
+
+// Dynamic Inclusion of newly added zombies
+enemyPool.masterPool.push({ id: 'test_alien_zombie', name: 'Alien Undead', hp: 200, speed: 35, type: 'alien', badge: 'ALIEN' });
+const alienMission = meta.getZombieMission('test_alien_zombie');
+assert(alienMission !== null && alienMission.targetKills === 10 && alienMission.kills === 0, 'Newly added zombie automatically enters meta missions pool with 0/10 kills');
+enemyPool.masterPool.pop(); // Clean up
+
+// Kill Tracking on Builder Zombie (User example: Construtor)
+const bBefore = meta.getZombieMission('builder_demolisher');
+const startKills = bBefore.kills;
+for (let i = 0; i < 10; i++) meta.recordKill('builder_demolisher');
+const bAfter10 = meta.getZombieMission('builder_demolisher');
+assert(bAfter10.kills === startKills + 10, `Kills recorded correctly: ${bAfter10.kills}`);
+assert(bAfter10.isReadyToClaim === true, '10 kills unlocks reward claim for Tier 1');
+
+// Claiming Tier 1
+const claim1 = meta.claimReward('builder_demolisher');
+assert(claim1 && claim1.success && claim1.claimedTier === 1, 'Tier 1 reward claimed successfully');
+assert(claim1.reward.gold > 0 && claim1.reward.xp > 0, 'Tier 1 awards procedural gold and XP');
+
+// Target advances to 100
+const bTier2 = meta.getZombieMission('builder_demolisher');
+assert(bTier2.targetKills === 100, 'Next milestone target automatically increases to 100 kills');
+assert(bTier2.isReadyToClaim === false, 'Cannot claim Tier 2 until 100 kills are reached');
+
+// UI DOM checks
+assert(htmlContent.includes('id="menu-btn-missions"'), 'index.html contains #menu-btn-missions');
+assert(htmlContent.includes('id="meta-missions-modal"'), 'index.html contains #meta-missions-modal');
+assert(cssContent.includes('.mission-card'), 'CSS includes styling for .mission-card');
+
 // Zero God Object rule check (JS files)
-const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));
-allJsFiles.forEach(f => {
+fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;
     assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
 });

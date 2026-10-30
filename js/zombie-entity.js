@@ -2,8 +2,10 @@
 class ZombieEntity {
     constructor(enemyDef, laneY, canvasWidth, level = 1, initialX = null) {
         this.level = Math.max(1, Math.round(level || 1));
-        this.type = enemyDef.type || 'normal';
-        this.baseName = enemyDef.name || 'Zumbi';
+        this.enemyId = (enemyDef && (enemyDef.id || enemyDef.type)) || 'normal';
+        this.id = this.enemyId;
+        this.type = (enemyDef && enemyDef.type) || 'normal';
+        this.baseName = (enemyDef && enemyDef.name) || 'Zumbi';
         this.name = `[Nv.${this.level}] ${this.baseName}`;
         this.badge = enemyDef.badge || '';
         this.tint = enemyDef.tint || null;

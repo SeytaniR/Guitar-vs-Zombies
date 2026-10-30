@@ -14,15 +14,16 @@
     <meta name="apple-mobile-web-app-title" content="Guitar vs Zombies">
 
     <!-- Modular CSS Architecture (Zero God Object: All files < 1,000 lines) -->
-    <link rel="stylesheet" href="css/base.css?v=46">
-    <link rel="stylesheet" href="css/menu.css?v=46">
-    <link rel="stylesheet" href="css/map-select.css?v=46">
-    <link rel="stylesheet" href="css/battle.css?v=46">
-    <link rel="stylesheet" href="css/skills.css?v=46">
-    <link rel="stylesheet" href="css/talents.css?v=46">
-    <link rel="stylesheet" href="css/song-studio.css?v=46">
-    <link rel="stylesheet" href="css/editor.css?v=46">
-    <link rel="stylesheet" href="css/results.css?v=46">
+    <link rel="stylesheet" href="css/base.css?v=47">
+    <link rel="stylesheet" href="css/menu.css?v=47">
+    <link rel="stylesheet" href="css/map-select.css?v=47">
+    <link rel="stylesheet" href="css/battle.css?v=47">
+    <link rel="stylesheet" href="css/skills.css?v=47">
+    <link rel="stylesheet" href="css/talents.css?v=47">
+    <link rel="stylesheet" href="css/song-studio.css?v=47">
+    <link rel="stylesheet" href="css/editor.css?v=47">
+    <link rel="stylesheet" href="css/results.css?v=47">
+    <link rel="stylesheet" href="css/missions.css?v=47">
 </head>
 <body>
     <div id="game-container">
@@ -74,6 +75,11 @@
                     <span class="btn-icon">🌳</span>
                     <span class="btn-text">ÁRVORE DE TALENTOS</span>
                 </button>
+                <button id="menu-btn-missions" class="menu-action-btn btn-missions">
+                    <span class="btn-icon">🎯</span>
+                    <span class="btn-text">MISSÕES & CAÇADA DE ZUMBIS</span>
+                    <span id="menu-missions-badge" class="missions-badge-counter hidden">0</span>
+                </button>
                 <button id="menu-btn-studio" class="menu-action-btn btn-studio">
                     <span class="btn-icon">🎵</span>
                     <span class="btn-text">ESTÚDIO DE MÚSICA & RITMO</span>
@@ -85,7 +91,7 @@
             </div>
 
             <div class="menu-footer">
-                <span>Guitar vs Zombies v1.7.4 (Build 46) • AAA Audio & Action Experience</span>
+                <span>Guitar vs Zombies v1.7.5 (Build 47) • AAA Audio & Action Experience</span>
             </div>
         </div>
 
@@ -853,22 +859,75 @@
         </div>
     </div>
 
-    <!-- Scripts with Cache Busting v=46 -->
-    <script src="js/audio.js?v=46"></script>
-    <script src="js/i18n.js?v=46"></script>
-    <script src="js/spritesheet.js?v=46"></script>
-    <script src="js/combat-fx.js?v=46"></script>
-    <script src="js/zombie-entity.js?v=46"></script>
-    <script src="js/enemy-pool.js?v=46"></script>
-    <script src="js/guitarist-pool.js?v=46"></script>
-    <script src="js/talents.js?v=46"></script>
-    <script src="js/skills.js?v=46"></script>
-    <script src="js/stage-system.js?v=46"></script>
-    <script src="js/song-db.js?v=46"></script>
-    <script src="js/song-editor.js?v=46"></script>
-    <script src="js/song-studio.js?v=46"></script>
-    <script src="js/combat.js?v=46"></script>
-    <script src="js/rhythm.js?v=46"></script>
-    <script src="js/main.js?v=46"></script>
+    <!-- Procedural Meta Missions & Zombie Bounty Modal -->
+    <div id="meta-missions-modal" class="missions-modal-overlay">
+        <div class="missions-modal-dialog">
+            <div class="missions-modal-header">
+                <div class="missions-header-title-wrap">
+                    <h2>🎯 MISSÕES & CAÇADA DE ZUMBIS</h2>
+                    <p class="missions-header-subtitle">Elimine cada zumbi para desbloquear marcos procedurais (10 ➔ 100 ➔ 1k ➔ 10k ➔ 100k)!</p>
+                </div>
+                <button id="missions-modal-close-btn" class="missions-modal-close-btn" aria-label="Fechar">✕</button>
+            </div>
+
+            <!-- Header Stats Summary -->
+            <div class="missions-stats-bar">
+                <div class="missions-stats-chips-group">
+                    <div class="missions-stat-chip">
+                        <span>💀 Kills Acumulados:</span>
+                        <strong id="missions-stat-kills">0</strong>
+                    </div>
+                    <div class="missions-stat-chip">
+                        <span>🪙 Ouro Coletado:</span>
+                        <strong id="missions-stat-gold">0</strong>
+                    </div>
+                    <div class="missions-stat-chip">
+                        <span>👑 Mestres (100k):</span>
+                        <strong id="missions-stat-completed">0 / 16</strong>
+                    </div>
+                </div>
+                <button type="button" id="missions-claim-all-btn" class="missions-claim-all-btn" disabled>✨ REIVINDICAR TODAS</button>
+            </div>
+
+            <!-- Filter Tabs & Search -->
+            <div class="missions-controls-bar">
+                <div class="missions-filters-row">
+                    <button type="button" class="missions-filter-btn active" data-filter="all">Todos</button>
+                    <button type="button" class="missions-filter-btn" data-filter="ready">Prontos ✨</button>
+                    <button type="button" class="missions-filter-btn" data-filter="active">Em Progresso 🔒</button>
+                    <button type="button" class="missions-filter-btn" data-filter="completed">Mestres 👑</button>
+                </div>
+                <div class="missions-search-wrap">
+                    <input type="text" id="missions-search-input" class="missions-search-input" placeholder="🔍 Buscar zumbi por nome ou arquétipo...">
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="missions-modal-body">
+                <div id="missions-cards-grid" class="missions-cards-grid">
+                    <!-- Rendered dynamically by MetaMissionSystem -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts with Cache Busting v=47 -->
+    <script src="js/audio.js?v=47"></script>
+    <script src="js/i18n.js?v=47"></script>
+    <script src="js/spritesheet.js?v=47"></script>
+    <script src="js/combat-fx.js?v=47"></script>
+    <script src="js/zombie-entity.js?v=47"></script>
+    <script src="js/enemy-pool.js?v=47"></script>
+    <script src="js/guitarist-pool.js?v=47"></script>
+    <script src="js/talents.js?v=47"></script>
+    <script src="js/skills.js?v=47"></script>
+    <script src="js/stage-system.js?v=47"></script>
+    <script src="js/song-db.js?v=47"></script>
+    <script src="js/song-editor.js?v=47"></script>
+    <script src="js/song-studio.js?v=47"></script>
+    <script src="js/combat.js?v=47"></script>
+    <script src="js/rhythm.js?v=47"></script>
+    <script src="js/missions.js?v=47"></script>
+    <script src="js/main.js?v=47"></script>
 </body>
 </html>

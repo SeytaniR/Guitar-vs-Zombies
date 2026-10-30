@@ -1,0 +1,553 @@
+/* ==========================================================================
+   META MISSIONS & BOUNTY HUNTING SYSTEM CSS (missions.css)
+   Clean, modern, glassmorphic UI for procedural zombie meta progression
+   ========================================================================== */
+
+.missions-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(8, 6, 14, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.missions-modal-overlay.open {
+    display: flex !important;
+    opacity: 1;
+}
+
+.missions-modal-dialog {
+    width: 100%;
+    max-width: 680px;
+    height: 92vh;
+    max-height: 850px;
+    background: linear-gradient(180deg, rgba(26, 20, 42, 0.98) 0%, rgba(14, 11, 24, 0.98) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 24px rgba(255, 170, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Modal Header */
+.missions-modal-header {
+    background: rgba(18, 14, 28, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.missions-header-title-wrap h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.missions-header-subtitle {
+    margin: 2px 0 0 0;
+    font-size: 11px;
+    color: #a09cb0;
+    font-weight: 500;
+}
+
+.missions-modal-close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ddd;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.missions-modal-close-btn:hover {
+    background: rgba(255, 50, 50, 0.3);
+    color: #fff;
+    border-color: rgba(255, 80, 80, 0.5);
+    transform: scale(1.08);
+}
+
+/* Stats Summary Bar */
+.missions-stats-bar {
+    background: rgba(12, 9, 20, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.missions-stats-chips-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.missions-stat-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.missions-stat-chip strong {
+    color: #ffd700;
+}
+
+.missions-claim-all-btn {
+    background: linear-gradient(135deg, #ff9900 0%, #ff5500 100%);
+    border: 1px solid #ffcc00;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(255, 120, 0, 0.4);
+    transition: all 0.2s ease;
+}
+
+.missions-claim-all-btn:hover:not(:disabled) {
+    transform: scale(1.04);
+    box-shadow: 0 4px 16px rgba(255, 150, 0, 0.6);
+}
+
+.missions-claim-all-btn:disabled {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Controls Bar (Filter Tabs & Search) */
+.missions-controls-bar {
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+    background: rgba(15, 12, 24, 0.5);
+}
+
+.missions-filters-row {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.missions-filter-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #aaa;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.missions-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.missions-filter-btn.active {
+    background: rgba(255, 215, 0, 0.18);
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.missions-search-wrap {
+    width: 100%;
+}
+
+.missions-search-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #fff;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.missions-search-input:focus {
+    border-color: #ffd700;
+}
+
+/* Scrollable Cards Body */
+.missions-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.missions-cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Individual Mission Card */
+.mission-card {
+    background: rgba(22, 17, 34, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.mission-card:hover {
+    border-color: rgba(255, 215, 0, 0.3);
+    background: rgba(28, 22, 44, 0.95);
+}
+
+.mission-card.card-ready {
+    border-color: rgba(255, 215, 0, 0.6);
+    background: linear-gradient(135deg, rgba(38, 28, 18, 0.95) 0%, rgba(22, 17, 34, 0.95) 100%);
+    box-shadow: 0 4px 18px rgba(255, 170, 0, 0.25);
+}
+
+.mission-card.card-master {
+    border-color: rgba(150, 0, 255, 0.5);
+    background: linear-gradient(135deg, rgba(28, 14, 44, 0.95) 0%, rgba(18, 12, 28, 0.95) 100%);
+}
+
+/* Card Top Section */
+.mission-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mission-avatar-wrap {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+
+.mission-avatar-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.mission-archetype-badge {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    background: #444;
+    color: #fff;
+}
+
+.mission-info-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.mission-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.mission-zombie-name {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mission-lifetime-kills {
+    font-size: 11px;
+    font-weight: 600;
+    color: #e0d070;
+    white-space: nowrap;
+}
+
+.mission-tier-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.tier-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #00ffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.tier-target-label {
+    font-size: 11px;
+    color: #bbb;
+}
+
+.tier-target-label strong {
+    color: #ffd700;
+}
+
+/* Progress Block */
+.mission-progress-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.mission-progress-track {
+    width: 100%;
+    height: 9px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mission-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00b4d8 0%, #0077b6 100%);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.mission-progress-fill.fill-ready {
+    background: linear-gradient(90deg, #ffd700 0%, #ff8800 100%);
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.6);
+}
+
+.mission-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #8e8a9d;
+    font-weight: 600;
+}
+
+/* Reward Details Box */
+.mission-reward-box {
+    background: rgba(10, 8, 16, 0.5);
+    border: 1px dashed rgba(255, 215, 0, 0.25);
+    border-radius: 8px;
+    padding: 5px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.reward-title-tag {
+    font-size: 9px;
+    font-weight: 800;
+    color: #ffd700;
+    letter-spacing: 0.5px;
+}
+
+.reward-chips-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.reward-chip {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.reward-chip.chip-gold {
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #ffd700;
+}
+
+.reward-chip.chip-xp {
+    background: rgba(0, 255, 136, 0.12);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+}
+
+.reward-chip.chip-title {
+    background: rgba(180, 100, 255, 0.12);
+    border: 1px solid rgba(180, 100, 255, 0.3);
+    color: #d199ff;
+}
+
+/* Card Action Button */
+.mission-card-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.mission-claim-btn {
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 6px 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mission-claim-btn.in-progress {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #777;
+    cursor: not-allowed;
+}
+
+.mission-claim-btn.ready-claim {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%);
+    border-color: #ffe600;
+    color: #1a0f00;
+    box-shadow: 0 2px 12px rgba(255, 170, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.mission-claim-btn.ready-claim:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 18px rgba(255, 170, 0, 0.7);
+}
+
+.mission-claim-btn.pulse-gold {
+    animation: goldPulse 1.6s infinite ease-in-out;
+}
+
+@keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+    50% { box-shadow: 0 0 22px rgba(255, 215, 0, 0.85); }
+}
+
+.mission-status-badge.badge-master {
+    background: linear-gradient(135deg, rgba(160, 32, 240, 0.25) 0%, rgba(255, 215, 0, 0.25) 100%);
+    border: 1px solid #ffd700;
+    border-radius: 8px;
+    padding: 4px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ffd700;
+    font-weight: 800;
+    font-size: 11px;
+}
+
+.mission-status-badge.badge-master small {
+    font-size: 9px;
+    color: #ddd;
+    font-weight: 500;
+}
+
+/* Empty State */
+.missions-empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: #888;
+}
+
+.missions-empty-state .empty-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Menu Button Notification Badge */
+.missions-badge-counter {
+    background: #ff2244;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    border-radius: 12px;
+    padding: 2px 6px;
+    margin-left: auto;
+    border: 1.5px solid #fff;
+    box-shadow: 0 0 8px rgba(255, 34, 68, 0.8);
+}
+
+.missions-badge-counter.hidden {
+    display: none !important;
+}
+
+.pulse-badge {
+    animation: badgePulse 1.3s infinite ease-in-out;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+}

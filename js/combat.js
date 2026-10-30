@@ -438,6 +438,7 @@ class CombatSystem {
                 localStorage.setItem('gvs_highscore', this.score.toString());
             }
         } catch (e) {}
+        if (window.metaMissionSystem) window.metaMissionSystem.recordKill(z);
 
         const activeHero = this.getActiveHeroData();
         const heroStats = this.getActiveHeroStats();
