@@ -885,17 +885,17 @@ assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #ma
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=43'), 'index.html links base.css with v=43');
-assert(htmlContent.includes('css/menu.css?v=43'), 'index.html links menu.css with v=43');
-assert(htmlContent.includes('css/map-select.css?v=43'), 'index.html links map-select.css with v=43');
-assert(htmlContent.includes('css/battle.css?v=43'), 'index.html links battle.css with v=43');
-assert(htmlContent.includes('css/skills.css?v=43'), 'index.html links skills.css with v=43');
-assert(htmlContent.includes('css/talents.css?v=43'), 'index.html links talents.css with v=43');
-assert(htmlContent.includes('css/song-studio.css?v=43'), 'index.html links song-studio.css with v=43');
-assert(htmlContent.includes('css/editor.css?v=43'), 'index.html links editor.css with v=43');
-assert(htmlContent.includes('css/results.css?v=43'), 'index.html links results.css with v=43');
-assert(htmlContent.includes('js/main.js?v=43'), 'index.html links main.js with v=43');
-assert(htmlContent.includes('v1.7.1 (Build 43)'), 'index.html footer specifies v1.7.1 (Build 43)');
+assert(htmlContent.includes('css/base.css?v=44'), 'index.html links base.css with v=44');
+assert(htmlContent.includes('css/menu.css?v=44'), 'index.html links menu.css with v=44');
+assert(htmlContent.includes('css/map-select.css?v=44'), 'index.html links map-select.css with v=44');
+assert(htmlContent.includes('css/battle.css?v=44'), 'index.html links battle.css with v=44');
+assert(htmlContent.includes('css/skills.css?v=44'), 'index.html links skills.css with v=44');
+assert(htmlContent.includes('css/talents.css?v=44'), 'index.html links talents.css with v=44');
+assert(htmlContent.includes('css/song-studio.css?v=44'), 'index.html links song-studio.css with v=44');
+assert(htmlContent.includes('css/editor.css?v=44'), 'index.html links editor.css with v=44');
+assert(htmlContent.includes('css/results.css?v=44'), 'index.html links results.css with v=44');
+assert(htmlContent.includes('js/main.js?v=44'), 'index.html links main.js with v=44');
+assert(htmlContent.includes('v1.7.2 (Build 44)'), 'index.html footer specifies v1.7.2 (Build 44)');
 
 // ==========================================
 // 17. Testing Zombie Balance & Explosion AoE Damage Reduction (v1.7.1)
@@ -903,14 +903,8 @@ assert(htmlContent.includes('v1.7.1 (Build 43)'), 'index.html footer specifies v
 console.log('\n17. Testing Zombie Balance (+30% Base HP) & Explosion AoE Reduction (-70%)...');
 const poolZombies = enemyPool.masterPool;
 const expectedHps = {
-    punk_walker: 104,
-    feral_leaper: 85,
-    toxic_mutant: 299,
-    armored_soldier: 273,
-    fungal_spore: 163,
-    bloater_pounder: 572,
-    chained_gladiator: 254,
-    toxic_hazmat: 208
+    punk_walker: 104, feral_leaper: 85, toxic_mutant: 299, armored_soldier: 273,
+    fungal_spore: 163, bloater_pounder: 572, chained_gladiator: 254, toxic_hazmat: 208
 };
 Object.entries(expectedHps).forEach(([id, expectedHp]) => {
     const z = poolZombies.find(item => item.id === id);
@@ -928,6 +922,37 @@ const hazmatFx = new CombatFX();
 const victimZombie2 = { x: 180, y: 150, hp: 100, active: true, flashTime: 0 };
 hazmatFx.triggerHazmatMeltdown(150, 150, [victimZombie2], null, null);
 assert(victimZombie2.hp === 88, `Hazmat meltdown dealt exactly 12 damage to nearby zombie (100 - 12 = 88, down 70% from 40)`);
+
+// ==========================================
+// 18. Testing 4 New Zombie Archetypes (v1.7.2)
+// ==========================================
+console.log('\n18. Testing 4 New Zombie Archetypes (Clown, Builder, Scientist, Firefighter)...');
+['zombie_clown.jpg', 'zombie_builder.jpg', 'zombie_scientist.jpg', 'zombie_firefighter.jpg'].forEach(sheetFile => {
+    assert(fs.existsSync(path.resolve(__dirname, 'assets', sheetFile)), `assets/${sheetFile} exists`);
+});
+['sinister_clown.jpg', 'builder_demolisher.jpg', 'mad_scientist.jpg', 'inferno_firefighter.jpg'].forEach(thumbFile => {
+    assert(fs.existsSync(path.resolve(__dirname, 'assets/zombies', thumbFile)), `assets/zombies/${thumbFile} exists`);
+});
+
+assert(enemyPool.masterPool.length === 12, `EnemyPool masterPool now contains all 12 distinct zombies (${enemyPool.masterPool.length} found)`);
+
+const clown = enemyPool.masterPool.find(z => z.id === 'clown_jester');
+assert(clown && clown.hp === 130 && clown.speed === 50 && clown.type === 'clown', 'Clown Jester archetype defined correctly');
+
+const builder = enemyPool.masterPool.find(z => z.id === 'builder_demolisher');
+assert(builder && builder.hp === 245 && builder.speed === 31 && builder.type === 'builder', 'Builder Demolisher archetype defined correctly');
+
+const scientist = enemyPool.masterPool.find(z => z.id === 'mad_scientist');
+assert(scientist && scientist.hp === 155 && scientist.speed === 40 && scientist.type === 'scientist', 'Mad Scientist archetype defined correctly');
+
+const firefighter = enemyPool.masterPool.find(z => z.id === 'inferno_firefighter');
+assert(firefighter && firefighter.hp === 310 && firefighter.speed === 25 && firefighter.type === 'firefighter', 'Inferno Firefighter archetype defined correctly');
+
+// Test Firefighter Burn Immunity
+const zFirefighter = new ZombieEntity(firefighter, 100, 400, 1);
+assert(zFirefighter.isBurnImmune === true, 'Firefighter zombie entity initializes with isBurnImmune = true');
+zFirefighter.applyBurn(20, 4.0);
+assert(zFirefighter.burnTimer === 0, 'Firefighter is completely immune to burn effect (burnTimer remains 0)');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

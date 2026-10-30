@@ -24,20 +24,15 @@ class CombatSystem {
                     : 'map_void';
                 return this[mapId] || this.map_void;
             },
-            heroSheet: loadSheet('assets/hero2.jpg'),
-            heroVulkanSheet: loadSheet('assets/hero_vulkan.jpg'),
-            heroHazmatSheet: loadSheet('assets/hero_hazmat.jpg'),
-            heroCyborgSheet: loadSheet('assets/hero_cyborg.jpg'),
-            heroGladiatorSheet: loadSheet('assets/hero_gladiator.jpg', 4, 4),
-            heroAnarchySheet: loadSheet('assets/hero_anarchy.jpg'),
-            zombieSheet: loadSheet('assets/zombie2.jpg'),
-            mutantSheet: loadSheet('assets/zombie_mutant.jpg'),
-            leaperSheet: loadSheet('assets/zombie_leaper.jpg'),
-            soldierSheet: loadSheet('assets/zombie_soldier.jpg'),
-            sporeSheet: loadSheet('assets/zombie_spore.jpg'),
-            bloaterSheet: loadSheet('assets/zombie_bloater.jpg'),
-            gladiatorSheet: loadSheet('assets/zombie_gladiator.jpg'),
-            hazmatSheet: loadSheet('assets/zombie_hazmat.jpg'),
+            heroSheet: loadSheet('assets/hero2.jpg'), heroVulkanSheet: loadSheet('assets/hero_vulkan.jpg'),
+            heroHazmatSheet: loadSheet('assets/hero_hazmat.jpg'), heroCyborgSheet: loadSheet('assets/hero_cyborg.jpg'),
+            heroGladiatorSheet: loadSheet('assets/hero_gladiator.jpg', 4, 4), heroAnarchySheet: loadSheet('assets/hero_anarchy.jpg'),
+            zombieSheet: loadSheet('assets/zombie2.jpg'), mutantSheet: loadSheet('assets/zombie_mutant.jpg'),
+            leaperSheet: loadSheet('assets/zombie_leaper.jpg'), soldierSheet: loadSheet('assets/zombie_soldier.jpg'),
+            sporeSheet: loadSheet('assets/zombie_spore.jpg'), bloaterSheet: loadSheet('assets/zombie_bloater.jpg'),
+            gladiatorSheet: loadSheet('assets/zombie_gladiator.jpg'), hazmatSheet: loadSheet('assets/zombie_hazmat.jpg'),
+            clownSheet: loadSheet('assets/zombie_clown.jpg'), builderSheet: loadSheet('assets/zombie_builder.jpg'),
+            scientistSheet: loadSheet('assets/zombie_scientist.jpg'), firefighterSheet: loadSheet('assets/zombie_firefighter.jpg'),
             fxSheet: loadSheet('assets/fx2.jpg')
         };
 
@@ -105,10 +100,8 @@ class CombatSystem {
     }
 
     getActiveHeroData() {
-        if (window.guitaristPool && typeof window.guitaristPool.getSelectedGuitarist === 'function') {
-            return window.guitaristPool.getSelectedGuitarist();
-        }
-        return null;
+        return (window.guitaristPool && typeof window.guitaristPool.getSelectedGuitarist === 'function')
+            ? window.guitaristPool.getSelectedGuitarist() : null;
     }
 
     getActiveHeroStats() {
@@ -134,10 +127,7 @@ class CombatSystem {
 
     getActiveHeroSheet() {
         const heroData = this.getActiveHeroData();
-        if (heroData && this.assets && this.assets[heroData.sheet]) {
-            return this.assets[heroData.sheet];
-        }
-        return this.assets.heroSheet;
+        return (heroData && this.assets && this.assets[heroData.sheet]) ? this.assets[heroData.sheet] : this.assets.heroSheet;
     }
 
     getRoadMetrics() {
@@ -801,12 +791,19 @@ class CombatSystem {
                             p.damage = Math.round(p.damage * (1 - armorReduction));
                             this.addFloatingText(pen > 0 ? "BLINDADO PENETRADO! ☢️" : "BLINDADO! -45%", z.x, currentY - 34, '#88aacc', false);
                         }
+                    } else if (z.type === 'builder' && !p.isCrit) {
+                        p.damage = Math.round(p.damage * 0.75);
+                        this.addFloatingText("CAPACETE! -25%", z.x, currentY - 34, '#ffaa00', false);
                     }
 
                     if (heroStats.burnChance && Math.random() < heroStats.burnChance) {
-                        z.burnTimer = 3.2;
-                        z.burnDps = 16;
-                        this.addFloatingText("🔥 QUEIMANDO!", z.x, currentY - 48, '#ff5500', true);
+                        if (z.isBurnImmune || z.type === 'firefighter') {
+                            this.addFloatingText("IMUNE 🔥", z.x, currentY - 48, '#ffaa00', false);
+                        } else {
+                            z.burnTimer = 3.2;
+                            z.burnDps = 16;
+                            this.addFloatingText("🔥 QUEIMANDO!", z.x, currentY - 48, '#ff5500', true);
+                        }
                     }
 
                     let knockMult = 1.0 + (window.talentSystem ? window.talentSystem.getStat('sonic_knockback') : 0);
@@ -829,8 +826,8 @@ class CombatSystem {
                         p.damage = Math.round(p.damage * (1.8 + airBonus));
                         this.addFloatingText("🎯 AIR SHOT! CRIT!", z.x, currentY - 45, '#ffcc00', true);
                         this.triggerShake(7);
-                    } else if (z.type === 'bloater') {
-                        knockDist = 2 * knockMult;
+                    } else if (z.type === 'bloater' || z.type === 'firefighter') {
+                        knockDist = (z.type === 'bloater' ? 2 : 3.5) * knockMult;
                     }
                     z.x = Math.min(this.canvas.width - 15, z.x + knockDist);
 

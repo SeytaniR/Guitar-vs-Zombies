@@ -73,6 +73,15 @@ class ZombieEntity {
 
         // Archetype: Hazmat
         this.puddleDropTimer = 1.8 + Math.random() * 1.0;
+
+        // Archetype: Clown
+        this.clownTimer = Math.random() * 2.0;
+
+        // Archetype: Builder
+        this.headArmor = 0.25;
+
+        // Archetype: Firefighter
+        this.isBurnImmune = (this.type === 'firefighter');
     }
 
     update(dt, combat) {
@@ -162,6 +171,18 @@ class ZombieEntity {
                 break;
             case 'hazmat':
                 this.updateHazmat(effectiveDt, combat, attackDistance);
+                break;
+            case 'clown':
+                this.updateClown(effectiveDt, combat, attackDistance);
+                break;
+            case 'builder':
+                this.updateBuilder(effectiveDt, combat, attackDistance);
+                break;
+            case 'scientist':
+                this.updateScientist(effectiveDt, combat, attackDistance);
+                break;
+            case 'firefighter':
+                this.updateFirefighter(effectiveDt, combat, attackDistance);
                 break;
             default:
                 this.updateStandard(effectiveDt, combat, attackDistance);
@@ -440,6 +461,93 @@ class ZombieEntity {
         }
     }
 
+    updateClown(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.clownTimer = (this.clownTimer || 0) + dt;
+            let sprintBonus = 1.0;
+            if (this.clownTimer >= 2.2) {
+                this.clownTimer = 0;
+                sprintBonus = 1.8;
+                combat.fx.spawnBurst(this.x, this.y - 12, '#ff0055', 3, 25, 1.4, 0.2);
+            }
+            this.x -= this.speed * dt * sprintBonus;
+            this.walkTimer += dt * (this.speed / 36) * 8.5;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 7.5) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} LACERAÇÃO! 🤡`, '#ff0077');
+                combat.fx.spawnBurst(this.x - 10, this.y - 14, '#ff0055', 4, 35, 1.8, 0.25);
+            }
+        }
+    }
+
+    updateBuilder(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 32) * 6.0;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 5.2) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} DEMOLIÇÃO! 🔨`, '#ffaa00');
+                combat.triggerShake(4);
+            }
+        }
+    }
+
+    updateScientist(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 36) * 7.0;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 6.5) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} VÍRUS! 🧪`, '#00ffcc');
+                combat.fx.spawnBurst(this.x - 8, this.y - 16, '#00ffcc', 5, 30, 1.6, 0.25);
+            }
+        }
+    }
+
+    updateFirefighter(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 26) * 5.8;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 5.0) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} IMPACTO! 🧯`, '#ff4400');
+                combat.triggerShake(5);
+            }
+        }
+    }
+
     draw(ctx, assets) {
         const currentY = this.y + (this.jumpArcY || 0);
 
@@ -478,6 +586,18 @@ class ZombieEntity {
         } else if (this.type === 'hazmat') {
             sheet = assets.hazmatSheet;
             yOffset = 12;
+        } else if (this.type === 'clown') {
+            sheet = assets.clownSheet;
+            yOffset = 12;
+        } else if (this.type === 'builder') {
+            sheet = assets.builderSheet;
+            yOffset = 12;
+        } else if (this.type === 'scientist') {
+            sheet = assets.scientistSheet;
+            yOffset = 12;
+        } else if (this.type === 'firefighter') {
+            sheet = assets.firefighterSheet;
+            yOffset = 13;
         }
 
         // Draw Sprite
@@ -492,7 +612,7 @@ class ZombieEntity {
         );
 
         // Health bar & Badge/Name Tag
-        const isSpecial = this.type === 'mutant' || this.type === 'leaper' || this.type === 'soldier' || this.type === 'spore' || this.type === 'bloater' || this.type === 'gladiator' || this.type === 'hazmat';
+        const isSpecial = this.type !== 'normal';
         if (this.x <= ctx.canvas.width - 5 && (this.hp < this.maxHp || isSpecial)) {
             const bw = (this.type === 'mutant' || this.type === 'bloater') ? 34 : (24 * (this.scale / 0.5));
             const bh = (this.type === 'mutant' || this.type === 'bloater') ? 4 : 3.5;
@@ -510,6 +630,10 @@ class ZombieEntity {
             else if (this.type === 'bloater') barColor = '#ffcc00';
             else if (this.type === 'gladiator') barColor = '#ff3333';
             else if (this.type === 'hazmat') barColor = '#39ff14';
+            else if (this.type === 'clown') barColor = '#ff0077';
+            else if (this.type === 'builder') barColor = '#ffaa00';
+            else if (this.type === 'scientist') barColor = '#00ffcc';
+            else if (this.type === 'firefighter') barColor = '#ff4400';
 
             ctx.fillStyle = barColor;
             ctx.fillRect(bx, by, Math.max(0, bw * (this.hp / this.maxHp)), bh);
@@ -524,6 +648,10 @@ class ZombieEntity {
             else if (this.type === 'bloater') nameColor = '#ffcc00';
             else if (this.type === 'gladiator') nameColor = '#ff5533';
             else if (this.type === 'hazmat') nameColor = '#39ff14';
+            else if (this.type === 'clown') nameColor = '#ff0077';
+            else if (this.type === 'builder') nameColor = '#ffaa00';
+            else if (this.type === 'scientist') nameColor = '#00ffcc';
+            else if (this.type === 'firefighter') nameColor = '#ff5522';
 
             ctx.fillStyle = nameColor;
             ctx.textAlign = 'center';
@@ -542,6 +670,7 @@ class ZombieEntity {
     }
 
     applyBurn(dps, durationSec) {
+        if (this.isBurnImmune || this.type === 'firefighter') return;
         this.burnDps = dps;
         this.burnTimer = Math.max(this.burnTimer, durationSec);
     }
@@ -558,10 +687,14 @@ class ZombieEntity {
         const baseMap = {
             bloater: 16,
             mutant: 14,
+            firefighter: 12,
+            builder: 11,
             soldier: 10,
             gladiator: 9,
             hazmat: 8,
+            scientist: 7,
             spore: 7,
+            clown: 6,
             runner: 5,
             normal: 4
         };

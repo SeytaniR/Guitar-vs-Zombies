@@ -134,6 +134,74 @@ class EnemyPoolSystem {
                 attackDamage: 11,
                 attackInterval: 1.2,
                 scale: 0.52
+            },
+            // === NOVO 6: Palhaço Sinistro ===
+            {
+                id: 'clown_jester',
+                name: 'Palhaço Sinistro',
+                badge: 'MANÍACO',
+                fullBadge: 'Maníaco / Garras',
+                badgeClass: 'badge-danger',
+                icon: 'assets/zombies/sinister_clown.jpg',
+                type: 'clown',
+                sheet: 'clownSheet',
+                desc: 'Ex-artista de circo tomado pela loucura. Passos erráticos e ataques frenéticos de garras afiadas que laceram o herói!',
+                hp: 130,
+                speed: 50,
+                attackDamage: 8,
+                attackInterval: 0.70,
+                scale: 0.50
+            },
+            // === NOVO 7: Operário Demolidor ===
+            {
+                id: 'builder_demolisher',
+                name: 'Operário Demolidor',
+                badge: 'DEMOLIDOR',
+                fullBadge: 'Demolição / Pesado',
+                badgeClass: 'badge-tank',
+                icon: 'assets/zombies/builder_demolisher.jpg',
+                type: 'builder',
+                sheet: 'builderSheet',
+                desc: 'Operário robusto com capacete industrial. Reduz dano de projéteis em 25% e desfere marretadas pesadas que estremecem o palco!',
+                hp: 245,
+                speed: 31,
+                attackDamage: 14,
+                attackInterval: 1.15,
+                scale: 0.52
+            },
+            // === NOVO 8: Cientista Louco ===
+            {
+                id: 'mad_scientist',
+                name: 'Cientista Louco',
+                badge: 'CIENTISTA',
+                fullBadge: 'Viral / Químico',
+                badgeClass: 'badge-toxic',
+                icon: 'assets/zombies/mad_scientist.jpg',
+                type: 'scientist',
+                sheet: 'scientistSheet',
+                desc: 'Pesquisador infectado com jaleco manchado. Avança com pressa ensandecida e desfere cortes duplos com resíduos virais perigosos!',
+                hp: 155,
+                speed: 40,
+                attackDamage: 9,
+                attackInterval: 0.85,
+                scale: 0.50
+            },
+            // === NOVO 9: Bombeiro Zumbi ===
+            {
+                id: 'inferno_firefighter',
+                name: 'Bombeiro Zumbi',
+                badge: 'BOMBEIRO',
+                fullBadge: 'Ignífugo / Blindado',
+                badgeClass: 'badge-danger',
+                icon: 'assets/zombies/inferno_firefighter.jpg',
+                type: 'firefighter',
+                sheet: 'firefighterSheet',
+                desc: 'Equipado com uniforme corta-fogo pesado e capacete. Totalmente imune a queimaduras e absorve repulsão de notas com alta resistência!',
+                hp: 310,
+                speed: 25,
+                attackDamage: 16,
+                attackInterval: 1.30,
+                scale: 0.54
             }
         ];
 

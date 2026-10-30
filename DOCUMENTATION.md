@@ -27,6 +27,41 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.2] - 2026-10-30 (Expansão de Horda: 4 Novos Arquétipos de Zumbis no Master Pool - Build 44)
+**Inclusão de 4 Novos Zumbis Oficiais com Spritesheets Calibrados, Miniaturas Cinemáticas e IA Dedicada**
+- **4 Novos Arquétipos Integrados ao Pool Mestre (`EnemyPoolSystem` & `masterPool` totalizando 12 zumbis):**
+  - **Palhaço Sinistro (`clown_jester`):**
+    - *Visual:* Figurino clássico de circo listrado em azul e vermelho com gola babado, maquiagem cadavérica com nariz vermelho e cabelos desgrenhados.
+    - *Atributos:* `130 HP`, `Velocidade 50`, `Dano 8`, `Intervalo 0.70s`, `scale: 0.50`.
+    - *Mecânica:* Avanço errático com piques de velocidade repentinos (`sprintBonus`) e ataques ultra-rápidos de garras afiadas que laceram o guitarrista (`LACERAÇÃO! 🤡`).
+    - *Badge:* `MANÍACO` • `Maníaco / Garras` (`badge-danger`).
+    - *Assets:* `assets/zombie_clown.jpg` e miniatura `assets/zombies/sinister_clown.jpg`.
+  - **Operário Demolidor (`builder_demolisher`):**
+    - *Visual:* Operário robusto com capacete de segurança amarelo industrial, colete refletivo laranja de alta visibilidade e luvas pesadas de obra.
+    - *Atributos:* `245 HP`, `Velocidade 31`, `Dano 14`, `Intervalo 1.15s`, `scale: 0.52`.
+    - *Mecânica:* Blindagem industrial na cabeça reduz o dano de projéteis frontais comuns em 25% (`CAPACETE! -25%`). No corpo a corpo, desfere marretadas e murros pesados com tremor de tela (`DEMOLIÇÃO! 🔨`).
+    - *Badge:* `DEMOLIDOR` • `Demolição / Pesado` (`badge-tank`).
+    - *Assets:* `assets/zombie_builder.jpg` e miniatura `assets/zombies/builder_demolisher.jpg`.
+  - **Cientista Louco (`mad_scientist`):**
+    - *Visual:* Pesquisador de patógenos com jaleco branco ensanguentado, crachá funcional pendurado no pescoço, óculos redondos e cabelos esparsos.
+    - *Atributos:* `155 HP`, `Velocidade 40`, `Dano 9`, `Intervalo 0.85s`, `scale: 0.50`.
+    - *Mecânica:* Movimentação apressada com jaleco esvoaçante e golpes cortantes duplos com arco de sangue e partículas químicas que infectam o herói (`VÍRUS! 🧪`).
+    - *Badge:* `CIENTISTA` • `Viral / Químico` (`badge-toxic`).
+    - *Assets:* `assets/zombie_scientist.jpg` (grid padronizado 4x3) e miniatura `assets/zombies/mad_scientist.jpg`.
+  - **Bombeiro Zumbi (`inferno_firefighter`):**
+    - *Visual:* Traje pesado de combate a incêndio (bunker gear) com faixas refletivas amarelas, capacete antichamas com escudo frontal e luvas térmicas grossas.
+    - *Atributos:* `310 HP`, `Velocidade 25`, `Dano 16`, `Intervalo 1.30s`, `scale: 0.54`.
+    - *Mecânica:* Totalmente imune a efeitos de queimadura (`isBurnImmune = true`, absorve chamas com feedback `IMUNE 🔥`), absorve repulsão sônica reduzindo knockback em 60% e ataca com golpes de ombro e extintor (`IMPACTO! 🧯`).
+    - *Badge:* `BOMBEIRO` • `Ignífugo / Blindado` (`badge-danger`).
+    - *Assets:* `assets/zombie_firefighter.jpg` e miniatura `assets/zombies/inferno_firefighter.jpg`.
+- **Renderização, Spritesheets & Chroma-Key (`SpriteSheet` & `ZombieEntity`):**
+  - Spritesheets calibrados para o motor matricial de 4 colunas x 3 linhas (1024x571, 12 frames), com remoção em tempo real de Chroma-Key verde e silhueta branca instantânea para flash de acerto.
+  - Miniaturas circulares em alta definição (256x256) geradas com iluminação de vinheta e cores temáticas na pasta `assets/zombies/`.
+- **Conformidade Estrita com Regra Zero God Object & Suíte de Testes (606 Testes):**
+  - Todos os 16 arquivos JS e 10 arquivos CSS estritamente abaixo de 1.000 linhas (`combat.js`: 985, `rhythm.js`: 989, `map-select.css`: 987, `zombie-entity.js`: 709).
+  - 606 testes automatizados com 100% de aprovação em `test-procedural.js`.
+  - Cache buster e versão do rodapé atualizados para `v1.7.2 (Build 44)` (`?v=44`).
+
 ### [v1.7.1] - 2026-10-30 (Aumento de 30% no HP Base dos Zumbis & Redução de 70% no Dano de Explosão em Área - Build 43)
 **Balanceamento Geral de Sobrevivência dos Zumbis e Ajuste Estratégico no Fogo Amigo de Explosões**
 - **Aumento de 30% na Vida Base (HP) de Todos os Zumbis (`EnemyPoolSystem` & `ZombieEntity`):**
