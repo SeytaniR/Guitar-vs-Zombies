@@ -406,27 +406,27 @@
 .zombie-preview-card {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(25, 20, 38, 0.65);
+    gap: 8px;
+    background: rgba(22, 17, 34, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    padding: 6px 8px;
+    padding: 4px 8px;
     transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
 .zombie-preview-card:hover {
-    border-color: rgba(255, 51, 102, 0.4);
-    transform: translateX(2px);
+    border-color: rgba(255, 51, 102, 0.35);
+    background: rgba(30, 22, 45, 0.75);
 }
 
 .zombie-card-art {
     position: relative;
-    width: 52px;
-    height: 52px;
+    width: 42px;
+    height: 42px;
     flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 7px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     background: #000;
 }
 
@@ -499,10 +499,21 @@
     flex-shrink: 0;
 }
 
-.zombie-card-desc {
-    font-size: 9.5px;
-    color: #a0aab8;
-    line-height: 1.3;
+.zombie-card-stats-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.zombie-stat-chip {
+    font-size: 8px;
+    font-weight: 700;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Song Selection Section */
@@ -830,13 +841,14 @@ button.hero-roster-card {
 
 .selected-arena-showcase {
     display: flex;
-    gap: 12px;
-    background: rgba(20, 16, 32, 0.9);
-    border: 1.5px solid rgba(0, 255, 204, 0.4);
-    border-radius: 12px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    gap: 10px;
+    background: rgba(20, 16, 32, 0.75);
+    border: 1px solid rgba(0, 255, 204, 0.25);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-top: 4px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     transition: all 0.2s ease;
     width: 100%;
     max-width: 100%;
@@ -845,10 +857,10 @@ button.hero-roster-card {
 
 .arena-showcase-cover-wrap {
     position: relative;
-    width: 110px;
-    height: 64px;
+    width: 76px;
+    height: 48px;
     flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: #000;
@@ -863,12 +875,12 @@ button.hero-roster-card {
 
 .arena-theme-badge {
     position: absolute;
-    bottom: 3px;
-    left: 3px;
-    font-size: 7.5px;
+    bottom: 2px;
+    left: 2px;
+    font-size: 6.5px;
     font-weight: 800;
-    padding: 1px 4px;
-    border-radius: 3px;
+    padding: 1px 3px;
+    border-radius: 2px;
 }
 
 .arena-showcase-details {
@@ -880,107 +892,83 @@ button.hero-roster-card {
 }
 
 .showcase-arena-name {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 800;
     color: #fff;
-    margin: 0 0 2px 0;
+    margin: 0;
     text-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
 }
 
 .showcase-arena-sub {
-    font-size: 10px;
+    font-size: 9px;
     color: #00ffcc;
     font-weight: 700;
-    margin-bottom: 3px;
+    margin: 1px 0;
 }
 
 .showcase-arena-desc {
-    font-size: 9.5px;
-    color: #aaa;
-    line-height: 1.3;
+    font-size: 8.5px;
+    color: #94a3b8;
+    line-height: 1.25;
     margin: 0;
-}
-
-.arena-roster-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #bbb;
-    margin: 6px 0 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.map-arenas-roster-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.arena-roster-card {
-    background: rgba(25, 20, 40, 0.85);
-    border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    padding: 6px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s ease;
-    outline: none;
-    font-family: inherit;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    touch-action: manipulation;
-}
-
-.arena-roster-card:active {
-    transform: scale(0.96);
-}
-
-.arena-roster-card.active {
-    border-color: #00ffcc;
-    box-shadow: 0 0 14px rgba(0, 255, 204, 0.45);
-    background: rgba(0, 255, 204, 0.12);
-}
-
-.arena-card-thumb-wrap {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16/9;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: #000;
-}
-
-.arena-card-thumb {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.arena-card-badge {
-    position: absolute;
-    bottom: 2px;
-    left: 2px;
-    font-size: 7px;
-    font-weight: 800;
-    padding: 1px 3px;
-    border-radius: 3px;
-}
-
-.arena-card-name {
-    font-size: 9.5px;
-    font-weight: 800;
-    color: #fff;
-    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100%;
+    max-width: 100%;
+}
+
+/* Minimalist Tags & Stage Chips */
+.stage-name-highlight {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffcc00;
+    margin: 4px 0 6px;
+}
+
+.stage-info-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+}
+
+.stage-chip {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.chip-diff { background: rgba(255, 68, 85, 0.15); color: #ff5566; border: 1px solid rgba(255, 68, 85, 0.3); }
+.chip-target { background: rgba(0, 212, 255, 0.15); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); }
+.chip-gold { background: rgba(255, 204, 0, 0.15); color: #ffcc00; border: 1px solid rgba(255, 204, 0, 0.3); }
+.chip-xp { background: rgba(160, 100, 255, 0.15); color: #c084fc; border: 1px solid rgba(160, 100, 255, 0.3); }
+
+.arena-random-badge, .horde-count-tag, .skills-hint-tag {
+    font-size: 8.5px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.arena-random-badge { background: rgba(0, 255, 204, 0.15); color: #00ffcc; border: 1px solid rgba(0, 255, 204, 0.35); }
+.horde-count-tag { background: rgba(255, 68, 85, 0.15); color: #ff4455; border: 1px solid rgba(255, 68, 85, 0.35); }
+.skills-hint-tag { background: rgba(255, 204, 0, 0.12); color: #ffcc00; border: 1px solid rgba(255, 204, 0, 0.3); }
+
+.section-header-row h3 {
+    font-size: 13px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.3px;
 }
 

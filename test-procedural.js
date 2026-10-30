@@ -878,11 +878,15 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #ma
 assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links
+// Cache Buster Version & Modular CSS Links (v1.7.4 Build 46)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=45`), `index.html links ${f} with v=45`);
+    assert(htmlContent.includes(`${f}?v=46`), `index.html links ${f} with v=46`);
 });
-assert(htmlContent.includes('v1.7.3 (Build 45)'), 'index.html footer specifies v1.7.3 (Build 45)');
+assert(htmlContent.includes('v1.7.4 (Build 46)'), 'index.html footer specifies v1.7.4 (Build 46)');
+
+// Pre-Battle Minimalist Redesign Checks (v1.7.4)
+assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
+assert(cssContent.includes('.stage-info-chips') && cssContent.includes('.arena-random-badge'), 'CSS provides clean badge chips for stage & random arena display');
 
 // ==========================================
 // 17. Testing Zombie Balance & Explosion AoE Damage Reduction (v1.7.1)

@@ -186,7 +186,12 @@ class Game {
             const range = window.stageSystem.getZombieLevelRange(stage);
             const kills = window.stageSystem.getTargetKills(stage);
             const rewards = window.stageSystem.getStageRewards(stage);
-            stageInfo.innerText = `Dificuldade: Zumbis Nv. ${range.min}-${range.max} | Alvo: ${kills} Baixas | Recompensas: 🪙 ${rewards.coins} | ⭐ ${rewards.xp} XP`;
+            stageInfo.innerHTML = `
+                <span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span>
+                <span class="stage-chip chip-target">🎯 ${kills} Alvos</span>
+                <span class="stage-chip chip-gold">🪙 +${rewards.coins}</span>
+                <span class="stage-chip chip-xp">⭐ +${rewards.xp} XP</span>
+            `;
         }
     }
 
@@ -325,7 +330,11 @@ class Game {
                         <h4 class="zombie-card-name">${z.name}</h4>
                         <span class="zombie-card-type-tag ${z.badgeClass || ''}">${z.fullBadge || z.badge}</span>
                     </div>
-                    <p class="zombie-card-desc">${z.desc}</p>
+                    <div class="zombie-card-stats-row">
+                        <span class="zombie-stat-chip">❤️ ${z.hp} HP</span>
+                        <span class="zombie-stat-chip">⚡ ${z.speed} Vel</span>
+                        <span class="zombie-stat-chip">💥 ${z.attackDamage} Dano</span>
+                    </div>
                 </div>
             `;
             grid.appendChild(card);

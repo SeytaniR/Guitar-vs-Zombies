@@ -14,15 +14,15 @@
     <meta name="apple-mobile-web-app-title" content="Guitar vs Zombies">
 
     <!-- Modular CSS Architecture (Zero God Object: All files < 1,000 lines) -->
-    <link rel="stylesheet" href="css/base.css?v=45">
-    <link rel="stylesheet" href="css/menu.css?v=45">
-    <link rel="stylesheet" href="css/map-select.css?v=45">
-    <link rel="stylesheet" href="css/battle.css?v=45">
-    <link rel="stylesheet" href="css/skills.css?v=45">
-    <link rel="stylesheet" href="css/talents.css?v=45">
-    <link rel="stylesheet" href="css/song-studio.css?v=45">
-    <link rel="stylesheet" href="css/editor.css?v=45">
-    <link rel="stylesheet" href="css/results.css?v=45">
+    <link rel="stylesheet" href="css/base.css?v=46">
+    <link rel="stylesheet" href="css/menu.css?v=46">
+    <link rel="stylesheet" href="css/map-select.css?v=46">
+    <link rel="stylesheet" href="css/battle.css?v=46">
+    <link rel="stylesheet" href="css/skills.css?v=46">
+    <link rel="stylesheet" href="css/talents.css?v=46">
+    <link rel="stylesheet" href="css/song-studio.css?v=46">
+    <link rel="stylesheet" href="css/editor.css?v=46">
+    <link rel="stylesheet" href="css/results.css?v=46">
 </head>
 <body>
     <div id="game-container">
@@ -85,7 +85,7 @@
             </div>
 
             <div class="menu-footer">
-                <span>Guitar vs Zombies v1.7.3 (Build 45) • AAA Audio & Action Experience</span>
+                <span>Guitar vs Zombies v1.7.4 (Build 46) • AAA Audio & Action Experience</span>
             </div>
         </div>
 
@@ -105,14 +105,19 @@
                 <div class="map-section-card stage-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <span class="section-badge stage-badge">🗺️ PROGRESSÃO INFINITA</span>
+                            <h3>🗺️ Fase Atual</h3>
                             <div class="cycle-nav-group">
                                 <button type="button" id="map-stage-prev-btn" class="cycle-nav-btn" title="Fase Anterior">◀️</button>
                                 <button type="button" id="map-stage-next-btn" class="cycle-nav-btn" title="Próxima Fase">▶️</button>
                             </div>
                         </div>
-                        <h3 id="map-stage-title-text">Fase 1: Subúrbio Desolado</h3>
-                        <p id="map-stage-info-text" class="section-subtext">Dificuldade: Zumbis Nv. 1-2 | Alvo: 14 Baixas | Recompensas: 🪙 70 | ⭐ 80 XP</p>
+                        <h4 id="map-stage-title-text" class="stage-name-highlight">Fase 1: Subúrbio Desolado</h4>
+                        <div id="map-stage-info-text" class="stage-info-chips">
+                            <span class="stage-chip chip-diff">💀 Nv. 1-2</span>
+                            <span class="stage-chip chip-target">🎯 14 Alvos</span>
+                            <span class="stage-chip chip-gold">🪙 +70</span>
+                            <span class="stage-chip chip-xp">⭐ +80 XP</span>
+                        </div>
                     </div>
                 </div>
 
@@ -120,10 +125,9 @@
                 <div class="map-section-card arena-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <span class="section-badge arena-badge">🏟️ ARENA SORTEADA</span>
+                            <h3>🏟️ Arena do Show</h3>
+                            <span class="arena-random-badge">🎲 Sorteada</span>
                         </div>
-                        <h3>Cenário da Partida (Aleatório):</h3>
-                        <p class="section-subtext">O palco do show é sorteado aleatoriamente a cada fase:</p>
                     </div>
 
                     <!-- Active Arena Showcase Card -->
@@ -144,14 +148,12 @@
                 <div class="map-section-card hero-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <span class="section-badge hero-badge">🎸 LINE-UP PRINCIPAL</span>
+                            <h3>🎸 Guitarrista</h3>
                             <div class="cycle-nav-group">
                                 <button type="button" id="map-hero-prev-btn" class="cycle-nav-btn" title="Guitarrista Anterior">◀️</button>
                                 <button type="button" id="map-hero-next-btn" class="cycle-nav-btn" title="Próximo Guitarrista">▶️</button>
                             </div>
                         </div>
-                        <h3>Escolha seu Guitarrista:</h3>
-                        <p class="section-subtext">Toque em qualquer herói da lista para selecioná-lo para a batalha:</p>
                     </div>
 
                     <!-- Selected Hero Big Showcase Card -->
@@ -195,7 +197,6 @@
                     </div>
 
                     <!-- 6 Guitarists Carousel / Thumbnail Strip -->
-                    <div class="hero-roster-title">Todos os 6 Guitarristas Disponíveis:</div>
                     <div id="map-heroes-roster-grid" class="map-heroes-roster-grid">
                         <!-- Populated dynamically by window.game.renderHeroRoster() -->
                     </div>
@@ -204,9 +205,10 @@
                 <!-- Section 2: Horde Intelligence -->
                 <div class="map-section-card">
                     <div class="section-card-header">
-                        <span class="section-badge danger-badge">⚠️ HORDA DETECTADA</span>
-                        <h3>Nesse mapa você encontrará esses zumbis:</h3>
-                        <p class="section-subtext">5 tipos sorteados da pool para invadir seu palco nesta partida:</p>
+                        <div class="section-header-row">
+                            <h3>🧟 Horda Inimiga</h3>
+                            <span class="horde-count-tag">5 Sorteados</span>
+                        </div>
                     </div>
                     <div id="map-zombies-grid" class="map-zombies-grid">
                         <!-- Populated dynamically by window.game.renderMapZombies() -->
@@ -216,9 +218,10 @@
                 <!-- Section 2.5: Equipped Lane Skills (4 Rhythm Tracks) -->
                 <div class="map-section-card skills-select-card">
                     <div class="section-card-header">
-                        <span class="section-badge skills-badge">⚡ HABILIDADES POR TRILHO</span>
-                        <h3>Habilidades dos 4 Trilhos Rítmicos:</h3>
-                        <p class="section-subtext">Toque em qualquer trilho para equipar uma habilidade (gasta Rock Mana):</p>
+                        <div class="section-header-row">
+                            <h3>⚡ Habilidades por Trilho</h3>
+                            <span class="skills-hint-tag">Toque para Equipar</span>
+                        </div>
                     </div>
                     <div id="map-lane-skills-grid" class="map-lane-skills-grid">
                         <!-- Populated dynamically by window.game.renderLaneSkills() -->
@@ -229,14 +232,12 @@
                 <div class="map-section-card song-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <span class="section-badge music-badge">🎵 TRILHA SONORA</span>
+                            <h3>🎵 Trilha Sonora</h3>
                             <div class="cycle-nav-group">
                                 <button type="button" id="map-song-prev-btn" class="cycle-nav-btn" title="Música Anterior">◀️</button>
                                 <button type="button" id="map-song-next-btn" class="cycle-nav-btn" title="Próxima Música">▶️</button>
                             </div>
                         </div>
-                        <h3>Escolha a Música da Batalha:</h3>
-                        <p class="section-subtext">Toque no botão da música desejada ou alterne pelas setas:</p>
                     </div>
 
                     <!-- Selected Active Song Showcase -->
@@ -256,9 +257,6 @@
                     </div>
 
                     <!-- Interactive List of Songs with Select Buttons -->
-                    <div class="song-roster-header">
-                        <span class="song-roster-title">Músicas do Repertório:</span>
-                    </div>
                     <div id="map-songs-roster-list" class="map-songs-roster-list">
                         <!-- Populated dynamically by window.game.renderSongRoster() -->
                     </div>
@@ -855,22 +853,22 @@
         </div>
     </div>
 
-    <!-- Scripts with Cache Busting v=45 -->
-    <script src="js/audio.js?v=45"></script>
-    <script src="js/i18n.js?v=45"></script>
-    <script src="js/spritesheet.js?v=45"></script>
-    <script src="js/combat-fx.js?v=45"></script>
-    <script src="js/zombie-entity.js?v=45"></script>
-    <script src="js/enemy-pool.js?v=45"></script>
-    <script src="js/guitarist-pool.js?v=45"></script>
-    <script src="js/talents.js?v=45"></script>
-    <script src="js/skills.js?v=45"></script>
-    <script src="js/stage-system.js?v=45"></script>
-    <script src="js/song-db.js?v=45"></script>
-    <script src="js/song-editor.js?v=45"></script>
-    <script src="js/song-studio.js?v=45"></script>
-    <script src="js/combat.js?v=45"></script>
-    <script src="js/rhythm.js?v=45"></script>
-    <script src="js/main.js?v=45"></script>
+    <!-- Scripts with Cache Busting v=46 -->
+    <script src="js/audio.js?v=46"></script>
+    <script src="js/i18n.js?v=46"></script>
+    <script src="js/spritesheet.js?v=46"></script>
+    <script src="js/combat-fx.js?v=46"></script>
+    <script src="js/zombie-entity.js?v=46"></script>
+    <script src="js/enemy-pool.js?v=46"></script>
+    <script src="js/guitarist-pool.js?v=46"></script>
+    <script src="js/talents.js?v=46"></script>
+    <script src="js/skills.js?v=46"></script>
+    <script src="js/stage-system.js?v=46"></script>
+    <script src="js/song-db.js?v=46"></script>
+    <script src="js/song-editor.js?v=46"></script>
+    <script src="js/song-studio.js?v=46"></script>
+    <script src="js/combat.js?v=46"></script>
+    <script src="js/rhythm.js?v=46"></script>
+    <script src="js/main.js?v=46"></script>
 </body>
 </html>

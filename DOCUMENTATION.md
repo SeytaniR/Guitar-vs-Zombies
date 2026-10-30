@@ -27,6 +27,23 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.4] - 2026-10-30 (Redesign Clean & Minimalista do Menu Pré-Batalha - Build 46)
+**Interface Moderna, Despoluída e Foco em Informações Táticas Essenciais na Preparação de Batalha**
+- **Eliminação de Poluição Visual e Ruído Textual (`#screen-map-select` / `index.html`):**
+  - Removidos parágrafos instrucionais prolixos (`.section-subtext`) que explicavam toques óbvios em todas as seções (Fase, Guitarrista, Horda, Habilidades e Repertório).
+  - Removidas embalagens pesadas e multiplicidade de badges competindo por atenção no topo dos cards de seção.
+  - Cabeçalhos de seção limpos com ícone e título direto: `🗺️ Fase Atual`, `🏟️ Arena do Show`, `🎸 Guitarrista`, `🧟 Horda Inimiga`, `⚡ Habilidades por Trilho` e `🎵 Trilha Sonora`.
+- **Chips Dinâmicos de Status da Fase (`js/main.js` & `css/map-select.css`):**
+  - Informações de nível, alvos de abate e recompensas agora renderizadas como badges compactos estilizados em glassmorphism: `💀 Nv. min-max`, `🎯 kills Alvos`, `🪙 +coins Ouro` e `⭐ +xp XP`.
+- **Cards de Zumbis Táticos & Minimalistas (`js/main.js` & `css/map-select.css`):**
+  - Substituídas as descrições textuais densas de 3 linhas por uma linha compacta de chips de atributos de combate RPG: `❤️ HP`, `⚡ Vel` e `💥 Dano`.
+  - Redimensionamento sutil do retrato de arte do zumbi (de 52x52 para 42x42) e padding enxuto para melhor densidade e leitura rápida sem rolagem excessiva.
+- **Limpeza de Código e Performance:**
+  - Removidas 84 linhas de estilos CSS legados de seleção manual de arena em `css/map-select.css`, mantendo o arquivo enxuto em 975 linhas (abaixo do teto de 1.000 linhas).
+  - `js/main.js` otimizado em 968 linhas.
+  - Cache-busting sincronizado para `?v=46` em todos os recursos CSS e JS.
+  - Suíte de testes automatizada `test-procedural.js` expandida para 633 testes, todos com 100% de aprovação.
+
 ### [v1.7.3] - 2026-10-30 (Horda Lendária: 4 Ícones da Cultura Pop e História no Master Pool - Build 45)
 **Inclusão de 4 Novos Zumbis Oficiais Inspirados em Rick Grimes, Político Brasileiro, Batman e Kratos**
 - **4 Novos Arquétipos Integrados ao Pool Mestre (`EnemyPoolSystem` & `masterPool` totalizando 16 zumbis):**
