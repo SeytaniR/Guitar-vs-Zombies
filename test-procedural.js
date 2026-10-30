@@ -756,10 +756,13 @@ assert(cssContent.includes('.game-modal,\n.skill-modal-overlay {\n    position: 
 assert(cssContent.includes('.game-modal.open,\n.skill-modal-overlay.open {\n    display: flex !important;'), 'CSS defines .game-modal.open with display: flex !important');
 assert(htmlContent.includes('id="skill-picker-modal" class="game-modal skill-modal-overlay"'), 'index.html includes skill-modal-overlay on #skill-picker-modal');
 
+// Pre-Battle Card flex-shrink check
+assert(cssContent.includes('.map-section-card {\n    background: rgba(18, 14, 28, 0.7);\n    border: 1px solid rgba(255, 255, 255, 0.1);\n    border-radius: 12px;\n    padding: 10px;\n    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n    width: 100%;\n    max-width: 100%;\n    box-sizing: border-box;\n    overflow: hidden;\n    flex-shrink: 0;\n}'), '.map-section-card enforces flex-shrink: 0 to prevent vertical card collapse');
+
 // Cache Buster Version
-assert(htmlContent.includes('css/style.css?v=35'), 'index.html links style.css with v=35');
-assert(htmlContent.includes('js/main.js?v=35'), 'index.html links main.js with v=35');
-assert(htmlContent.includes('v1.6.3 (Build 35)'), 'index.html footer specifies v1.6.3 (Build 35)');
+assert(htmlContent.includes('css/style.css?v=36'), 'index.html links style.css with v=36');
+assert(htmlContent.includes('js/main.js?v=36'), 'index.html links main.js with v=36');
+assert(htmlContent.includes('v1.6.4 (Build 36)'), 'index.html footer specifies v1.6.4 (Build 36)');
 
 // Zero God Object rule check
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

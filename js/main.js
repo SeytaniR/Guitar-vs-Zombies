@@ -19,7 +19,9 @@ class Game {
         this.setupScreenNavigation();
         this.setupBattleControls();
         this.setupAudioGlobalUnlock();
-        this.switchScreen('menu');
+        const urlParams = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : null;
+        const initScreen = (urlParams && urlParams.get('screen')) ? urlParams.get('screen') : 'menu';
+        this.switchScreen(initScreen);
         this.start();
     }
 

@@ -2089,17 +2089,13 @@ body, html {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y !important;
     overscroll-behavior-y: contain;
-    padding: 10px 10px 24px;
+    padding: 10px 10px 36px;
     display: flex;
     flex-direction: column;
     gap: 12px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-}
-
-.map-screen-scroll * {
-    touch-action: pan-y;
 }
 
 .map-section-card {
@@ -2112,6 +2108,7 @@ body, html {
     max-width: 100%;
     box-sizing: border-box;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .section-card-header {

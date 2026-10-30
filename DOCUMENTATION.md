@@ -669,6 +669,20 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - **Cobertura de Testes Automatizados:**
   - Testes ampliados em `test-procedural.js` com 70 asserções automatizadas passando com 100% de sucesso.
 
+### [v1.6.4] - 2026-10-30 (Build 36 - Correção Definitiva do Menu Pré-Batalha & Scroll Mobile)
+- **Correção de Colapso de Altura dos Cards Pré-Batalha (`css/style.css`):**
+  - Identificada e corrigida a causa raiz do layout espremido: os cartões `.map-section-card` dentro do container flexível `.map-screen-scroll` possuíam `flex-shrink: 1` padrão combinado com `overflow: hidden`, o que fazia o flexbox encolher forçadamente todos os 5 cards para dentro da altura da tela (641px), impedindo o scroll vertical e cortando mais de 70% das informações visuais.
+  - Aplicado `flex-shrink: 0;` a `.map-section-card`, permitindo que cada cartão expanda em sua altura natural completa (~1.638px totais), ativando imediatamente a rolagem suave vertical (`overflow-y: auto`).
+  - Removida a regra global conflituosa `.map-screen-scroll * { touch-action: pan-y; }` que impedia o registro de toques e cliques em botões internos em navegadores mobile.
+  - Adicionado espaçamento inferior seguro (`padding: 10px 10px 36px;`) para afastar o último card do rodapé flutuante (`.map-bottom-bar`).
+- **Isolamento Estrito de Telas (`index.html`, `js/main.js`):**
+  - `#screen-main-menu` e `#screen-map-select` operam agora com isolamento total via regras CSS `.game-screen { display: none !important; }` e `.game-screen.active { display: flex !important; }`.
+  - Suporte a depuração direta via parâmetro de URL (`?screen=map-select`).
+- **Cache-Busting & Testes Automatizados:**
+  - Versão atualizada para `v=36` em todas as tags de script e folhas de estilo.
+  - Bateria de testes em `test-procedural.js` expandida para 460 asserções automatizadas com 100% de aprovação.
+  - Todos os 16 arquivos JavaScript do projeto continuam rigorosamente abaixo de 1.000 linhas (Regra Zero God Objects).
+
 ### [v1.5.0] - 2026-10-13 (Fatores Procedurais & Pool de 6 Guitarristas)
 - **Níveis Procedurais para Guitarristas (1 a 100):** Escalonamento suave de dano (+1% por nível), vida e bônus de raridade.
 - **Pool Completa de 6 Guitarristas:** Johnny Blade, Vulkan Heavy, Dr. Radix, Cypher Volt, Kragthor Titan e Riot Pixie.
