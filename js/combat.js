@@ -65,26 +65,15 @@ class CombatSystem {
         this.zombiesKilled = 0; this.score = 0; this.spawnTimer = 0;
         this.shockBarrierTimer = 15; this.shockBarrierReady = false; this.heroImmunityTimer = 0;
         this.matchActive = false; this.activeEnemyTypes = [];
-        this.battleStats = {
-            damageDealt: 0,
-            zombiesKilled: 0,
-            coinsEarned: 0,
-            hitsReceived: 0,
-            matchStartTime: performance.now()
-        };
-
+        this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.fx.initEmbers(25, 800, 600);
-
         this.resize();
         window.addEventListener('resize', () => this.resize());
         this.canvas.addEventListener('pointerdown', () => { if (this.isGameOver) this.reviveHero(); });
     }
 
-    // Rock Power backward compatibility property mapping to Rock Mana
     get rockPower() { return (this.rockMana / this.maxRockMana) * 100; }
     set rockPower(v) { this.rockMana = Math.max(0, Math.min(this.maxRockMana, (v / 100) * this.maxRockMana)); }
-
-    // Proxy FX helper methods for backwards compatibility
     get shakePower() { return this.fx.shakePower; }
     set shakePower(v) { this.fx.shakePower = v; }
     triggerShake(amount = 6) { this.fx.triggerShake(amount); }
@@ -173,6 +162,9 @@ class CombatSystem {
         this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
         this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0;
         this.perfectStreak = 0; this.guaranteedCritReady = false;
+        const curStage = window.stageSystem ? window.stageSystem.selectedStage : 1;
+        this.isBossStage = !!(window.stageSystem && typeof window.stageSystem.isBossStage === 'function' && window.stageSystem.isBossStage(curStage));
+        this.bossSpawned = false;
         const activeMap = (window.stageSystem && window.stageSystem.getSelectedMap) ? window.stageSystem.getSelectedMap().id : 'map_void';
         if (this.fx && typeof this.fx.initEmbers === 'function') {
             this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
@@ -189,22 +181,32 @@ class CombatSystem {
         this.spawnZombie(cw * 0.92);
     }
 
-    spawnZombie(initialX = null) {
+    spawnZombie(initialX = null, forceDef = null) {
         if (this.isGameOver || !this.matchActive) return;
         const metrics = this.getRoadMetrics();
-
-        const pool = (this.activeEnemyTypes && this.activeEnemyTypes.length > 0)
-            ? this.activeEnemyTypes
-            : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
-
-        const enemyDef = pool.length > 0
-            ? pool[Math.floor(Math.random() * pool.length)]
-            : { type: 'normal', scale: 0.50, speed: 38, hp: 104, attackInterval: 1.1, attackDamage: 7, name: 'Zumbi Punk' };
-
         const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
+
+        let enemyDef = forceDef;
+        if (!enemyDef) {
+            if (this.isBossStage && !this.bossSpawned && this.zombiesKilled >= 5) {
+                this.bossSpawned = true;
+                enemyDef = window.stageSystem.getBossZombieDef(stage);
+                const cw = this.canvas ? this.canvas.width : 360;
+                this.addFloatingText('⚠️ CHEFE TITÃ SURGIU! 👑', cw / 2, metrics.laneY - 45, '#ff0033', true);
+                this.triggerShake(10);
+                if (window.soundEngine) window.soundEngine.playPowerChord();
+            } else {
+                const pool = (this.activeEnemyTypes && this.activeEnemyTypes.length > 0)
+                    ? this.activeEnemyTypes
+                    : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
+                enemyDef = pool.length > 0
+                    ? pool[Math.floor(Math.random() * pool.length)]
+                    : { type: 'normal', scale: 0.50, speed: 38, hp: 104, attackInterval: 1.1, attackDamage: 7, name: 'Zumbi Punk' };
+            }
+        }
+
         const range = window.stageSystem ? window.stageSystem.getZombieLevelRange(stage) : { min: 1, max: 2 };
         const zombieLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-
         const ZombieClass = window.ZombieEntity || ZombieEntity;
         const zombie = new ZombieClass(enemyDef, metrics.laneY, this.canvas.width, zombieLevel, initialX);
         this.entities.zombies.push(zombie);
@@ -472,11 +474,12 @@ class CombatSystem {
         // Rock Mana bonus on kill
         this.rockMana = Math.min(this.maxRockMana, this.rockMana + 5.0);
 
-        // Check Stage Clear Target
+        // Check Stage Clear Target or Boss Defeat
         const targetKills = window.stageSystem ? window.stageSystem.getTargetKills() : 20;
-        if (this.zombiesKilled >= targetKills && !this.stageCompleted) {
+        const isClear = this.isBossStage ? (z.isBoss || this.zombiesKilled >= targetKills) : (this.zombiesKilled >= targetKills);
+        if (isClear && !this.stageCompleted) {
             this.stageCompleted = true;
-            this.triggerStageClear();
+            this.triggerStageClear(z.isBoss);
         }
 
         if (z.type === 'mutant') {
@@ -495,7 +498,7 @@ class CombatSystem {
         }
     }
 
-    triggerStageClear() {
+    triggerStageClear(isBossKill = false) {
         const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
         const rewards = window.stageSystem ? window.stageSystem.getStageRewards(stage) : { coins: 80, xp: 100 };
         if (window.talentSystem) window.talentSystem.addGold(rewards.coins);
@@ -503,12 +506,14 @@ class CombatSystem {
         if (activeHero && window.guitaristPool) window.guitaristPool.addHeroXp(activeHero.id, rewards.xp);
         if (window.stageSystem) window.stageSystem.unlockNextStage();
 
-        this.triggerShake(7);
+        const isBoss = isBossKill || this.isBossStage;
+        this.triggerShake(isBoss ? 11 : 7);
         this.fx.shockwaves.push({
             x: this.canvas.width / 2, y: this.canvas.height / 2,
-            radius: 8, maxRadius: 150, color: '#ffd700', lineWidth: 5, alpha: 1.0
+            radius: 8, maxRadius: isBoss ? 200 : 150, color: '#ffd700', lineWidth: 5.5, alpha: 1.0
         });
-        this.addFloatingText(`🏆 FASE ${stage} CONCLUÍDA!`, this.canvas.width / 2, this.canvas.height / 2 - 35, '#ffd700', true);
+        const titleText = isBoss ? `👑 CHEFE DERROTADO! FASE ${stage}!` : `🏆 FASE ${stage} CONCLUÍDA!`;
+        this.addFloatingText(titleText, this.canvas.width / 2, this.canvas.height / 2 - 35, '#ffd700', true);
         this.addFloatingText(`+${rewards.coins} 🪙  +${rewards.xp} XP`, this.canvas.width / 2, this.canvas.height / 2 + 10, '#00ff66', true);
         if (window.soundEngine) window.soundEngine.playExplosion();
 
@@ -972,19 +977,15 @@ class CombatSystem {
     }
 
     drawGameOverOverlay() { this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height); }
-
+    drawAmpAndShadow(heroX, heroY) { this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time); }
     drawBackground() {
         const bg = this.assets.bg;
         if (!bg.complete || bg.naturalWidth === 0 || this.canvas.width <= 10 || this.canvas.height <= 10) {
-            this.ctx.fillStyle = '#1a1a2e';
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            return;
+            this.ctx.fillStyle = '#1a1a2e'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); return;
         }
         const m = this.getRoadMetrics();
         if (m.drawW > 0 && m.drawH > 0) this.ctx.drawImage(bg, m.drawX, m.drawY, m.drawW, m.drawH);
     }
-
-    drawAmpAndShadow(heroX, heroY) { this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time); }
 }
 
 window.CombatSystem = CombatSystem;

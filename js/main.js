@@ -187,10 +187,13 @@ class Game {
         const stageInfo = document.getElementById('map-stage-info-text');
         if (stageTitle) stageTitle.innerText = window.stageSystem.getStageName(stage);
         if (stageInfo) {
+            const isBoss = window.stageSystem.isBossStage && window.stageSystem.isBossStage(stage);
             const range = window.stageSystem.getZombieLevelRange(stage);
             const kills = window.stageSystem.getTargetKills(stage);
             const rewards = window.stageSystem.getStageRewards(stage);
+            const bossChip = isBoss ? '<span class="stage-chip chip-boss">👑 CHEFE (2x OURO/XP)</span>' : '';
             stageInfo.innerHTML = `
+                ${bossChip}
                 <span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span>
                 <span class="stage-chip chip-target">🎯 ${kills} Alvos</span>
                 <span class="stage-chip chip-gold">🪙 +${rewards.coins}</span>
@@ -201,103 +204,110 @@ class Game {
 
     renderHeroRoster() {
         if (!window.guitaristPool) return;
-
-        const currentHero = (window.guitaristPool.getSelectedGuitarist && window.guitaristPool.getSelectedGuitarist()) 
-            || (window.guitaristPool.getActiveGuitarist && window.guitaristPool.getActiveGuitarist());
+        const pool = window.guitaristPool;
+        const selectedHero = (pool.getSelectedGuitarist && pool.getSelectedGuitarist()) 
+            || (pool.getActiveGuitarist && pool.getActiveGuitarist());
+        const displayId = this.previewHeroId || (selectedHero ? selectedHero.id : 'johnny_blaze');
+        const currentHero = pool.guitarists.find(g => g.id === displayId) || selectedHero;
         if (!currentHero) return;
 
-        const allHeroes = window.guitaristPool.getAllGuitarists();
+        const isUnlocked = pool.isHeroUnlocked(currentHero.id);
+        const allHeroes = pool.getAllGuitarists();
 
-        // 1. Update Hero Showcase Card
-        const showcaseImg = document.getElementById('showcase-hero-img');
-        const rarityBadge = document.getElementById('showcase-hero-rarity-badge');
-        const nameEl = document.getElementById('showcase-hero-name');
-        const titleEl = document.getElementById('showcase-hero-title');
-        const instrumentEl = document.getElementById('showcase-hero-instrument-text');
-        const passiveNameEl = document.getElementById('showcase-hero-passive-name');
-        const passiveDescEl = document.getElementById('showcase-hero-passive-desc');
-        const showcaseBox = document.getElementById('map-selected-hero-showcase');
-
-        if (showcaseImg) showcaseImg.src = currentHero.icon;
-        if (rarityBadge) {
-            rarityBadge.innerText = (currentHero.rarity || 'COMUM').toUpperCase();
-            rarityBadge.className = `hero-rarity-badge ${currentHero.rarityClass || currentHero.badgeClass || 'badge-common'}`;
-        }
-        if (nameEl) nameEl.innerText = currentHero.name;
-        if (titleEl) titleEl.innerText = currentHero.title;
-        if (instrumentEl) instrumentEl.innerText = `${currentHero.instrument} • ⚡ 1.0/s`;
-        if (passiveNameEl) passiveNameEl.innerText = (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva';
-        if (passiveDescEl) passiveDescEl.innerText = (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '';
-        if (showcaseBox) {
-            const color = currentHero.accentColor || currentHero.themeColor || '#ffaa00';
-            showcaseBox.style.borderColor = color;
-            showcaseBox.style.boxShadow = `0 4px 20px ${color}44`;
+        const el = (id) => document.getElementById(id);
+        const sImg = el('showcase-hero-img'), rBadge = el('showcase-hero-rarity-badge'), nEl = el('showcase-hero-name'), tEl = el('showcase-hero-title');
+        const iEl = el('showcase-hero-instrument-text'), pnEl = el('showcase-hero-passive-name'), pdEl = el('showcase-hero-passive-desc'), sBox = el('map-selected-hero-showcase');
+        if (sImg) sImg.src = currentHero.icon;
+        if (rBadge) { rBadge.innerText = (isUnlocked ? (currentHero.rarity || 'COMUM') : `🔒 ${currentHero.rarity}`).toUpperCase(); rBadge.className = `hero-rarity-badge ${currentHero.rarityClass || currentHero.badgeClass || 'badge-common'} ${isUnlocked ? '' : 'badge-locked'}`; }
+        if (nEl) nEl.innerText = isUnlocked ? currentHero.name : `🔒 ${currentHero.name}`;
+        if (tEl) tEl.innerText = currentHero.title;
+        if (iEl) iEl.innerText = isUnlocked ? `${currentHero.instrument} • ⚡ 1.0/s` : `🔒 Desbloqueie por 🪙 ${currentHero.unlockCost || 1000}`;
+        if (pnEl) pnEl.innerText = (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva';
+        if (pdEl) pdEl.innerText = (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '';
+        if (sBox) {
+            const color = isUnlocked ? (currentHero.accentColor || currentHero.themeColor || '#ffaa00') : '#666677';
+            sBox.style.borderColor = color; sBox.style.boxShadow = `0 4px 20px ${color}44`;
         }
 
-        // Hero Level Progression Box
-        const lvlData = window.guitaristPool.getHeroLevelData(currentHero.id);
-        const reqXp = window.guitaristPool.getXpRequiredForNextLevel(lvlData.level);
-        const goldCost = window.guitaristPool.getGoldCostForLevelUp(lvlData.level);
+        // Hero Level Progression / Unlock Box
+        const lvlData = pool.getHeroLevelData(currentHero.id);
+        const reqXp = pool.getXpRequiredForNextLevel(lvlData.level);
+        const goldCost = pool.getGoldCostForLevelUp(lvlData.level);
+        const lBadge = el('showcase-hero-level-badge'), xText = el('showcase-hero-xp-text'), xFill = el('showcase-hero-xp-fill'), lUpBtn = el('hero-level-up-btn');
 
-        const lvlBadge = document.getElementById('showcase-hero-level-badge');
-        const xpText = document.getElementById('showcase-hero-xp-text');
-        const xpFill = document.getElementById('showcase-hero-xp-fill');
-        const lvlUpBtn = document.getElementById('hero-level-up-btn');
-
-        if (lvlBadge) lvlBadge.innerText = `⭐ NÍVEL ${lvlData.level} / 100`;
-        if (xpText) xpText.innerText = lvlData.level >= 100 ? 'MÁXIMO' : `XP: ${lvlData.xp} / ${reqXp}`;
-        if (xpFill) {
-            const pct = lvlData.level >= 100 ? 100 : Math.min(100, Math.round((lvlData.xp / reqXp) * 100));
-            xpFill.style.width = `${pct}%`;
+        if (isUnlocked) {
+            if (lBadge) lBadge.innerText = `⭐ NÍVEL ${lvlData.level} / 100`;
+            if (xText) xText.innerText = lvlData.level >= 100 ? 'MÁXIMO' : `XP: ${lvlData.xp} / ${reqXp}`;
+            if (xFill) xFill.style.width = `${lvlData.level >= 100 ? 100 : Math.min(100, Math.round((lvlData.xp / reqXp) * 100))}%`;
+            if (lUpBtn) {
+                lUpBtn.disabled = (lvlData.level >= 100);
+                lUpBtn.className = 'hero-lvl-btn';
+                lUpBtn.innerText = lvlData.level >= 100 ? '⭐ NÍVEL MÁXIMO (100)' : `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`;
+                lUpBtn.onclick = () => {
+                    if (lvlData.level >= 100) return;
+                    const res = pool.levelUpWithGold(currentHero.id);
+                    if (res.success) {
+                        if (window.soundEngine) window.soundEngine.playPowerChord();
+                        this.renderHeroRoster(); this.updateMenuCurrencies();
+                    } else alert(res.reason || 'Ouro insuficiente!');
+                };
+            }
+        } else {
+            const uCost = pool.getHeroUnlockCost(currentHero.id);
+            if (lBadge) lBadge.innerText = `🔒 GUITARRISTA BLOQUEADO`;
+            if (xText) xText.innerText = `Custo: 🪙 ${uCost} Ouro`;
+            if (xFill) xFill.style.width = '0%';
+            if (lUpBtn) {
+                lUpBtn.disabled = false;
+                lUpBtn.className = 'hero-lvl-btn hero-unlock-cta';
+                lUpBtn.innerText = `🪙 DESBLOQUEAR GUITARRISTA (🪙 ${uCost})`;
+                lUpBtn.onclick = () => {
+                    const res = pool.unlockHeroWithGold(currentHero.id);
+                    if (res.success) {
+                        if (window.soundEngine) window.soundEngine.playPowerChord();
+                        this.previewHeroId = null;
+                        this.renderHeroRoster(); this.renderLaneSkills(); this.updateMenuCurrencies();
+                    } else alert(res.reason || 'Ouro insuficiente!');
+                };
+            }
         }
-        if (lvlUpBtn) {
-            lvlUpBtn.disabled = (lvlData.level >= 100);
-            lvlUpBtn.innerText = lvlData.level >= 100 ? '⭐ NÍVEL MÁXIMO (100)' : `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`;
-            lvlUpBtn.onclick = () => {
-                if (lvlData.level >= 100) return;
-                const res = window.guitaristPool.levelUpWithGold(currentHero.id);
-                if (res.success) {
-                    if (window.soundEngine) window.soundEngine.playPowerChord();
-                    this.renderHeroRoster(); this.updateMenuCurrencies();
-                } else alert(res.reason || 'Ouro insuficiente!');
-            };
-        }
 
-        // 2. Populate 6 Guitarists Grid with Real Clickable Buttons
+        // 2. Populate 6 Guitarists Grid
         const grid = document.getElementById('map-heroes-roster-grid');
         if (!grid) return;
-
         grid.innerHTML = '';
         allHeroes.forEach(hero => {
+            const isUnl = pool.isHeroUnlocked(hero.id);
             const isSelected = (hero.id === currentHero.id);
             const card = document.createElement('button');
             card.type = 'button';
-            card.className = `hero-roster-card ${isSelected ? 'active' : ''}`;
-            card.title = `${hero.name} (${hero.rarity}) - ${(hero.passive && hero.passive.name) || hero.passiveName || ''}`;
+            card.className = `hero-roster-card ${isSelected ? 'active' : ''} ${isUnl ? '' : 'locked'}`;
+            card.title = isUnl ? `${hero.name} (${hero.rarity})` : `🔒 ${hero.name} (🪙 ${hero.unlockCost})`;
 
-            const color = hero.accentColor || hero.themeColor || '#ffaa00';
-            const badgeClass = hero.rarityClass || hero.badgeClass || 'badge-common';
+            const color = isUnl ? (hero.accentColor || hero.themeColor || '#ffaa00') : '#555566';
+            const badgeClass = isUnl ? (hero.rarityClass || hero.badgeClass || 'badge-common') : 'badge-locked';
 
             card.innerHTML = `
                 <div class="hero-roster-art" style="border-color: ${color}; pointer-events: none;">
-                    <img src="${hero.icon}" alt="${hero.name}" class="hero-roster-img" style="pointer-events: none;">
+                    <img src="${hero.icon}" alt="${hero.name}" class="hero-roster-img" style="pointer-events: none; ${isUnl ? '' : 'filter: grayscale(0.85);'}">
                 </div>
                 <div class="hero-roster-name" style="pointer-events: none;">${hero.name.split(' ')[0]}</div>
-                <span class="hero-roster-mini-badge ${badgeClass}" style="pointer-events: none;">${hero.rarity}</span>
-                ${isSelected ? '<span class="hero-card-check">✓</span>' : ''}
+                <span class="hero-roster-mini-badge ${badgeClass}" style="pointer-events: none;">${isUnl ? hero.rarity : `🔒 ${hero.unlockCost}`}</span>
+                ${(isSelected && isUnl) ? '<span class="hero-card-check">✓</span>' : ''}
             `;
 
-            const chooseHero = (e) => {
+            card.onclick = (e) => {
                 if (e) e.preventDefault();
-                window.guitaristPool.setSelectedGuitarist(hero.id);
-                if (window.soundEngine) {
-                    window.soundEngine.playGuitarChord(2);
+                if (isUnl) {
+                    pool.setSelectedGuitarist(hero.id);
+                    this.previewHeroId = null;
+                    if (window.soundEngine) window.soundEngine.playGuitarChord(2);
+                } else {
+                    this.previewHeroId = hero.id;
                 }
                 this.renderHeroRoster();
                 this.renderLaneSkills();
             };
-
-            card.onclick = chooseHero;
             grid.appendChild(card);
         });
     }

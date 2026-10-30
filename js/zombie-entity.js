@@ -25,6 +25,15 @@ class ZombieEntity {
         const dmgMult = 1 + 0.075 * (this.level - 1);
         const baseDmg = enemyDef.attackDamage || 7;
         this.attackDamage = Math.max(1, Math.round(baseDmg * dmgMult));
+
+        this.isBoss = !!(enemyDef && enemyDef.isBoss);
+        if (this.isBoss) {
+            this.scale = (enemyDef.scale || 0.50) * 1.45;
+            this.hp = Math.round(this.hp * 3.5);
+            this.maxHp = this.hp;
+            this.attackDamage = Math.round(this.attackDamage * 1.5);
+            this.name = `👑 [CHEFE] ${this.baseName} TITÃ`;
+        }
         this.attackInterval = enemyDef.attackInterval || 1.1;
         this.attackCooldown = 0.3;
         this.attackTimer = 0;
@@ -738,15 +747,28 @@ class ZombieEntity {
         );
 
         // Health bar & Badge/Name Tag
-        const isSpecial = this.type !== 'normal';
-        if (this.x <= ctx.canvas.width - 5 && (this.hp < this.maxHp || isSpecial)) {
-            const bw = (this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 34 : (24 * (this.scale / 0.5));
-            const bh = (this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 4 : 3.5;
-            const bx = this.x - bw / 2;
-            const by = currentY - ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 52 : (42 * (this.scale / 0.5)));
+        if (this.isBoss && this.x <= ctx.canvas.width - 5) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(this.x, currentY + 4, 30, 9, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 68, 0, 0.4)';
+            ctx.fill();
+            ctx.restore();
+        }
 
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        const isSpecial = this.type !== 'normal' || this.isBoss;
+        if (this.x <= ctx.canvas.width - 5 && (this.hp < this.maxHp || isSpecial)) {
+            const bw = this.isBoss ? 48 : ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 34 : (24 * (this.scale / 0.5)));
+            const bh = this.isBoss ? 5 : ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 4 : 3.5);
+            const bx = this.x - bw / 2;
+            const by = currentY - (this.isBoss ? 60 : ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 52 : (42 * (this.scale / 0.5))));
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
             ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
+            if (this.isBoss) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.strokeRect(bx - 1.5, by - 1.5, bw + 3, bh + 3);
+            }
 
             let barColor = '#00ff66';
             if (this.type === 'mutant') barColor = '#39ff14';
@@ -838,7 +860,8 @@ class ZombieEntity {
         };
         const baseGold = baseMap[this.type] || 5;
         const levelMult = 1 + 0.075 * (this.level - 1);
-        const earned = Math.round((baseGold * levelMult + talentBonus) * heroGoldMult);
+        const bossMult = this.isBoss ? 3.0 : 1.0;
+        const earned = Math.round((baseGold * levelMult * bossMult + talentBonus) * heroGoldMult);
         return Math.max(1, earned);
     }
 }

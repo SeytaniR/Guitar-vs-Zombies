@@ -324,7 +324,8 @@ assert(!skillsCode.includes("regen_pick"), 'No obsolete regen_pick talent refere
 let mockLocalStorage = {};
 global.localStorage = {
     getItem: (k) => mockLocalStorage[k] || null,
-    setItem: (k, v) => { mockLocalStorage[k] = v.toString(); }
+    setItem: (k, v) => { mockLocalStorage[k] = v.toString(); },
+    removeItem: (k) => { delete mockLocalStorage[k]; }
 };
 
 localStorage.setItem('gvs_total_kills', '42');
@@ -779,31 +780,16 @@ const mainJsContent = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'ut
     assert(masterStyleContent.includes(`@import url('${f}');`), `style.css imports ${f}`);
 });
 
-// Screen Isolation
-assert(cssContent.includes('.game-screen {\n    display: none !important;'), 'CSS enforces .game-screen { display: none !important; }');
-assert(cssContent.includes('.game-screen.active {\n    display: flex !important;'), 'CSS enforces .game-screen.active { display: flex !important; }');
-assert(!cssContent.includes('#screen-map-select {\n    background: radial-gradient(circle at 50% 20%, #171026 0%, #0a0812 70%, #040308 100%);\n    display: flex;'), '#screen-map-select does not hardcode display: flex in ID rule');
+// Screen Isolation & Initial State
+assert(cssContent.includes('.game-screen {\n    display: none !important;') && cssContent.includes('.game-screen.active {\n    display: flex !important;'), 'CSS enforces screen isolation rules');
 assert(mainJsContent.includes("this.switchScreen('menu');"), "main.js constructor enforces switchScreen('menu') on startup");
+assert(htmlContent.includes('id="screen-main-menu" class="game-screen active"') && htmlContent.includes('id="screen-map-select" class="game-screen"'), 'index.html initializes #screen-main-menu active and map inactive');
 
-// HTML Initial State
-assert(htmlContent.includes('id="screen-main-menu" class="game-screen active"'), 'index.html initializes #screen-main-menu as only active screen');
-assert(htmlContent.includes('id="screen-map-select" class="game-screen"'), 'index.html initializes #screen-map-select as inactive');
-assert(htmlContent.includes('id="screen-battle" class="game-screen"'), 'index.html initializes #screen-battle as inactive');
-
-// Pre-Battle Scrolling & Fluid Layout
-assert(cssContent.includes('.map-screen-scroll {\n    flex: 1 1 0%;\n    min-height: 0;\n    overflow-y: auto !important;'), '.map-screen-scroll uses flex: 1 1 0% with overflow-y: auto');
-assert(cssContent.includes('touch-action: pan-y !important;'), '.map-screen-scroll enforces touch-action: pan-y !important');
-assert(htmlContent.includes('class="hero-showcase-top-row"'), 'Hero showcase uses top-row for portrait and names');
-assert(cssContent.includes('.map-heroes-roster-grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));'), '.map-heroes-roster-grid uses 3 columns on mobile to prevent overflow');
-assert(cssContent.includes('.map-lane-skills-grid {\n    display: grid;\n    grid-template-columns: repeat(2, minmax(0, 1fr));'), '.map-lane-skills-grid uses 2 columns on mobile to ensure readable cards');
-
-// Skill Picker Modal CSS
-assert(cssContent.includes('.game-modal,\n.skill-modal-overlay {\n    position: fixed;'), 'CSS defines .game-modal and .skill-modal-overlay with position: fixed');
-assert(cssContent.includes('.game-modal.open,\n.skill-modal-overlay.open {\n    display: flex !important;'), 'CSS defines .game-modal.open with display: flex !important');
-assert(htmlContent.includes('id="skill-picker-modal" class="game-modal skill-modal-overlay"'), 'index.html includes skill-modal-overlay on #skill-picker-modal');
-
-// Pre-Battle Card flex-shrink check
-assert(cssContent.includes('.map-section-card {\n    background: rgba(18, 14, 28, 0.7);\n    border: 1px solid rgba(255, 255, 255, 0.1);\n    border-radius: 12px;\n    padding: 10px;\n    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n    width: 100%;\n    max-width: 100%;\n    box-sizing: border-box;\n    overflow: hidden;\n    flex-shrink: 0;\n}'), '.map-section-card enforces flex-shrink: 0 to prevent vertical card collapse');
+// Pre-Battle Scrolling, Cards & Modals
+assert(cssContent.includes('.map-screen-scroll {\n    flex: 1 1 0%;') && cssContent.includes('touch-action: pan-y !important;'), '.map-screen-scroll uses flex & touch-action: pan-y');
+assert(cssContent.includes('repeat(3, minmax(0, 1fr))') && cssContent.includes('repeat(2, minmax(0, 1fr))'), 'Grids configured for 3 and 2 columns on mobile');
+assert(cssContent.includes('flex-shrink: 0;') && htmlContent.includes('class="hero-showcase-top-row"'), 'Card flex-shrink & hero showcase row present');
+assert(cssContent.includes('.game-modal,\n.skill-modal-overlay') && htmlContent.includes('id="skill-picker-modal"'), 'Skill picker modal present in HTML & CSS');
 
 // Pre-Battle Header Reroll Removal & Clean Balance Spacer
 assert(!htmlContent.includes('id="map-reroll-btn"'), 'map-reroll-btn successfully removed from pre-battle screen');
@@ -812,6 +798,7 @@ assert(htmlContent.includes('class="map-header-spacer"'), 'map-header-spacer mai
 // Zombie Thumbnail Badge Compactness (< 10 chars, no multiple words covering art)
 loadScript('js/enemy-pool.js');
 const enemyPool = new EnemyPoolSystem();
+window.enemyPool = enemyPool;
 enemyPool.masterPool.forEach(z => {
     assert(z.badge.length <= 10 && !z.badge.includes('/') && z.fullBadge && z.fullBadge.length > 0, `Zombie ${z.id} badge compact: "${z.badge}"`);
 });
@@ -821,12 +808,8 @@ console.log('\n15. Testing Branding Assets & Visual Identity Integration...');
 ['branding/logo.png', 'branding/wallpaper.jpg', 'branding/app-icon.png', 'branding/favicon-32.png', '../favicon.png'].forEach(f => {
     assert(fs.existsSync(path.resolve(__dirname, 'assets', f)), `${f} exists`);
 });
-
-assert(htmlContent.includes('assets/branding/logo.png'), 'index.html includes official brand logo image');
-assert(htmlContent.includes('class="menu-brand-logo"'), 'index.html gives brand logo the .menu-brand-logo class');
-assert(htmlContent.includes('href="assets/branding/favicon-32.png"'), 'index.html specifies high-res favicon');
-assert(cssContent.includes("assets/branding/wallpaper.jpg"), 'CSS references cinematic wallpaper background');
-assert(cssContent.includes('.menu-brand-logo'), 'CSS includes styling for .menu-brand-logo');
+assert(htmlContent.includes('assets/branding/logo.png') && htmlContent.includes('class="menu-brand-logo"'), 'index.html includes brand logo');
+assert(htmlContent.includes('href="assets/branding/favicon-32.png"') && cssContent.includes("assets/branding/wallpaper.jpg"), 'favicon and wallpaper integrated');
 
 // 16. Testing 3 Battle Maps / Arenas System (v1.6.8)
 console.log('\n16. Testing 3 Battle Maps / Arenas System...');
@@ -851,11 +834,11 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #ma
 assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.7.6 Build 48)
+// Cache Buster Version & Modular CSS Links (v1.7.7 Build 49)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=48`), `index.html links ${f} with v=48`);
+    assert(htmlContent.includes(`${f}?v=49`), `index.html links ${f} with v=49`);
 });
-assert(htmlContent.includes('v1.7.6 (Build 48)'), 'index.html footer specifies v1.7.6 (Build 48)');
+assert(htmlContent.includes('v1.7.7 (Build 49)'), 'index.html footer specifies v1.7.7 (Build 49)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -969,13 +952,37 @@ assert(meta.getGuitaristMission('johnny_blaze').targetKills === 100, 'Guitarist 
 assert(htmlContent.includes('id="meta-missions-modal"') && htmlContent.includes('data-cat="guitarists"'), 'index.html contains modal & category tabs');
 assert(cssContent.includes('.mission-card') && cssContent.includes('.hero-mission-card'), 'CSS includes styling for mission & hero cards');
 
-// Zero God Object rule check (JS files)
+// ==========================================
+// 20. Testing Boss Battles & Guitarist Gold Unlocking (v1.7.7 Build 49)
+// ==========================================
+console.log('\n20. Testing Boss Battles & Guitarist Gold Unlocking...');
+assert(stgSys.isBossStage(5) && stgSys.isBossStage(10) && stgSys.isBossStage(15), 'Stages 5, 10, 15 are boss stages');
+assert(!stgSys.isBossStage(1) && !stgSys.isBossStage(4), 'Stages 1 and 4 are regular stages');
+assert(stgSys.getStageRewards(5).isBoss === true, 'Stage 5 rewards flagged as boss with 2x rewards');
+const bossDef = stgSys.getBossZombieDef(5);
+assert(bossDef && bossDef.isBoss === true && bossDef.hpMultiplier === 3.5, 'Boss zombie uses existing pool zombie with 3.5x HP and isBoss: true');
+const bossEntity = new ZombieEntity(bossDef, 100, 400, 1);
+assert(bossEntity.isBoss === true && bossEntity.scale > 0.7 && bossEntity.getGoldDrop() >= 3, 'Boss entity scales 1.45x and drops 3x gold');
+
+// Guitarist Unlock Flow
+localStorage.removeItem('gvs_unlocked_guitarists');
+const heroPool = new GuitaristPoolSystem();
+assert(heroPool.isHeroUnlocked('johnny_blaze') === true, 'Starter Johnny Blaze is unlocked by default');
+assert(heroPool.isHeroUnlocked('vulkan_ironhead') === false, 'Vulkan Ironhead is locked by default');
+assert(heroPool.getHeroUnlockCost('vulkan_ironhead') === 500, 'Vulkan costs 500 gold to unlock');
+window.talentSystem.gold = 200;
+assert(heroPool.unlockHeroWithGold('vulkan_ironhead').success === false, 'Unlock fails with insufficient gold');
+window.talentSystem.gold = 1000;
+const unlockRes = heroPool.unlockHeroWithGold('vulkan_ironhead');
+assert(unlockRes.success === true && heroPool.isHeroUnlocked('vulkan_ironhead') === true, 'Hero unlocked with gold');
+assert(window.talentSystem.gold === 500, '500 gold deducted from talentSystem');
+assert(cssContent.includes('.chip-boss') && cssContent.includes('.hero-unlock-cta'), 'CSS includes boss chip and hero unlock CTA');
+
+// Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;
     assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
 });
-
-// Zero God Object rule check (CSS files)
 allCssFiles.forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length;
     assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`);

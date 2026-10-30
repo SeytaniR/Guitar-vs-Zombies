@@ -9,6 +9,7 @@ class GuitaristPoolSystem {
                 title: 'O Punk Rocker Clássico',
                 rarity: 'COMUM',
                 rarityKey: 'common',
+                unlockCost: 0,
                 badgeClass: 'badge-common',
                 icon: 'assets/heroes/johnny_blaze.jpg',
                 sheet: 'heroSheet',
@@ -37,6 +38,7 @@ class GuitaristPoolSystem {
                 title: 'O Piromaníaco das Wastelands',
                 rarity: 'RARO',
                 rarityKey: 'rare',
+                unlockCost: 500,
                 badgeClass: 'badge-rare',
                 icon: 'assets/heroes/vulkan_ironhead.jpg',
                 sheet: 'heroVulkanSheet',
@@ -66,6 +68,7 @@ class GuitaristPoolSystem {
                 title: 'O Solista Bioquímico',
                 rarity: 'RARO',
                 rarityKey: 'rare',
+                unlockCost: 750,
                 badgeClass: 'badge-rare',
                 icon: 'assets/heroes/dr_radix.jpg',
                 sheet: 'heroHazmatSheet',
@@ -96,6 +99,7 @@ class GuitaristPoolSystem {
                 title: 'O Virtuoso Cibernético',
                 rarity: 'ÉPICO',
                 rarityKey: 'epic',
+                unlockCost: 1500,
                 badgeClass: 'badge-epic',
                 icon: 'assets/heroes/cypher_volt.jpg',
                 sheet: 'heroCyborgSheet',
@@ -125,6 +129,7 @@ class GuitaristPoolSystem {
                 title: 'O Titã do Heavy Metal',
                 rarity: 'LENDÁRIO',
                 rarityKey: 'legendary',
+                unlockCost: 3000,
                 badgeClass: 'badge-legendary',
                 icon: 'assets/heroes/kragthor_titan.jpg',
                 sheet: 'heroGladiatorSheet',
@@ -153,6 +158,7 @@ class GuitaristPoolSystem {
                 title: 'A Valquíria do Punk Mítico',
                 rarity: 'MÍTICO',
                 rarityKey: 'mythic',
+                unlockCost: 5000,
                 badgeClass: 'badge-mythic',
                 icon: 'assets/heroes/roxie_anarchy.jpg',
                 sheet: 'heroAnarchySheet',
@@ -186,6 +192,7 @@ class GuitaristPoolSystem {
         });
 
         this.heroLevels = this.loadHeroLevels();
+        this.unlockedHeroes = this.loadUnlockedHeroes();
         this.selectedId = this.loadSelectedGuitaristId();
     }
 
@@ -315,17 +322,72 @@ class GuitaristPoolSystem {
         };
     }
 
+    loadUnlockedHeroes() {
+        try {
+            const raw = localStorage.getItem('gvs_unlocked_guitarists');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    if (!parsed.includes('johnny_blaze')) parsed.unshift('johnny_blaze');
+                    return parsed;
+                }
+            }
+        } catch(e) {}
+        return ['johnny_blaze'];
+    }
+
+    saveUnlockedHeroes() {
+        try {
+            localStorage.setItem('gvs_unlocked_guitarists', JSON.stringify(this.unlockedHeroes));
+        } catch(e) {}
+    }
+
+    isHeroUnlocked(heroId) {
+        if (!heroId || heroId === 'johnny_blaze') return true;
+        return Array.isArray(this.unlockedHeroes) && this.unlockedHeroes.includes(heroId);
+    }
+
+    getHeroUnlockCost(heroId) {
+        const hero = this.guitarists.find(g => g.id === heroId);
+        return (hero && hero.unlockCost !== undefined) ? hero.unlockCost : 1000;
+    }
+
+    unlockHeroWithGold(heroId) {
+        if (this.isHeroUnlocked(heroId)) {
+            return { success: false, reason: 'Guitarrista já desbloqueado!' };
+        }
+        const cost = this.getHeroUnlockCost(heroId);
+        if (!window.talentSystem || window.talentSystem.gold < cost) {
+            return { success: false, reason: `Ouro insuficiente (necessário: 🪙 ${cost})` };
+        }
+
+        window.talentSystem.gold -= cost;
+        if (typeof window.talentSystem.saveProgress === 'function') {
+            window.talentSystem.saveProgress();
+        } else if (typeof window.talentSystem.save === 'function') {
+            window.talentSystem.save();
+        }
+
+        if (!this.unlockedHeroes.includes(heroId)) {
+            this.unlockedHeroes.push(heroId);
+        }
+        this.saveUnlockedHeroes();
+        this.setSelectedGuitarist(heroId);
+
+        return { success: true, heroId, cost };
+    }
+
     loadSelectedGuitaristId() {
         try {
-            return localStorage.getItem('gvs_selected_guitarist') || 'johnny_blaze';
-        } catch(e) {
-            return 'johnny_blaze';
-        }
+            const id = localStorage.getItem('gvs_selected_guitarist');
+            if (id && this.isHeroUnlocked(id)) return id;
+        } catch(e) {}
+        return 'johnny_blaze';
     }
 
     setSelectedGuitarist(id) {
         const found = this.guitarists.find(g => g.id === id);
-        if (found) {
+        if (found && this.isHeroUnlocked(id)) {
             this.selectedId = id;
             try {
                 localStorage.setItem('gvs_selected_guitarist', id);
@@ -336,6 +398,9 @@ class GuitaristPoolSystem {
     }
 
     getActiveGuitarist() {
+        if (!this.isHeroUnlocked(this.selectedId)) {
+            this.selectedId = 'johnny_blaze';
+        }
         return this.guitarists.find(g => g.id === this.selectedId) || this.guitarists[0];
     }
 

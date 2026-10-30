@@ -907,86 +907,37 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - **Testes Automatizados:**
   - Suíte `test-procedural.js` expandida com a Seção 7 (80 testes automatizados, 100% aprovados).
 
-### [v1.5.1] - 2026-10-13 (Revisão Geral de Código, Correção de Bugs e Modularização Estrita)
-- **Correção Crítica de Combate & Velocidade de Ataque (`js/main.js`):**
-  - Removido `this.combat.launchAttack(isCrit, lane)` do callback `onHitCallback`.
-  - As notas acertadas agora alimentam estritamente o sistema procedural de modificadores de precisão (Miss = -50%, Good = 1.0x, Great = 1.2x, Perfect = Crítico) e Rock Mana, respeitando rigorosamente a cadência contínua do atributo de Velocidade de Ataque do herói.
-- **Correção de Áudio (`js/audio.js`):**
-  - Implementado o método `playPowerChord(chordIndex)` no sintetizador web audio `SoundEngine`, prevenindo `TypeError` ao subir de nível ou ao ativar acordes.
-- **Correção de Habilidade (`js/skills.js`):**
-  - Corrigido `healing_melody` para consultar o talento de cura existente `'rhythmic_heal'` em vez do obsoleto `'regen_pick'`.
-- **Navegação & Modais (`js/talents.js` e `js/song-studio.js`):**
-  - Vinculados os botões `menu-btn-talents` e `menu-btn-studio` aos seus respectivos modais.
-  - Sincronizados displays de ouro dinâmicos para `menu-gold-count` e `modal-gold-count`.
-  - Adicionado método `updateMenuCurrencies()` como alias robusto para `updateMenuHUD()`.
-- **Estatísticas de Vida Útil Persistentes:**
-  - `gvs_total_kills` agora é incrementado e salvo no `localStorage` a cada abate de zumbi.
-  - `gvs_highscore` agora é persistido ao superar o recorde anterior (ao matar zumbis, concluir fases e no game over).
-- **Controle Touch Arrastado na Esteira de Ritmo (`js/rhythm.js`):**
-  - Adicionados manipuladores de `pointermove` e `touchmove` com transição suave entre pistas e debounce de captura de ponteiro, permitindo tocar e arrastar o dedo dinamicamente pelas 4 faixas.
-- **Sincronização de Encerramento de Partida (`js/rhythm.js`):**
-  - `combat.matchActive` agora é desativado ao término da música para evitar que zumbis ataquem em segundo plano atrás do modal de resultados.
-  - O botão de jogar novamente reseta o estado da batalha e respawna os inimigos correspondentes.
-- **Arquitetura Zero God Objects (< 1.000 linhas por arquivo):**
-  - Todos os 16 arquivos JavaScript do projeto estão rigorosamente abaixo de 1.000 linhas (`combat.js`: 990, `rhythm.js`: 991, `song-editor.js`: 995, etc.).
-  - Efeitos gráficos auxiliares (`drawAmpAndShadow`, `drawGameOverOverlay`, `spawnBurst`) delegados modularmente para `CombatFX` (`combat-fx.js`).
-- **Cobertura de Testes Automatizados:**
-  - Testes ampliados em `test-procedural.js` com 70 asserções automatizadas passando com 100% de sucesso.
+### [v1.7.7] - 2026-10-30 (Batalhas de Chefe a Cada 5 Fases & Compra de Guitarristas com Ouro - Build 49)
+- **Batalha de Chefe Procedural a Cada 5 Fases (`js/stage-system.js`, `js/combat.js`, `js/zombie-entity.js`):**
+  - Fases múltiplas de 5 (5, 10, 15, 20...) agora são formalmente Confrontos de Chefe (`👑 CONFRONTO DE CHEFE`).
+  - Os chefes são sorteados exclusivamente a partir do pool existente de 16 zumbis (`bloater_pounder`, `toxic_mutant`, `god_of_war_spartan`, `chained_gladiator`, `dark_knight_undead`, `inferno_firefighter`, `builder_demolisher`).
+  - O Chefe surge em combate como uma versão Titã (+45% de escala, 3.5x HP, +50% de dano de ataque, aura no solo, barra de HP dourada ampliada e drop de 3x ouro).
+  - Alvo da fase de chefe ajustado para 8 abates; derrotar o chefe aciona imediatamente a vitória da fase com recompensas dobradas (2.0x Ouro e XP).
+  - Chip temático pulsante no pré-batalha (`👑 CHEFE (2x OURO/XP)`).
+- **Sistema de Desbloqueio de Guitarristas por Ouro (`js/guitarist-pool.js`, `js/main.js`, `css/map-select.css`):**
+  - Todos os jogadores começam unicamente com o guitarrista inicial (`Johnny Blaze`).
+  - Os demais guitarristas iniciam bloqueados e podem ser comprados com ouro:
+    - *Vulkan Ironhead* (Raro): 500 Ouro
+    - *Dr. Radix* (Raro): 750 Ouro
+    - *Cypher Volt* (Épico): 1.500 Ouro
+    - *Kragthor Titan* (Lendário): 3.000 Ouro
+    - *Roxie Anarchy* (Mítico): 5.000 Ouro
+  - O card do guitarrista na tela de pré-batalha exibe status `🔒 BLOQUEADO` e botão de compra `[🪙 DESBLOQUEAR GUITARRISTA (🪙 X)]`.
+  - Persistência segura em `localStorage ('gvs_unlocked_guitarists')`.
+- **Cache-Busting & Testes Automatizados (v=49):**
+  - Suíte `test-procedural.js` com a Seção 20 totalizando **521 testes automatizados (100% de sucesso)**.
+  - Zero God Object: Todos os 17 arquivos JS e 11 arquivos CSS estritamente abaixo de 1.000 linhas.
 
-### [v1.6.6] - 2026-10-30 (Build 38 - Remoção do Botão Re-sortear & Otimização de Miniaturas de Zumbis)
-- **Remoção do Botão Re-sortear no Pré-Batalha (`index.html`, `js/main.js`, `css/map-select.css`):**
-  - Removido o botão `#map-reroll-btn` da barra de cabeçalho da tela de pré-batalha (`#screen-map-select`), limpando o layout mobile.
-  - Adicionado elemento espaçador `.map-header-spacer` de largura idêntica ao botão Voltar (65px), mantendo o título "PREPARAÇÃO DA BATALHA" perfeitamente centralizado.
-  - A horda de zumbis da fase continua sendo rolada proceduralmente de forma automática ao entrar na tela ou alternar entre fases.
-- **Otimização Visual das Miniaturas e Badges dos Zumbis (`js/enemy-pool.js`, `js/main.js`, `css/map-select.css`):**
-  - Substituídos os textos longos e compostos dos badges das fotos por rótulos curtos e contundentes de palavra única (`COMUM`, `ÁGIL`, `TANK`, `BLINDADO`, `ESPORO`, `COLOSSO`, `GLADIADOR`, `TÓXICO`).
-  - Aplicado `white-space: nowrap`, `text-overflow: ellipsis`, altura fixa de 10px e fundo translúcido escuro (`rgba(0,0,0,0.78)`), impedindo que quebras de linha cubram o rosto ou corpo do zumbi na miniatura.
-  - Aumentado o tamanho do container da foto (`.zombie-card-art`) de 48px para 52px com cantos arredondados de 8px.
-  - Adicionada linha de topo no corpo do card (`.zombie-card-top-row`) exibindo o nome do zumbi e uma tag estilizada com o arquétipo detalhado (`.zombie-card-type-tag`, ex: `Ágil / Salto Aéreo`, `Colosso / Sísmico`).
-- **Zero God Object & Testes Automatizados:**
-  - Versão atualizada para `v=38` no `index.html`.
-  - Cobertura de testes em `test-procedural.js` expandida para **513 testes automatizados** passando com 100% de sucesso.
-  - Todos os 16 arquivos JavaScript e 10 arquivos CSS continuam rigorosamente abaixo de 1.000 linhas.
+### [v1.7.6] - 2026-10-30 (Sistema de Missões Meta Procedurais & Maestria de Guitarristas - Build 48)
+- **Sistema de Missões Meta Procedurais (`js/missions.js`, `css/missions.css`, `index.html`):**
+  - Rastreamento procedural de abates de todos os 16 zumbis do pool e de todos os 6 guitarristas com 5 tiers escalonados (10 -> 100 -> 1.000 -> 10.000 -> 100.000 abates).
+  - Recompensas rebalanceadas (-90% nos zumbis, guitarristas escalonados a 10% dos zumbis).
+  - Modal imersivo com abas de categoria, filtros de status, busca dinâmica e botão "Reivindicar Todas".
 
-### [v1.6.5] - 2026-10-30 (Build 37 - Eliminação de God Object no CSS & Modularização Completa)
-- **Refatoração Completa do CSS (Zero God Object: Todos os arquivos < 1.000 linhas):**
-  - O antigo arquivo monolítico `css/style.css` (com mais de 3.700 linhas) foi totalmente refatorado e particionado em 9 módulos independentes de alta coesão estrutural dentro da pasta `css/`:
-    1. `css/base.css` (264 linhas): Reset global, reset de box-sizing, `#game-container`, zonas de tela dividida (`#combat-zone`, `#rhythm-zone`), divisor `#zone-divider` e container de telas (`.game-screen`).
-    2. `css/menu.css` (242 linhas): Tela 1 `#screen-main-menu`, barra superior de HUD, estatísticas, vitrine de herói, logo em chamas, cartão de fase e botões de ação principal.
-    3. `css/map-select.css` (788 linhas): Tela 2 `#screen-map-select`, contêiner com rolagem touch, cards de seção com `flex-shrink: 0`, grade de seleção dos 6 guitarristas, preview dos 5 zumbis, carrossel de músicas e barra inferior fixa.
-    4. `css/battle.css` (613 linhas): Tela 3 `#screen-battle`, HUD superior in-game, banner da música ativa, medidor flutuante de combo e pontuação, modal de estatísticas SS e modal de configurações/pausa (Gear).
-    5. `css/skills.css` (428 linhas): Medidor de Rock Mana, progressão e barra de nível do guitarrista, grade dos 4 slots de habilidades equipadas nos trilhos e modal de seleção de habilidades (`#skill-picker-modal`).
-    6. `css/talents.css` (412 linhas): Modal completo da Árvore de Talentos AAA, abas de ramificação, nós de talentos, insígnia de nível máximo, inspetor de atributos e botão de upgrade.
-    7. `css/song-studio.css` (476 linhas): Modal do Estúdio de Músicas, biblioteca de faixas, formulário de upload de áudio/capa e painel de importação/exportação de pacotes `.gvsong`.
-    8. `css/editor.css` (332 linhas): Modal do Beat Mapper / Editor DAW multi-pista, régua de compassos, cursor síncrono, velocidade de reprodução, grade de quantização e gravador em tempo real.
-    9. `css/results.css` (189 lines): Modal de resultados pós-partida, medalhas de ranking, detalhamento de precisão, recompensas de moedas e toasts informativos.
-    10. `css/style.css` (15 lines): Orquestrador master que importa os 9 módulos via `@import` para total retrocompatibilidade.
-- **Carregamento Otimizado em Paralelo no `index.html`:**
-  - `index.html` agora referencia diretamente os 9 arquivos modulares com cache-busting `?v=37`, garantindo download simultâneo em paralelo e facilitando a inspeção no DevTools (cada regra aponta diretamente para o seu respectivo arquivo e linha de origem).
-- **Cobertura Total de Testes Automatizados:**
-  - Bateria de testes em `test-procedural.js` expandida para **487 testes automatizados** com 100% de sucesso.
-  - A regra Zero God Object agora audita automaticamente **tanto os 16 arquivos JavaScript quanto os 10 arquivos CSS** do projeto, garantindo que nenhum ultrapasse 1.000 linhas.
-
-### [v1.6.4] - 2026-10-30 (Build 36 - Correção Definitiva do Menu Pré-Batalha & Scroll Mobile)
-- **Correção de Colapso de Altura dos Cards Pré-Batalha (`css/style.css`):**
-  - Identificada e corrigida a causa raiz do layout espremido: os cartões `.map-section-card` dentro do container flexível `.map-screen-scroll` possuíam `flex-shrink: 1` padrão combinado com `overflow: hidden`, o que fazia o flexbox encolher forçadamente todos os 5 cards para dentro da altura da tela (641px), impedindo o scroll vertical e cortando mais de 70% das informações visuais.
-  - Aplicado `flex-shrink: 0;` a `.map-section-card`, permitindo que cada cartão expanda em sua altura natural completa (~1.638px totais), ativando imediatamente a rolagem suave vertical (`overflow-y: auto`).
-  - Removida a regra global conflituosa `.map-screen-scroll * { touch-action: pan-y; }` que impedia o registro de toques e cliques em botões internos em navegadores mobile.
-  - Adicionado espaçamento inferior seguro (`padding: 10px 10px 36px;`) para afastar o último card do rodapé flutuante (`.map-bottom-bar`).
-- **Isolamento Estrito de Telas (`index.html`, `js/main.js`):**
-  - `#screen-main-menu` e `#screen-map-select` operam agora com isolamento total via regras CSS `.game-screen { display: none !important; }` e `.game-screen.active { display: flex !important; }`.
-  - Suporte a depuração direta via parâmetro de URL (`?screen=map-select`).
-- **Cache-Busting & Testes Automatizados:**
-  - Versão atualizada para `v=36` em todas as tags de script e folhas de estilo.
-  - Bateria de testes em `test-procedural.js` expandida para 460 asserções automatizadas com 100% de aprovação.
-  - Todos os 16 arquivos JavaScript do projeto continuam rigorosamente abaixo de 1.000 linhas (Regra Zero God Objects).
-
-### [v1.5.0] - 2026-10-13 (Fatores Procedurais & Pool de 6 Guitarristas)
-- Níveis procedurais para guitarristas (1-100), pool de 6 heróis, fases infinitas, Rock Mana e 4 trilhos de habilidades equipáveis.
-
-### [v0.8.0 - v1.0.0] - 2026-10-12 (Estúdio de Músicas & Zumbi Saltador)
-- Estúdio de músicas e Beatmapper DAW com IndexedDB (`.gvsong`), e Zumbi Leaper com mecânica de salto parabólico e Air Shot crítico.
-
-### [v0.1.0 - v0.7.0] - 2026-10-08 a 2026-10-11
-- Criação inicial do projeto, layout mobile 50/50, i18n, spritesheets com Chroma Key, combate contínuo, projéteis sônicos e Zumbi Mutante Radioativo com explosão em área.
-
+### [v1.6.6 - v1.7.5] - 2026-10-30 (Histórico de Releases Recentes)
+- **v1.7.4 - v1.7.5:** Redesign minimalista e clean do menu pré-batalha, tags compactas e balanceamento de horda.
+- **v1.7.2 - v1.7.3:** Adicionados 8 novos arquétipos de zumbis à pool mestre (Clown, Builder, Scientist, Firefighter, Rick Grimes, Politician, Batman, Kratos).
+- **v1.7.1:** Aumento de +30% na vida base de todos os zumbis e redução de 70% no dano em área das explosões entre zumbis.
+- **v1.6.7 - v1.7.0:** Nova identidade visual AAA, favicon squircle translúcido e 3 arenas sorteadas proceduralmente por fase.
+- **v1.6.5:** Modularização CSS estrita (Zero God Object: 10 arquivos modulares < 1.000 linhas).
+- **v1.5.0 - v1.6.4:** Pool de 6 guitarristas procedurais, árvore de talentos, modo estúdio DAW e eliminação de ghost kills.

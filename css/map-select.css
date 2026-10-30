@@ -947,6 +947,7 @@ button.hero-roster-card {
 .chip-target { background: rgba(0, 212, 255, 0.15); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); }
 .chip-gold { background: rgba(255, 204, 0, 0.15); color: #ffcc00; border: 1px solid rgba(255, 204, 0, 0.3); }
 .chip-xp { background: rgba(160, 100, 255, 0.15); color: #c084fc; border: 1px solid rgba(160, 100, 255, 0.3); }
+.chip-boss { background: rgba(255, 0, 85, 0.25); color: #ffd700; border: 1px solid #ff0055; font-weight: 900; }
 
 .arena-random-badge, .horde-count-tag, .skills-hint-tag {
     font-size: 8.5px;
@@ -972,3 +973,8 @@ button.hero-roster-card {
     letter-spacing: 0.3px;
 }
 
+/* Locked Heroes & Unlock CTA */
+.hero-roster-card.locked { opacity: 0.72; border-color: rgba(255, 255, 255, 0.15) !important; }
+.hero-unlock-cta { background: linear-gradient(135deg, #ffd700, #ff8800) !important; color: #000 !important; font-weight: 900; border: none; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); cursor: pointer; }
+.hero-unlock-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6); }
+.badge-locked { background: rgba(80, 80, 80, 0.6); color: #bbb; border: 1px solid rgba(255, 255, 255, 0.2); }

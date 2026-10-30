@@ -149,7 +149,40 @@ class StageSystem {
         return { stage, rewards };
     }
 
+    isBossStage(stage = this.selectedStage) {
+        return stage > 0 && (stage % 5 === 0);
+    }
+
+    getBossZombieDef(stage = this.selectedStage) {
+        const bossPoolIds = [
+            'bloater_pounder',
+            'toxic_mutant',
+            'god_of_war_spartan',
+            'chained_gladiator',
+            'dark_knight_undead',
+            'inferno_firefighter',
+            'builder_demolisher'
+        ];
+        const cycle = Math.max(0, Math.floor(stage / 5) - 1);
+        const bossId = bossPoolIds[cycle % bossPoolIds.length];
+        const master = (window.enemyPool && window.enemyPool.masterPool) ? window.enemyPool.masterPool : [];
+        const baseDef = master.find(z => z.id === bossId) || master[0] || { id: 'toxic_mutant', name: 'Mutante Radioativo', type: 'mutant', hp: 299 };
+        return {
+            ...baseDef,
+            isBoss: true,
+            hpMultiplier: 3.5,
+            badge: 'CHEFE',
+            badgeClass: 'badge-boss',
+            name: baseDef.name
+        };
+    }
+
     getStageName(stage) {
+        if (this.isBossStage(stage)) {
+            const bossDef = this.getBossZombieDef(stage);
+            return `Fase ${stage}: 👑 CONFRONTO DE CHEFE: ${bossDef.name.toUpperCase()}!`;
+        }
+
         const namedPrefixes = [
             'Rua das Garagens',
             'Subúrbio Desolado',
@@ -189,13 +222,16 @@ class StageSystem {
     }
 
     getTargetKills(stage = this.selectedStage) {
+        if (this.isBossStage(stage)) return 8;
         return Math.min(100, 12 + Math.floor(stage * 2.2));
     }
 
     getStageRewards(stage = this.selectedStage) {
-        const coins = Math.floor(45 + stage * 22 + Math.pow(stage, 1.22) * 3);
-        const xp = Math.floor(55 + stage * 25 + Math.pow(stage, 1.20) * 3);
-        return { coins, xp };
+        const isBoss = this.isBossStage(stage);
+        const mult = isBoss ? 2.0 : 1.0;
+        const coins = Math.floor((45 + stage * 22 + Math.pow(stage, 1.22) * 3) * mult);
+        const xp = Math.floor((55 + stage * 25 + Math.pow(stage, 1.20) * 3) * mult);
+        return { coins, xp, isBoss };
     }
 
     getStageInfo(stage = this.selectedStage) {
@@ -203,6 +239,7 @@ class StageSystem {
         const rewards = this.getStageRewards(stage);
         return {
             stage,
+            isBossStage: this.isBossStage(stage),
             name: this.getStageName(stage),
             minZombieLevel: range.min,
             maxZombieLevel: range.max,
