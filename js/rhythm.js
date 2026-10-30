@@ -217,7 +217,7 @@ class RhythmSystem {
             if (minDist <= perfectWindow) {
                 rating = 'PERFECT!';
                 ratingKey = 'perfect';
-                isCrit = true;
+                isCrit = (window.game && window.game.combat && window.game.combat.guaranteedCritReady) || false;
                 ratingColor = '#ffcc00';
                 this.streak++;
                 if (this.songStats) this.songStats.perfects++;

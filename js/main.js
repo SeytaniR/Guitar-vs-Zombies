@@ -125,8 +125,6 @@ class Game {
         bind('map-song-next-btn', () => this.cycleSong(1));
         bind('map-stage-prev-btn', () => this.cycleStage(-1));
         bind('map-stage-next-btn', () => this.cycleStage(1));
-        bind('map-arena-prev-btn', () => this.cycleArena(-1));
-        bind('map-arena-next-btn', () => this.cycleArena(1));
         bind('skill-picker-close-btn', () => {
             const m = document.getElementById('skill-picker-modal'); if (m) m.classList.remove('open');
         });
@@ -155,24 +153,15 @@ class Game {
         const highest = window.stageSystem.highestUnlockedStage;
         const next = Math.max(1, Math.min(highest, current + direction));
         window.stageSystem.setSelectedStage(next);
-        const stageMap = window.stageSystem.getMapForStage(next);
-        if (stageMap) window.stageSystem.setSelectedMap(stageMap.id);
         if (window.soundEngine) window.soundEngine.playSustainTick(0);
         this.updateStageUI();
-        this.renderArenaRoster();
-    }
-
-    cycleArena(direction = 1) {
-        if (!window.stageSystem) return;
-        window.stageSystem.cycleMap(direction);
-        if (window.soundEngine) window.soundEngine.playSustainTick(0);
         this.renderArenaRoster();
     }
 
     renderArenaRoster() {
         if (!window.stageSystem) return;
         const currentMap = window.stageSystem.getSelectedMap();
-        const allMaps = window.stageSystem.getAllMaps();
+        if (!currentMap) return;
 
         const imgEl = document.getElementById('showcase-arena-img');
         const badgeEl = document.getElementById('showcase-arena-badge');
@@ -181,29 +170,10 @@ class Game {
         const descEl = document.getElementById('showcase-arena-desc');
 
         if (imgEl) imgEl.src = currentMap.thumb;
-        if (badgeEl) { badgeEl.innerText = currentMap.badge; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
+        if (badgeEl) { badgeEl.innerText = `${currentMap.badge} • ALEATÓRIO`; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
         if (nameEl) nameEl.innerText = currentMap.name;
         if (subEl) subEl.innerText = currentMap.subtitle;
         if (descEl) descEl.innerText = currentMap.description;
-
-        const grid = document.getElementById('map-arenas-roster-grid');
-        if (!grid) return;
-        grid.innerHTML = '';
-
-        allMaps.forEach(map => {
-            const isSelected = (map.id === currentMap.id);
-            const card = document.createElement('button');
-            card.type = 'button';
-            card.className = `arena-roster-card ${isSelected ? 'active' : ''}`;
-            card.innerHTML = `<div class="arena-card-thumb-wrap" style="pointer-events: none;"><img src="${map.thumb}" alt="${map.name}" class="arena-card-thumb" style="pointer-events: none;"><span class="arena-card-badge ${map.badgeClass || ''}" style="pointer-events: none;">${map.badge}</span></div><div class="arena-card-name" style="pointer-events: none;">${map.name}</div>`;
-            card.onclick = (e) => {
-                if (e) e.preventDefault();
-                window.stageSystem.setSelectedMap(map.id);
-                if (window.soundEngine) window.soundEngine.playSustainTick(1);
-                this.renderArenaRoster();
-            };
-            grid.appendChild(card);
-        });
     }
 
     updateStageUI() {
@@ -936,7 +906,10 @@ class Game {
         }
         if (h.comboEl) {
             const streak = this.rhythm.streak || 0;
-            const t = `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} SPD)`;
+            const pStreak = (this.combat && this.combat.perfectStreak) || 0;
+            const critReady = (this.combat && this.combat.guaranteedCritReady);
+            const critTag = critReady ? ' • 💥 CRÍTICO PRONTO!' : (pStreak > 0 ? ` • 🎯 ${pStreak}/5 PERF` : '');
+            const t = `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} SPD)${critTag}`;
             if (t !== h.lastCombo) { h.lastCombo = t; h.comboEl.innerText = t; }
         }
         if (h.multEl) {

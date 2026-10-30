@@ -393,6 +393,44 @@ assert(Math.abs(combat.getHeroAttackSpeed() - 3.0) < 0.001, `Attack speed at com
 combat.combo = 0; // Simulated miss
 assert(combat.getHeroAttackSpeed() === 1.0, `Miss resets combo to 0 and drops attack speed back to base 1.0/s: ${combat.getHeroAttackSpeed()}`);
 
+// Test 7.1: Natural Critical Accumulation Rule (v1.7.0)
+combat.perfectStreak = 0;
+combat.guaranteedCritReady = false;
+combat.pendingAttackModifiers = [];
+
+// 1. Non-perfect note (great, good, miss) resets perfect streak
+combat.registerRhythmNote('perfect', 0);
+assert(combat.perfectStreak === 1, 'First perfect note increments perfectStreak to 1');
+combat.registerRhythmNote('great', 1);
+assert(combat.perfectStreak === 0, 'Great note resets perfectStreak to 0');
+
+combat.registerRhythmNote('perfect', 0);
+assert(combat.perfectStreak === 1, 'Perfect note increments perfectStreak to 1');
+combat.registerRhythmNote('good', 2);
+assert(combat.perfectStreak === 0, 'Good note resets perfectStreak to 0');
+
+combat.registerRhythmNote('perfect', 0);
+assert(combat.perfectStreak === 1, 'Perfect note increments perfectStreak to 1');
+combat.registerRhythmNote('miss', 3);
+assert(combat.perfectStreak === 0, 'Miss note resets perfectStreak to 0');
+
+// 2. Accumulating 5 consecutive perfect notes guarantees crit on next shot
+combat.registerRhythmNote('perfect', 0); // 1
+combat.registerRhythmNote('perfect', 1); // 2
+combat.registerRhythmNote('perfect', 2); // 3
+combat.registerRhythmNote('perfect', 3); // 4
+assert(combat.perfectStreak === 4 && !combat.guaranteedCritReady, '4 perfect notes accumulated, guaranteed crit not yet ready');
+combat.registerRhythmNote('perfect', 0); // 5th perfect note!
+assert(combat.perfectStreak === 0, 'After 5th perfect note, perfectStreak is reset to 0');
+assert(combat.guaranteedCritReady === true, '5 consecutive perfect notes sets guaranteedCritReady to true');
+
+// 3. Next note/shot consumes guaranteed crit
+combat.registerRhythmNote('good', 1); // Next note (even if good) consumes guaranteed crit!
+const queuedCritMod = combat.pendingAttackModifiers[combat.pendingAttackModifiers.length - 1];
+assert(queuedCritMod.isCrit === true, 'Next shot receives guaranteed critical damage');
+assert(combat.guaranteedCritReady === false, 'guaranteedCritReady is consumed and set back to false');
+assert(combat.perfectStreak === 0, 'Good note kept perfectStreak at 0');
+
 // Test Vanguard Spawning on Battle Reset
 combat.resetBattle([mockZombieType]);
 assert(combat.entities.zombies.length === 2, 'resetBattle() spawns 2 vanguard zombies immediately');
@@ -833,34 +871,31 @@ assert(stgSys.maps.some(m => m.id === 'map_void' && m.name === 'The Void Club'),
 assert(stgSys.maps.some(m => m.id === 'map_ruins' && m.name === 'Palco dos Escombros'), 'Map 2: Palco dos Escombros defined');
 assert(stgSys.maps.some(m => m.id === 'map_wasteland' && m.name === 'Wasteland do Metal'), 'Map 3: Wasteland do Metal defined');
 
-stgSys.setSelectedMap('map_ruins');
-assert(stgSys.getSelectedMap().id === 'map_ruins', 'StageSystem sets active map to Palco dos Escombros');
-stgSys.cycleMap(1);
-assert(stgSys.getSelectedMap().id === 'map_wasteland', 'StageSystem cycles active map to Wasteland do Metal');
-stgSys.cycleMap(1);
-assert(stgSys.getSelectedMap().id === 'map_void', 'StageSystem cycles active map back to The Void Club');
+// Test Random Map per Stage (v1.7.0)
+const rolled = stgSys.rollRandomMap();
+assert(stgSys.maps.some(m => m.id === rolled.id), `stgSys.rollRandomMap() rolls valid map: ${rolled.name} (${rolled.id})`);
+stgSys.setSelectedStage(1);
+assert(stgSys.getSelectedMap() !== null, 'Stage selection automatically assigns a randomized battle map');
 
-// UI DOM & CSS Checks for Arenas
+// UI DOM & CSS Checks for Arenas (v1.7.0)
 assert(htmlContent.includes('id="map-selected-arena-showcase"'), 'index.html contains #map-selected-arena-showcase');
-assert(htmlContent.includes('id="map-arenas-roster-grid"'), 'index.html contains #map-arenas-roster-grid');
-assert(htmlContent.includes('id="map-arena-prev-btn"'), 'index.html contains #map-arena-prev-btn');
-assert(htmlContent.includes('id="map-arena-next-btn"'), 'index.html contains #map-arena-next-btn');
-assert(cssContent.includes('.map-arenas-roster-grid'), 'CSS includes styling for .map-arenas-roster-grid');
+assert(!htmlContent.includes('id="map-arenas-roster-grid"'), 'index.html removed #map-arenas-roster-grid (no manual map selection)');
+assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #map-arena-prev-btn (no manual map cycling)');
+assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
-assert(cssContent.includes('.arena-roster-card'), 'CSS includes styling for .arena-roster-card');
 
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=41'), 'index.html links base.css with v=41');
-assert(htmlContent.includes('css/menu.css?v=41'), 'index.html links menu.css with v=41');
-assert(htmlContent.includes('css/map-select.css?v=41'), 'index.html links map-select.css with v=41');
-assert(htmlContent.includes('css/battle.css?v=41'), 'index.html links battle.css with v=41');
-assert(htmlContent.includes('css/skills.css?v=41'), 'index.html links skills.css with v=41');
-assert(htmlContent.includes('css/talents.css?v=41'), 'index.html links talents.css with v=41');
-assert(htmlContent.includes('css/song-studio.css?v=41'), 'index.html links song-studio.css with v=41');
-assert(htmlContent.includes('css/editor.css?v=41'), 'index.html links editor.css with v=41');
-assert(htmlContent.includes('css/results.css?v=41'), 'index.html links results.css with v=41');
-assert(htmlContent.includes('js/main.js?v=41'), 'index.html links main.js with v=41');
-assert(htmlContent.includes('v1.6.9 (Build 41)'), 'index.html footer specifies v1.6.9 (Build 41)');
+assert(htmlContent.includes('css/base.css?v=42'), 'index.html links base.css with v=42');
+assert(htmlContent.includes('css/menu.css?v=42'), 'index.html links menu.css with v=42');
+assert(htmlContent.includes('css/map-select.css?v=42'), 'index.html links map-select.css with v=42');
+assert(htmlContent.includes('css/battle.css?v=42'), 'index.html links battle.css with v=42');
+assert(htmlContent.includes('css/skills.css?v=42'), 'index.html links skills.css with v=42');
+assert(htmlContent.includes('css/talents.css?v=42'), 'index.html links talents.css with v=42');
+assert(htmlContent.includes('css/song-studio.css?v=42'), 'index.html links song-studio.css with v=42');
+assert(htmlContent.includes('css/editor.css?v=42'), 'index.html links editor.css with v=42');
+assert(htmlContent.includes('css/results.css?v=42'), 'index.html links results.css with v=42');
+assert(htmlContent.includes('js/main.js?v=42'), 'index.html links main.js with v=42');
+assert(htmlContent.includes('v1.7.0 (Build 42)'), 'index.html footer specifies v1.7.0 (Build 42)');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

@@ -62,21 +62,12 @@ class CombatSystem {
         this.baseAttackSpeed = 1.0; this.heroAttackTimer = 0;
         this.heroAttackSpeedBuffTimer = 0; this.heroAttackSpeedBuffMult = 1.0;
         this.heroShieldHp = 0; this.heroShieldTimer = 0;
+        this.perfectStreak = 0; this.guaranteedCritReady = false;
         this.pendingAttackModifiers = []; this.stageCompleted = false;
 
-        this.zombiesKilled = 0;
-        this.score = 0;
-
-        // Talent-driven combat states
-        this.shockBarrierTimer = 15;
-        this.shockBarrierReady = false;
-        this.heroImmunityTimer = 0;
-
-        this.spawnTimer = 0;
-
-        // Match Enemy Pool & Real-Time Battle Statistics (SS)
-        this.matchActive = false;
-        this.activeEnemyTypes = [];
+        this.zombiesKilled = 0; this.score = 0; this.spawnTimer = 0;
+        this.shockBarrierTimer = 15; this.shockBarrierReady = false; this.heroImmunityTimer = 0;
+        this.matchActive = false; this.activeEnemyTypes = [];
         this.battleStats = {
             damageDealt: 0,
             zombiesKilled: 0,
@@ -189,6 +180,7 @@ class CombatSystem {
         this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0;
         this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
         this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0;
+        this.perfectStreak = 0; this.guaranteedCritReady = false;
         const activeMap = (window.stageSystem && window.stageSystem.getSelectedMap) ? window.stageSystem.getSelectedMap().id : 'map_void';
         if (this.fx && typeof this.fx.initEmbers === 'function') {
             this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
@@ -230,6 +222,7 @@ class CombatSystem {
         if (this.isGameOver || !this.matchActive) return;
         this.combo = 0;
         this.comboKills = 0;
+        this.perfectStreak = 0;
         const heroPos = this.getHeroPosition();
         this.addFloatingText('ERROU! 💨', heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
         this.pendingAttackModifiers.push({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
@@ -246,6 +239,7 @@ class CombatSystem {
             this.addFloatingText('MISS (-50%)', heroPos.x, heroPos.y - 45, '#ff3333', false);
             this.combo = 0;
             this.comboKills = 0;
+            this.perfectStreak = 0;
             return;
         }
 
@@ -254,18 +248,32 @@ class CombatSystem {
         let ratingMult = 1.0;
         let isCrit = false;
 
+        // Natural Critical Rule: 5 consecutive perfect notes guarantee crit on next shot
+        if (this.guaranteedCritReady) {
+            isCrit = true;
+            this.guaranteedCritReady = false;
+        }
+
         if (rating === 'perfect') {
             manaAward = 4.5;
             ratingMult = 1.4;
-            isCrit = true; // Perfect guarantees Critical Strike!
-        } else if (rating === 'great') {
-            manaAward = 3.2;
-            ratingMult = 1.2;
-            isCrit = false;
-        } else { // good
-            manaAward = 2.0;
-            ratingMult = 1.0;
-            isCrit = false;
+            this.perfectStreak = (this.perfectStreak || 0) + 1;
+            if (this.perfectStreak >= 5) {
+                this.guaranteedCritReady = true;
+                this.perfectStreak = 0;
+                this.addFloatingText('🎯 5x PERFECT! PRÓXIMO CRÍTICO!', heroPos.x, heroPos.y - 50, '#ff00ff', true);
+            } else {
+                this.addFloatingText(`🎯 PERFECT! (${this.perfectStreak}/5)`, heroPos.x, heroPos.y - 45, '#ffcc00', false);
+            }
+        } else {
+            this.perfectStreak = 0;
+            if (rating === 'great') {
+                manaAward = 3.2;
+                ratingMult = 1.2;
+            } else {
+                manaAward = 2.0;
+                ratingMult = 1.0;
+            }
         }
 
         // Hyper Overdrive talent bonus
@@ -338,7 +346,8 @@ class CombatSystem {
         const talentBaseBonus = window.talentSystem ? window.talentSystem.getStat('power_chord') : 0;
         const baseDmg = (45 + talentBaseBonus) * (heroStats.damageMult || 1.0) * (mod.mult || 1.0);
         let calcDamage = isMiss ? 0 : Math.round(baseDmg);
-        const isCrit = !isMiss && mod.isCrit;
+        let isCrit = !isMiss && (mod.isCrit || this.guaranteedCritReady);
+        if (!isMiss && this.guaranteedCritReady) { this.guaranteedCritReady = false; }
 
         if (isCrit) {
             const critBonusPercent = (heroStats.critDamageBonusPercent || 50) + (window.talentSystem ? window.talentSystem.getStat('ferocious_solo') * 6 : 0);

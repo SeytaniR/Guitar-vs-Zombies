@@ -27,6 +27,30 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.0] - 2026-10-30 (Mapas Aleatórios por Fase & Nova Regra de Crítico Natural por 5 Notas Perfeitas - Build 42)
+**Remoção da Seleção Manual de Mapas, Randomização por Fase e Sistema de Acúmulo de Crítico Natural por Sequência de Notas Perfeitas**
+- **Cenário de Batalha Aleatório a Cada Fase (`StageSystem` & `#screen-map-select`):**
+  - **Remoção da Seleção Manual:** Removidos os botões de navegação lateral (◀️ / ▶️) e o grid clicável de mapas da tela de pré-batalha (`index.html`). O jogador não pode mais forçar a escolha da arena.
+  - **Sorteio Automático por Fase (`rollRandomMap()`):** Toda vez que uma fase é selecionada, iniciada ou desbloqueada em `StageSystem`, uma das 3 arenas oficiais (`The Void Club`, `Palco dos Escombros`, `Wasteland do Metal`) é sorteada aleatoriamente.
+  - **Showcase Informativo na Pré-Batalha:** O card exibe o cenário sorteado da fase (`🏟️ ARENA SORTEADA`), com miniatura, tema (`URBANO`, `CONCERTO`, `DESERTO`), nome e ambientação narrativa.
+- **Nova Regra de Crítico Natural por Sequência de 5 Notas Perfeitas (`CombatSystem`):**
+  - Substituída a regra antiga (onde cada nota perfeita individualmente causava crítico).
+  - **Acúmulo de 5 Notas Perfeitas Consecutivas:**
+    - O jogador acumula notas perfeitas em sequência (`perfectStreak`).
+    - Ao atingir a 5ª nota perfeita consecutiva (`perfectStreak >= 5`), o **próximo disparo garantirá 100% de dano crítico** (`guaranteedCritReady = true`).
+    - Após atingir a meta de 5, a contagem de notas perfeitas é **zerada** (`perfectStreak = 0`), iniciando um novo ciclo de acúmulo.
+    - O disparo crítico garantido consome o bônus e aplica o multiplicador completo de dano crítico do herói + bônus de talentos com efeitos visuais e sonoros ampliados.
+  - **Quebra por Notas Não-Perfeitas:**
+    - Sempre que uma nota tocada **não for perfeita** (`great`, `good`, `miss` ou toque errado no vazio), a contagem do combo de perfeitas é **imediatamente zerada** (`perfectStreak = 0`).
+  - **Telemetria e HUD Dinâmico de Combos (`js/main.js`):**
+    - O indicador de combo no topo da batalha informa ao vivo o progresso do crítico:
+      - Em acúmulo: `14 COMBO (+0.14 SPD) • 🎯 3/5 PERF`
+      - Crítico pronto: `18 COMBO (+0.18 SPD) • 💥 CRÍTICO PRONTO!`
+- **Zero God Object Rule & Suíte de Testes (569 Testes):**
+  - Todos os 16 arquivos JS e 10 arquivos CSS estritamente abaixo de 1.000 linhas (`combat.js`: 988, `rhythm.js`: 989, `main.js`: 959).
+  - 569 testes aprovados com 100% de sucesso em `test-procedural.js`.
+  - Cache buster e versão do rodapé atualizados para `v1.7.0 (Build 42)` (`?v=42`).
+
 ### [v1.6.9] - 2026-10-30 (Ajuste da Velocidade Base de Ataque para 1.0/s em Todos os Guitarristas - Build 41)
 **Balanceamento Estratégico do Ataque Automático para Valorizar Combos e Precisão no Minigame de Ritmo**
 - **Padronização da Velocidade de Ataque Base em 1.0/s (`baseAttackSpeed: 1.0`):**

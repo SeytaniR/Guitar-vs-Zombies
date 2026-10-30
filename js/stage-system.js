@@ -57,6 +57,14 @@ class StageSystem {
         return this.maps;
     }
 
+    rollRandomMap() {
+        if (!this.maps || this.maps.length === 0) return null;
+        const randIdx = Math.floor(Math.random() * this.maps.length);
+        this.selectedMapId = this.maps[randIdx].id;
+        this.save();
+        return this.getSelectedMap();
+    }
+
     getSelectedMap() {
         return this.maps.find(m => m.id === this.selectedMapId) || this.maps[0];
     }
@@ -78,9 +86,7 @@ class StageSystem {
     }
 
     getMapForStage(stage = this.selectedStage) {
-        const mapCycle = ['map_void', 'map_ruins', 'map_wasteland'];
-        const idx = (stage - 1) % mapCycle.length;
-        return this.maps.find(m => m.id === mapCycle[idx]) || this.maps[0];
+        return this.rollRandomMap();
     }
 
     loadHighestStage() {
@@ -112,6 +118,7 @@ class StageSystem {
     setSelectedStage(stage) {
         if (stage >= 1 && stage <= this.highestUnlockedStage) {
             this.selectedStage = stage;
+            this.rollRandomMap();
             this.save();
             return true;
         }
@@ -121,6 +128,8 @@ class StageSystem {
     unlockNextStage() {
         if (this.selectedStage >= this.highestUnlockedStage) {
             this.highestUnlockedStage = this.selectedStage + 1;
+            this.selectedStage = this.highestUnlockedStage;
+            this.rollRandomMap();
             this.save();
         }
     }
