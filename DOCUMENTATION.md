@@ -27,6 +27,34 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.6.8] - 2026-10-30 (Sistema de 3 Mapas & Arenas de Batalha com Seleção Interativa - Build 40)
+**Adição de 3 Mapas Oficiais em Alta Definição (1024x572), Seletor de Arenas na Pré-Batalha e Paletas de Partículas Temáticas**
+- **Processamento e Integração dos 3 Mapas Oficiais (`assets/maps/`):**
+  - **1. The Void Club (`map_void.jpg` / `thumb_void.jpg`):**
+    - Fachada do lendário pub underground "The Void", barricadas de concreto e ônibus blindado abandonado.
+    - Badge: `URBANO` (Ciano neon `#00ffcc`).
+    - Partículas de ambiente em combate: Faíscas elétricas e brasas cibernéticas (ciano, azul elétrico e verde ácido).
+  - **2. Palco dos Escombros (`map_ruins.jpg` / `thumb_ruins.jpg`):**
+    - Arena central destruída com palco de aço, fumaça, arranha-céus em ruínas e bandeiras anarquistas.
+    - Badge: `CONCERTO` (Rubro/Vermelho neon `#ff0055`).
+    - Partículas de ambiente em combate: Brasas de fogo, fuligem e fagulhas ardentes (carmesim e laranja intenso).
+  - **3. Wasteland do Metal (`map_wasteland.jpg` / `thumb_wasteland.jpg`):**
+    - Deserto radioativo pós-apocalíptico estilo Mad Max com posto de gasolina fortificado, cactos, muscle cars e palco sob poeira.
+    - Badge: `DESERTO` (Âmbar/Dourado `#ffaa00`).
+    - Partículas de ambiente em combate: Poeira dourada, areia e brasas ocres.
+- **Seletor Interativo de Arenas na Tela de Pré-Batalha (`#screen-map-select`):**
+  - Novo card dedicado **"🏟️ ARENA DE BATALHA"** posicionado na preparação da partida.
+  - Showcase detalhado com miniatura da arena, badge temático, nome, subtítulo e descrição do cenário.
+  - Grid touch responsivo com os 3 mapas (`.map-arenas-roster-grid`), com feedback tátil, borda neon ativa e navegação por setas (◀️ / ▶️) ou toque direto.
+  - Sincronização automática com a progressão de fases em `StageSystem` (fases alternam cenários tematicamente por padrão, permitindo também ao jogador selecionar qualquer arena manualmente).
+- **Orquestração Gráfica e Partículas no Motor de Combate (`CombatSystem` & `CombatFX`):**
+  - Getter dinâmico `assets.bg` em `js/combat.js` que chaveia o background de combate automaticamente com zero overhead e total compatibilidade.
+  - `CombatFX.initEmbers` atualizado com paletas dinâmicas por arena (`map_ruins`, `map_wasteland`, `map_void`).
+- **Zero God Object Rule & Suíte de Testes (543 Testes):**
+  - Todos os 16 arquivos JS e 10 arquivos CSS estritamente abaixo de 1.000 linhas.
+  - 543 testes aprovados com 100% de sucesso em `test-procedural.js`.
+  - Cache buster atualizado para `?v=40`.
+
 ### [v1.6.7] - 2026-10-30 (Identidade Visual Oficial: Wallpaper Cinemático, Logo Neon e Ícone Transparente - Build 39)
 **Integração Estratégica da Nova Identidade Visual Oficial e Processamento de Ícone com Transparência de Bordas**
 - **Processamento Automatizado do Ícone do App / Favicon com Remoção de Bordas Pretas:**

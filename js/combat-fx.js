@@ -11,8 +11,11 @@ class CombatFX {
         this.shakePower = 0;
     }
 
-    initEmbers(count = 25, width = 800, height = 600) {
+    initEmbers(count = 25, width = 800, height = 600, theme = 'map_void') {
         this.ambientEmbers = [];
+        const hues = theme === 'map_ruins'
+            ? ['#ff2244', '#ff6600', '#ffaa00']
+            : (theme === 'map_wasteland' ? ['#ffaa00', '#e08800', '#d4a373'] : ['#00ffcc', '#00aaff', '#39ff14']);
         for (let i = 0; i < count; i++) {
             this.ambientEmbers.push({
                 x: Math.random() * width,
@@ -21,7 +24,7 @@ class CombatFX {
                 vy: 8 + Math.random() * 14,
                 size: 1 + Math.random() * 2,
                 alpha: 0.2 + Math.random() * 0.5,
-                hue: Math.random() > 0.4 ? '#ff6600' : '#ffaa00'
+                hue: hues[Math.floor(Math.random() * hues.length)]
             });
         }
     }

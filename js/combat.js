@@ -15,7 +15,15 @@ class CombatSystem {
         const loadImg = src => { const img = new Image(); img.src = src; return img; };
         const loadSheet = (src, cols = 4, rows = 3) => new SheetClass(loadImg(src), cols, rows);
         this.assets = {
-            bg: loadImg('assets/bg2.jpg'),
+            map_void: loadImg('assets/maps/map_void.jpg'),
+            map_ruins: loadImg('assets/maps/map_ruins.jpg'),
+            map_wasteland: loadImg('assets/maps/map_wasteland.jpg'),
+            get bg() {
+                const mapId = (window.stageSystem && typeof window.stageSystem.getSelectedMap === 'function')
+                    ? window.stageSystem.getSelectedMap().id
+                    : 'map_void';
+                return this[mapId] || this.map_void;
+            },
             heroSheet: loadSheet('assets/hero2.jpg'),
             heroVulkanSheet: loadSheet('assets/hero_vulkan.jpg'),
             heroHazmatSheet: loadSheet('assets/hero_hazmat.jpg'),
@@ -46,29 +54,15 @@ class CombatSystem {
             get ambientEmbers() { return fxRef.ambientEmbers; }
         };
 
-        this.time = 0;
-        this.heroStrumAnim = 0.8;
-        this.heroFlashTime = 0;
-        this.heroHp = 100;
-        this.heroMaxHp = 100;
-        this.isGameOver = false;
-        this.combo = 0;
+        this.time = 0; this.heroStrumAnim = 0.8; this.heroFlashTime = 0;
+        this.heroHp = 100; this.heroMaxHp = 100; this.isGameOver = false; this.combo = 0;
 
         // Rock Mana & Attack Speed System (replaces old rock power)
-        this.rockMana = 30;
-        this.maxRockMana = 100;
-        this.rockManaRegen = 2.0;
-
-        this.baseAttackSpeed = 1.30; // attacks per second
-        this.heroAttackTimer = 0;
-        this.heroAttackSpeedBuffTimer = 0;
-        this.heroAttackSpeedBuffMult = 1.0;
-
-        this.heroShieldHp = 0;
-        this.heroShieldTimer = 0;
-
-        this.pendingAttackModifiers = [];
-        this.stageCompleted = false;
+        this.rockMana = 30; this.maxRockMana = 100; this.rockManaRegen = 2.0;
+        this.baseAttackSpeed = 1.30; this.heroAttackTimer = 0;
+        this.heroAttackSpeedBuffTimer = 0; this.heroAttackSpeedBuffMult = 1.0;
+        this.heroShieldHp = 0; this.heroShieldTimer = 0;
+        this.pendingAttackModifiers = []; this.stageCompleted = false;
 
         this.zombiesKilled = 0;
         this.score = 0;
@@ -190,20 +184,14 @@ class CombatSystem {
         this.entities.projectiles = [];
         this.fx.reset();
         this.heroHp = this.heroMaxHp;
-        this.isGameOver = false;
-        this.isPaused = false;
-        this.isVictory = false;
-        this.rockMana = 30;
-        this.combo = 0;
-        this.comboKills = 0;
-        this.score = 0;
-        this.zombiesKilled = 0;
-        this.spawnTimer = 0;
-        this.pendingAttackModifiers = [];
-        this.stageCompleted = false;
-        this.heroAttackTimer = 0;
-        this.heroShieldHp = 0;
-        this.heroShieldTimer = 0;
+        this.isGameOver = false; this.isPaused = false; this.isVictory = false;
+        this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0;
+        this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
+        this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0;
+        const activeMap = (window.stageSystem && window.stageSystem.getSelectedMap) ? window.stageSystem.getSelectedMap().id : 'map_void';
+        if (this.fx && typeof this.fx.initEmbers === 'function') {
+            this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
+        }
 
         this.activeEnemyTypes = (enemyList && enemyList.length > 0)
             ? enemyList

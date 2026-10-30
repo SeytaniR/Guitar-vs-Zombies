@@ -799,18 +799,49 @@ assert(htmlContent.includes('href="assets/branding/favicon-32.png"'), 'index.htm
 assert(cssContent.includes("assets/branding/wallpaper.jpg"), 'CSS references cinematic wallpaper background');
 assert(cssContent.includes('.menu-brand-logo'), 'CSS includes styling for .menu-brand-logo');
 
+// 16. Testing 3 Battle Maps / Arenas System (v1.6.8)
+console.log('\n16. Testing 3 Battle Maps / Arenas System...');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/map_void.jpg')), 'assets/maps/map_void.jpg exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/map_ruins.jpg')), 'assets/maps/map_ruins.jpg exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/map_wasteland.jpg')), 'assets/maps/map_wasteland.jpg exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/thumb_void.jpg')), 'assets/maps/thumb_void.jpg exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/thumb_ruins.jpg')), 'assets/maps/thumb_ruins.jpg exists');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/maps/thumb_wasteland.jpg')), 'assets/maps/thumb_wasteland.jpg exists');
+
+const stgSys = new StageSystem();
+assert(stgSys.getAllMaps().length === 3, 'StageSystem contains all 3 battle maps');
+assert(stgSys.maps.some(m => m.id === 'map_void' && m.name === 'The Void Club'), 'Map 1: The Void Club defined');
+assert(stgSys.maps.some(m => m.id === 'map_ruins' && m.name === 'Palco dos Escombros'), 'Map 2: Palco dos Escombros defined');
+assert(stgSys.maps.some(m => m.id === 'map_wasteland' && m.name === 'Wasteland do Metal'), 'Map 3: Wasteland do Metal defined');
+
+stgSys.setSelectedMap('map_ruins');
+assert(stgSys.getSelectedMap().id === 'map_ruins', 'StageSystem sets active map to Palco dos Escombros');
+stgSys.cycleMap(1);
+assert(stgSys.getSelectedMap().id === 'map_wasteland', 'StageSystem cycles active map to Wasteland do Metal');
+stgSys.cycleMap(1);
+assert(stgSys.getSelectedMap().id === 'map_void', 'StageSystem cycles active map back to The Void Club');
+
+// UI DOM & CSS Checks for Arenas
+assert(htmlContent.includes('id="map-selected-arena-showcase"'), 'index.html contains #map-selected-arena-showcase');
+assert(htmlContent.includes('id="map-arenas-roster-grid"'), 'index.html contains #map-arenas-roster-grid');
+assert(htmlContent.includes('id="map-arena-prev-btn"'), 'index.html contains #map-arena-prev-btn');
+assert(htmlContent.includes('id="map-arena-next-btn"'), 'index.html contains #map-arena-next-btn');
+assert(cssContent.includes('.map-arenas-roster-grid'), 'CSS includes styling for .map-arenas-roster-grid');
+assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
+assert(cssContent.includes('.arena-roster-card'), 'CSS includes styling for .arena-roster-card');
+
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=39'), 'index.html links base.css with v=39');
-assert(htmlContent.includes('css/menu.css?v=39'), 'index.html links menu.css with v=39');
-assert(htmlContent.includes('css/map-select.css?v=39'), 'index.html links map-select.css with v=39');
-assert(htmlContent.includes('css/battle.css?v=39'), 'index.html links battle.css with v=39');
-assert(htmlContent.includes('css/skills.css?v=39'), 'index.html links skills.css with v=39');
-assert(htmlContent.includes('css/talents.css?v=39'), 'index.html links talents.css with v=39');
-assert(htmlContent.includes('css/song-studio.css?v=39'), 'index.html links song-studio.css with v=39');
-assert(htmlContent.includes('css/editor.css?v=39'), 'index.html links editor.css with v=39');
-assert(htmlContent.includes('css/results.css?v=39'), 'index.html links results.css with v=39');
-assert(htmlContent.includes('js/main.js?v=39'), 'index.html links main.js with v=39');
-assert(htmlContent.includes('v1.6.7 (Build 39)'), 'index.html footer specifies v1.6.7 (Build 39)');
+assert(htmlContent.includes('css/base.css?v=40'), 'index.html links base.css with v=40');
+assert(htmlContent.includes('css/menu.css?v=40'), 'index.html links menu.css with v=40');
+assert(htmlContent.includes('css/map-select.css?v=40'), 'index.html links map-select.css with v=40');
+assert(htmlContent.includes('css/battle.css?v=40'), 'index.html links battle.css with v=40');
+assert(htmlContent.includes('css/skills.css?v=40'), 'index.html links skills.css with v=40');
+assert(htmlContent.includes('css/talents.css?v=40'), 'index.html links talents.css with v=40');
+assert(htmlContent.includes('css/song-studio.css?v=40'), 'index.html links song-studio.css with v=40');
+assert(htmlContent.includes('css/editor.css?v=40'), 'index.html links editor.css with v=40');
+assert(htmlContent.includes('css/results.css?v=40'), 'index.html links results.css with v=40');
+assert(htmlContent.includes('js/main.js?v=40'), 'index.html links main.js with v=40');
+assert(htmlContent.includes('v1.6.8 (Build 40)'), 'index.html footer specifies v1.6.8 (Build 40)');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

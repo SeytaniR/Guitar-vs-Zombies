@@ -40,23 +40,13 @@ class Game {
             { b: 56, l: 3 }, { b: 57, l: 2 }, { b: 58, l: 0 }
         ];
         const notes = pattern.map(p => ({
-            time: Math.round((p.b * beatSec) * 1000) / 1000,
-            lane: p.l,
-            id: 'n_' + Math.random().toString(36).substr(2, 9)
+            time: Math.round((p.b * beatSec) * 1000) / 1000, lane: p.l, id: 'n_' + Math.random().toString(36).substr(2, 9)
         }));
         return {
-            id: 'default_thunder_strike',
-            title: 'Thunder Strike',
-            artist: 'Cyber Shock',
+            id: 'default_thunder_strike', title: 'Thunder Strike', artist: 'Cyber Shock',
             description: 'Solo oficial de alta voltagem pós-apocalíptico! Perfeito para detonar hordas mutantes no asfalto.',
-            bpm: bpm,
-            duration: 30,
-            cover: 'assets/covers/default_cover.jpg',
-            audioData: null,
-            notes: notes,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            isDefault: true
+            bpm: bpm, duration: 30, cover: 'assets/covers/default_cover.jpg', audioData: null,
+            notes: notes, createdAt: Date.now(), updatedAt: Date.now(), isDefault: true
         };
     }
 
@@ -135,6 +125,8 @@ class Game {
         bind('map-song-next-btn', () => this.cycleSong(1));
         bind('map-stage-prev-btn', () => this.cycleStage(-1));
         bind('map-stage-next-btn', () => this.cycleStage(1));
+        bind('map-arena-prev-btn', () => this.cycleArena(-1));
+        bind('map-arena-next-btn', () => this.cycleArena(1));
         bind('skill-picker-close-btn', () => {
             const m = document.getElementById('skill-picker-modal'); if (m) m.classList.remove('open');
         });
@@ -146,22 +138,14 @@ class Game {
     // MAP & PRE-BATTLE PREPARATION
     // ==========================================
     async prepareMapScreen() {
-        // 0. Update Stage Progression UI
         this.updateStageUI();
-
-        // 1. Render Guitarist Hero Roster & Showcase
+        this.renderArenaRoster();
         this.renderHeroRoster();
-
-        // 2. Roll 5 zombies from Enemy Pool
         if (window.enemyPool) {
             this.currentMapZombies = window.enemyPool.rollMapEnemies(5);
             this.renderMapZombies();
         }
-
-        // 2.5. Render 4-Lane Equipped Skills
         this.renderLaneSkills();
-
-        // 3. Populate available songs from IndexedDB
         await this.populateSongDropdown();
     }
 
@@ -171,8 +155,55 @@ class Game {
         const highest = window.stageSystem.highestUnlockedStage;
         const next = Math.max(1, Math.min(highest, current + direction));
         window.stageSystem.setSelectedStage(next);
+        const stageMap = window.stageSystem.getMapForStage(next);
+        if (stageMap) window.stageSystem.setSelectedMap(stageMap.id);
         if (window.soundEngine) window.soundEngine.playSustainTick(0);
         this.updateStageUI();
+        this.renderArenaRoster();
+    }
+
+    cycleArena(direction = 1) {
+        if (!window.stageSystem) return;
+        window.stageSystem.cycleMap(direction);
+        if (window.soundEngine) window.soundEngine.playSustainTick(0);
+        this.renderArenaRoster();
+    }
+
+    renderArenaRoster() {
+        if (!window.stageSystem) return;
+        const currentMap = window.stageSystem.getSelectedMap();
+        const allMaps = window.stageSystem.getAllMaps();
+
+        const imgEl = document.getElementById('showcase-arena-img');
+        const badgeEl = document.getElementById('showcase-arena-badge');
+        const nameEl = document.getElementById('showcase-arena-name');
+        const subEl = document.getElementById('showcase-arena-sub');
+        const descEl = document.getElementById('showcase-arena-desc');
+
+        if (imgEl) imgEl.src = currentMap.thumb;
+        if (badgeEl) { badgeEl.innerText = currentMap.badge; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
+        if (nameEl) nameEl.innerText = currentMap.name;
+        if (subEl) subEl.innerText = currentMap.subtitle;
+        if (descEl) descEl.innerText = currentMap.description;
+
+        const grid = document.getElementById('map-arenas-roster-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        allMaps.forEach(map => {
+            const isSelected = (map.id === currentMap.id);
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = `arena-roster-card ${isSelected ? 'active' : ''}`;
+            card.innerHTML = `<div class="arena-card-thumb-wrap" style="pointer-events: none;"><img src="${map.thumb}" alt="${map.name}" class="arena-card-thumb" style="pointer-events: none;"><span class="arena-card-badge ${map.badgeClass || ''}" style="pointer-events: none;">${map.badge}</span></div><div class="arena-card-name" style="pointer-events: none;">${map.name}</div>`;
+            card.onclick = (e) => {
+                if (e) e.preventDefault();
+                window.stageSystem.setSelectedMap(map.id);
+                if (window.soundEngine) window.soundEngine.playSustainTick(1);
+                this.renderArenaRoster();
+            };
+            grid.appendChild(card);
+        });
     }
 
     updateStageUI() {
@@ -180,10 +211,7 @@ class Game {
         const stage = window.stageSystem.selectedStage;
         const stageTitle = document.getElementById('map-stage-title-text');
         const stageInfo = document.getElementById('map-stage-info-text');
-
-        if (stageTitle) {
-            stageTitle.innerText = window.stageSystem.getStageName(stage);
-        }
+        if (stageTitle) stageTitle.innerText = window.stageSystem.getStageName(stage);
         if (stageInfo) {
             const range = window.stageSystem.getZombieLevelRange(stage);
             const kills = window.stageSystem.getTargetKills(stage);
@@ -244,23 +272,16 @@ class Game {
             xpFill.style.width = `${pct}%`;
         }
         if (lvlUpBtn) {
-            if (lvlData.level >= 100) {
-                lvlUpBtn.innerText = '⭐ NÍVEL MÁXIMO (100)';
-                lvlUpBtn.disabled = true;
-            } else {
-                lvlUpBtn.disabled = false;
-                lvlUpBtn.innerText = `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`;
-                lvlUpBtn.onclick = () => {
-                    const res = window.guitaristPool.levelUpWithGold(currentHero.id);
-                    if (res.success) {
-                        if (window.soundEngine) window.soundEngine.playPowerChord();
-                        this.renderHeroRoster();
-                        this.updateMenuCurrencies();
-                    } else {
-                        alert(res.reason || 'Ouro insuficiente!');
-                    }
-                };
-            }
+            lvlUpBtn.disabled = (lvlData.level >= 100);
+            lvlUpBtn.innerText = lvlData.level >= 100 ? '⭐ NÍVEL MÁXIMO (100)' : `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`;
+            lvlUpBtn.onclick = () => {
+                if (lvlData.level >= 100) return;
+                const res = window.guitaristPool.levelUpWithGold(currentHero.id);
+                if (res.success) {
+                    if (window.soundEngine) window.soundEngine.playPowerChord();
+                    this.renderHeroRoster(); this.updateMenuCurrencies();
+                } else alert(res.reason || 'Ouro insuficiente!');
+            };
         }
 
         // 2. Populate 6 Guitarists Grid with Real Clickable Buttons
@@ -725,33 +746,23 @@ class Game {
     }
 
     closeGearModal() {
-        const modal = document.getElementById('battle-gear-modal');
-        if (modal) modal.classList.remove('open');
-        if (!this.isGearFromMenu && this.currentScreen === 'battle') {
-            if (!this.combat.isGameOver && !this.combat.isVictory) {
-                this.resumeBattle();
-            }
-        }
+        const m = document.getElementById('battle-gear-modal');
+        if (m) m.classList.remove('open');
+        if (!this.isGearFromMenu && this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) this.resumeBattle();
     }
 
     openStatsModal() {
-        const modal = document.getElementById('battle-stats-modal');
-        if (!modal) return;
+        const m = document.getElementById('battle-stats-modal');
+        if (!m) return;
         this.updateBattleStatsModal();
-        if (this.currentScreen === 'battle') {
-            this.pauseBattle();
-        }
-        modal.classList.add('open');
+        if (this.currentScreen === 'battle') this.pauseBattle();
+        m.classList.add('open');
     }
 
     closeStatsModal() {
-        const modal = document.getElementById('battle-stats-modal');
-        if (modal) modal.classList.remove('open');
-        if (this.currentScreen === 'battle') {
-            if (!this.combat.isGameOver && !this.combat.isVictory) {
-                this.resumeBattle();
-            }
-        }
+        const m = document.getElementById('battle-stats-modal');
+        if (m) m.classList.remove('open');
+        if (this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) this.resumeBattle();
     }
 
     updateBattleStatsModal() {
@@ -784,10 +795,8 @@ class Game {
 
         setVal('ss-total-damage', Math.round(s.damageDealt).toLocaleString());
         setVal('ss-hero-hp', `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`);
-        setVal('ss-zombies-killed', s.zombiesKilled);
-        setVal('ss-max-streak', `${r.maxStreak || this.rhythm.streak || 0} 🔥`);
-        setVal('ss-current-multiplier', `x${this.rhythm.multiplier}`);
-        setVal('ss-current-score', this.combat.score.toLocaleString());
+        setVal('ss-zombies-killed', s.zombiesKilled); setVal('ss-max-streak', `${r.maxStreak || this.rhythm.streak || 0} 🔥`);
+        setVal('ss-current-multiplier', `x${this.rhythm.multiplier}`); setVal('ss-current-score', this.combat.score.toLocaleString());
         setVal('ss-match-coins', `+${s.coinsEarned} 🪙`);
         setVal('ss-accuracy-rate', `${accPct}% (${r.perfects || 0}P / ${r.greats || 0}G / ${r.misses || 0}M)`);
         setVal('ss-time-elapsed', `${mins}:${secs < 10 ? '0' : ''}${secs}`);
@@ -811,8 +820,7 @@ class Game {
         const accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
 
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-        setVal('result-accuracy', `${accPct}%`);
-        setVal('result-hits', `${hitNotes} / ${totalNotes}`);
+        setVal('result-accuracy', `${accPct}%`); setVal('result-hits', `${hitNotes} / ${totalNotes}`);
         setVal('result-zombies-killed', `${(this.combat && this.combat.battleStats ? this.combat.battleStats.zombiesKilled : 0)} 💀`);
         setVal('result-max-streak', `${stats.maxStreak || (this.rhythm ? this.rhythm.maxStreak : 0)} 🔥`);
         setVal('result-gold-reward', `+${(this.combat && this.combat.battleStats ? this.combat.battleStats.coinsEarned : 0)} 🪙`);
@@ -906,8 +914,7 @@ class Game {
         if (h.hpBar) {
             const pct = Math.max(0, Math.min(100, Math.round((this.combat.heroHp / this.combat.heroMaxHp) * 100)));
             if (pct !== h.lastHpPct) {
-                h.lastHpPct = pct;
-                h.hpBar.style.width = `${pct}%`;
+                h.lastHpPct = pct; h.hpBar.style.width = `${pct}%`;
                 h.hpBar.style.backgroundColor = pct < 30 ? '#ff2222' : (pct < 60 ? '#ffaa00' : '#00ff66');
             }
         }
@@ -929,8 +936,7 @@ class Game {
         }
         if (h.comboEl) {
             const streak = this.rhythm.streak || 0;
-            const spdBonus = Math.min(2.0, streak * 0.01);
-            const t = `${streak} COMBO (+${spdBonus.toFixed(2)} SPD)`;
+            const t = `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} SPD)`;
             if (t !== h.lastCombo) { h.lastCombo = t; h.comboEl.innerText = t; }
         }
         if (h.multEl) {
@@ -949,18 +955,9 @@ class Game {
         const goldCount = document.getElementById('menu-gold-count');
         const highscoreVal = document.getElementById('menu-highscore-val');
         const killsVal = document.getElementById('menu-total-kills');
-
-        if (goldCount && window.talentSystem) {
-            goldCount.innerText = window.talentSystem.gold;
-        }
-        if (highscoreVal) {
-            const hs = parseInt(localStorage.getItem('gvs_highscore') || '0');
-            highscoreVal.innerText = hs.toLocaleString();
-        }
-        if (killsVal) {
-            const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0');
-            killsVal.innerText = tk.toLocaleString();
-        }
+        if (goldCount && window.talentSystem) goldCount.innerText = window.talentSystem.gold;
+        if (highscoreVal) highscoreVal.innerText = parseInt(localStorage.getItem('gvs_highscore') || '0').toLocaleString();
+        if (killsVal) killsVal.innerText = parseInt(localStorage.getItem('gvs_total_kills') || '0').toLocaleString();
     }
 
     updateMenuCurrencies() {

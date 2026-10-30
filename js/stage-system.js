@@ -3,6 +3,84 @@ class StageSystem {
     constructor() {
         this.highestUnlockedStage = this.loadHighestStage();
         this.selectedStage = this.loadSelectedStage();
+        this.initMaps();
+        this.selectedMapId = this.loadSelectedMap();
+    }
+
+    initMaps() {
+        this.maps = [
+            {
+                id: 'map_void',
+                name: 'The Void Club',
+                subtitle: 'Clube Subterrâneo & Escombros Urbanos',
+                description: 'Fachada do lendário pub underground "The Void", barricadas de concreto e ônibus blindado abandonado.',
+                badge: 'URBANO',
+                badgeClass: 'badge-urban',
+                themeColor: '#00ffcc',
+                src: 'assets/maps/map_void.jpg',
+                thumb: 'assets/maps/thumb_void.jpg'
+            },
+            {
+                id: 'map_ruins',
+                name: 'Palco dos Escombros',
+                subtitle: 'Arena Central do Apocalipse',
+                description: 'Palco de metal destruído no coração das ruínas metropolitanas, cercado por amplificadores e fumaça.',
+                badge: 'CONCERTO',
+                badgeClass: 'badge-concert',
+                themeColor: '#ff0055',
+                src: 'assets/maps/map_ruins.jpg',
+                thumb: 'assets/maps/thumb_ruins.jpg'
+            },
+            {
+                id: 'map_wasteland',
+                name: 'Wasteland do Metal',
+                subtitle: 'Deserto Anárquico & Posto Tóxico',
+                description: 'Autoestrada árida estilo Mad Max, posto de gasolina fortificado, cactos e sucatas sob tempestade de areia.',
+                badge: 'DESERTO',
+                badgeClass: 'badge-desert',
+                themeColor: '#ffaa00',
+                src: 'assets/maps/map_wasteland.jpg',
+                thumb: 'assets/maps/thumb_wasteland.jpg'
+            }
+        ];
+    }
+
+    loadSelectedMap() {
+        try {
+            const val = localStorage.getItem('gvs_selected_map');
+            if (val && this.maps.some(m => m.id === val)) return val;
+        } catch(e) {}
+        return 'map_void';
+    }
+
+    getAllMaps() {
+        return this.maps;
+    }
+
+    getSelectedMap() {
+        return this.maps.find(m => m.id === this.selectedMapId) || this.maps[0];
+    }
+
+    setSelectedMap(mapId) {
+        if (this.maps.some(m => m.id === mapId)) {
+            this.selectedMapId = mapId;
+            this.save();
+            return true;
+        }
+        return false;
+    }
+
+    cycleMap(direction = 1) {
+        const idx = this.maps.findIndex(m => m.id === this.selectedMapId);
+        const nextIdx = (idx + direction + this.maps.length) % this.maps.length;
+        this.setSelectedMap(this.maps[nextIdx].id);
+        return this.getSelectedMap();
+    }
+
+    getMapForStage(stage = this.selectedStage) {
+        const mapCycle = ['map_void', 'map_ruins', 'map_wasteland'];
+        const idx = (stage - 1) % mapCycle.length;
+        return this.maps.find(m => m.id === mapCycle[idx]) || this.maps[0];
     }
 
     loadHighestStage() {
@@ -27,6 +105,7 @@ class StageSystem {
         try {
             localStorage.setItem('gvs_highest_stage', this.highestUnlockedStage.toString());
             localStorage.setItem('gvs_selected_stage', this.selectedStage.toString());
+            localStorage.setItem('gvs_selected_map', this.selectedMapId);
         } catch(e) {}
     }
 
