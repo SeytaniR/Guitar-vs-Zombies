@@ -202,6 +202,74 @@ class EnemyPoolSystem {
                 attackDamage: 16,
                 attackInterval: 1.30,
                 scale: 0.54
+            },
+            // === NOVO 10: Xerife Sobrevivente (Rick Grimes) ===
+            {
+                id: 'sheriff_walker',
+                name: 'Xerife Sobrevivente',
+                badge: 'XERIFE',
+                fullBadge: 'Xerife / Machadada',
+                badgeClass: 'badge-danger',
+                icon: 'assets/zombies/sheriff_walker.jpg',
+                type: 'sheriff',
+                sheet: 'sheriffSheet',
+                desc: 'Inspirado no líder sobrevivente de Atlanta. Com chapéu de xerife e farda gasta, desfere golpes brutais de machado!',
+                hp: 170,
+                speed: 36,
+                attackDamage: 12,
+                attackInterval: 0.95,
+                scale: 0.52
+            },
+            // === NOVO 11: Político Presidencial ===
+            {
+                id: 'presidential_politician',
+                name: 'Político Presidencial',
+                badge: 'POLÍTICO',
+                fullBadge: 'Político / Comício',
+                badgeClass: 'badge-tank',
+                icon: 'assets/zombies/presidential_politician.jpg',
+                type: 'politician',
+                sheet: 'politicianSheet',
+                desc: 'Ostentando a faixa presidencial verde-amarela, discursa com fúria ensurdecedora que mobiliza a horda e suga o herói!',
+                hp: 220,
+                speed: 32,
+                attackDamage: 10,
+                attackInterval: 1.05,
+                scale: 0.52
+            },
+            // === NOVO 12: Cavaleiro das Trevas (Batman) ===
+            {
+                id: 'dark_knight_undead',
+                name: 'Cavaleiro das Trevas',
+                badge: 'MORCEGO',
+                fullBadge: 'Morcego / Capa',
+                badgeClass: 'badge-rusher',
+                icon: 'assets/zombies/dark_knight_undead.jpg',
+                type: 'batman',
+                sheet: 'batmanSheet',
+                desc: 'O morcego de Gotham renascido nas trevas. Usa sua capa sombria para desviar de 20% dos tiros comuns e mergulhar ferozmente!',
+                hp: 260,
+                speed: 45,
+                attackDamage: 15,
+                attackInterval: 0.80,
+                scale: 0.52
+            },
+            // === NOVO 13: Fantasma Espartano (Kratos) ===
+            {
+                id: 'god_of_war_spartan',
+                name: 'Fantasma Espartano',
+                badge: 'ESPARTANO',
+                fullBadge: 'Espartano / Fúria',
+                badgeClass: 'badge-danger',
+                icon: 'assets/zombies/god_of_war_spartan.jpg',
+                type: 'kratos',
+                sheet: 'kratosSheet',
+                desc: 'O implacável guerreiro de Esparta com lâminas em chamas. Reduz repulsão em 50% e entra em Fúria Espartana abaixo de 40% de vida!',
+                hp: 380,
+                speed: 28,
+                attackDamage: 22,
+                attackInterval: 1.20,
+                scale: 0.55
             }
         ];
 

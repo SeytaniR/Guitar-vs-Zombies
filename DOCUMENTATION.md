@@ -27,6 +27,41 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.3] - 2026-10-30 (Horda Lendária: 4 Ícones da Cultura Pop e História no Master Pool - Build 45)
+**Inclusão de 4 Novos Zumbis Oficiais Inspirados em Rick Grimes, Político Brasileiro, Batman e Kratos**
+- **4 Novos Arquétipos Integrados ao Pool Mestre (`EnemyPoolSystem` & `masterPool` totalizando 16 zumbis):**
+  - **Xerife Sobrevivente (`sheriff_walker` - Rick Grimes / The Walking Dead):**
+    - *Visual:* Chapéu clássico de xerife com estrela dourada, farda cáqui com insígnia no braço, coldre na cintura e machadinha de sobrevivência.
+    - *Atributos:* `170 HP`, `Velocidade 36`, `Dano 12`, `Intervalo 0.95s`, `scale: 0.52`.
+    - *Mecânica:* Avanço resoluto de líder sobrevivente e ataques viscerais com machadinha que geram partículas de sangue denso (`MACHADADA! 🪓`).
+    - *Badge:* `XERIFE` • `Xerife / Machadada` (`badge-danger`).
+    - *Assets:* `assets/zombie_sheriff.jpg` e miniatura HD `assets/zombies/sheriff_walker.jpg`.
+  - **Político Presidencial (`presidential_politician` - Político Brasileiro):**
+    - *Visual:* Terno social cinza com gravata escura e a emblemática faixa presidencial verde e amarela com o brasão da República, cabelos brancos e expressão ensandecida.
+    - *Atributos:* `220 HP`, `Velocidade 32`, `Dano 10`, `Intervalo 1.05s`, `scale: 0.52`.
+    - *Mecânica:* Discurso de comício periódico (`DISCURSO! 📜`) que emite auras patrióticas verde-amarelas e drena a determinação do herói com retórica fanática (`COMÍCIO! 📜`).
+    - *Badge:* `POLÍTICO` • `Político / Comício` (`badge-tank`).
+    - *Assets:* `assets/zombie_politician.jpg` (grid 4x3 padronizado) e miniatura HD `assets/zombies/presidential_politician.jpg`.
+  - **Cavaleiro das Trevas (`dark_knight_undead` - Batman / DC Comics):**
+    - *Visual:* Máscara e capuz pontiagudo de morcego, emblema sombrio no peitoral, cinto de utilidades dourado e capa recortada esvoaçante.
+    - *Atributos:* `260 HP`, `Velocidade 45`, `Dano 15`, `Intervalo 0.80s`, `scale: 0.52`.
+    - *Mecânica:* Deflexão sombria com capa (20% de chance de esquivar de disparos comuns frontais com `ESQUIVA CAPA! 🦇`) e mergulhos predadores ultra-velozes (`MORCEGO! 🦇`).
+    - *Badge:* `MORCEGO` • `Morcego / Capa` (`badge-rusher`).
+    - *Assets:* `assets/zombie_batman.jpg` e miniatura HD `assets/zombies/dark_knight_undead.jpg`.
+  - **Fantasma Espartano (`god_of_war_spartan` - Kratos / God of War):**
+    - *Visual:* Pele cinzenta marcada por cinzas de Esparta, tatuagem carmesim pelo rosto e tronco, ombreira dourada, saiote de guerra espartano e lâminas com correntes nos punhos.
+    - *Atributos:* `380 HP`, `Velocidade 28`, `Dano 22`, `Intervalo 1.20s`, `scale: 0.55`.
+    - *Mecânica:* Postura pesada (absorve 50% da repulsão de notas). Abaixo de 40% de HP ativa a **Fúria Espartana** (`FÚRIA ESPARTANA! 🔥`), ganhando +40% de velocidade de movimento, labaredas ardentes e golpes violentos com as Lâminas do Caos com forte tremor de tela (`LÂMINAS DO CAOS! ⚔️`).
+    - *Badge:* `ESPARTANO` • `Espartano / Fúria` (`badge-danger`).
+    - *Assets:* `assets/zombie_kratos.jpg` e miniatura HD `assets/zombies/god_of_war_spartan.jpg`.
+- **Renderização, Spritesheets & Chroma-Key (`SpriteSheet` & `ZombieEntity`):**
+  - Spritesheets 4x3 1024x571 carregados dinamicamente via `loadSheet()`.
+  - Miniaturas circulares HD 256x256 geradas com vinheta atmosférica personalizada para cada personagem.
+- **Conformidade Estrita com Regra Zero God Object & Suíte de Testes (631 Testes):**
+  - Todos os 16 módulos JavaScript e 10 folhas de estilo CSS permanecem sob o teto estrito de 1.000 linhas.
+  - Suíte completa de 631 testes com 100% de aprovação.
+  - Atualização do número de build e versão para `v1.7.3 (Build 45)` com cache-buster `?v=45`.
+
 ### [v1.7.2] - 2026-10-30 (Expansão de Horda: 4 Novos Arquétipos de Zumbis no Master Pool - Build 44)
 **Inclusão de 4 Novos Zumbis Oficiais com Spritesheets Calibrados, Miniaturas Cinemáticas e IA Dedicada**
 - **4 Novos Arquétipos Integrados ao Pool Mestre (`EnemyPoolSystem` & `masterPool` totalizando 12 zumbis):**

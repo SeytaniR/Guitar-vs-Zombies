@@ -793,15 +793,9 @@ const masterStyleContent = fs.readFileSync(path.resolve(__dirname, 'css/style.cs
 const mainJsContent = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
 
 // Master CSS Orchestrator
-assert(masterStyleContent.includes("@import url('base.css');"), "style.css imports base.css");
-assert(masterStyleContent.includes("@import url('menu.css');"), "style.css imports menu.css");
-assert(masterStyleContent.includes("@import url('map-select.css');"), "style.css imports map-select.css");
-assert(masterStyleContent.includes("@import url('battle.css');"), "style.css imports battle.css");
-assert(masterStyleContent.includes("@import url('skills.css');"), "style.css imports skills.css");
-assert(masterStyleContent.includes("@import url('talents.css');"), "style.css imports talents.css");
-assert(masterStyleContent.includes("@import url('song-studio.css');"), "style.css imports song-studio.css");
-assert(masterStyleContent.includes("@import url('editor.css');"), "style.css imports editor.css");
-assert(masterStyleContent.includes("@import url('results.css');"), "style.css imports results.css");
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css'].forEach(f => {
+    assert(masterStyleContent.includes(`@import url('${f}');`), `style.css imports ${f}`);
+});
 
 // Screen Isolation
 assert(cssContent.includes('.game-screen {\n    display: none !important;'), 'CSS enforces .game-screen { display: none !important; }');
@@ -885,17 +879,10 @@ assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #ma
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=44'), 'index.html links base.css with v=44');
-assert(htmlContent.includes('css/menu.css?v=44'), 'index.html links menu.css with v=44');
-assert(htmlContent.includes('css/map-select.css?v=44'), 'index.html links map-select.css with v=44');
-assert(htmlContent.includes('css/battle.css?v=44'), 'index.html links battle.css with v=44');
-assert(htmlContent.includes('css/skills.css?v=44'), 'index.html links skills.css with v=44');
-assert(htmlContent.includes('css/talents.css?v=44'), 'index.html links talents.css with v=44');
-assert(htmlContent.includes('css/song-studio.css?v=44'), 'index.html links song-studio.css with v=44');
-assert(htmlContent.includes('css/editor.css?v=44'), 'index.html links editor.css with v=44');
-assert(htmlContent.includes('css/results.css?v=44'), 'index.html links results.css with v=44');
-assert(htmlContent.includes('js/main.js?v=44'), 'index.html links main.js with v=44');
-assert(htmlContent.includes('v1.7.2 (Build 44)'), 'index.html footer specifies v1.7.2 (Build 44)');
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'main.js'].forEach(f => {
+    assert(htmlContent.includes(`${f}?v=45`), `index.html links ${f} with v=45`);
+});
+assert(htmlContent.includes('v1.7.3 (Build 45)'), 'index.html footer specifies v1.7.3 (Build 45)');
 
 // ==========================================
 // 17. Testing Zombie Balance & Explosion AoE Damage Reduction (v1.7.1)
@@ -912,47 +899,59 @@ Object.entries(expectedHps).forEach(([id, expectedHp]) => {
 });
 
 // Test Mutant Blast AoE Damage Reduction to other zombies (reduced by 70%: 70 -> 21)
-const mutantFx = new CombatFX();
 const victimZombie1 = { x: 200, y: 150, hp: 100, active: true, flashTime: 0 };
-mutantFx.triggerMutantBlast(150, 150, [victimZombie1], null, null);
+new CombatFX().triggerMutantBlast(150, 150, [victimZombie1], null, null);
 assert(victimZombie1.hp === 79, `Mutant blast dealt exactly 21 damage to victim zombie (100 - 21 = 79, down 70% from 70)`);
 
 // Test Hazmat Meltdown AoE Damage Reduction to other zombies (reduced by 70%: 40 -> 12)
-const hazmatFx = new CombatFX();
 const victimZombie2 = { x: 180, y: 150, hp: 100, active: true, flashTime: 0 };
-hazmatFx.triggerHazmatMeltdown(150, 150, [victimZombie2], null, null);
+new CombatFX().triggerHazmatMeltdown(150, 150, [victimZombie2], null, null);
 assert(victimZombie2.hp === 88, `Hazmat meltdown dealt exactly 12 damage to nearby zombie (100 - 12 = 88, down 70% from 40)`);
 
 // ==========================================
-// 18. Testing 4 New Zombie Archetypes (v1.7.2)
+// 18. Testing 8 Added Zombie Archetypes (v1.7.2 & v1.7.3)
 // ==========================================
-console.log('\n18. Testing 4 New Zombie Archetypes (Clown, Builder, Scientist, Firefighter)...');
-['zombie_clown.jpg', 'zombie_builder.jpg', 'zombie_scientist.jpg', 'zombie_firefighter.jpg'].forEach(sheetFile => {
+console.log('\n18. Testing 8 Expanded Zombie Archetypes...');
+['zombie_clown.jpg', 'zombie_builder.jpg', 'zombie_scientist.jpg', 'zombie_firefighter.jpg',
+ 'zombie_sheriff.jpg', 'zombie_politician.jpg', 'zombie_batman.jpg', 'zombie_kratos.jpg'].forEach(sheetFile => {
     assert(fs.existsSync(path.resolve(__dirname, 'assets', sheetFile)), `assets/${sheetFile} exists`);
 });
-['sinister_clown.jpg', 'builder_demolisher.jpg', 'mad_scientist.jpg', 'inferno_firefighter.jpg'].forEach(thumbFile => {
+['sinister_clown.jpg', 'builder_demolisher.jpg', 'mad_scientist.jpg', 'inferno_firefighter.jpg',
+ 'sheriff_walker.jpg', 'presidential_politician.jpg', 'dark_knight_undead.jpg', 'god_of_war_spartan.jpg'].forEach(thumbFile => {
     assert(fs.existsSync(path.resolve(__dirname, 'assets/zombies', thumbFile)), `assets/zombies/${thumbFile} exists`);
 });
 
-assert(enemyPool.masterPool.length === 12, `EnemyPool masterPool now contains all 12 distinct zombies (${enemyPool.masterPool.length} found)`);
+assert(enemyPool.masterPool.length === 16, `EnemyPool masterPool now contains all 16 distinct zombies (${enemyPool.masterPool.length} found)`);
 
-const clown = enemyPool.masterPool.find(z => z.id === 'clown_jester');
-assert(clown && clown.hp === 130 && clown.speed === 50 && clown.type === 'clown', 'Clown Jester archetype defined correctly');
-
-const builder = enemyPool.masterPool.find(z => z.id === 'builder_demolisher');
-assert(builder && builder.hp === 245 && builder.speed === 31 && builder.type === 'builder', 'Builder Demolisher archetype defined correctly');
-
-const scientist = enemyPool.masterPool.find(z => z.id === 'mad_scientist');
-assert(scientist && scientist.hp === 155 && scientist.speed === 40 && scientist.type === 'scientist', 'Mad Scientist archetype defined correctly');
-
-const firefighter = enemyPool.masterPool.find(z => z.id === 'inferno_firefighter');
-assert(firefighter && firefighter.hp === 310 && firefighter.speed === 25 && firefighter.type === 'firefighter', 'Inferno Firefighter archetype defined correctly');
+[
+    ['clown_jester', 130, 50, 'clown', 'Clown Jester'],
+    ['builder_demolisher', 245, 31, 'builder', 'Builder Demolisher'],
+    ['mad_scientist', 155, 40, 'scientist', 'Mad Scientist'],
+    ['inferno_firefighter', 310, 25, 'firefighter', 'Inferno Firefighter'],
+    ['sheriff_walker', 170, 36, 'sheriff', 'Sheriff Walker (Rick Grimes)'],
+    ['presidential_politician', 220, 32, 'politician', 'Presidential Politician'],
+    ['dark_knight_undead', 260, 45, 'batman', 'Dark Knight (Batman)'],
+    ['god_of_war_spartan', 380, 28, 'kratos', 'Spartan (Kratos)']
+].forEach(([id, hp, speed, type, label]) => {
+    const z = enemyPool.masterPool.find(item => item.id === id);
+    assert(z && z.hp === hp && z.speed === speed && z.type === type, `${label} defined correctly`);
+});
 
 // Test Firefighter Burn Immunity
+const firefighter = enemyPool.masterPool.find(z => z.id === 'inferno_firefighter');
 const zFirefighter = new ZombieEntity(firefighter, 100, 400, 1);
 assert(zFirefighter.isBurnImmune === true, 'Firefighter zombie entity initializes with isBurnImmune = true');
 zFirefighter.applyBurn(20, 4.0);
 assert(zFirefighter.burnTimer === 0, 'Firefighter is completely immune to burn effect (burnTimer remains 0)');
+
+// Test Kratos Spartan Rage trigger below 40% HP
+const kratos = enemyPool.masterPool.find(z => z.id === 'god_of_war_spartan');
+const zKratos = new ZombieEntity(kratos, 100, 400, 1);
+const origSpeed = zKratos.speed;
+zKratos.hp = Math.round(zKratos.maxHp * 0.35);
+const dummyCombat = { getHeroPosition: () => ({ x: 50, y: 100 }), fx: { particles: [], spawnBurst: () => {} }, addFloatingText: () => {}, triggerShake: () => {}, takeDamage: () => {} };
+zKratos.update(0.1, dummyCombat);
+assert(zKratos.rageTriggered === true && zKratos.speed > origSpeed, 'Kratos triggers Spartan Rage and speed boost below 40% HP');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

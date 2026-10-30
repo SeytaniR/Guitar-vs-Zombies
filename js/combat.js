@@ -33,6 +33,8 @@ class CombatSystem {
             gladiatorSheet: loadSheet('assets/zombie_gladiator.jpg'), hazmatSheet: loadSheet('assets/zombie_hazmat.jpg'),
             clownSheet: loadSheet('assets/zombie_clown.jpg'), builderSheet: loadSheet('assets/zombie_builder.jpg'),
             scientistSheet: loadSheet('assets/zombie_scientist.jpg'), firefighterSheet: loadSheet('assets/zombie_firefighter.jpg'),
+            sheriffSheet: loadSheet('assets/zombie_sheriff.jpg'), politicianSheet: loadSheet('assets/zombie_politician.jpg'),
+            batmanSheet: loadSheet('assets/zombie_batman.jpg'), kratosSheet: loadSheet('assets/zombie_kratos.jpg'),
             fxSheet: loadSheet('assets/fx2.jpg')
         };
 
@@ -794,6 +796,9 @@ class CombatSystem {
                     } else if (z.type === 'builder' && !p.isCrit) {
                         p.damage = Math.round(p.damage * 0.75);
                         this.addFloatingText("CAPACETE! -25%", z.x, currentY - 34, '#ffaa00', false);
+                    } else if (z.type === 'batman' && !p.isCrit && Math.random() < 0.20) {
+                        this.addFloatingText("ESQUIVA CAPA! 🦇", z.x, currentY - 34, '#aa00ff', false);
+                        continue;
                     }
 
                     if (heroStats.burnChance && Math.random() < heroStats.burnChance) {
@@ -826,8 +831,8 @@ class CombatSystem {
                         p.damage = Math.round(p.damage * (1.8 + airBonus));
                         this.addFloatingText("🎯 AIR SHOT! CRIT!", z.x, currentY - 45, '#ffcc00', true);
                         this.triggerShake(7);
-                    } else if (z.type === 'bloater' || z.type === 'firefighter') {
-                        knockDist = (z.type === 'bloater' ? 2 : 3.5) * knockMult;
+                    } else if (z.type === 'bloater' || z.type === 'firefighter' || z.type === 'kratos') {
+                        knockDist = (z.type === 'bloater' ? 2 : (z.type === 'kratos' ? 4 : 3.5)) * knockMult;
                     }
                     z.x = Math.min(this.canvas.width - 15, z.x + knockDist);
 

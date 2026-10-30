@@ -82,6 +82,10 @@ class ZombieEntity {
 
         // Archetype: Firefighter
         this.isBurnImmune = (this.type === 'firefighter');
+
+        // Archetypes: Politician & Kratos
+        this.rallyTimer = 2.5 + Math.random() * 2.0;
+        this.rageTriggered = false;
     }
 
     update(dt, combat) {
@@ -183,6 +187,18 @@ class ZombieEntity {
                 break;
             case 'firefighter':
                 this.updateFirefighter(effectiveDt, combat, attackDistance);
+                break;
+            case 'sheriff':
+                this.updateSheriff(effectiveDt, combat, attackDistance);
+                break;
+            case 'politician':
+                this.updatePolitician(effectiveDt, combat, attackDistance);
+                break;
+            case 'batman':
+                this.updateBatman(effectiveDt, combat, attackDistance);
+                break;
+            case 'kratos':
+                this.updateKratos(effectiveDt, combat, attackDistance);
                 break;
             default:
                 this.updateStandard(effectiveDt, combat, attackDistance);
@@ -548,6 +564,102 @@ class ZombieEntity {
         }
     }
 
+    updateSheriff(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 36) * 7.2;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 6.5) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} MACHADADA! 🪓`, '#ff3300');
+                combat.fx.spawnBurst(this.x - 8, this.y - 14, '#bb0000', 4, 30, 1.8, 0.25);
+            }
+        }
+    }
+
+    updatePolitician(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.rallyTimer -= dt;
+            if (this.rallyTimer <= 0) {
+                this.rallyTimer = 3.6;
+                combat.fx.spawnBurst(this.x, this.y - 20, '#00ff66', 3, 20, 1.4, 0.25);
+                combat.addFloatingText("DISCURSO! 📜", this.x, this.y - 36, '#00ff66', false);
+            }
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 32) * 6.8;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 6.0) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} COMÍCIO! 📜`, '#00ff66');
+                combat.fx.spawnBurst(this.x - 8, this.y - 14, '#ffdd00', 3, 25, 1.5, 0.2);
+            }
+        }
+    }
+
+    updateBatman(dt, combat, attackDistance) {
+        if (this.x > attackDistance) {
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 45) * 8.0;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 7.5) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} MORCEGO! 🦇`, '#aa00ff');
+                combat.fx.spawnBurst(this.x - 10, this.y - 16, '#aa00ff', 5, 35, 1.8, 0.25);
+            }
+        }
+    }
+
+    updateKratos(dt, combat, attackDistance) {
+        if (this.hp <= this.maxHp * 0.40) {
+            if (!this.rageTriggered) {
+                this.rageTriggered = true;
+                this.speed *= 1.4;
+                combat.addFloatingText("FÚRIA ESPARTANA! 🔥", this.x, this.y - 42, '#ff2200', true);
+                combat.triggerShake(6);
+            }
+            if (Math.random() < 0.25) combat.fx.spawnBurst(this.x, this.y - 16, '#ff2200', 2, 20, 1.3, 0.2);
+        }
+
+        if (this.x > attackDistance) {
+            this.x -= this.speed * dt;
+            this.walkTimer += dt * (this.speed / 28) * 6.5;
+            this.isAttacking = false;
+            this.frame = Math.floor(this.walkTimer) % 8;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackTimer += dt;
+            this.attackCooldown -= dt;
+            this.frame = 8 + (Math.floor(this.attackTimer * 5.5) % 4);
+            if (this.attackCooldown <= 0 && !combat.isGameOver) {
+                this.attackCooldown = this.attackInterval;
+                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} LÂMINAS DO CAOS! ⚔️`, '#ff2200');
+                combat.triggerShake(5);
+            }
+        }
+    }
+
     draw(ctx, assets) {
         const currentY = this.y + (this.jumpArcY || 0);
 
@@ -598,6 +710,18 @@ class ZombieEntity {
         } else if (this.type === 'firefighter') {
             sheet = assets.firefighterSheet;
             yOffset = 13;
+        } else if (this.type === 'sheriff') {
+            sheet = assets.sheriffSheet;
+            yOffset = 12;
+        } else if (this.type === 'politician') {
+            sheet = assets.politicianSheet;
+            yOffset = 12;
+        } else if (this.type === 'batman') {
+            sheet = assets.batmanSheet;
+            yOffset = 12;
+        } else if (this.type === 'kratos') {
+            sheet = assets.kratosSheet;
+            yOffset = 14;
         }
 
         // Draw Sprite
@@ -614,10 +738,10 @@ class ZombieEntity {
         // Health bar & Badge/Name Tag
         const isSpecial = this.type !== 'normal';
         if (this.x <= ctx.canvas.width - 5 && (this.hp < this.maxHp || isSpecial)) {
-            const bw = (this.type === 'mutant' || this.type === 'bloater') ? 34 : (24 * (this.scale / 0.5));
-            const bh = (this.type === 'mutant' || this.type === 'bloater') ? 4 : 3.5;
+            const bw = (this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 34 : (24 * (this.scale / 0.5));
+            const bh = (this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 4 : 3.5;
             const bx = this.x - bw / 2;
-            const by = currentY - ((this.type === 'mutant' || this.type === 'bloater') ? 52 : (42 * (this.scale / 0.5)));
+            const by = currentY - ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 52 : (42 * (this.scale / 0.5)));
 
             ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
             ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
@@ -634,6 +758,10 @@ class ZombieEntity {
             else if (this.type === 'builder') barColor = '#ffaa00';
             else if (this.type === 'scientist') barColor = '#00ffcc';
             else if (this.type === 'firefighter') barColor = '#ff4400';
+            else if (this.type === 'sheriff') barColor = '#ffaa00';
+            else if (this.type === 'politician') barColor = '#00ff66';
+            else if (this.type === 'batman') barColor = '#aa00ff';
+            else if (this.type === 'kratos') barColor = '#ff2200';
 
             ctx.fillStyle = barColor;
             ctx.fillRect(bx, by, Math.max(0, bw * (this.hp / this.maxHp)), bh);
@@ -652,6 +780,10 @@ class ZombieEntity {
             else if (this.type === 'builder') nameColor = '#ffaa00';
             else if (this.type === 'scientist') nameColor = '#00ffcc';
             else if (this.type === 'firefighter') nameColor = '#ff5522';
+            else if (this.type === 'sheriff') nameColor = '#ffaa00';
+            else if (this.type === 'politician') nameColor = '#00ff66';
+            else if (this.type === 'batman') nameColor = '#bb44ff';
+            else if (this.type === 'kratos') nameColor = '#ff3322';
 
             ctx.fillStyle = nameColor;
             ctx.textAlign = 'center';
@@ -685,12 +817,16 @@ class ZombieEntity {
 
     getGoldDrop(heroGoldMult = 1.0, talentBonus = 0) {
         const baseMap = {
+            kratos: 18,
             bloater: 16,
             mutant: 14,
+            batman: 12,
             firefighter: 12,
             builder: 11,
             soldier: 10,
+            politician: 10,
             gladiator: 9,
+            sheriff: 9,
             hazmat: 8,
             scientist: 7,
             spore: 7,
