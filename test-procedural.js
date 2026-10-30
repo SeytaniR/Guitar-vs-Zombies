@@ -772,18 +772,31 @@ assert(htmlContent.includes('id="skill-picker-modal" class="game-modal skill-mod
 // Pre-Battle Card flex-shrink check
 assert(cssContent.includes('.map-section-card {\n    background: rgba(18, 14, 28, 0.7);\n    border: 1px solid rgba(255, 255, 255, 0.1);\n    border-radius: 12px;\n    padding: 10px;\n    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n    width: 100%;\n    max-width: 100%;\n    box-sizing: border-box;\n    overflow: hidden;\n    flex-shrink: 0;\n}'), '.map-section-card enforces flex-shrink: 0 to prevent vertical card collapse');
 
+// Pre-Battle Header Reroll Removal & Clean Balance Spacer
+assert(!htmlContent.includes('id="map-reroll-btn"'), 'map-reroll-btn successfully removed from pre-battle screen');
+assert(htmlContent.includes('class="map-header-spacer"'), 'map-header-spacer maintains balanced centered title layout');
+
+// Zombie Thumbnail Badge Compactness (< 10 chars, no multiple words covering art)
+loadScript('js/enemy-pool.js');
+const enemyPool = new EnemyPoolSystem();
+enemyPool.masterPool.forEach(z => {
+    assert(z.badge.length <= 10, `Zombie ${z.id} thumbnail badge is compact: "${z.badge}" (${z.badge.length} chars)`);
+    assert(!z.badge.includes('/'), `Zombie ${z.id} thumbnail badge has no wrapping slash: "${z.badge}"`);
+    assert(z.fullBadge && z.fullBadge.length > 0, `Zombie ${z.id} has fullBadge descriptor: "${z.fullBadge}"`);
+});
+
 // Cache Buster Version & Modular CSS Links
-assert(htmlContent.includes('css/base.css?v=37'), 'index.html links base.css with v=37');
-assert(htmlContent.includes('css/menu.css?v=37'), 'index.html links menu.css with v=37');
-assert(htmlContent.includes('css/map-select.css?v=37'), 'index.html links map-select.css with v=37');
-assert(htmlContent.includes('css/battle.css?v=37'), 'index.html links battle.css with v=37');
-assert(htmlContent.includes('css/skills.css?v=37'), 'index.html links skills.css with v=37');
-assert(htmlContent.includes('css/talents.css?v=37'), 'index.html links talents.css with v=37');
-assert(htmlContent.includes('css/song-studio.css?v=37'), 'index.html links song-studio.css with v=37');
-assert(htmlContent.includes('css/editor.css?v=37'), 'index.html links editor.css with v=37');
-assert(htmlContent.includes('css/results.css?v=37'), 'index.html links results.css with v=37');
-assert(htmlContent.includes('js/main.js?v=37'), 'index.html links main.js with v=37');
-assert(htmlContent.includes('v1.6.5 (Build 37)'), 'index.html footer specifies v1.6.5 (Build 37)');
+assert(htmlContent.includes('css/base.css?v=38'), 'index.html links base.css with v=38');
+assert(htmlContent.includes('css/menu.css?v=38'), 'index.html links menu.css with v=38');
+assert(htmlContent.includes('css/map-select.css?v=38'), 'index.html links map-select.css with v=38');
+assert(htmlContent.includes('css/battle.css?v=38'), 'index.html links battle.css with v=38');
+assert(htmlContent.includes('css/skills.css?v=38'), 'index.html links skills.css with v=38');
+assert(htmlContent.includes('css/talents.css?v=38'), 'index.html links talents.css with v=38');
+assert(htmlContent.includes('css/song-studio.css?v=38'), 'index.html links song-studio.css with v=38');
+assert(htmlContent.includes('css/editor.css?v=38'), 'index.html links editor.css with v=38');
+assert(htmlContent.includes('css/results.css?v=38'), 'index.html links results.css with v=38');
+assert(htmlContent.includes('js/main.js?v=38'), 'index.html links main.js with v=38');
+assert(htmlContent.includes('v1.6.6 (Build 38)'), 'index.html footer specifies v1.6.6 (Build 38)');
 
 // Zero God Object rule check (JS files)
 const allJsFiles = fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js'));

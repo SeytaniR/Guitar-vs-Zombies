@@ -669,6 +669,21 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - **Cobertura de Testes Automatizados:**
   - Testes ampliados em `test-procedural.js` com 70 asserções automatizadas passando com 100% de sucesso.
 
+### [v1.6.6] - 2026-10-30 (Build 38 - Remoção do Botão Re-sortear & Otimização de Miniaturas de Zumbis)
+- **Remoção do Botão Re-sortear no Pré-Batalha (`index.html`, `js/main.js`, `css/map-select.css`):**
+  - Removido o botão `#map-reroll-btn` da barra de cabeçalho da tela de pré-batalha (`#screen-map-select`), limpando o layout mobile.
+  - Adicionado elemento espaçador `.map-header-spacer` de largura idêntica ao botão Voltar (65px), mantendo o título "PREPARAÇÃO DA BATALHA" perfeitamente centralizado.
+  - A horda de zumbis da fase continua sendo rolada proceduralmente de forma automática ao entrar na tela ou alternar entre fases.
+- **Otimização Visual das Miniaturas e Badges dos Zumbis (`js/enemy-pool.js`, `js/main.js`, `css/map-select.css`):**
+  - Substituídos os textos longos e compostos dos badges das fotos por rótulos curtos e contundentes de palavra única (`COMUM`, `ÁGIL`, `TANK`, `BLINDADO`, `ESPORO`, `COLOSSO`, `GLADIADOR`, `TÓXICO`).
+  - Aplicado `white-space: nowrap`, `text-overflow: ellipsis`, altura fixa de 10px e fundo translúcido escuro (`rgba(0,0,0,0.78)`), impedindo que quebras de linha cubram o rosto ou corpo do zumbi na miniatura.
+  - Aumentado o tamanho do container da foto (`.zombie-card-art`) de 48px para 52px com cantos arredondados de 8px.
+  - Adicionada linha de topo no corpo do card (`.zombie-card-top-row`) exibindo o nome do zumbi e uma tag estilizada com o arquétipo detalhado (`.zombie-card-type-tag`, ex: `Ágil / Salto Aéreo`, `Colosso / Sísmico`).
+- **Zero God Object & Testes Automatizados:**
+  - Versão atualizada para `v=38` no `index.html`.
+  - Cobertura de testes em `test-procedural.js` expandida para **513 testes automatizados** passando com 100% de sucesso.
+  - Todos os 16 arquivos JavaScript e 10 arquivos CSS continuam rigorosamente abaixo de 1.000 linhas.
+
 ### [v1.6.5] - 2026-10-30 (Build 37 - Eliminação de God Object no CSS & Modularização Completa)
 - **Refatoração Completa do CSS (Zero God Object: Todos os arquivos < 1.000 linhas):**
   - O antigo arquivo monolítico `css/style.css` (com mais de 3.700 linhas) foi totalmente refatorado e particionado em 9 módulos independentes de alta coesão estrutural dentro da pasta `css/`:

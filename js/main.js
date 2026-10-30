@@ -128,9 +128,6 @@ class Game {
             }
         });
         bind('map-back-btn', () => this.switchScreen('menu'));
-        bind('map-reroll-btn', () => {
-            if (window.enemyPool) { this.currentMapZombies = window.enemyPool.rollMapEnemies(5); this.renderMapZombies(); }
-        });
         bind('map-start-battle-btn', () => this.startMatch());
         bind('map-hero-prev-btn', () => this.cycleGuitarist(-1));
         bind('map-hero-next-btn', () => this.cycleGuitarist(1));
@@ -333,7 +330,10 @@ class Game {
                     <span class="zombie-card-badge ${z.badgeClass || ''}">${z.badge}</span>
                 </div>
                 <div class="zombie-card-info">
-                    <h4 class="zombie-card-name">${z.name}</h4>
+                    <div class="zombie-card-top-row">
+                        <h4 class="zombie-card-name">${z.name}</h4>
+                        <span class="zombie-card-type-tag ${z.badgeClass || ''}">${z.fullBadge || z.badge}</span>
+                    </div>
                     <p class="zombie-card-desc">${z.desc}</p>
                 </div>
             `;

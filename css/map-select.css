@@ -46,10 +46,9 @@
     white-space: nowrap;
 }
 
-.map-header-btn.map-reroll {
-    background: linear-gradient(135deg, #2b1055, #7928ca);
-    border-color: #d44dff;
-    color: #fff;
+.map-header-spacer {
+    width: 65px;
+    flex-shrink: 0;
 }
 
 .map-header-title {
@@ -420,10 +419,10 @@
 
 .zombie-card-art {
     position: relative;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     flex-shrink: 0;
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: #000;
@@ -441,12 +440,19 @@
     bottom: 0;
     left: 0;
     right: 0;
-    font-size: 7px;
-    font-weight: 800;
+    font-size: 6.5px;
+    font-weight: 900;
     text-align: center;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.78);
     color: #ffaa00;
-    padding: 1px 0;
+    padding: 1px 2px;
+    line-height: 10px;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 
 .badge-danger { color: #ff3366 !important; }
@@ -461,11 +467,34 @@
     min-width: 0;
 }
 
+.zombie-card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
 .zombie-card-name {
     font-size: 12px;
     font-weight: 800;
     color: #ffdd44;
-    margin-bottom: 2px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zombie-card-type-tag {
+    font-size: 8px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
 }
 
 .zombie-card-desc {

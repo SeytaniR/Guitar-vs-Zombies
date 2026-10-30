@@ -6,6 +6,7 @@ class EnemyPoolSystem {
                 id: 'punk_walker',
                 name: 'Zumbi Punk Rocker',
                 badge: 'COMUM',
+                fullBadge: 'Normal / Punk',
                 badgeClass: 'badge-common',
                 icon: 'assets/zombies/punk_walker.jpg',
                 type: 'normal',
@@ -20,7 +21,8 @@ class EnemyPoolSystem {
             {
                 id: 'feral_leaper',
                 name: 'Corredor Saltador',
-                badge: 'ÁGIL / SALTO',
+                badge: 'ÁGIL',
+                fullBadge: 'Ágil / Salto Aéreo',
                 badgeClass: 'badge-agile',
                 icon: 'assets/zombies/feral_leaper.jpg',
                 type: 'leaper',
@@ -35,7 +37,8 @@ class EnemyPoolSystem {
             {
                 id: 'toxic_mutant',
                 name: 'Mutante Radioativo',
-                badge: 'TANK / BIOHAZARD',
+                badge: 'TANK',
+                fullBadge: 'Tank / Devastador',
                 badgeClass: 'badge-tank',
                 icon: 'assets/zombies/toxic_mutant.jpg',
                 type: 'mutant',
@@ -51,7 +54,8 @@ class EnemyPoolSystem {
             {
                 id: 'armored_soldier',
                 name: 'Sargento Blindado',
-                badge: 'BLINDADO / CARGA',
+                badge: 'BLINDADO',
+                fullBadge: 'Blindado / Carga',
                 badgeClass: 'badge-danger',
                 icon: 'assets/zombies/armored_soldier.jpg',
                 type: 'soldier',
@@ -67,7 +71,8 @@ class EnemyPoolSystem {
             {
                 id: 'fungal_spore',
                 name: 'Infectado Esporo',
-                badge: 'VENENO / CURA',
+                badge: 'ESPORO',
+                fullBadge: 'Fungo / Regenerativo',
                 badgeClass: 'badge-toxic',
                 icon: 'assets/zombies/fungal_spore.jpg',
                 type: 'spore',
@@ -83,7 +88,8 @@ class EnemyPoolSystem {
             {
                 id: 'bloater_pounder',
                 name: 'Gordo Devorador',
-                badge: 'COLOSSAL / TERREMOTO',
+                badge: 'COLOSSO',
+                fullBadge: 'Colosso / Sísmico',
                 badgeClass: 'badge-tank',
                 icon: 'assets/zombies/bloater_pounder.jpg',
                 type: 'bloater',
@@ -99,7 +105,8 @@ class EnemyPoolSystem {
             {
                 id: 'chained_gladiator',
                 name: 'Gladiador do Asfalto',
-                badge: 'CORRENTES / DEFLEXÃO',
+                badge: 'GLADIADOR',
+                fullBadge: 'Gladiador / Deflexão',
                 badgeClass: 'badge-rusher',
                 icon: 'assets/zombies/chained_gladiator.jpg',
                 type: 'gladiator',
@@ -115,7 +122,8 @@ class EnemyPoolSystem {
             {
                 id: 'toxic_hazmat',
                 name: 'Operário Hazmat',
-                badge: 'ÁCIDO / POÇA TÓXICA',
+                badge: 'TÓXICO',
+                fullBadge: 'Químico / Poça Ácida',
                 badgeClass: 'badge-toxic',
                 icon: 'assets/zombies/toxic_hazmat.jpg',
                 type: 'hazmat',
