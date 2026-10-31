@@ -28,6 +28,38 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.8] - 2026-10-31 (Suporte a GitHub Pages, Auto-Sync & Música Gravit Stand - Build 50)
+**Publicação Web via GitHub Pages, Integração da Faixa Gravit Stand e Sincronização Automática com o Servidor**
+- **Suporte Oficial ao GitHub Pages:**
+  - Adicionado `.nojekyll` na raiz para contornar o processamento do Jekyll no GitHub Pages e servir arquivos estáticos sem restrições.
+  - Criado workflow de GitHub Actions em `.github/workflows/deploy.yml` (`actions/deploy-pages@v4`, `actions/upload-pages-artifact@v3`) configurado para deploy automático na branch `main`.
+  - Configurada branch `gh-pages` para compatibilidade total de hospedagem em `https://seytanir.github.io/Guitar-vs-Zombies/`.
+- **Música Original Gravit Stand Integrada (`SongDB` / `js/song-db.js`):**
+  - "Gravit Stand" integrada oficialmente ao acervo nativo do jogo como música original em `ensureDefaultSong()` (`default_gravit_stand`).
+  - Rock enérgico em 142 BPM dos *Antigravity Rockers*, com synth audio fallback e notas mapeadas nas 4 pistas neon.
+  - Carregamento prioritário de `assets/songs/gravit_stand.json` quando sincronizado.
+- **Auto-Sync Transparente Cliente-Servidor (`SongDB` & `server.js`):**
+  - Endpoint `POST /api/sync-song` implementado em `server.js` para persistência de faixas customizadas enviadas pelo navegador.
+  - Método `syncBrowserCustomSongs()`: detecta automaticamente músicas criadas pelo jogador no IndexedDB local e efetua sync automático com o servidor em background.
+  - Botão de sincronização manual (`⚡ P/ SERVIDOR`) na biblioteca do Estúdio de Músicas (`js/song-studio.js` e `css/song-studio.css`).
+- **Conformidade de Arquitetura & Testes Automatizados:**
+  - Todos os 17 arquivos JS e 11 arquivos CSS permanecem estritamente abaixo do teto de 1.000 linhas.
+  - Suíte procedural `test-procedural.js` com 521 testes 100% aprovados.
+  - Cache-busting atualizado para `v=50` e rodapé para `v1.7.8 (Build 50)`.
+
+### [v1.7.7] - 2026-10-30 (Batalhas de Chefe a Cada 5 Fases & Compra de Guitarristas com Ouro - Build 49)
+**Chefes Titãs Procedurais a Cada 5 Fases e Sistema de Desbloqueio de Guitarristas com Ouro**
+- **Batalha de Chefe Procedural a Cada 5 Fases (`js/stage-system.js`, `js/combat.js`, `js/zombie-entity.js`):**
+  - Fases múltiplas de 5 (5, 10, 15, 20...) são Confrontos de Chefe (`👑 CONFRONTO DE CHEFE`).
+  - Chefes sorteados exclusivamente a partir do pool existente de 16 zumbis (`bloater_pounder`, `toxic_mutant`, `god_of_war_spartan`, `chained_gladiator`, etc.).
+  - Chefe surge como versão Titã (+45% de escala, 3.5x HP, +50% dano, aura no solo, barra de HP dourada e drop de 3x ouro).
+  - Alvo da fase ajustado para 8 abates com recompensas dobradas (2.0x Ouro e XP) e chip pulsante (`👑 CHEFE (2x OURO/XP)`).
+- **Sistema de Desbloqueio de Guitarristas por Ouro (`js/guitarist-pool.js`, `js/main.js`, `css/map-select.css`):**
+  - Jogadores começam unicamente com o guitarrista inicial (`Johnny Blaze`).
+  - Demais guitarristas desbloqueáveis por ouro (Vulkan: 500, Dr. Radix: 750, Cypher: 1.500, Kragthor: 3.000, Roxie: 5.000).
+  - Card no pré-batalha exibe status de bloqueio e botão de compra imediato com persistência em `localStorage`.
+- **Cache-Busting & Testes Automatizados (v=49):**
+  - Suíte `test-procedural.js` com 521 testes automatizados (100% de sucesso).
 ### [v1.7.6] - 2026-10-30 (Mestria dos Guitarristas & Rebalanceamento das Recompensas Meta - Build 48)
 **Sistema Procedural de Mestria para Guitarristas e Rebalanceamento da Economia Meta (-90%)**
 - **Sistema de Mestria dos Guitarristas (`MetaMissionSystem` / `js/missions.js`):**
@@ -907,37 +939,3 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - **Testes Automatizados:**
   - Suíte `test-procedural.js` expandida com a Seção 7 (80 testes automatizados, 100% aprovados).
 
-### [v1.7.7] - 2026-10-30 (Batalhas de Chefe a Cada 5 Fases & Compra de Guitarristas com Ouro - Build 49)
-- **Batalha de Chefe Procedural a Cada 5 Fases (`js/stage-system.js`, `js/combat.js`, `js/zombie-entity.js`):**
-  - Fases múltiplas de 5 (5, 10, 15, 20...) agora são formalmente Confrontos de Chefe (`👑 CONFRONTO DE CHEFE`).
-  - Os chefes são sorteados exclusivamente a partir do pool existente de 16 zumbis (`bloater_pounder`, `toxic_mutant`, `god_of_war_spartan`, `chained_gladiator`, `dark_knight_undead`, `inferno_firefighter`, `builder_demolisher`).
-  - O Chefe surge em combate como uma versão Titã (+45% de escala, 3.5x HP, +50% de dano de ataque, aura no solo, barra de HP dourada ampliada e drop de 3x ouro).
-  - Alvo da fase de chefe ajustado para 8 abates; derrotar o chefe aciona imediatamente a vitória da fase com recompensas dobradas (2.0x Ouro e XP).
-  - Chip temático pulsante no pré-batalha (`👑 CHEFE (2x OURO/XP)`).
-- **Sistema de Desbloqueio de Guitarristas por Ouro (`js/guitarist-pool.js`, `js/main.js`, `css/map-select.css`):**
-  - Todos os jogadores começam unicamente com o guitarrista inicial (`Johnny Blaze`).
-  - Os demais guitarristas iniciam bloqueados e podem ser comprados com ouro:
-    - *Vulkan Ironhead* (Raro): 500 Ouro
-    - *Dr. Radix* (Raro): 750 Ouro
-    - *Cypher Volt* (Épico): 1.500 Ouro
-    - *Kragthor Titan* (Lendário): 3.000 Ouro
-    - *Roxie Anarchy* (Mítico): 5.000 Ouro
-  - O card do guitarrista na tela de pré-batalha exibe status `🔒 BLOQUEADO` e botão de compra `[🪙 DESBLOQUEAR GUITARRISTA (🪙 X)]`.
-  - Persistência segura em `localStorage ('gvs_unlocked_guitarists')`.
-- **Cache-Busting & Testes Automatizados (v=49):**
-  - Suíte `test-procedural.js` com a Seção 20 totalizando **521 testes automatizados (100% de sucesso)**.
-  - Zero God Object: Todos os 17 arquivos JS e 11 arquivos CSS estritamente abaixo de 1.000 linhas.
-
-### [v1.7.6] - 2026-10-30 (Sistema de Missões Meta Procedurais & Maestria de Guitarristas - Build 48)
-- **Sistema de Missões Meta Procedurais (`js/missions.js`, `css/missions.css`, `index.html`):**
-  - Rastreamento procedural de abates de todos os 16 zumbis do pool e de todos os 6 guitarristas com 5 tiers escalonados (10 -> 100 -> 1.000 -> 10.000 -> 100.000 abates).
-  - Recompensas rebalanceadas (-90% nos zumbis, guitarristas escalonados a 10% dos zumbis).
-  - Modal imersivo com abas de categoria, filtros de status, busca dinâmica e botão "Reivindicar Todas".
-
-### [v1.6.6 - v1.7.5] - 2026-10-30 (Histórico de Releases Recentes)
-- **v1.7.4 - v1.7.5:** Redesign minimalista e clean do menu pré-batalha, tags compactas e balanceamento de horda.
-- **v1.7.2 - v1.7.3:** Adicionados 8 novos arquétipos de zumbis à pool mestre (Clown, Builder, Scientist, Firefighter, Rick Grimes, Politician, Batman, Kratos).
-- **v1.7.1:** Aumento de +30% na vida base de todos os zumbis e redução de 70% no dano em área das explosões entre zumbis.
-- **v1.6.7 - v1.7.0:** Nova identidade visual AAA, favicon squircle translúcido e 3 arenas sorteadas proceduralmente por fase.
-- **v1.6.5:** Modularização CSS estrita (Zero God Object: 10 arquivos modulares < 1.000 linhas).
-- **v1.5.0 - v1.6.4:** Pool de 6 guitarristas procedurais, árvore de talentos, modo estúdio DAW e eliminação de ghost kills.

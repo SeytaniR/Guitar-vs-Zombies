@@ -473,3 +473,20 @@
     border-radius: 6px;
     cursor: pointer;
 }
+
+.song-btn-sync {
+    background: linear-gradient(135deg, #00ffcc, #00aa88);
+    border: none;
+    color: #041014;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 255, 204, 0.3);
+}
+.song-btn-sync:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 255, 204, 0.5);
+}
+

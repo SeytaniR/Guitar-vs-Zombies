@@ -26,6 +26,7 @@ class SongDB {
                 this.db = e.target.result;
                 // Ensure default starter song exists
                 await this.ensureDefaultSong();
+                setTimeout(() => this.syncBrowserCustomSongs(), 600);
                 resolve(this.db);
             };
 
@@ -55,8 +56,52 @@ class SongDB {
                 const s3 = await this.createDefaultRockSong('default_anarchy_riot', 'Anarchy Riot', 'Roxie Anarchy', 160, 'assets/heroes/roxie_anarchy.jpg');
                 await this.saveSong(s3);
             }
+
+            const existing4 = await this.getSong('default_gravit_stand');
+            if (!existing4) {
+                let gravitData = null;
+                try {
+                    const res = await fetch('assets/songs/gravit_stand.json');
+                    if (res.ok) gravitData = await res.json();
+                } catch(err) {}
+
+                if (gravitData && gravitData.notes) {
+                    gravitData.id = 'default_gravit_stand';
+                    gravitData.isDefault = true;
+                    await this.saveSong(gravitData);
+                } else {
+                    const s4 = await this.createDefaultRockSong('default_gravit_stand', 'Gravit Stand', 'Antigravity Rockers', 142, 'assets/branding/wallpaper.jpg');
+                    s4.description = 'Faixa original lendária de alta voltagem (142 BPM)! Sincronia pesada para o apocalipse zumbi.';
+                    await this.saveSong(s4);
+                }
+            }
         } catch (e) {
             console.warn("Could not check/create default starter song:", e);
+        }
+    }
+
+    async syncBrowserCustomSongs() {
+        try {
+            const songs = await this.getAllSongs();
+            if (!songs || songs.length === 0) return;
+            for (const s of songs) {
+                const titleLower = (s.title || '').toLowerCase();
+                const isGravit = titleLower.includes('gravit');
+                const isCustom = !s.isDefault || isGravit;
+                if (isCustom && s.notes && s.notes.length > 0) {
+                    fetch('/api/sync-song', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(s)
+                    }).then(r => r.json()).then(data => {
+                        if (data && data.success) {
+                            console.log(`[AutoSync] ✅ Música "${s.title}" sincronizada com o servidor!`);
+                        }
+                    }).catch(() => {});
+                }
+            }
+        } catch (e) {
+            console.warn('[AutoSync] Error checking custom songs:', e);
         }
     }
 

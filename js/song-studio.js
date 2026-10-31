@@ -402,6 +402,7 @@ class SongStudio {
                         <button class="song-btn-play" title="Jogar Música">▶️ JOGAR</button>
                         <button class="song-btn-edit" title="Editar Ritmo">✏️ EDITAR</button>
                         <button class="song-btn-export" title="Exportar (.gvsong)">💾 EXPORTAR</button>
+                        <button class="song-btn-sync" title="Exportar Diretamente para o Servidor">⚡ P/ SERVIDOR</button>
                         ${!song.isDefault ? '<button class="song-btn-delete" title="Excluir">🗑️</button>' : ''}
                     </div>
                 `;
@@ -442,6 +443,28 @@ class SongStudio {
                             this.showToast(`💾 Música baixada: ${filename}`);
                         } catch (err) {
                             alert("Erro ao exportar música: " + err.message);
+                        }
+                    };
+                }
+
+                const syncBtn = card.querySelector('.song-btn-sync');
+                if (syncBtn) {
+                    syncBtn.onclick = async () => {
+                        try {
+                            this.showToast(`⚡ Enviando "${song.title}" para o servidor...`);
+                            const res = await fetch('/api/sync-song', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(song)
+                            });
+                            const data = await res.json();
+                            if (data && data.success) {
+                                this.showToast(`🎉 Música "${song.title}" salva no jogo!`);
+                            } else {
+                                this.showToast(`⚠️ Não foi possível salvar no servidor.`);
+                            }
+                        } catch(e) {
+                            this.showToast(`⚠️ Falha ao conectar ao servidor.`);
                         }
                     };
                 }

@@ -834,11 +834,11 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #ma
 assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.7.7 Build 49)
+// Cache Buster Version & Modular CSS Links (v1.7.8 Build 50)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=49`), `index.html links ${f} with v=49`);
+    assert(htmlContent.includes(`${f}?v=50`), `index.html links ${f} with v=50`);
 });
-assert(htmlContent.includes('v1.7.7 (Build 49)'), 'index.html footer specifies v1.7.7 (Build 49)');
+assert(htmlContent.includes('v1.7.8 (Build 50)'), 'index.html footer specifies v1.7.8 (Build 50)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -850,10 +850,7 @@ assert(cssContent.includes('.stage-info-chips') && cssContent.includes('.arena-r
 console.log('\n17. Testing Zombie Balance (+30% Base HP) & Explosion AoE Reduction (-70%)...');
 const poolZombies = enemyPool.masterPool;
 const expectedHps = { punk_walker: 104, feral_leaper: 85, toxic_mutant: 299, armored_soldier: 273, fungal_spore: 163, bloater_pounder: 572, chained_gladiator: 254, toxic_hazmat: 208 };
-Object.entries(expectedHps).forEach(([id, expectedHp]) => {
-    const z = poolZombies.find(item => item.id === id);
-    assert(z && z.hp === expectedHp, `Zombie ${id} base HP is scaled +30% to ${expectedHp} (actual: ${z ? z.hp : 'not found'})`);
-});
+Object.entries(expectedHps).forEach(([id, expHp]) => assert(poolZombies.find(z => z.id === id)?.hp === expHp, `Zombie ${id} HP scaled +30% to ${expHp}`));
 
 // Test Mutant Blast AoE Damage Reduction to other zombies (reduced by 70%: 70 -> 21)
 const victimZombie1 = { x: 200, y: 150, hp: 100, active: true, flashTime: 0 };
