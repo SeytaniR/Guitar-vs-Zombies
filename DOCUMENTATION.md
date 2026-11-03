@@ -28,6 +28,20 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.8.1] - 2026-11-03 (Rebalanceamento de Custo dos Guitarristas 10x - Build 53)
+**Aumento de 10x no Custo em Ouro para Desbloqueio dos Guitarristas no Roster de Heróis**
+- **Escalonamento de Custos 10x (`GuitaristPoolSystem` / `js/guitarist-pool.js`):**
+  - *Johnny "Riff" Blaze (Comum):* 0 Ouro (Guitarrista inicial desbloqueado por padrão).
+  - *Vulkan "Ironhead" (Raro):* De 500 para **5.000 Ouro** (10x).
+  - *Dr. Radix Biohazard (Raro):* De 750 para **7.500 Ouro** (10x).
+  - *Cypher-7 Volt (Épico):* De 1.500 para **15.000 Ouro** (10x).
+  - *Kragthor, o Bárbaro (Lendário):* De 3.000 para **30.000 Ouro** (10x).
+  - *Roxie "Anarchy" Slash (Mítico):* De 5.000 para **50.000 Ouro** (10x).
+- **Interface & Validação:**
+  - Valores atualizados dinamicamente na tela de Pré-Batalha e no seletor de heróis.
+  - Testes automatizados atualizados (`test-procedural.js`) com 100% de aprovação (524 testes).
+  - Cache-busting atualizado para `v=53` e versão global para `v1.8.1 (Build 53)`.
+
 ### [v1.8.0] - 2026-11-03 (Revisão Geral e Internacionalização Completa PT-BR / EN - Build 52)
 **Auditoria e Revisão Geral de Todos os Textos, Telas e Modais do Jogo com Localização Completa em Português e Inglês**
 - **Motor Central de Internacionalização (`I18n` / `js/i18n.js`):**

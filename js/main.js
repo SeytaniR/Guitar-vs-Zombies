@@ -223,7 +223,7 @@ class Game {
         if (rBadge) { rBadge.innerText = (isUnlocked ? (currentHero.rarity || 'COMUM') : `🔒 ${currentHero.rarity}`).toUpperCase(); rBadge.className = `hero-rarity-badge ${currentHero.rarityClass || currentHero.badgeClass || 'badge-common'} ${isUnlocked ? '' : 'badge-locked'}`; }
         if (nEl) nEl.innerText = isUnlocked ? currentHero.name : `🔒 ${currentHero.name}`;
         if (tEl) tEl.innerText = currentHero.title;
-        if (iEl) iEl.innerText = isUnlocked ? `${currentHero.instrument} • ⚡ 1.0/s` : `🔒 Desbloqueie por 🪙 ${currentHero.unlockCost || 1000}`;
+        if (iEl) iEl.innerText = isUnlocked ? `${currentHero.instrument} • ⚡ 1.0/s` : `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`;
         if (pnEl) pnEl.innerText = (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva';
         if (pdEl) pdEl.innerText = (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '';
         if (sBox) {

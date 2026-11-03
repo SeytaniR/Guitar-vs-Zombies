@@ -38,7 +38,7 @@ class GuitaristPoolSystem {
                 title: 'O Piromaníaco das Wastelands',
                 rarity: 'RARO',
                 rarityKey: 'rare',
-                unlockCost: 500,
+                unlockCost: 5000,
                 badgeClass: 'badge-rare',
                 icon: 'assets/heroes/vulkan_ironhead.jpg',
                 sheet: 'heroVulkanSheet',
@@ -68,7 +68,7 @@ class GuitaristPoolSystem {
                 title: 'O Solista Bioquímico',
                 rarity: 'RARO',
                 rarityKey: 'rare',
-                unlockCost: 750,
+                unlockCost: 7500,
                 badgeClass: 'badge-rare',
                 icon: 'assets/heroes/dr_radix.jpg',
                 sheet: 'heroHazmatSheet',
@@ -99,7 +99,7 @@ class GuitaristPoolSystem {
                 title: 'O Virtuoso Cibernético',
                 rarity: 'ÉPICO',
                 rarityKey: 'epic',
-                unlockCost: 1500,
+                unlockCost: 15000,
                 badgeClass: 'badge-epic',
                 icon: 'assets/heroes/cypher_volt.jpg',
                 sheet: 'heroCyborgSheet',
@@ -129,7 +129,7 @@ class GuitaristPoolSystem {
                 title: 'O Titã do Heavy Metal',
                 rarity: 'LENDÁRIO',
                 rarityKey: 'legendary',
-                unlockCost: 3000,
+                unlockCost: 30000,
                 badgeClass: 'badge-legendary',
                 icon: 'assets/heroes/kragthor_titan.jpg',
                 sheet: 'heroGladiatorSheet',
@@ -158,7 +158,7 @@ class GuitaristPoolSystem {
                 title: 'A Valquíria do Punk Mítico',
                 rarity: 'MÍTICO',
                 rarityKey: 'mythic',
-                unlockCost: 5000,
+                unlockCost: 50000,
                 badgeClass: 'badge-mythic',
                 icon: 'assets/heroes/roxie_anarchy.jpg',
                 sheet: 'heroAnarchySheet',
@@ -349,7 +349,7 @@ class GuitaristPoolSystem {
 
     getHeroUnlockCost(heroId) {
         const hero = this.guitarists.find(g => g.id === heroId);
-        return (hero && hero.unlockCost !== undefined) ? hero.unlockCost : 1000;
+        return (hero && hero.unlockCost !== undefined) ? hero.unlockCost : 5000;
     }
 
     unlockHeroWithGold(heroId) {

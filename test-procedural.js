@@ -771,11 +771,11 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.8.0 Build 52)
+// Cache Buster Version & Modular CSS Links (v1.8.1 Build 53)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=52`), `index.html links ${f} with v=52`);
+    assert(htmlContent.includes(`${f}?v=53`), `index.html links ${f} with v=53`);
 });
-assert(htmlContent.includes('v1.8.0 (Build 52)'), 'index.html footer specifies v1.8.0 (Build 52)');
+assert(htmlContent.includes('v1.8.1 (Build 53)'), 'index.html footer specifies v1.8.1 (Build 53)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -903,13 +903,13 @@ localStorage.removeItem('gvs_unlocked_guitarists');
 const heroPool = new GuitaristPoolSystem();
 assert(heroPool.isHeroUnlocked('johnny_blaze') === true, 'Starter Johnny Blaze is unlocked by default');
 assert(heroPool.isHeroUnlocked('vulkan_ironhead') === false, 'Vulkan Ironhead is locked by default');
-assert(heroPool.getHeroUnlockCost('vulkan_ironhead') === 500, 'Vulkan costs 500 gold to unlock');
-window.talentSystem.gold = 200;
+assert(heroPool.getHeroUnlockCost('vulkan_ironhead') === 5000, 'Vulkan costs 5000 gold to unlock (10x scaled)');
+window.talentSystem.gold = 2000;
 assert(heroPool.unlockHeroWithGold('vulkan_ironhead').success === false, 'Unlock fails with insufficient gold');
-window.talentSystem.gold = 1000;
+window.talentSystem.gold = 10000;
 const unlockRes = heroPool.unlockHeroWithGold('vulkan_ironhead');
 assert(unlockRes.success === true && heroPool.isHeroUnlocked('vulkan_ironhead') === true, 'Hero unlocked with gold');
-assert(window.talentSystem.gold === 500, '500 gold deducted from talentSystem');
+assert(window.talentSystem.gold === 5000, '5000 gold deducted from talentSystem');
 assert(cssContent.includes('.chip-boss') && cssContent.includes('.hero-unlock-cta'), 'CSS includes boss chip and hero unlock CTA');
 
 // ==========================================
