@@ -210,11 +210,25 @@ class RhythmSystem {
             let ratingColor = '#00d4ff';
 
             const syncBonus = window.talentSystem ? window.talentSystem.getStat('fine_sync') : 0;
+            const unbelWindow = Math.round(11 * (1.0 + syncBonus));
             const perfectWindow = Math.round(24 * (1.0 + syncBonus));
             const greatWindow = Math.round(54 * (1.0 + syncBonus * 0.5));
 
             let ratingKey = 'good';
-            if (minDist <= perfectWindow) {
+            if (minDist <= unbelWindow) {
+                rating = 'UNBELIEVABLE!';
+                ratingKey = 'unbelievable';
+                isCrit = (window.game && window.game.combat && window.game.combat.guaranteedCritReady) || false;
+                ratingColor = '#ff00ff';
+                this.streak++;
+                if (this.songStats) {
+                    this.songStats.unbelievables = (this.songStats.unbelievables || 0) + 1;
+                    this.songStats.perfects = (this.songStats.perfects || 0) + 1;
+                }
+                if (window.metaMissions && typeof window.metaMissions.recordStat === 'function') {
+                    window.metaMissions.recordStat('unbelievable', 1);
+                }
+            } else if (minDist <= perfectWindow) {
                 rating = 'PERFECT!';
                 ratingKey = 'perfect';
                 isCrit = (window.game && window.game.combat && window.game.combat.guaranteedCritReady) || false;
@@ -239,6 +253,9 @@ class RhythmSystem {
             if (this.songStats) {
                 this.songStats.hitNotes++;
                 this.songStats.maxStreak = Math.max(this.songStats.maxStreak, this.streak);
+            }
+            if (window.metaMissions && typeof window.metaMissions.recordMaxStreak === 'function') {
+                window.metaMissions.recordMaxStreak(this.streak);
             }
 
             // Streak milestone talents:
@@ -731,27 +748,21 @@ class RhythmSystem {
             this.ctx.save();
             this.ctx.translate(x, drawY);
 
-            // Fast GPU halo stroke instead of multi-pass shadowBlur
+            // GPU halo stroke & fill
             this.ctx.strokeStyle = col.main + (note.holding ? '88' : '44');
             this.ctx.lineWidth = note.holding ? 6 : 4;
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, -19);
-            this.ctx.bezierCurveTo(21, -19, 19, 13, 0, 21);
-            this.ctx.bezierCurveTo(-19, 13, -21, -19, 0, -19);
-            this.ctx.stroke();
-
-            this.ctx.fillStyle = col.main;
             this.ctx.beginPath();
             this.ctx.moveTo(0, -18);
             this.ctx.bezierCurveTo(20, -18, 18, 12, 0, 20);
             this.ctx.bezierCurveTo(-18, 12, -20, -18, 0, -18);
+            this.ctx.stroke();
+            this.ctx.fillStyle = col.main;
             this.ctx.fill();
 
             this.ctx.fillStyle = col.core;
             this.ctx.beginPath();
             this.ctx.arc(0, -2, 6.5, 0, Math.PI * 2);
             this.ctx.fill();
-
             this.ctx.restore();
         });
 
@@ -838,14 +849,9 @@ class RhythmSystem {
         }
 
         this.songStats = {
-            totalNotes: song.notes.length,
-            hitNotes: 0,
-            perfects: 0,
-            greats: 0,
-            goods: 0,
-            misses: 0,
-            maxStreak: 0,
-            scoreStart: window.game && window.game.combat ? window.game.combat.score : 0
+            totalNotes: song.notes.length, hitNotes: 0,
+            unbelievables: 0, perfects: 0, greats: 0, goods: 0, misses: 0,
+            maxStreak: 0, scoreStart: window.game && window.game.combat ? window.game.combat.score : 0
         };
 
         // Initialize notes from song chart
@@ -878,27 +884,18 @@ class RhythmSystem {
                     console.warn("RhythmSystem audio error, continuing with precision software clock:", e);
                 };
                 const playPromise = this.songAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => {
-                        console.warn("Song audio play blocked by browser autoplay policy; will auto-resume on first tap", e);
-                    });
-                }
+                if (playPromise !== undefined) playPromise.catch(() => {});
             } catch (err) {
-                console.warn("Could not initialize custom song audio element:", err);
                 this.songAudio = null;
             }
         } else {
             this.songAudio = null;
         }
-
         this.updateCustomSongHUD();
     }
 
     stopCustomSong() {
-        if (this.songAudio) {
-            try { this.songAudio.pause(); } catch (e) {}
-            this.songAudio = null;
-        }
+        if (this.songAudio) { try { this.songAudio.pause(); } catch (e) {} this.songAudio = null; }
         this.isCustomSongPlaying = false;
         this.currentSong = null;
         this.notes = [];
@@ -910,9 +907,7 @@ class RhythmSystem {
 
     pauseAudio() {
         this.isPaused = true;
-        if (this.songAudio && !this.songAudio.paused) {
-            try { this.songAudio.pause(); } catch (e) {}
-        }
+        if (this.songAudio && !this.songAudio.paused) { try { this.songAudio.pause(); } catch (e) {} }
     }
 
     resumeAudio() {

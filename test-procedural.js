@@ -213,10 +213,8 @@ heroCatalogues.forEach(hid => {
 });
 
 // Test stage rule: player cannot equip 4 special skills; at least 1 must remain basic strike
-skillSys.equipSkill(3, 'basic_strike', 'johnny_blaze');
-skillSys.equipSkill(0, 'blaze_power_chord', 'johnny_blaze');
-skillSys.equipSkill(1, 'blaze_garage_shred', 'johnny_blaze');
-skillSys.equipSkill(2, 'blaze_stage_dive', 'johnny_blaze');
+skillSys.equipSkill(3, 'basic_strike', 'johnny_blaze'); skillSys.equipSkill(0, 'blaze_power_chord', 'johnny_blaze');
+skillSys.equipSkill(1, 'blaze_garage_shred', 'johnny_blaze'); skillSys.equipSkill(2, 'blaze_stage_dive', 'johnny_blaze');
 
 // Slot 3 is currently basic_strike. Trying to replace slot 3 with a special skill MUST be blocked!
 const checkBlock = skillSys.canEquipSkill(3, 'blaze_sound_concussion', 'johnny_blaze');
@@ -235,23 +233,10 @@ assert(allowBasic.allowed === true, 'canEquipSkill() permits equipping basic_str
 function simulateSkillExecution(lane, baseDamage, currentMana) {
     const skill = skillSys.getEquippedSkill(lane, 'johnny_blaze');
     const manaCost = skill ? skill.manaCost : 0;
-    
     if (manaCost > 0 && currentMana < manaCost) {
-        // Insufficient mana: note becomes a common basic attack! (1.0x damage, 0 mana spent)
-        return {
-            executedSkill: 'common_basic_attack',
-            damage: Math.round(baseDamage * 1.0),
-            manaSpent: 0,
-            feedback: '⚡ SEM MP! (BÁSICO)'
-        };
-    } else {
-        return {
-            executedSkill: skill.id,
-            damage: Math.round(baseDamage * (skill.damageMult || 1.0)),
-            manaSpent: manaCost,
-            feedback: skill.name
-        };
+        return { executedSkill: 'common_basic_attack', damage: Math.round(baseDamage * 1.0), manaSpent: 0, feedback: '⚡ SEM MP! (BÁSICO)' };
     }
+    return { executedSkill: skill.id, damage: Math.round(baseDamage * (skill.damageMult || 1.0)), manaSpent: manaCost, feedback: skill.name };
 }
 
 // Case A: Lane 0 (Power Chord, cost 8) with 30 mana -> Should succeed
@@ -357,21 +342,9 @@ const zDefaultEdge = new ZombieEntity(mockZombieType, 100, 400, 1);
 assert(zDefaultEdge.x >= 408 && zDefaultEdge.x <= 420, `ZombieEntity default edge spawn is right at screen threshold (${zDefaultEdge.x.toFixed(1)} vs 408-418px)`);
 
 // 7.2 Mock CombatSystem Environment
-global.window.addEventListener = () => {};
-global.window.removeEventListener = () => {};
-global.document = {
-    getElementById: () => ({
-        getContext: () => ({
-            save: () => {}, restore: () => {}, fillRect: () => {}, beginPath: () => {},
-            stroke: () => {}, fill: () => {}, drawImage: () => {}, closePath: () => {},
-            arc: () => {}, ellipse: () => {}, measureText: () => ({ width: 20 })
-        }),
-        addEventListener: () => {},
-        parentElement: { clientWidth: 400, clientHeight: 300 },
-        width: 400,
-        height: 300
-    })
-};
+global.window.addEventListener = () => {}; global.window.removeEventListener = () => {};
+const mockCtx = { save: () => {}, restore: () => {}, fillRect: () => {}, beginPath: () => {}, stroke: () => {}, fill: () => {}, drawImage: () => {}, closePath: () => {}, arc: () => {}, ellipse: () => {}, measureText: () => ({ width: 20 }) };
+global.document = { getElementById: () => ({ getContext: () => mockCtx, addEventListener: () => {}, parentElement: { clientWidth: 400, clientHeight: 300 }, width: 400, height: 300 }) };
 global.Image = class { constructor() { this.complete = true; this.naturalWidth = 1024; this.naturalHeight = 571; } };
 global.SpriteSheet = class { constructor() {} drawFrame() {} };
 
@@ -404,22 +377,13 @@ combat.registerRhythmNote('perfect', 0);
 assert(combat.perfectStreak === 1, 'First perfect note increments perfectStreak to 1');
 combat.registerRhythmNote('great', 1);
 assert(combat.perfectStreak === 0, 'Great note resets perfectStreak to 0');
-
-combat.registerRhythmNote('perfect', 0);
-assert(combat.perfectStreak === 1, 'Perfect note increments perfectStreak to 1');
-combat.registerRhythmNote('good', 2);
+combat.registerRhythmNote('perfect', 0); combat.registerRhythmNote('good', 2);
 assert(combat.perfectStreak === 0, 'Good note resets perfectStreak to 0');
-
-combat.registerRhythmNote('perfect', 0);
-assert(combat.perfectStreak === 1, 'Perfect note increments perfectStreak to 1');
-combat.registerRhythmNote('miss', 3);
+combat.registerRhythmNote('perfect', 0); combat.registerRhythmNote('miss', 3);
 assert(combat.perfectStreak === 0, 'Miss note resets perfectStreak to 0');
 
 // 2. Accumulating 5 consecutive perfect notes guarantees crit on next shot
-combat.registerRhythmNote('perfect', 0); // 1
-combat.registerRhythmNote('perfect', 1); // 2
-combat.registerRhythmNote('perfect', 2); // 3
-combat.registerRhythmNote('perfect', 3); // 4
+[0, 1, 2, 3].forEach(l => combat.registerRhythmNote('perfect', l));
 assert(combat.perfectStreak === 4 && !combat.guaranteedCritReady, '4 perfect notes accumulated, guaranteed crit not yet ready');
 combat.registerRhythmNote('perfect', 0); // 5th perfect note!
 assert(combat.perfectStreak === 0, 'After 5th perfect note, perfectStreak is reset to 0');
@@ -542,18 +506,12 @@ assert(window.talentSystem.gold > prevGold, 'completeStage() deposits gold rewar
 assert(stageSys.highestUnlockedStage >= stageBefore + 1, 'completeStage() unlocks the next stage');
 
 // 2. Combo Attack Speed Scaling (+0.01 per point, max +2.0)
-combat.combo = 0;
-const baseSpd = combat.getHeroAttackSpeed();
-combat.combo = 50;
-const spd50 = combat.getHeroAttackSpeed();
+combat.combo = 0; const baseSpd = combat.getHeroAttackSpeed();
+combat.combo = 50; const spd50 = combat.getHeroAttackSpeed();
 assert(Math.abs(spd50 - (baseSpd + 0.50)) < 0.001, `Combo 50 adds +0.50 attack speed: ${spd50.toFixed(2)} vs ${baseSpd.toFixed(2)} + 0.50`);
-
-combat.combo = 200;
-const spd200 = combat.getHeroAttackSpeed();
+combat.combo = 200; const spd200 = combat.getHeroAttackSpeed();
 assert(Math.abs(spd200 - (baseSpd + 2.0)) < 0.001, `Combo 200 adds +2.00 attack speed (max cap): ${spd200.toFixed(2)}`);
-
-combat.combo = 500;
-const spd500 = combat.getHeroAttackSpeed();
+combat.combo = 500; const spd500 = combat.getHeroAttackSpeed();
 assert(Math.abs(spd500 - (baseSpd + 2.0)) < 0.001, `Combo 500 is capped at +2.00 max attack speed: ${spd500.toFixed(2)}`);
 
 // 3. Wrong Tap Penalty (miss shot bypasses zombies, 0 damage, resets combo)
@@ -828,17 +786,15 @@ stgSys.setSelectedStage(1);
 assert(stgSys.getSelectedMap() !== null, 'Stage selection automatically assigns a randomized battle map');
 
 // UI DOM & CSS Checks for Arenas (v1.7.0)
-assert(htmlContent.includes('id="map-selected-arena-showcase"'), 'index.html contains #map-selected-arena-showcase');
-assert(!htmlContent.includes('id="map-arenas-roster-grid"'), 'index.html removed #map-arenas-roster-grid (no manual map selection)');
-assert(!htmlContent.includes('id="map-arena-prev-btn"'), 'index.html removed #map-arena-prev-btn (no manual map cycling)');
-assert(!htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed #map-arena-next-btn (no manual map cycling)');
+assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.includes('id="map-arenas-roster-grid"'), 'index.html contains #map-selected-arena-showcase & removed manual roster');
+assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.7.8 Build 50)
+// Cache Buster Version & Modular CSS Links (v1.7.9 Build 51)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=50`), `index.html links ${f} with v=50`);
+    assert(htmlContent.includes(`${f}?v=51`), `index.html links ${f} with v=51`);
 });
-assert(htmlContent.includes('v1.7.8 (Build 50)'), 'index.html footer specifies v1.7.8 (Build 50)');
+assert(htmlContent.includes('v1.7.9 (Build 51)'), 'index.html footer specifies v1.7.9 (Build 51)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -974,6 +930,44 @@ const unlockRes = heroPool.unlockHeroWithGold('vulkan_ironhead');
 assert(unlockRes.success === true && heroPool.isHeroUnlocked('vulkan_ironhead') === true, 'Hero unlocked with gold');
 assert(window.talentSystem.gold === 500, '500 gold deducted from talentSystem');
 assert(cssContent.includes('.chip-boss') && cssContent.includes('.hero-unlock-cta'), 'CSS includes boss chip and hero unlock CTA');
+
+// ==========================================
+// 21. Testing Performance Missions (v1.7.9 Build 51)
+// ==========================================
+console.log('\n21. Testing Performance Missions (Unbelievable, Crits, Precision & Streak)...');
+assert(meta.getAllPerformanceMissions().length === 6, 'Performance missions category contains all 6 missions');
+const unbMission = meta.getPerformanceMission('unbelievable');
+assert(unbMission && unbMission.unitLabel === 'Acertos' && unbMission.reward.gold === 15, 'Unbelievable Tier 1 configured with low reward (15 gold)');
+
+// Record Unbelievables
+const prevUnb = unbMission.currentVal;
+meta.recordStat('unbelievable', 10);
+const unbAfter = meta.getPerformanceMission('unbelievable');
+assert(unbAfter.currentVal === prevUnb + 10 && unbAfter.isReadyToClaim, '10 Unbelievables recorded & Tier 1 ready to claim');
+const claimUnb = meta.claimPerformanceReward('unbelievable');
+assert(claimUnb && claimUnb.success && claimUnb.claimedTier === 1 && claimUnb.reward.gold === 15, 'Unbelievable Tier 1 claimed with low 15 gold reward');
+assert(meta.getPerformanceMission('unbelievable').targetVal === 100, 'Unbelievable advances to 100 target');
+
+// Record Critical Hits
+meta.recordStat('critical_hits', 10);
+const critAfter = meta.getPerformanceMission('critical_hits');
+assert(critAfter.currentVal >= 10 && critAfter.isReadyToClaim, '10 Critical hits recorded & Tier 1 ready to claim');
+const claimCrit = meta.claimPerformanceReward('critical_hits');
+assert(claimCrit && claimCrit.success && claimCrit.reward.gold === 15, 'Critical Hits Tier 1 claimed with low 15 gold reward');
+
+// Record Song Completion with 92% Accuracy
+meta.recordSongCompletion(92, { totalNotes: 100, hitNotes: 92, misses: 8, maxStreak: 45 });
+assert(meta.getPerformanceMission('songs_completed').currentVal >= 1, 'Song completion recorded');
+assert(meta.getPerformanceMission('high_accuracy_songs').currentVal >= 1, 'High accuracy song (≥90%) recorded');
+assert(meta.getPerformanceMission('max_streak').currentVal >= 45, 'Max streak recorded');
+
+// Record 100% Full Combo
+meta.recordSongCompletion(100, { totalNotes: 50, hitNotes: 50, misses: 0, maxStreak: 50 });
+assert(meta.getPerformanceMission('perfect_accuracy_songs').currentVal >= 1, '100% Full Combo song recorded');
+
+// UI DOM Category Tabs check
+assert(htmlContent.includes('data-cat="performance"'), 'index.html includes performance category tab');
+assert(cssContent.includes('.perf-mission-card'), 'CSS includes styling for performance cards');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {

@@ -819,6 +819,10 @@ class Game {
         setVal('result-gold-reward', `+${(this.combat && this.combat.battleStats ? this.combat.battleStats.coinsEarned : 0)} 🪙`);
         setVal('result-score-gained', `+${(this.combat ? this.combat.score : 0).toLocaleString()}`);
 
+        if (window.metaMissionSystem && typeof window.metaMissionSystem.recordSongCompletion === 'function') {
+            window.metaMissionSystem.recordSongCompletion(accPct, stats);
+        }
+
         try {
             if (window.stageSystem && typeof window.stageSystem.completeStage === 'function') {
                 window.stageSystem.completeStage(window.stageSystem.selectedStage);

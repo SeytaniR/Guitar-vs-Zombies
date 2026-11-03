@@ -638,3 +638,29 @@
     border-color: rgba(0, 240, 255, 0.35);
     color: #00f0ff;
 }
+
+/* Performance & Rhythm Card Overrides */
+.perf-mission-card {
+    border-color: rgba(255, 204, 0, 0.25);
+}
+
+.perf-mission-card:hover {
+    border-color: rgba(255, 204, 0, 0.55);
+    box-shadow: 0 4px 18px rgba(255, 204, 0, 0.18);
+}
+
+.perf-tier-pill {
+    background: rgba(255, 215, 0, 0.12);
+    border-color: rgba(255, 215, 0, 0.35);
+    color: #ffd700;
+}
+
+.perf-fill {
+    background: linear-gradient(90deg, #ffaa00 0%, #ff00ff 100%);
+}
+
+.perf-title {
+    background: rgba(255, 215, 0, 0.12);
+    border-color: rgba(255, 215, 0, 0.35);
+    color: #ffd700;
+}

@@ -28,6 +28,29 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.7.9] - 2026-11-03 (Missões Procedurais de Performance, Ritmo & Batalha - Build 51)
+**Expansão de Metas Procedurais com UNBELIEVABLE, Dano Crítico, Precisão de Músicas, Combos e Recompensas Balanceadas**
+- **Nova Categoria: Ritmo & Batalha (`MetaMissionSystem` / `js/missions.js`):**
+  - Adicionadas 6 missões de performance procedural com metas de longo prazo:
+    1. *Acertos UNBELIEVABLE:* Precisão máxima no centro da pista ou streaks de 7+ kills (10 ➔ 100 ➔ 1k ➔ 10k ➔ 100k acertos).
+    2. *Disparos Críticos:* Dano crítico com tiros sônicos em zumbis (10 ➔ 100 ➔ 1k ➔ 10k ➔ 100k críticos).
+    3. *Shows com Precisão ≥ 90%:* Músicas concluídas com precisão excelente (1 ➔ 5 ➔ 20 ➔ 50 ➔ 150 shows).
+    4. *Shows Perfeitos (100% FC):* Músicas finalizadas sem errar nenhuma nota (1 ➔ 3 ➔ 10 ➔ 25 ➔ 60 shows 100%).
+    5. *Maior Combo de Notas (Streak):* Sequência ininterrupta máxima na esteira (25 ➔ 50 ➔ 100 ➔ 250 ➔ 500 notas).
+    6. *Shows Realizados na Turnê:* Total de músicas finalizadas na turnê (1 ➔ 5 ➔ 20 ➔ 60 ➔ 150 shows).
+- **Timing Rating UNBELIEVABLE! no Motor de Ritmo (`js/rhythm.js` & `js/combat.js`):**
+  - Janela de acerto no centro exato da pista (`<= 11px`), exibindo `UNBELIEVABLE! 👑⚡` em neon magenta/dourado e concedendo 6.0 MP e multiplicador de 1.6x.
+  - Notificação sônica e de combate ao atingir marcos de ritmo.
+- **Economia Equilibrada (Recompensas Baixas & Sem Exageros):**
+  - Valores de ouro mantidos estritamente moderados (Tier 1: 15-30 Ouro, Tier 2: 80-150 Ouro, Tier 3: 500-1000 Ouro, Tier 4: 3.000-6.000 Ouro, Tier 5: 20.000-40.000 Ouro).
+- **Interface & Navegação (`index.html` & `css/missions.css`):**
+  - Nova aba `⚡ Ritmo & Batalha` com badge de resgate individual no modal de missões.
+  - Estilização neon âmbar/magenta para cards de performance (`.perf-mission-card`, `.perf-fill`, `.perf-tier-pill`).
+- **Conformidade de Arquitetura & Testes:**
+  - 530 testes automatizados 100% aprovados (`test-procedural.js`).
+  - Todos os 17 arquivos JS e 11 arquivos CSS estritamente abaixo de 1.000 linhas.
+  - Cache-busting atualizado para `v=51` e rodapé para `v1.7.9 (Build 51)`.
+
 ### [v1.7.8] - 2026-10-31 (Suporte a GitHub Pages, Auto-Sync & Música Gravit Stand - Build 50)
 **Publicação Web via GitHub Pages, Integração da Faixa Gravit Stand e Sincronização Automática com o Servidor**
 - **Suporte Oficial ao GitHub Pages:**
@@ -903,39 +926,7 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
   - Painel inspetor com ícone renderizado, descrição detalhada, requisitos bloqueados, barra de progresso de nível, prévia de benefícios atual/próximo e botão de compra com validação de saldo.
   - Efeitos visuais no canvas: arco da barreira sônica girando em torno do herói e aura dourada durante a imunidade do Rock Never Dies.
 
-### [v1.0.1] - 2026-10-12 (Hotfix: Chart Editor 60 FPS Engine, Software Clock & Highway Synchronization)
-**Corrigido & Aprimorado**
-- **Bug 1 Resolvido (Esteira do Editor Parada & Notas Acumuladas no Início):**
-  - Implementado loop contínuo de renderização com `requestAnimationFrame` a 60 FPS dentro de `SongEditor`.
-  - Adicionado relógio híbrido de software (`performance.now()`): a esteira agora avança suavemente em tempo real mesmo se o navegador mobile bloquear ou suspender temporariamente o áudio antes da interação.
-  - Corrigido acúmulo de listeners no DOM ao abrir o modal repetidas vezes (`isInitialized`).
-  - Adicionados botões de passo rítmico (`⏮️ -1 Beat` e `⏭️ +1 Beat`) e barra deslizante de scrubber de tempo dedicada (`#editor-time-scrubber`) para navegação tátil ágil no celular.
-- **Bug 2 Resolvido (Música Salva sem Notas na Esteira ao Jogar):**
-  - Implementada sincronização com relógio de software em `RhythmSystem.update(deltaTime)`. Mesmo em navegadores mobile que suspendem o áudio inicial, a esteira calcula a descida das notas a 340 px/s com precisão milimétrica.
-  - Desbloqueio e auto-resume do áudio da música ao primeiro toque do jogador nas pistas.
-  - Gerador dinâmico de notas de contingência (`generateFallbackNotes`): caso uma música salva tenha 0 notas, o sistema mapeia automaticamente notas no BPM da música, impedindo highway vazia.
-  - Otimização do loop de desenho: notas inativas ou fora da tela não consomem renderização.
-- **Bug 3 Resolvido (Geração Automática de Notas que não Funcionava):**
-  - Removido `window.confirm()` bloqueante em `autoGenerateBasicChart()` (que falhava silenciosamente em WebViews mobile).
-  - Geração imediata com feedback em toast (`⚡ Ritmo de X notas gerado`).
-  - Proteção contra `duration` inválida/NaN em `SongStudio.handleCreateSong()`, garantindo pelo menos 15-30s e gerando notas completas pelas 4 pistas ao selecionar "Gerar Ritmo Base Automaticamente por BPM".
-- **Cache-Busting v=11:** Atualizadas todas as referências de scripts e CSS para garantir recarregamento imediato no mobile (`http://192.168.1.7:8080/?v=11`).
-
-### [v1.5.2] - 2026-10-23 (Visibilidade Total dos Zumbis: Zero Ghost Kills, Spawn On-Screen & Clamping)
-- **Eliminação Total de Abates Fantasma Fora da Tela (Zero Ghost Kills):**
-  - **Mira e Auto-Ataque Restritos ao Canvas (`js/combat.js`):** `performHeroAutoAttack()`, `launchSustainTick()` e `triggerChainLightning()` agora filtram candidatos estritamente com `z.x <= this.canvas.width - 5`, garantindo que notas e projéteis sônicos nunca mirem ou causem dano a zumbis que ainda não entraram no campo de visão da tela.
-  - **Dissipação de Projéteis na Borda:** Projéteis que atingem o limite direito da tela (`p.x >= this.canvas.width - 4`) faíscam e se dissipam com `spawnBurst` na borda em vez de viajar indefinidamente no vazio off-screen.
-  - **Filtro de Colisão On-Screen:** A detecção de colisão de projéteis exige `z.x <= this.canvas.width - 4`, impedindo qualquer impacto prévio fora do enquadramento.
-- **Onda de Vanguarda Imediata no Início da Partida (`resetBattle()`):**
-  - Ao iniciar ou reiniciar o combate, 2 zumbis de vanguarda são instantaneamente posicionados na faixa visível da estrada (`0.78 * cw` e `0.92 * cw`), dando alvos imediatos ao jogador a partir do primeiro compasso da música.
-- **Respawn Rápido para Jogadores Habilidosos:**
-  - Quando o jogador joga perfeitamente e limpa todos os zumbis da pista (`entities.zombies.length === 0`), o temporizador de onda adianta automaticamente para que o próximo inimigo apareça em menos de 0.4s, eliminando períodos mortos de pista vazia.
-- **Ajuste de Spawn e Clamping de Knockback:**
-  - O ponto de spawn padrão de `ZombieEntity` (`js/zombie-entity.js`) foi aproximado da borda imediata (`canvasWidth + 8px`), e o método construtor agora suporta `initialX` explícito.
-  - O recuo sísmico (knockback) é limitado com `Math.min(this.canvas.width - 15, z.x + knockDist)`, impedindo que golpes críticos empurrem zumbis de volta para fora da tela.
-  - Placas de nome, barras de vida e textos flutuantes de ouro/XP/kill têm suas coordenadas x travadas dentro da área útil da tela (`Math.min(canvas.width - 45, Math.max(30, z.x))`).
-- **Conformidade com a Regra Zero God Object (< 1.000 Linhas por Arquivo):**
-  - Todos os 16 arquivos JavaScript continuam estritamente abaixo do limite de 1.000 linhas (`combat.js`: 985, `rhythm.js`: 991, `song-editor.js`: 995, etc.).
-- **Testes Automatizados:**
-  - Suíte `test-procedural.js` expandida com a Seção 7 (80 testes automatizados, 100% aprovados).
+### [v1.0.1 - v1.5.2] - 2026-10-12 a 2026-10-23 (Motor 60 FPS, Sincronia de Áudio e Zero Ghost Kills)
+- **Motor de Áudio & Editor 60 FPS (v1.0.1):** Relógio híbrido de software (`performance.now()`), esteira a 60 FPS contínuos, navegação por compassos e scrubber tátil.
+- **Visibilidade Total & Zero Ghost Kills (v1.5.2):** Mira e auto-ataque restritos ao canvas visível (`z.x <= canvas.width - 5`), dissipação de projéteis na borda e clamping de knockback.
 

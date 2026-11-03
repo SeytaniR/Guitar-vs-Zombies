@@ -84,10 +84,7 @@ class CombatSystem {
         const parent = this.canvas.parentElement;
         const w = (parent && parent.clientWidth) || window.innerWidth || 360;
         const h = (parent && parent.clientHeight) || Math.round(window.innerHeight * 0.5) || 300;
-        if (w > 0 && h > 0) {
-            this.canvas.width = w;
-            this.canvas.height = h;
-        }
+        if (w > 0 && h > 0) { this.canvas.width = w; this.canvas.height = h; }
     }
 
     getActiveHeroData() {
@@ -248,26 +245,28 @@ class CombatSystem {
             this.guaranteedCritReady = false;
         }
 
-        if (rating === 'perfect') {
-            manaAward = 4.5;
-            ratingMult = 1.4;
+        if (rating === 'unbelievable') {
+            manaAward = 6.0; ratingMult = 1.6;
             this.perfectStreak = (this.perfectStreak || 0) + 1;
             if (this.perfectStreak >= 5) {
-                this.guaranteedCritReady = true;
-                this.perfectStreak = 0;
+                this.guaranteedCritReady = true; this.perfectStreak = 0;
+                this.addFloatingText('🎯 5x PERFECT! PRÓXIMO CRÍTICO!', heroPos.x, heroPos.y - 50, '#ff00ff', true);
+            } else {
+                this.addFloatingText(`👑 UNBELIEVABLE! (${this.perfectStreak}/5)`, heroPos.x, heroPos.y - 45, '#ffd700', true);
+            }
+        } else if (rating === 'perfect') {
+            manaAward = 4.5; ratingMult = 1.4;
+            this.perfectStreak = (this.perfectStreak || 0) + 1;
+            if (this.perfectStreak >= 5) {
+                this.guaranteedCritReady = true; this.perfectStreak = 0;
                 this.addFloatingText('🎯 5x PERFECT! PRÓXIMO CRÍTICO!', heroPos.x, heroPos.y - 50, '#ff00ff', true);
             } else {
                 this.addFloatingText(`🎯 PERFECT! (${this.perfectStreak}/5)`, heroPos.x, heroPos.y - 45, '#ffcc00', false);
             }
         } else {
             this.perfectStreak = 0;
-            if (rating === 'great') {
-                manaAward = 3.2;
-                ratingMult = 1.2;
-            } else {
-                manaAward = 2.0;
-                ratingMult = 1.0;
-            }
+            manaAward = rating === 'great' ? 3.2 : 2.0;
+            ratingMult = rating === 'great' ? 1.2 : 1.0;
         }
 
         // Hyper Overdrive talent bonus
@@ -431,6 +430,9 @@ class CombatSystem {
         this.score += bonusScore;
         this.comboKills = (this.comboKills || 0) + 1;
         this.fx.addMultiKillBanner(this.comboKills, this.canvas.width / 2, this.canvas.height * 0.38);
+        if (this.comboKills >= 7 && window.metaMissionSystem) {
+            window.metaMissionSystem.recordStat('unbelievable', 1);
+        }
 
         try {
             const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0', 10);
@@ -653,14 +655,8 @@ class CombatSystem {
         this.rockMana = Math.min(this.maxRockMana, this.rockMana + manaRegen * dt);
 
         // 2. Shield & Attack Speed Buff Timers
-        if (this.heroShieldTimer > 0) {
-            this.heroShieldTimer -= dt;
-            if (this.heroShieldTimer <= 0) this.heroShieldHp = 0;
-        }
-
-        if (this.heroAttackSpeedBuffTimer > 0) {
-            this.heroAttackSpeedBuffTimer -= dt;
-        }
+        if (this.heroShieldTimer > 0 && (this.heroShieldTimer -= dt) <= 0) this.heroShieldHp = 0;
+        if (this.heroAttackSpeedBuffTimer > 0) this.heroAttackSpeedBuffTimer -= dt;
 
         // 3. Continuous Procedural Attack Speed Loop
         if (!this.isGameOver && this.matchActive) {
@@ -720,14 +716,10 @@ class CombatSystem {
             if (p.trailTimer > 0.03) {
                 p.trailTimer = 0;
                 this.fx.particles.push({
-                    x: p.x - (p.vx * 0.015),
-                    y: p.y - (p.vy * 0.015),
-                    vx: (Math.random() - 0.5) * 15 - 15,
-                    vy: (Math.random() - 0.5) * 15,
+                    x: p.x - (p.vx * 0.015), y: p.y - (p.vy * 0.015),
+                    vx: (Math.random() - 0.5) * 15 - 15, vy: (Math.random() - 0.5) * 15,
                     color: p.projColor || (p.isCrit ? '#ff00ff' : '#00ffff'),
-                    size: 1.2 + Math.random() * 1.4,
-                    life: 0.22,
-                    maxLife: 0.22
+                    size: 1.2 + Math.random() * 1.4, life: 0.22, maxLife: 0.22
                 });
             }
 
@@ -860,6 +852,7 @@ class CombatSystem {
                     this.createExplosion(p.x, p.y, p.isCrit);
 
                     if (p.isCrit) {
+                        if (window.metaMissionSystem) window.metaMissionSystem.recordStat('critical_hits', 1);
                         let chainTargets = window.talentSystem ? window.talentSystem.getStat('fuzz_lightning') : 0;
                         if (heroStats.chainLightning || heroId === 'cypher_volt') {
                             chainTargets = Math.max(chainTargets, heroStats.chainTargets || 2);
