@@ -178,9 +178,10 @@ class StageSystem {
     }
 
     getStageName(stage) {
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         if (this.isBossStage(stage)) {
             const bossDef = this.getBossZombieDef(stage);
-            return `Fase ${stage}: 👑 CONFRONTO DE CHEFE: ${bossDef.name.toUpperCase()}!`;
+            return tr('bossShowdown', `Fase ${stage}: 👑 CONFRONTO DE CHEFE: ${bossDef.name.toUpperCase()}!`, { stage, name: bossDef.name.toUpperCase() });
         }
 
         const namedPrefixes = [
@@ -201,14 +202,15 @@ class StageSystem {
             'Wasteland Nuclear'
         ];
 
+        const stageLabel = tr('stagePrefix', `Fase ${stage}`, { stage });
         if (stage <= namedPrefixes.length) {
-            return `Fase ${stage}: ${namedPrefixes[stage - 1]}`;
+            return `${stageLabel}: ${namedPrefixes[stage - 1]}`;
         }
 
         const sectors = ['Setor Alfa', 'Setor Ômega', 'Zona Tóxica', 'Abismo Sônico', 'Wasteland', 'Pilar do Heavy Metal'];
         const sectorIndex = (stage - 1) % sectors.length;
         const cycle = Math.floor((stage - 1) / sectors.length) + 1;
-        return `Fase ${stage}: ${sectors[sectorIndex]} MK-${cycle}`;
+        return `${stageLabel}: ${sectors[sectorIndex]} MK-${cycle}`;
     }
 
     getZombieBaseLevel(stage = this.selectedStage) {

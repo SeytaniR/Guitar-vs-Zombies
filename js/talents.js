@@ -479,8 +479,9 @@ class TalentSystem {
         const pct = Math.round((talent.level / talent.maxLevel) * 100);
         if (barFill) barFill.style.width = `${pct}%`;
 
-        if (currentBenefit) currentBenefit.innerText = talent.level > 0 ? talent.getBenefit(talent.level) : 'Nenhum bônus';
-        if (nextBenefit) nextBenefit.innerText = talent.level < talent.maxLevel ? talent.getNextBenefit(talent.level) : 'Nível Máximo Atingido!';
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
+        if (currentBenefit) currentBenefit.innerText = talent.level > 0 ? talent.getBenefit(talent.level) : tr('noBonus', 'Nenhum bônus');
+        if (nextBenefit) nextBenefit.innerText = talent.level < talent.maxLevel ? talent.getNextBenefit(talent.level) : tr('maxLevelReached', 'Nível Máximo Atingido!');
 
         const unlocked = this.isUnlocked(talent);
         const cost = this.getCost(talent);
@@ -490,7 +491,7 @@ class TalentSystem {
         if (reqEl) {
             if (!unlocked && talent.prereq) {
                 const reqTalent = this.talents[talent.prereq.id];
-                reqEl.innerText = `🔒 Requer: ${reqTalent.name} Nv. ${talent.prereq.level}`;
+                reqEl.innerText = tr('requiresPrereq', `🔒 Requer: ${reqTalent.name} Nv. ${talent.prereq.level}`, { name: reqTalent.name, level: talent.prereq.level });
                 reqEl.style.display = 'block';
             } else {
                 reqEl.style.display = 'none';
@@ -498,24 +499,24 @@ class TalentSystem {
         }
 
         if (costEl) {
-            costEl.innerText = isMax ? 'MÁXIMO' : `${cost.toLocaleString()} 🪙`;
+            costEl.innerText = isMax ? tr('maxLevel', 'MÁXIMO') : `${cost.toLocaleString()} 🪙`;
         }
 
         if (upgradeBtn) {
             if (isMax) {
-                upgradeBtn.innerText = 'NÍVEL MÁXIMO';
+                upgradeBtn.innerText = tr('maxLevel', 'NÍVEL MÁXIMO');
                 upgradeBtn.disabled = true;
                 upgradeBtn.className = 'upgrade-btn maxed';
             } else if (!unlocked) {
-                upgradeBtn.innerText = 'BLOQUEADO';
+                upgradeBtn.innerText = tr('locked', 'BLOQUEADO');
                 upgradeBtn.disabled = true;
                 upgradeBtn.className = 'upgrade-btn locked';
             } else if (!affordable) {
-                upgradeBtn.innerText = `FALTAM ${(cost - this.gold).toLocaleString()} 🪙`;
+                upgradeBtn.innerText = tr('needGold', `FALTAM ${(cost - this.gold).toLocaleString()} 🪙`, { amount: (cost - this.gold).toLocaleString() });
                 upgradeBtn.disabled = true;
                 upgradeBtn.className = 'upgrade-btn broke';
             } else {
-                upgradeBtn.innerText = `MELHORAR (${cost.toLocaleString()} 🪙)`;
+                upgradeBtn.innerText = `${tr('btnUpgrade', 'MELHORAR')} (${cost.toLocaleString()} 🪙)`;
                 upgradeBtn.disabled = false;
                 upgradeBtn.className = 'upgrade-btn ready';
             }

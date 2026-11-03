@@ -14,16 +14,16 @@
     <meta name="apple-mobile-web-app-title" content="Guitar vs Zombies">
 
     <!-- Modular CSS Architecture (Zero God Object: All files < 1,000 lines) -->
-    <link rel="stylesheet" href="css/base.css?v=51">
-    <link rel="stylesheet" href="css/menu.css?v=51">
-    <link rel="stylesheet" href="css/map-select.css?v=51">
-    <link rel="stylesheet" href="css/battle.css?v=51">
-    <link rel="stylesheet" href="css/skills.css?v=51">
-    <link rel="stylesheet" href="css/talents.css?v=51">
-    <link rel="stylesheet" href="css/song-studio.css?v=51">
-    <link rel="stylesheet" href="css/editor.css?v=51">
-    <link rel="stylesheet" href="css/results.css?v=51">
-    <link rel="stylesheet" href="css/missions.css?v=51">
+    <link rel="stylesheet" href="css/base.css?v=52">
+    <link rel="stylesheet" href="css/menu.css?v=52">
+    <link rel="stylesheet" href="css/map-select.css?v=52">
+    <link rel="stylesheet" href="css/battle.css?v=52">
+    <link rel="stylesheet" href="css/skills.css?v=52">
+    <link rel="stylesheet" href="css/talents.css?v=52">
+    <link rel="stylesheet" href="css/song-studio.css?v=52">
+    <link rel="stylesheet" href="css/editor.css?v=52">
+    <link rel="stylesheet" href="css/results.css?v=52">
+    <link rel="stylesheet" href="css/missions.css?v=52">
 </head>
 <body>
     <div id="game-container">
@@ -31,23 +31,23 @@
         <div id="screen-main-menu" class="game-screen active">
             <div class="menu-top-bar">
                 <div class="menu-hud-stats">
-                    <div class="menu-stat-badge gold-badge" title="Ouro Coletado">
+                    <div class="menu-stat-badge gold-badge" title="Ouro Coletado" data-i18n-title="menuGoldTitle">
                         <span class="stat-icon">🪙</span>
                         <span id="menu-gold-count" class="stat-val">0</span>
                     </div>
-                    <div class="menu-stat-badge score-badge" title="Maior Pontuação">
+                    <div class="menu-stat-badge score-badge" title="Maior Pontuação" data-i18n-title="menuScoreTitle">
                         <span class="stat-icon">🏆</span>
                         <span id="menu-highscore-val" class="stat-val">0</span>
                     </div>
-                    <div class="menu-stat-badge kills-badge" title="Zumbis Destruídos">
+                    <div class="menu-stat-badge kills-badge" title="Zumbis Destruídos" data-i18n-title="menuKillsTitle">
                         <span class="stat-icon">💀</span>
                         <span id="menu-total-kills" class="stat-val">0</span>
                     </div>
                 </div>
                 <div class="menu-quick-tools">
-                    <button id="menu-sound-toggle" class="menu-tool-btn" title="Alternar Som">🔊</button>
+                    <button id="menu-sound-toggle" class="menu-tool-btn" title="Alternar Som" data-i18n-title="menuSoundToggleTitle">🔊</button>
                     <div class="menu-lang-group">
-                        <button class="lang-btn" onclick="i18n.setLanguage('pt')">PT</button>
+                        <button class="lang-btn active" onclick="i18n.setLanguage('pt')">PT</button>
                         <button class="lang-btn" onclick="i18n.setLanguage('en')">EN</button>
                     </div>
                 </div>
@@ -56,52 +56,52 @@
             <div class="menu-hero-showcase">
                 <div class="menu-logo-wrap">
                     <img src="assets/branding/logo.png" alt="Guitar vs Zombies" class="menu-brand-logo">
-                    <span class="logo-sub">HEAVY METAL APOCALYPSE</span>
+                    <span class="logo-sub" data-i18n="menuSub">HEAVY METAL APOCALYPSE</span>
                     <div class="logo-divider"></div>
                 </div>
                 <div class="menu-stage-card">
                     <div class="stage-glow"></div>
-                    <div class="stage-tag">🎸 TURNÊ MUNDIAL DOS CONDENADOS</div>
-                    <p class="stage-desc">Arme sua guitarra distorcida, destrua hordas de zumbis em tempo real e domine o palco com seus riffs mortais!</p>
+                    <div class="stage-tag" data-i18n="menuStageTag">🎸 TURNÊ MUNDIAL DOS CONDENADOS</div>
+                    <p class="stage-desc" data-i18n="menuStageDesc">Arme sua guitarra distorcida, destrua hordas de zumbis em tempo real e domine o palco com seus riffs mortais!</p>
                 </div>
             </div>
 
             <div class="menu-actions-stack">
                 <button id="menu-btn-play" class="menu-action-btn btn-play-battle">
                     <span class="btn-icon">⚡</span>
-                    <span class="btn-text">JOGAR / INICIAR BATALHA</span>
+                    <span class="btn-text" data-i18n="btnPlay">JOGAR / INICIAR BATALHA</span>
                 </button>
                 <button id="menu-btn-talents" class="menu-action-btn btn-talents">
                     <span class="btn-icon">🌳</span>
-                    <span class="btn-text">ÁRVORE DE TALENTOS</span>
+                    <span class="btn-text" data-i18n="btnTalents">ÁRVORE DE TALENTOS</span>
                 </button>
                 <button id="menu-btn-missions" class="menu-action-btn btn-missions">
                     <span class="btn-icon">🎯</span>
-                    <span class="btn-text">MISSÕES & CAÇADA DE ZUMBIS</span>
+                    <span class="btn-text" data-i18n="btnMissions">MISSÕES & CAÇADA DE ZUMBIS</span>
                     <span id="menu-missions-badge" class="missions-badge-counter hidden">0</span>
                 </button>
                 <button id="menu-btn-studio" class="menu-action-btn btn-studio">
                     <span class="btn-icon">🎵</span>
-                    <span class="btn-text">ESTÚDIO DE MÚSICA & RITMO</span>
+                    <span class="btn-text" data-i18n="btnStudio">ESTÚDIO DE MÚSICA & RITMO</span>
                 </button>
                 <button id="menu-btn-settings" class="menu-action-btn btn-settings">
                     <span class="btn-icon">⚙️</span>
-                    <span class="btn-text">CONFIGURAÇÕES</span>
+                    <span class="btn-text" data-i18n="btnSettings">CONFIGURAÇÕES</span>
                 </button>
             </div>
 
             <div class="menu-footer">
-                <span>Guitar vs Zombies v1.7.9 (Build 51) • AAA Audio & Action Experience</span>
+                <span data-i18n="menuFooter">Guitar vs Zombies v1.8.0 (Build 52) • AAA Audio & Action Experience</span>
             </div>
         </div>
 
         <!-- SCREEN 2: MAP / PRE-BATTLE PREPARATION -->
         <div id="screen-map-select" class="game-screen">
             <div class="map-header-bar">
-                <button id="map-back-btn" class="map-header-btn">⬅️ Voltar</button>
+                <button id="map-back-btn" class="map-header-btn" data-i18n="mapBack">⬅️ Voltar</button>
                 <div class="map-header-title">
-                    <h2>PREPARAÇÃO DA BATALHA</h2>
-                    <span class="map-sub">CONFIGURE SEU SHOW E CONHEÇA A HORDA</span>
+                    <h2 data-i18n="mapTitle">PREPARAÇÃO DA BATALHA</h2>
+                    <span class="map-sub" data-i18n="mapSub">CONFIGURE SEU SHOW E CONHEÇA A HORDA</span>
                 </div>
                 <div class="map-header-spacer" aria-hidden="true"></div>
             </div>
@@ -111,10 +111,10 @@
                 <div class="map-section-card stage-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <h3>🗺️ Fase Atual</h3>
+                            <h3 data-i18n="sectionStage">🗺️ Fase Atual</h3>
                             <div class="cycle-nav-group">
-                                <button type="button" id="map-stage-prev-btn" class="cycle-nav-btn" title="Fase Anterior">◀️</button>
-                                <button type="button" id="map-stage-next-btn" class="cycle-nav-btn" title="Próxima Fase">▶️</button>
+                                <button type="button" id="map-stage-prev-btn" class="cycle-nav-btn" title="Fase Anterior" data-i18n-title="btnPrevStage">◀️</button>
+                                <button type="button" id="map-stage-next-btn" class="cycle-nav-btn" title="Próxima Fase" data-i18n-title="btnNextStage">▶️</button>
                             </div>
                         </div>
                         <h4 id="map-stage-title-text" class="stage-name-highlight">Fase 1: Subúrbio Desolado</h4>
@@ -131,8 +131,8 @@
                 <div class="map-section-card arena-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <h3>🏟️ Arena do Show</h3>
-                            <span class="arena-random-badge">🎲 Sorteada</span>
+                            <h3 data-i18n="sectionArena">🏟️ Arena do Show</h3>
+                            <span class="arena-random-badge" data-i18n="badgeRandom">🎲 Sorteada</span>
                         </div>
                     </div>
 
@@ -154,10 +154,10 @@
                 <div class="map-section-card hero-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <h3>🎸 Guitarrista</h3>
+                            <h3 data-i18n="sectionHero">🎸 Guitarrista</h3>
                             <div class="cycle-nav-group">
-                                <button type="button" id="map-hero-prev-btn" class="cycle-nav-btn" title="Guitarrista Anterior">◀️</button>
-                                <button type="button" id="map-hero-next-btn" class="cycle-nav-btn" title="Próximo Guitarrista">▶️</button>
+                                <button type="button" id="map-hero-prev-btn" class="cycle-nav-btn" title="Guitarrista Anterior" data-i18n-title="btnPrevHero">◀️</button>
+                                <button type="button" id="map-hero-next-btn" class="cycle-nav-btn" title="Próximo Guitarrista" data-i18n-title="btnNextHero">▶️</button>
                             </div>
                         </div>
                     </div>
@@ -181,7 +181,7 @@
                         </div>
 
                         <div class="showcase-hero-passive-box">
-                            <span class="passive-tag">PASSIVA: <b id="showcase-hero-passive-name">Espírito do Rock</b></span>
+                            <span class="passive-tag"><span data-i18n="heroPassiveTag">PASSIVA:</span> <b id="showcase-hero-passive-name">Espírito do Rock</b></span>
                             <p id="showcase-hero-passive-desc" class="passive-desc">+1.0% de Dano e +0.4% de Dano Crítico por nível (chegando a +99% de dano e +89% de crítico no Nv. 100).</p>
                         </div>
 
@@ -195,8 +195,8 @@
                                 <div id="showcase-hero-xp-fill" class="hero-xp-bar-fill" style="width: 0%;"></div>
                             </div>
                             <div class="hero-level-actions">
-                                <button type="button" id="hero-level-up-btn" class="hero-level-up-action">
-                                    ⬆️ SUBIR NÍVEL (🪙 32)
+                                <button type="button" id="hero-level-up-btn" class="hero-level-up-action" data-i18n="btnHeroLevelUp">
+                                    ⬆️ SUBIR NÍVEL
                                 </button>
                             </div>
                         </div>
@@ -212,8 +212,8 @@
                 <div class="map-section-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <h3>🧟 Horda Inimiga</h3>
-                            <span class="horde-count-tag">5 Sorteados</span>
+                            <h3 data-i18n="sectionHorde">🧟 Horda Inimiga</h3>
+                            <span class="horde-count-tag" data-i18n="hordeCountTag">5 Sorteados</span>
                         </div>
                     </div>
                     <div id="map-zombies-grid" class="map-zombies-grid">
@@ -225,8 +225,8 @@
                 <div class="map-section-card skills-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <h3>⚡ Habilidades por Trilho</h3>
-                            <span class="skills-hint-tag">Toque para Equipar</span>
+                            <h3 data-i18n="sectionSkills">⚡ Habilidades por Trilho</h3>
+                            <span class="skills-hint-tag" data-i18n="skillsHint">Toque para Equipar</span>
                         </div>
                     </div>
                     <div id="map-lane-skills-grid" class="map-lane-skills-grid">
@@ -238,10 +238,10 @@
                 <div class="map-section-card song-select-card">
                     <div class="section-card-header">
                         <div class="section-header-row">
-                            <h3>🎵 Trilha Sonora</h3>
+                            <h3 data-i18n="sectionSong">🎵 Trilha Sonora</h3>
                             <div class="cycle-nav-group">
-                                <button type="button" id="map-song-prev-btn" class="cycle-nav-btn" title="Música Anterior">◀️</button>
-                                <button type="button" id="map-song-next-btn" class="cycle-nav-btn" title="Próxima Música">▶️</button>
+                                <button type="button" id="map-song-prev-btn" class="cycle-nav-btn" title="Música Anterior" data-i18n-title="btnPrevSong">◀️</button>
+                                <button type="button" id="map-song-next-btn" class="cycle-nav-btn" title="Próxima Música" data-i18n-title="btnNextSong">▶️</button>
                             </div>
                         </div>
                     </div>
@@ -250,7 +250,7 @@
                     <div class="map-selected-song-preview" id="map-active-song-preview-card">
                         <div class="map-song-cover-wrap">
                             <img id="map-selected-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="map-song-cover-img">
-                            <span class="map-song-active-pill">EM REPRODUÇÃO</span>
+                            <span class="map-song-active-pill" data-i18n="songActivePill">EM REPRODUÇÃO</span>
                         </div>
                         <div class="map-selected-song-info">
                             <h4 id="map-selected-song-title" class="map-song-current-title">Thunder Strike</h4>
@@ -273,7 +273,7 @@
             </div>
 
             <div class="map-bottom-bar">
-                <button id="map-start-battle-btn" class="map-start-battle-action">
+                <button id="map-start-battle-btn" class="map-start-battle-action" data-i18n="btnStartBattle">
                     🔥 INICIAR BATALHA AGORA!
                 </button>
             </div>
@@ -284,7 +284,7 @@
             <!-- Minimal Clean Battle HUD (ONLY: Auto, Mute, SS Stats, Gear) -->
             <div id="battle-hud-top">
                 <div class="battle-hud-left">
-                    <button id="battle-sound-toggle" class="battle-btn sound-btn" title="Alternar Áudio">🔊</button>
+                    <button id="battle-sound-toggle" class="battle-btn sound-btn" title="Alternar Áudio" data-i18n-title="btnSoundTitle">🔊</button>
                 </div>
                 <div class="battle-hud-center">
                     <div class="battle-hp-wrap">
@@ -294,25 +294,25 @@
                         </div>
                     </div>
                     <div class="battle-rock-wrap">
-                        <div class="battle-bar-label">⚡ ROCK MANA <span id="battle-hero-mana-text">30 / 100</span></div>
+                        <div class="battle-bar-label"><span data-i18n="rockManaLabel">⚡ ROCK MANA</span> <span id="battle-hero-mana-text">30 / 100</span></div>
                         <div class="battle-bar-frame">
                             <div id="rock-meter-bar"></div>
                         </div>
                     </div>
                 </div>
                 <div class="battle-hud-right">
-                    <button id="battle-stats-toggle" class="battle-btn ss-btn" title="Estatísticas da Batalha (SS)">📊 SS</button>
-                    <button id="battle-gear-toggle" class="battle-btn gear-btn" title="Configurações & Pausa">⚙️</button>
+                    <button id="battle-stats-toggle" class="battle-btn ss-btn" title="Estatísticas da Batalha (SS)" data-i18n-title="btnStatsTitle">📊 SS</button>
+                    <button id="battle-gear-toggle" class="battle-btn gear-btn" title="Configurações & Pausa" data-i18n-title="btnGearTitle">⚙️</button>
                 </div>
             </div>
 
             <!-- Floating Real-Time Battle Score & Combo Bar -->
             <div id="battle-hud-sub">
-                <div class="battle-sub-pill score-pill" title="Pontuação Atual">
+                <div class="battle-sub-pill score-pill" title="Pontuação Atual" data-i18n-title="scorePillTitle">
                     <span class="sub-pill-icon">🏆</span>
                     <span id="battle-score-val" class="sub-pill-val">0</span>
                 </div>
-                <div class="battle-sub-pill combo-pill" id="battle-combo-pill" title="Combo Atual">
+                <div class="battle-sub-pill combo-pill" id="battle-combo-pill" title="Combo Atual" data-i18n-title="comboPillTitle">
                     <span id="battle-combo-val" class="sub-pill-val">0 COMBO</span>
                     <span id="battle-mult-val" class="sub-pill-mult">x1</span>
                 </div>
@@ -326,7 +326,7 @@
             <!-- Divider Line & Active Song Banner -->
             <div id="zone-divider">
                 <div id="default-divider-content">
-                    <span class="divider-text">🎸 SOLO RHYTHM HIGHWAY - TOQUE NO RITMO! 🎸</span>
+                    <span class="divider-text" data-i18n="highwayDivider">🎸 SOLO RHYTHM HIGHWAY - TOQUE NO RITMO! 🎸</span>
                 </div>
                 <div id="active-song-banner" style="display: none;">
                     <div class="banner-song-info">
@@ -342,7 +342,7 @@
                         </div>
                         <span id="active-song-time" class="banner-time-text">00:00 / 00:30</span>
                     </div>
-                    <button id="active-song-exit-btn" class="banner-exit-btn" title="Encerrar Música">✕ SAIR</button>
+                    <button id="active-song-exit-btn" class="banner-exit-btn" title="Encerrar Música" data-i18n-title="btnExitSongTitle" data-i18n="btnExitSong">✕ SAIR</button>
                 </div>
             </div>
 
@@ -359,10 +359,10 @@
             <!-- Modal Header -->
             <div class="talent-modal-header">
                 <div class="talent-header-title">
-                    <h2>🎸 ÁRVORE DE TALENTOS</h2>
+                    <h2 data-i18n="talentTitle">🎸 ÁRVORE DE TALENTOS</h2>
                     <div class="talent-header-stats">
                         <span class="modal-gold-tag">🪙 <span id="modal-gold-count">0</span></span>
-                        <span class="modal-upgrades-tag">Upgrades: <span id="modal-total-upgrades">0 / 188</span></span>
+                        <span class="modal-upgrades-tag"><span data-i18n="talentUpgrades">Upgrades:</span> <span id="modal-total-upgrades">0 / 188</span></span>
                     </div>
                 </div>
                 <button id="talent-close-btn" class="talent-modal-close" aria-label="Fechar">✕</button>
@@ -370,9 +370,9 @@
 
             <!-- Tabs: Branches -->
             <div class="talent-tabs-bar">
-                <button class="talent-tab active" data-branch="offense">🔥 OFENSIVO</button>
-                <button class="talent-tab" data-branch="defense">🛡️ DEFENSIVO</button>
-                <button class="talent-tab" data-branch="rhythm">⚡ RITMO & OURO</button>
+                <button class="talent-tab active" data-branch="offense" data-i18n="tabOffense">🔥 OFENSIVO</button>
+                <button class="talent-tab" data-branch="defense" data-i18n="tabDefense">🛡️ DEFENSIVO</button>
+                <button class="talent-tab" data-branch="rhythm" data-i18n="tabRhythm">⚡ RITMO & OURO</button>
             </div>
 
             <!-- Modal Content Body -->
@@ -398,11 +398,11 @@
 
                     <div class="inspector-benefits-box">
                         <div class="benefit-row current">
-                            <span class="benefit-label">Efeito Atual:</span>
+                            <span class="benefit-label" data-i18n="effectCurrent">Efeito Atual:</span>
                             <span id="inspector-current-benefit" class="benefit-value">+0 Dano</span>
                         </div>
                         <div class="benefit-row next">
-                            <span class="benefit-label">Próximo Nível:</span>
+                            <span class="benefit-label" data-i18n="effectNext">Próximo Nível:</span>
                             <span id="inspector-next-benefit" class="benefit-value">+5 Dano</span>
                         </div>
                     </div>
@@ -411,7 +411,7 @@
 
                     <div class="inspector-actions">
                         <button id="talent-upgrade-action" class="upgrade-btn ready">
-                            MELHORAR (<span id="inspector-cost-val">40 🪙</span>)
+                            <span data-i18n="btnUpgrade">MELHORAR</span> (<span id="inspector-cost-val">40 🪙</span>)
                         </button>
                     </div>
                 </div>
@@ -425,17 +425,17 @@
             <!-- Studio Header -->
             <div class="studio-modal-header">
                 <div class="studio-header-title">
-                    <h2>🎵 ESTÚDIO DE MÚSICAS & RITMO</h2>
-                    <span class="studio-subtitle">Crie, edite e compartilhe suas próprias faixas no jogo!</span>
+                    <h2 data-i18n="studioTitle">🎵 ESTÚDIO DE MÚSICAS & RITMO</h2>
+                    <span class="studio-subtitle" data-i18n="studioSubtitle">Crie, edite e compartilhe suas próprias faixas no jogo!</span>
                 </div>
                 <button id="studio-close-btn" class="studio-modal-close" aria-label="Fechar">✕</button>
             </div>
 
             <!-- Studio Tabs Bar -->
             <div class="studio-tabs-bar">
-                <button class="studio-tab active" data-tab="library">📂 MINHAS MÚSICAS</button>
-                <button class="studio-tab" data-tab="new">➕ NOVA MÚSICA</button>
-                <button class="studio-tab" data-tab="io">📥 IMPORTAR / EXPORTAR</button>
+                <button class="studio-tab active" data-tab="library" data-i18n="tabMySongs">📂 MINHAS MÚSICAS</button>
+                <button class="studio-tab" data-tab="new" data-i18n="tabNewSong">➕ NOVA MÚSICA</button>
+                <button class="studio-tab" data-tab="io" data-i18n="tabImportExport">📥 IMPORTAR / EXPORTAR</button>
             </div>
 
             <!-- Studio Body -->
@@ -451,66 +451,66 @@
                         <div class="form-row-2col">
                             <!-- Cover Art Upload & Preview -->
                             <div class="form-group cover-upload-group">
-                                <label class="form-label">Capa do Álbum (Imagem):</label>
+                                <label class="form-label" data-i18n="labelAlbumCover">Capa do Álbum (Imagem):</label>
                                 <div class="cover-preview-box">
                                     <img id="new-song-cover-preview" src="assets/covers/default_cover.jpg" alt="Preview Capa" class="cover-preview-img">
-                                    <label for="new-song-cover-file" class="upload-badge-btn">📷 Escolher Imagem</label>
+                                    <label for="new-song-cover-file" class="upload-badge-btn" data-i18n="btnChooseImage">📷 Escolher Imagem</label>
                                     <input type="file" id="new-song-cover-file" accept="image/*" style="display: none;">
                                 </div>
                             </div>
 
                             <!-- Audio File Upload -->
                             <div class="form-group audio-upload-group">
-                                <label class="form-label">Arquivo de Áudio (.mp3, .wav, .ogg, .m4a):</label>
+                                <label class="form-label" data-i18n="labelAudioFile">Arquivo de Áudio (.mp3, .wav, .ogg, .m4a):</label>
                                 <div class="audio-dropzone">
                                     <span class="dropzone-icon">🎧</span>
-                                    <label for="new-song-audio-file" class="dropzone-btn">📁 Escolher Arquivo de Áudio</label>
+                                    <label for="new-song-audio-file" class="dropzone-btn" data-i18n="btnChooseAudio">📁 Escolher Arquivo de Áudio</label>
                                     <input type="file" id="new-song-audio-file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.webm" style="display: none;">
-                                    <div id="new-song-audio-status" class="audio-status-text">Nenhum áudio selecionado</div>
+                                    <div id="new-song-audio-status" class="audio-status-text" data-i18n="noAudioSelected">Nenhum áudio selecionado</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Metadata Fields -->
                         <div class="form-group">
-                            <label for="new-song-title" class="form-label">Título da Música:</label>
-                            <input type="text" id="new-song-title" class="form-input" placeholder="Ex: Through the Fire and Flames" maxlength="60">
+                            <label for="new-song-title" class="form-label" data-i18n="labelSongTitle">Título da Música:</label>
+                            <input type="text" id="new-song-title" class="form-input" placeholder="Ex: Through the Fire and Flames" data-i18n-placeholder="phSongTitle" maxlength="60">
                         </div>
 
                         <div class="form-row-2col">
                             <div class="form-group">
-                                <label for="new-song-artist" class="form-label">Autoria / Artista:</label>
-                                <input type="text" id="new-song-artist" class="form-input" placeholder="Ex: DragonForce" maxlength="60">
+                                <label for="new-song-artist" class="form-label" data-i18n="labelSongArtist">Autoria / Artista:</label>
+                                <input type="text" id="new-song-artist" class="form-input" placeholder="Ex: DragonForce" data-i18n-placeholder="phSongArtist" maxlength="60">
                             </div>
                             <div class="form-group">
-                                <label for="new-song-bpm" class="form-label">BPM (Tempo da Música):</label>
+                                <label for="new-song-bpm" class="form-label" data-i18n="labelBpm">BPM (Tempo da Música):</label>
                                 <div class="bpm-input-row">
                                     <input type="number" id="new-song-bpm" class="form-input" value="130" min="40" max="280">
-                                    <button type="button" id="new-song-tap-tempo" class="tap-tempo-btn" title="Toque no ritmo para calcular BPM">🖐️ TAP TEMPO</button>
+                                    <button type="button" id="new-song-tap-tempo" class="tap-tempo-btn" title="Toque no ritmo para calcular BPM" data-i18n-title="tapTempoTitle" data-i18n="btnTapTempo">🖐️ TAP TEMPO</button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="new-song-desc" class="form-label">Descrição da Música:</label>
-                            <textarea id="new-song-desc" class="form-textarea" placeholder="Descreva sua faixa, estilo ou desafio rítmico..." rows="2" maxlength="200"></textarea>
+                            <label for="new-song-desc" class="form-label" data-i18n="labelSongDesc">Descrição da Música:</label>
+                            <textarea id="new-song-desc" class="form-textarea" placeholder="Descreva sua faixa, estilo ou desafio rítmico..." data-i18n-placeholder="phSongDesc" rows="2" maxlength="200"></textarea>
                         </div>
 
                         <div class="form-group pattern-options">
-                            <label class="form-label">Ritmo Inicial:</label>
+                            <label class="form-label" data-i18n="labelInitialPattern">Ritmo Inicial:</label>
                             <div class="radio-options">
                                 <label class="radio-label">
                                     <input type="radio" name="new-song-pattern" value="empty" checked>
-                                    <span>Iniciar com Ritmo Vazio (Mapear no Editor)</span>
+                                    <span data-i18n="optEmptyPattern">Iniciar com Ritmo Vazio (Mapear no Editor)</span>
                                 </label>
                                 <label class="radio-label">
                                     <input type="radio" name="new-song-pattern" value="autogen">
-                                    <span>Gerar Ritmo Base Automaticamente por BPM</span>
+                                    <span data-i18n="optAutogenPattern">Gerar Ritmo Base Automaticamente por BPM</span>
                                 </label>
                             </div>
                         </div>
 
-                        <button id="new-song-submit-btn" class="form-submit-btn">🚀 CRIAR MÚSICA & ABRIR EDITOR</button>
+                        <button id="new-song-submit-btn" class="form-submit-btn" data-i18n="btnCreateSong">🚀 CRIAR MÚSICA & ABRIR EDITOR</button>
                     </div>
                 </div>
 
@@ -518,17 +518,17 @@
                 <div id="studio-tab-io" class="studio-tab-content">
                     <div class="io-panel">
                         <div class="io-card import-card">
-                            <h3>📥 Importar Música (.gvsong / .json / Áudio)</h3>
-                            <p>Importe pacotes de músicas (.gvsong / .json) ou arquivos de áudio (.mp3, .wav, .ogg, .m4a) diretamente para o jogo! Você também pode simplesmente arrastar e soltar o arquivo aqui.</p>
-                            <label for="studio-import-file" class="io-upload-btn">📂 Escolher Pacote .gvsong ou Áudio</label>
+                            <h3 data-i18n="importTitle">📥 Importar Música (.gvsong / .json / Áudio)</h3>
+                            <p data-i18n="importDesc">Importe pacotes de músicas (.gvsong / .json) ou arquivos de áudio (.mp3, .wav, .ogg, .m4a) diretamente para o jogo! Você também pode simplesmente arrastar e soltar o arquivo aqui.</p>
+                            <label for="studio-import-file" class="io-upload-btn" data-i18n="btnChoosePackage">📂 Escolher Pacote .gvsong ou Áudio</label>
                             <input type="file" id="studio-import-file" accept=".gvsong,.json,audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.webm" style="display: none;">
                         </div>
 
                         <div class="io-card info-card">
-                            <h3>💾 Como Exportar e Compartilhar?</h3>
-                            <p>1. Vá até a aba <b>MINHAS MÚSICAS</b>.</p>
-                            <p>2. Clique em <b>EXPORTAR</b> no card da sua música.</p>
-                            <p>3. Um arquivo <code>.gvsong</code> será baixado no seu celular ou PC pronto para enviar aos amigos!</p>
+                            <h3 data-i18n="exportTitle">💾 Como Exportar e Compartilhar?</h3>
+                            <p data-i18n="exportStep1" data-i18n-html="true">1. Vá até a aba <b>MINHAS MÚSICAS</b>.</p>
+                            <p data-i18n="exportStep2" data-i18n-html="true">2. Clique em <b>EXPORTAR</b> no card da sua música.</p>
+                            <p data-i18n="exportStep3" data-i18n-html="true">3. Um arquivo <code>.gvsong</code> será baixado no seu celular ou PC pronto para enviar aos amigos!</p>
                         </div>
                     </div>
                 </div>
@@ -564,7 +564,7 @@
                 </div>
 
                 <div class="tool-group">
-                    <label class="tool-select-label">Grade:
+                    <label class="tool-select-label"><span data-i18n="editorSnap">Grade:</span>
                         <select id="editor-snap-select" class="tool-select">
                             <option value="none">Livre</option>
                             <option value="1/2">1/2 Tempo</option>
@@ -574,7 +574,7 @@
                         </select>
                     </label>
 
-                    <label class="tool-select-label">Velocidade:
+                    <label class="tool-select-label"><span data-i18n="editorSpeed">Velocidade:</span>
                         <select id="editor-speed-select" class="tool-select">
                             <option value="0.5">0.5x</option>
                             <option value="0.75">0.75x</option>
@@ -584,9 +584,9 @@
                 </div>
 
                 <div class="tool-group note-type-group">
-                    <button id="editor-mode-tap" class="tool-btn mode-btn active" title="Toque Normal (Tap)">🎵 Normal</button>
-                    <button id="editor-mode-hold" class="tool-btn mode-btn" title="Toque Arrastado (Sustain / Hold)">〰️ Arrastado</button>
-                    <label class="tool-select-label" id="editor-hold-len-wrap" style="display: none;">Duração:
+                    <button id="editor-mode-tap" class="tool-btn mode-btn active" title="Toque Normal (Tap)" data-i18n="editorNormal">🎵 Normal</button>
+                    <button id="editor-mode-hold" class="tool-btn mode-btn" title="Toque Arrastado (Sustain / Hold)" data-i18n="editorHold">〰️ Arrastado</button>
+                    <label class="tool-select-label" id="editor-hold-len-wrap" style="display: none;"><span data-i18n="editorHoldDuration">Duração:</span>
                         <select id="editor-hold-len-select" class="tool-select">
                             <option value="0.5">0.5s</option>
                             <option value="1.0" selected>1.0s</option>
@@ -600,14 +600,14 @@
                 <div class="tool-group">
                     <button id="editor-zoom-out" class="tool-btn" title="Diminuir Zoom">🔍 -</button>
                     <button id="editor-zoom-in" class="tool-btn" title="Aumentar Zoom">🔍 +</button>
-                    <button id="editor-undo-btn" class="tool-btn" title="Desfazer">↩️ Desfazer</button>
-                    <button id="editor-autogen-btn" class="tool-btn" title="Gerar ritmo base por BPM">⚡ Auto-BPM</button>
-                    <button id="editor-clear-btn" class="tool-btn btn-danger" title="Limpar todas as notas">🗑️ Limpar</button>
+                    <button id="editor-undo-btn" class="tool-btn" title="Desfazer" data-i18n="editorUndo">↩️ Desfazer</button>
+                    <button id="editor-autogen-btn" class="tool-btn" title="Gerar ritmo base por BPM" data-i18n="editorAutoBpm">⚡ Auto-BPM</button>
+                    <button id="editor-clear-btn" class="tool-btn btn-danger" title="Limpar todas as notas" data-i18n="editorClear">🗑️ Limpar</button>
                 </div>
 
                 <div class="tool-group save-group">
-                    <button id="editor-save-btn" class="tool-btn btn-save">💾 SALVAR</button>
-                    <button id="editor-save-play-btn" class="tool-btn btn-save-play">🚀 SALVAR & JOGAR</button>
+                    <button id="editor-save-btn" class="tool-btn btn-save" data-i18n="editorSave">💾 SALVAR</button>
+                    <button id="editor-save-play-btn" class="tool-btn btn-save-play" data-i18n="editorSavePlay">🚀 SALVAR & JOGAR</button>
                 </div>
             </div>
 
@@ -618,29 +618,29 @@
 
             <!-- Precision Timeline Time Scrubber Bar -->
             <div class="editor-scrubber-row">
-                <span class="scrub-label">⏱️ Navegador de Tempo:</span>
+                <span class="scrub-label" data-i18n="editorScrubberLabel">⏱️ Navegador de Tempo:</span>
                 <input type="range" id="editor-time-scrubber" min="0" max="30" step="0.05" value="0" class="editor-time-slider">
             </div>
 
             <!-- Fretboard Tap Pads (On-screen mobile buttons + keyboard A, S, D, F) -->
             <div class="editor-pads-section">
-                <div class="pads-instructions">Toque nas pistas para adicionar/remover notas na linha do tempo, ou use <b>REC</b> para gravar no ritmo enquanto a música toca!</div>
+                <div class="pads-instructions" data-i18n="editorInstructions">Toque nas pistas para adicionar/remover notas na linha do tempo, ou use <b>REC</b> para gravar no ritmo enquanto a música toca!</div>
                 <div class="editor-pads-bar">
                     <button id="editor-pad-0" class="editor-fret-pad pad-green">
                         <span class="pad-num">1</span>
-                        <span class="pad-label">VERDE [A]</span>
+                        <span class="pad-label" data-i18n="laneGreen">VERDE [A]</span>
                     </button>
                     <button id="editor-pad-1" class="editor-fret-pad pad-red">
                         <span class="pad-num">2</span>
-                        <span class="pad-label">VERMELHO [S]</span>
+                        <span class="pad-label" data-i18n="laneRed">VERMELHO [S]</span>
                     </button>
                     <button id="editor-pad-2" class="editor-fret-pad pad-yellow">
                         <span class="pad-num">3</span>
-                        <span class="pad-label">AMARELO [D]</span>
+                        <span class="pad-label" data-i18n="laneYellow">AMARELO [D]</span>
                     </button>
                     <button id="editor-pad-3" class="editor-fret-pad pad-blue">
                         <span class="pad-num">4</span>
-                        <span class="pad-label">AZUL [F]</span>
+                        <span class="pad-label" data-i18n="laneBlue">AZUL [F]</span>
                     </button>
                 </div>
             </div>
@@ -651,7 +651,7 @@
     <div id="song-results-modal" class="results-modal-overlay">
         <div class="results-modal-dialog">
             <div class="results-header">
-                <h2 id="result-modal-title">🏆 VITÓRIA! SHOW CONCLUÍDO!</h2>
+                <h2 id="result-modal-title" data-i18n="victoryTitle">🏆 VITÓRIA! SHOW CONCLUÍDO!</h2>
             </div>
             <div class="results-song-card">
                 <img id="result-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="results-cover-img">
@@ -662,33 +662,33 @@
             </div>
             <div class="results-stats-grid">
                 <div class="stat-box">
-                    <span class="stat-label">Precisão</span>
+                    <span class="stat-label" data-i18n="statAccuracy">Precisão</span>
                     <span id="result-accuracy" class="stat-value val-acc">100%</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Notas Acertadas</span>
+                    <span class="stat-label" data-i18n="statNotesHit">Notas Acertadas</span>
                     <span id="result-hits" class="stat-value">0 / 0</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Zumbis Derrotados</span>
+                    <span class="stat-label" data-i18n="statZombiesKilled">Zumbis Derrotados</span>
                     <span id="result-zombies-killed" class="stat-value val-streak">0 💀</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Maior Streak</span>
+                    <span class="stat-label" data-i18n="statMaxStreak">Maior Streak</span>
                     <span id="result-max-streak" class="stat-value val-streak">0 🔥</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Ouro Ganho</span>
+                    <span class="stat-label" data-i18n="statGoldGained">Ouro Ganho</span>
                     <span id="result-gold-reward" class="stat-value val-gold">+0 🪙</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Pontos da Partida</span>
+                    <span class="stat-label" data-i18n="statScoreGained">Pontos da Partida</span>
                     <span id="result-score-gained" class="stat-value val-score">+0</span>
                 </div>
             </div>
             <div class="results-actions">
-                <button id="result-replay-btn" class="res-btn btn-replay">🔄 JOGAR NOVAMENTE</button>
-                <button id="result-close-btn" class="res-btn btn-close">🏠 MENU PRINCIPAL</button>
+                <button id="result-replay-btn" class="res-btn btn-replay" data-i18n="btnPlayAgain">🔄 JOGAR NOVAMENTE</button>
+                <button id="result-close-btn" class="res-btn btn-close" data-i18n="btnMainMenu">🏠 MENU PRINCIPAL</button>
             </div>
         </div>
     </div>
@@ -697,35 +697,35 @@
     <div id="battle-defeat-modal" class="results-modal-overlay defeat-modal-overlay">
         <div class="results-modal-dialog defeat-modal-dialog">
             <div class="results-header defeat-header">
-                <h2>☠️ DERROTA! O PALCO FOI INVADIDO!</h2>
-                <p class="defeat-subtitle">Sua energia esgotou e os zumbis interromperam o show!</p>
+                <h2 data-i18n="defeatTitle">☠️ DERROTA! O PALCO FOI INVADIDO!</h2>
+                <p class="defeat-subtitle" data-i18n="defeatSub">Sua energia esgotou e os zumbis interromperam o show!</p>
             </div>
             <div class="results-stats-grid">
                 <div class="stat-box">
-                    <span class="stat-label">Zumbis Derrotados</span>
+                    <span class="stat-label" data-i18n="statZombiesKilled">Zumbis Derrotados</span>
                     <span id="defeat-zombies-killed" class="stat-value val-streak">0 💀</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Dano Causado</span>
+                    <span class="stat-label" data-i18n="statDamageDealt">Dano Causado</span>
                     <span id="defeat-total-damage" class="stat-value val-acc">0</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Precisão</span>
+                    <span class="stat-label" data-i18n="statAccuracy">Precisão</span>
                     <span id="defeat-accuracy" class="stat-value val-score">0%</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Ouro Coletado</span>
+                    <span class="stat-label" data-i18n="statGoldCollected">Ouro Coletado</span>
                     <span id="defeat-gold-reward" class="stat-value val-gold">+0 🪙</span>
                 </div>
                 <div class="stat-box full-width">
-                    <span class="stat-label">Pontuação Alcançada</span>
+                    <span class="stat-label" data-i18n="statScoreReached">Pontuação Alcançada</span>
                     <span id="defeat-score-gained" class="stat-value val-score">0</span>
                 </div>
             </div>
             <div class="results-actions defeat-actions">
-                <button id="defeat-retry-btn" class="res-btn btn-replay">🔄 TENTAR NOVAMENTE</button>
-                <button id="defeat-talents-btn" class="res-btn btn-edit">🌳 TALENTOS</button>
-                <button id="defeat-close-btn" class="res-btn btn-close">🏠 MENU PRINCIPAL</button>
+                <button id="defeat-retry-btn" class="res-btn btn-replay" data-i18n="btnRetry">🔄 TENTAR NOVAMENTE</button>
+                <button id="defeat-talents-btn" class="res-btn btn-edit" data-i18n="btnTalents">🌳 TALENTOS</button>
+                <button id="defeat-close-btn" class="res-btn btn-close" data-i18n="btnMainMenu">🏠 MENU PRINCIPAL</button>
             </div>
         </div>
     </div>
@@ -735,8 +735,8 @@
         <div class="stats-modal-dialog">
             <div class="stats-modal-header">
                 <div class="stats-header-info">
-                    <h2>📊 ESTATÍSTICAS DE BATALHA</h2>
-                    <span class="stats-header-sub">Performance em tempo real do confronto</span>
+                    <h2 data-i18n="ssTitle">📊 ESTATÍSTICAS DE BATALHA</h2>
+                    <span class="stats-header-sub" data-i18n="ssSub">Performance em tempo real do confronto</span>
                 </div>
                 <button id="stats-modal-close-btn" class="stats-modal-close" aria-label="Fechar">✕</button>
             </div>
@@ -750,11 +750,11 @@
                         </div>
                     </div>
                     <div class="hero-hp-status">
-                        <span class="stat-label">HP DO GUITARRISTA</span>
+                        <span class="stat-label" data-i18n="ssHeroHp">HP DO GUITARRISTA</span>
                         <span id="ss-hero-hp" class="stat-highlight-val hp-val">100 / 100</span>
                     </div>
                     <div class="match-time-status">
-                        <span class="stat-label">TEMPO EM COMBATE</span>
+                        <span class="stat-label" data-i18n="ssMatchTime">TEMPO EM COMBATE</span>
                         <span id="ss-time-elapsed" class="stat-highlight-val">00:00</span>
                     </div>
                 </div>
@@ -762,43 +762,43 @@
                 <div class="stats-metrics-grid">
                     <div class="metric-card">
                         <span class="metric-icon">💥</span>
-                        <span class="metric-label">Dano Total Causado</span>
+                        <span class="metric-label" data-i18n="ssTotalDamage">Dano Total Causado</span>
                         <span id="ss-total-damage" class="metric-value val-dmg">0</span>
                     </div>
                     <div class="metric-card">
                         <span class="metric-icon">💀</span>
-                        <span class="metric-label">Zumbis Derrotados</span>
+                        <span class="metric-label" data-i18n="ssZombiesKilled">Zumbis Derrotados</span>
                         <span id="ss-zombies-killed" class="metric-value val-kills">0</span>
                     </div>
                     <div class="metric-card">
                         <span class="metric-icon">🔥</span>
-                        <span class="metric-label">Maior Streak</span>
+                        <span class="metric-label" data-i18n="ssMaxStreak">Maior Streak</span>
                         <span id="ss-max-streak" class="metric-value val-streak">0 🔥</span>
                     </div>
                     <div class="metric-card">
                         <span class="metric-icon">⚡</span>
-                        <span class="metric-label">Multiplicador Atual</span>
+                        <span class="metric-label" data-i18n="ssCurrentMultiplier">Multiplicador Atual</span>
                         <span id="ss-current-multiplier" class="metric-value val-mult">x1</span>
                     </div>
                     <div class="metric-card">
                         <span class="metric-icon">🏆</span>
-                        <span class="metric-label">Pontuação Atual</span>
+                        <span class="metric-label" data-i18n="ssCurrentScore">Pontuação Atual</span>
                         <span id="ss-current-score" class="metric-value val-score">0</span>
                     </div>
                     <div class="metric-card">
                         <span class="metric-icon">🪙</span>
-                        <span class="metric-label">Ouro nesta Partida</span>
+                        <span class="metric-label" data-i18n="ssMatchCoins">Ouro nesta Partida</span>
                         <span id="ss-match-coins" class="metric-value val-gold">+0 🪙</span>
                     </div>
                     <div class="metric-card full-span">
                         <span class="metric-icon">🎯</span>
-                        <span class="metric-label">Precisão & Julgamento de Notas</span>
+                        <span class="metric-label" data-i18n="ssAccuracyJudging">Precisão & Julgamento de Notas</span>
                         <span id="ss-accuracy-rate" class="metric-value val-acc">100% (0P / 0G / 0M)</span>
                     </div>
                 </div>
             </div>
             <div class="stats-modal-footer">
-                <button id="stats-resume-btn" class="stats-resume-btn">VOLTAR AO JOGO</button>
+                <button id="stats-resume-btn" class="stats-resume-btn" data-i18n="btnResumeBattle">VOLTAR AO JOGO</button>
             </div>
         </div>
     </div>
@@ -807,31 +807,31 @@
     <div id="battle-gear-modal" class="gear-modal-overlay">
         <div class="gear-modal-dialog">
             <div class="gear-modal-header">
-                <h2 id="gear-modal-title">⚙️ OPÇÕES & PAUSA</h2>
+                <h2 id="gear-modal-title" data-i18n="gearTitle">⚙️ OPÇÕES & PAUSA</h2>
                 <button id="gear-modal-close-btn" class="gear-modal-close" aria-label="Fechar">✕</button>
             </div>
             <div class="gear-modal-body">
                 <div class="gear-option-row">
-                    <span class="gear-option-label">Idioma / Language:</span>
+                    <span class="gear-option-label" data-i18n="gearLangLabel">Idioma / Language:</span>
                     <div class="gear-lang-group">
                         <button class="gear-btn-choice" onclick="i18n.setLanguage('pt')">Português (PT)</button>
                         <button class="gear-btn-choice" onclick="i18n.setLanguage('en')">English (EN)</button>
                     </div>
                 </div>
                 <div class="gear-option-row">
-                    <span class="gear-option-label">Som do Jogo:</span>
-                    <button class="gear-btn-choice" onclick="if(window.soundEngine){ const m = window.soundEngine.toggleMute(); this.innerText = m ? 'Mutado 🔇' : 'Ativo 🔊'; }">Alternar Som</button>
+                    <span class="gear-option-label" data-i18n="gearSoundLabel">Som do Jogo:</span>
+                    <button class="gear-btn-choice" data-i18n="gearToggleSound" onclick="if(window.soundEngine){ const m = window.soundEngine.toggleMute(); this.innerText = m ? 'Mutado 🔇' : 'Ativo 🔊'; }">Alternar Som</button>
                 </div>
 
                 <div id="gear-danger-zone-wrap" class="gear-danger-zone">
-                    <div class="danger-warning-text">⚠️ Voltar ao Menu Inicial encerrará o combate atual e os dados desta partida serão descartados!</div>
-                    <button id="gear-abandon-battle-btn" class="gear-abandon-btn">
+                    <div class="danger-warning-text" data-i18n="gearDangerWarning">⚠️ Voltar ao Menu Inicial encerrará o combate atual e os dados desta partida serão descartados!</div>
+                    <button id="gear-abandon-battle-btn" class="gear-abandon-btn" data-i18n="gearAbandon">
                         🚨 Voltar ao Menu Inicial (perde progresso atual)
                     </button>
                 </div>
             </div>
             <div class="gear-modal-footer">
-                <button id="gear-footer-action-btn" class="gear-resume-btn">▶️ Continuar Partida</button>
+                <button id="gear-footer-action-btn" class="gear-resume-btn" data-i18n="gearResume">▶️ Continuar Partida</button>
             </div>
         </div>
     </div>
@@ -842,16 +842,16 @@
             <div class="game-modal-header">
                 <h3 id="skill-picker-title">⚡ Equipar no Trilho 1</h3>
                 <div class="skill-modal-actions-top">
-                    <button type="button" id="skill-restore-default-btn" class="skill-restore-btn" title="Restaurar Loadout Padrão">↺ Padrão</button>
+                    <button type="button" id="skill-restore-default-btn" class="skill-restore-btn" title="Restaurar Loadout Padrão" data-i18n="btnRestoreDefault">↺ Padrão</button>
                     <button id="skill-picker-close-btn" class="gear-modal-close" aria-label="Fechar">✕</button>
                 </div>
             </div>
             <div class="game-modal-body">
                 <div class="skill-rule-notice" style="background: rgba(255,170,0,0.12); border: 1px solid rgba(255,170,0,0.35); border-radius: 8px; padding: 7px 10px; margin-bottom: 12px; font-size: 11.5px; color: #ffcc00; display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 16px;">⚠️</span>
-                    <span><strong>Regra do Palco:</strong> É obrigatório manter pelo menos 1 trilho com o Ataque Básico equipado!</span>
+                    <span data-i18n="skillRuleNotice" data-i18n-html="true"><strong>Regra do Palco:</strong> É obrigatório manter pelo menos 1 trilho com o Ataque Básico equipado!</span>
                 </div>
-                <p class="section-subtext">Escolha a habilidade que será ativada ao acertar notas nesta pista:</p>
+                <p class="section-subtext" data-i18n="skillPickPrompt">Escolha a habilidade que será ativada ao acertar notas nesta pista:</p>
                 <div id="skill-picker-list" class="skill-picker-list">
                     <!-- Populated dynamically with guitarist skills -->
                 </div>
@@ -864,8 +864,8 @@
         <div class="missions-modal-dialog">
             <div class="missions-modal-header">
                 <div class="missions-header-title-wrap">
-                    <h2>🎯 MISSÕES & METAS DO PALCO</h2>
-                    <p class="missions-header-subtitle">Elimine zumbis e domine guitarristas para desbloquear marcos procedurais (10 ➔ 100 ➔ 1k ➔ 10k ➔ 100k)!</p>
+                    <h2 data-i18n="missionsTitle">🎯 MISSÕES & METAS DO PALCO</h2>
+                    <p class="missions-header-subtitle" data-i18n="missionsSub">Elimine zumbis e domine guitarristas para desbloquear marcos procedurais (10 ➔ 100 ➔ 1k ➔ 10k ➔ 100k)!</p>
                 </div>
                 <button id="missions-modal-close-btn" class="missions-modal-close-btn" aria-label="Fechar">✕</button>
             </div>
@@ -873,15 +873,15 @@
             <!-- Category Switcher (Zombies vs Guitarists vs Performance) -->
             <div class="missions-category-tabs">
                 <button type="button" class="missions-cat-tab active" data-cat="zombies">
-                    <span>🧟 Hordas Zumbi</span>
+                    <span data-i18n="tabZombieHordes">🧟 Hordas Zumbi</span>
                     <span id="cat-badge-zombies" class="cat-tab-badge" style="display: none;"></span>
                 </button>
                 <button type="button" class="missions-cat-tab" data-cat="guitarists">
-                    <span>🎸 Guitarristas</span>
+                    <span data-i18n="tabGuitarists">🎸 Guitarristas</span>
                     <span id="cat-badge-guitarists" class="cat-tab-badge" style="display: none;"></span>
                 </button>
                 <button type="button" class="missions-cat-tab" data-cat="performance">
-                    <span>⚡ Ritmo & Batalha</span>
+                    <span data-i18n="tabPerformance">⚡ Ritmo & Batalha</span>
                     <span id="cat-badge-performance" class="cat-tab-badge" style="display: none;"></span>
                 </button>
             </div>
@@ -894,27 +894,27 @@
                         <strong id="missions-stat-kills">0</strong>
                     </div>
                     <div class="missions-stat-chip">
-                        <span>🪙 Ouro Coletado:</span>
+                        <span data-i18n="statMissionsGold">🪙 Ouro Coletado:</span>
                         <strong id="missions-stat-gold">0</strong>
                     </div>
                     <div class="missions-stat-chip">
-                        <span>👑 Mestres (100k):</span>
+                        <span data-i18n="statMasters">👑 Mestres (100k):</span>
                         <strong id="missions-stat-completed">0 / 16</strong>
                     </div>
                 </div>
-                <button type="button" id="missions-claim-all-btn" class="missions-claim-all-btn" disabled>✨ REIVINDICAR TODAS</button>
+                <button type="button" id="missions-claim-all-btn" class="missions-claim-all-btn" data-i18n="btnClaimAll" disabled>✨ REIVINDICAR TODAS</button>
             </div>
 
             <!-- Filter Tabs & Search -->
             <div class="missions-controls-bar">
                 <div class="missions-filters-row">
-                    <button type="button" class="missions-filter-btn active" data-filter="all">Todos</button>
-                    <button type="button" class="missions-filter-btn" data-filter="ready">Prontos ✨</button>
-                    <button type="button" class="missions-filter-btn" data-filter="active">Em Progresso 🔒</button>
-                    <button type="button" class="missions-filter-btn" data-filter="completed">Mestres 👑</button>
+                    <button type="button" class="missions-filter-btn active" data-filter="all" data-i18n="filterAll">Todos</button>
+                    <button type="button" class="missions-filter-btn" data-filter="ready" data-i18n="filterReady">Prontos ✨</button>
+                    <button type="button" class="missions-filter-btn" data-filter="active" data-i18n="filterActive">Em Progresso 🔒</button>
+                    <button type="button" class="missions-filter-btn" data-filter="completed" data-i18n="filterCompleted">Mestres 👑</button>
                 </div>
                 <div class="missions-search-wrap">
-                    <input type="text" id="missions-search-input" class="missions-search-input" placeholder="🔍 Buscar zumbi por nome ou arquétipo...">
+                    <input type="text" id="missions-search-input" class="missions-search-input" placeholder="🔍 Buscar zumbi por nome ou arquétipo..." data-i18n-placeholder="phSearchMissions">
                 </div>
             </div>
 
@@ -927,23 +927,23 @@
         </div>
     </div>
 
-    <!-- Scripts with Cache Busting v=51 -->
-    <script src="js/audio.js?v=51"></script>
-    <script src="js/i18n.js?v=51"></script>
-    <script src="js/spritesheet.js?v=51"></script>
-    <script src="js/combat-fx.js?v=51"></script>
-    <script src="js/zombie-entity.js?v=51"></script>
-    <script src="js/enemy-pool.js?v=51"></script>
-    <script src="js/guitarist-pool.js?v=51"></script>
-    <script src="js/talents.js?v=51"></script>
-    <script src="js/skills.js?v=51"></script>
-    <script src="js/stage-system.js?v=51"></script>
-    <script src="js/song-db.js?v=51"></script>
-    <script src="js/song-editor.js?v=51"></script>
-    <script src="js/song-studio.js?v=51"></script>
-    <script src="js/combat.js?v=51"></script>
-    <script src="js/rhythm.js?v=51"></script>
-    <script src="js/missions.js?v=51"></script>
-    <script src="js/main.js?v=51"></script>
+    <!-- Scripts with Cache Busting v=52 -->
+    <script src="js/audio.js?v=52"></script>
+    <script src="js/i18n.js?v=52"></script>
+    <script src="js/spritesheet.js?v=52"></script>
+    <script src="js/combat-fx.js?v=52"></script>
+    <script src="js/zombie-entity.js?v=52"></script>
+    <script src="js/enemy-pool.js?v=52"></script>
+    <script src="js/guitarist-pool.js?v=52"></script>
+    <script src="js/talents.js?v=52"></script>
+    <script src="js/skills.js?v=52"></script>
+    <script src="js/stage-system.js?v=52"></script>
+    <script src="js/song-db.js?v=52"></script>
+    <script src="js/song-editor.js?v=52"></script>
+    <script src="js/song-studio.js?v=52"></script>
+    <script src="js/combat.js?v=52"></script>
+    <script src="js/rhythm.js?v=52"></script>
+    <script src="js/missions.js?v=52"></script>
+    <script src="js/main.js?v=52"></script>
 </body>
 </html>

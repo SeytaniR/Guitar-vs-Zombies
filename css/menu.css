@@ -97,9 +97,12 @@
     cursor: pointer;
 }
 
-.menu-lang-group .lang-btn:hover {
+.menu-lang-group .lang-btn:hover,
+.menu-lang-group .lang-btn.active {
     color: #00ff66;
     border-color: #00ff66;
+    background: rgba(0, 255, 102, 0.2);
+    box-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
 }
 
 /* Menu Hero Showcase & Logo */

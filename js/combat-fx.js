@@ -67,16 +67,17 @@ class CombatFX {
     }
 
     getMultiKillDef(count) {
-        if (count <= 1) return { title: '1 KILL! ⚡', color: '#00ffff', sub: 'PRIMEIRA VÍTIMA! 🔥', shake: 3 };
-        if (count === 2) return { title: 'DOUBLE KILL! 🔥', color: '#ffaa00', sub: 'RITMO ACELERANDO! ⚡', shake: 5 };
-        if (count === 3) return { title: 'TRIPLE KILL! ⚡🔥', color: '#ff3300', sub: 'TRIPLA CHACINA! 💥', shake: 7 };
-        if (count === 4) return { title: 'MULTI KILL! 💥', color: '#ff00aa', sub: 'MASSACRE NO PALCO! 🎸', shake: 9 };
-        if (count === 5) return { title: 'ULTRA KILL! ⚡💥', color: '#ff0055', sub: 'ADRENALINA MÁXIMA! ⚡', shake: 12 };
-        if (count === 6) return { title: 'FANTÁSTICO! 🎸🔥', color: '#9900ff', sub: 'DEUS DO ROCK AND ROLL! 🤘', shake: 14 };
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+        if (count <= 1) return { title: '1 KILL! ⚡', color: '#00ffff', sub: tr('mk1Sub', 'PRIMEIRA VÍTIMA! 🔥'), shake: 3 };
+        if (count === 2) return { title: 'DOUBLE KILL! 🔥', color: '#ffaa00', sub: tr('mk2Sub', 'RITMO ACELERANDO! ⚡'), shake: 5 };
+        if (count === 3) return { title: 'TRIPLE KILL! ⚡🔥', color: '#ff3300', sub: tr('mk3Sub', 'TRIPLA CHACINA! 💥'), shake: 7 };
+        if (count === 4) return { title: 'MULTI KILL! 💥', color: '#ff00aa', sub: tr('mk4Sub', 'MASSACRE NO PALCO! 🎸'), shake: 9 };
+        if (count === 5) return { title: 'ULTRA KILL! ⚡💥', color: '#ff0055', sub: tr('mk5Sub', 'ADRENALINA MÁXIMA! ⚡'), shake: 12 };
+        if (count === 6) return { title: 'FANTÁSTICO! 🎸🔥', color: '#9900ff', sub: tr('mk6Sub', 'DEUS DO ROCK AND ROLL! 🤘'), shake: 14 };
         return {
             title: count === 7 ? 'UNBELIEVABLE! 👑⚡' : `UNBELIEVABLE x${count}! 👑⚡`,
             color: '#ffd700',
-            sub: 'LENDÁRIO & IMBATÍVEL! 👑',
+            sub: tr('mk7Sub', 'LENDÁRIO & IMBATÍVEL! 👑'),
             shake: 16
         };
     }

@@ -22,11 +22,36 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 - `RhythmSystem` (`js/rhythm.js`): Pistas neon interativas com controle manual do jogador, modo de músicas customizadas com sincronização por relógio de áudio (`currentTime`), avaliação de ritmo, tela de resultados com premiações em ouro e multiplicador até x9.
 - `Game` (`js/main.js`): Máquina de estados de telas (`menu`, `map-select`, `battle`), HUD minimalista de batalha (Auto, Mute, SS, Engrenagem), orquestrador da preparação de mapa e modais de estatísticas (SS) e pausa/abandono.
 - `MetaMissionSystem` (`js/missions.js`): Sistema procedural de missões meta e caçada de zumbis permanente. Rastreia eliminações individuais por arquétipo com escalonamento procedural de metas (10 ➔ 100 ➔ 1.000 ➔ 10.000 ➔ 100.000 kills), integração dinâmica com o pool mestre de zumbis, premiações em ouro e XP com bônus de periculosidade, e painel modal com filtros e coleta em massa.
-- `I18n` (`js/i18n.js`): Suporte a idiomas (Português do Brasil e Inglês).
+- `I18n` (`js/i18n.js`): Motor robusto de internacionalização com suporte completo a Português (pt-BR) e Inglês (EN). Suporta atributos declarativos de DOM (`data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, `data-i18n-html`), interpolação dinâmica de parâmetros com `t(key, fallback, params)`, persistência em `localStorage ('gvs_language')`, detecção automática de navegador e sincronização reativa com listeners e re-renderização em tempo real das telas ativas.
 
 ---
 
 ## Changelog
+
+### [v1.8.0] - 2026-11-03 (Revisão Geral e Internacionalização Completa PT-BR / EN - Build 52)
+**Auditoria e Revisão Geral de Todos os Textos, Telas e Modais do Jogo com Localização Completa em Português e Inglês**
+- **Motor Central de Internacionalização (`I18n` / `js/i18n.js`):**
+  - Dicionários completos para `pt` (Português do Brasil) e `en` (English) cobrindo todas as telas e modais.
+  - Implementado helper declarativo no DOM: suporte a `[data-i18n]`, `[data-i18n-title]`, `[data-i18n-placeholder]` e `[data-i18n-html]`.
+  - Implementado `t(key, fallback, params)` com interpolação de tokens dinâmicos (`{name}`, `{cost}`, `{stage}`, etc.).
+  - Persistência automática no `localStorage` sob a chave `gvs_language` e detecção inteligente do idioma do navegador.
+  - Sincronização reativa com sistema de eventos `onLanguageChange(fn)` que notifica os módulos do jogo para re-renderização imediata de HUDs, cards de missões, talentos e rosters.
+- **Revisão e Tradução de Telas e Modais (`index.html`):**
+  - **Menu Principal:** Títulos de estatísticas (Ouro, Pontuação, Kills), subtítulo da marca, card da turnê, botões de ação e rodapé.
+  - **Pré-Batalha:** Cabeçalho, fases procedurais, arena selecionada, seletor de guitarristas, passivas, hordas inimigas e seleção de faixas.
+  - **Batalha & Highway:** Barras de HP/Mana, botões do HUD (som, SS, engrenagem), pills flutuantes de pontuação e combo, e divisor da highway.
+  - **Modais:** Árvore de Talentos, Estúdio de Criação & Importação de Músicas, Editor de Ritmo (timeline e pads), Resultados de Vitória e Derrota, Estatísticas em Tempo Real (SS), Opções & Pausa (Gear), Seleção de Habilidades de Trilho e Missões Meta Procedurais.
+- **Integração Dinâmica nos Scripts do Jogo (`main.js`, `missions.js`, `talents.js`, `combat-fx.js`, `stage-system.js`, `song-studio.js`):**
+  - Atualização dos chips de fase (`CHEFE`, `Alvos`), badges de níveis de herói, desbloqueios e custos de ouro.
+  - Atualização dos títulos e subtítulos de MultiKill radical no canvas (`combat-fx.js`).
+  - Textos dinâmicos da árvore de talentos (requisitos, níveis máximos, custos de melhoria).
+  - Títulos de mestria procedural em missões (`MESTRE CAÇADOR` / `MASTER HUNTER`, `LENDA DO ROCK` / `ROCK LEGEND`, `MESTRIA SUPREMA` / `SUPREME MASTERY`).
+- **Estilização & Indicadores de Idioma Ativo (`css/menu.css` & `css/battle.css`):**
+  - Adicionado estilo neon verde ativo `.lang-btn.active` e `.gear-btn-choice.active` para feedback visual claro do idioma selecionado.
+- **Conformidade de Arquitetura & Testes:**
+  - 524 testes automatizados 100% aprovados (`test-procedural.js`), incluindo seção dedicada de validação i18n (PT-BR, EN, interpolação, alternância e persistência).
+  - Todos os 17 arquivos JS e 11 arquivos CSS estritamente abaixo de 1.000 linhas (Regra Zero God Object).
+  - Cache-busting atualizado para `v=52` e versão global para `v1.8.0 (Build 52)`.
 
 ### [v1.7.9] - 2026-11-03 (Missões Procedurais de Performance, Ritmo & Batalha - Build 51)
 **Expansão de Metas Procedurais com UNBELIEVABLE, Dano Crítico, Precisão de Músicas, Combos e Recompensas Balanceadas**

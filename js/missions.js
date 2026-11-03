@@ -605,9 +605,10 @@ class MetaMissionSystem {
         const claimAllBtn = document.getElementById('missions-claim-all-btn');
         if (claimAllBtn) {
             claimAllBtn.disabled = (currentCatPending === 0);
+            const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
             claimAllBtn.innerText = currentCatPending > 0
-                ? `✨ REIVINDICAR (${currentCatPending})`
-                : '✨ REIVINDICAR TODAS';
+                ? tr('btnClaimCount', `✨ REIVINDICAR (${currentCatPending})`, { count: currentCatPending })
+                : tr('btnClaimAll', '✨ REIVINDICAR TODAS');
         }
 
         const zCount = this.getPendingClaimsCount('zombies');
@@ -698,22 +699,23 @@ class MetaMissionSystem {
     }
 
     updateStatsHeader() {
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         let missions = [];
         let totalCount = 0;
-        let labelText = 'Kills Hordas:';
+        let labelText = tr('statKillsHordes', 'Kills Hordas:');
 
         if (this.activeCategory === 'guitarists') {
             missions = this.getAllGuitaristMissions();
             totalCount = Object.values(this.state.heroKills).reduce((a, b) => a + (Number(b) || 0), 0);
-            labelText = 'Kills Heróis:';
+            labelText = tr('statKillsHeroes', 'Kills Heróis:');
         } else if (this.activeCategory === 'performance') {
             missions = this.getAllPerformanceMissions();
             totalCount = Object.values(this.state.performanceStats).reduce((a, b) => a + (Number(b) || 0), 0);
-            labelText = 'Ações de Ritmo:';
+            labelText = tr('statRhythmActions', 'Ações de Ritmo:');
         } else {
             missions = this.getAllZombieMissions();
             totalCount = Object.values(this.state.kills).reduce((a, b) => a + (Number(b) || 0), 0);
-            labelText = 'Kills Hordas:';
+            labelText = tr('statKillsHordes', 'Kills Hordas:');
         }
 
         const maxCompletedCount = missions.filter(m => m.isMaxCompleted).length;
@@ -753,10 +755,11 @@ class MetaMissionSystem {
 
         if (missions.length === 0) {
             const icon = this.activeCategory === 'guitarists' ? '🎸' : (this.activeCategory === 'performance' ? '⚡' : '🧟');
+            const emptyMsg = typeof i18n !== 'undefined' ? i18n.t('noMissionsFound', 'Nenhuma missão encontrada para o filtro selecionado.') : 'Nenhuma missão encontrada para o filtro selecionado.';
             container.innerHTML = `
                 <div class="missions-empty-state">
                     <span class="empty-icon">${icon}</span>
-                    <p>Nenhuma missão encontrada para o filtro selecionado.</p>
+                    <p>${emptyMsg}</p>
                 </div>
             `;
             return;
@@ -798,25 +801,28 @@ class MetaMissionSystem {
         const titleClass = m.category === 'guitarists' ? 'hero-title' : (m.category === 'performance' ? 'perf-title' : '');
         const tierPillClass = m.category === 'guitarists' ? 'hero-tier-pill' : (m.category === 'performance' ? 'perf-tier-pill' : '');
 
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         let actionBtnHTML = '';
         if (isMax) {
-            let masterTitle = 'MESTRE CAÇADOR';
-            if (m.category === 'guitarists') masterTitle = 'LENDA DO ROCK';
-            else if (m.category === 'performance') masterTitle = 'MESTRIA SUPREMA';
+            let masterTitle = tr('masterHunter', 'MESTRE CAÇADOR');
+            if (m.category === 'guitarists') masterTitle = tr('rockLegend', 'LENDA DO ROCK');
+            else if (m.category === 'performance') masterTitle = tr('supremeMastery', 'MESTRIA SUPREMA');
 
+            const completedText = tr('completedUnits', `${m.targetVal.toLocaleString()} ${m.unitLabel} Concluídas!`, { target: m.targetVal.toLocaleString(), unit: m.unitLabel });
             actionBtnHTML = `
                 <div class="mission-status-badge badge-master">
                     <span>👑 ${masterTitle}</span>
-                    <small>${m.targetVal.toLocaleString()} ${m.unitLabel} Concluídas!</small>
+                    <small>${completedText}</small>
                 </div>
             `;
         } else if (isReady) {
+            const claimLabel = tr('claim', 'REIVINDICAR');
             actionBtnHTML = `
                 <button type="button" class="mission-claim-btn ready-claim pulse-gold"
                         data-claim-cat="${m.category}" data-claim-id="${m.id}"
                         ${m.category === 'zombies' ? `data-zombie="${m.id}"` : ''}
                         ${m.category === 'guitarists' ? `data-hero="${m.id}"` : ''}>
-                    <span class="btn-label">✨ REIVINDICAR</span>
+                    <span class="btn-label">✨ ${claimLabel}</span>
                     <span class="btn-reward-preview">+${m.reward.gold.toLocaleString()} 🪙</span>
                 </button>
             `;
@@ -828,9 +834,12 @@ class MetaMissionSystem {
             `;
         }
 
-        let sectionTag = 'RECOMPENSA DO MARCO:';
-        if (m.category === 'guitarists') sectionTag = 'MESTRIA DO GUITARRISTA:';
-        else if (m.category === 'performance') sectionTag = 'MARCO DE PERFORMANCE:';
+        let sectionTag = tr('milestoneReward', 'RECOMPENSA DO MARCO:');
+        if (m.category === 'guitarists') sectionTag = tr('heroMastery', 'MESTRIA DO GUITARRISTA:');
+        else if (m.category === 'performance') sectionTag = tr('perfMilestone', 'MARCO DE PERFORMANCE:');
+
+        const goldLabel = tr('goldUnit', 'Ouro');
+        const targetLabel = tr('target', 'Meta:');
 
         return `
             <div class="mission-card ${catClass} ${isReady ? 'card-ready' : ''} ${isMax ? 'card-master' : ''}">
@@ -846,7 +855,7 @@ class MetaMissionSystem {
                         </div>
                         <div class="mission-tier-indicator">
                             <span class="tier-pill ${tierPillClass}">Tier ${isMax ? '5/5' : `${m.currentTierNum}/5`}</span>
-                            <span class="tier-target-label">Meta: <strong>${m.targetVal.toLocaleString()}</strong> ${m.unitLabel.toLowerCase()}</span>
+                            <span class="tier-target-label">${targetLabel} <strong>${m.targetVal.toLocaleString()}</strong> ${m.unitLabel.toLowerCase()}</span>
                         </div>
                     </div>
                 </div>
@@ -864,7 +873,7 @@ class MetaMissionSystem {
                 <div class="mission-reward-box">
                     <div class="reward-title-tag">${sectionTag}</div>
                     <div class="reward-chips-row">
-                        <span class="reward-chip chip-gold">🪙 +${m.reward.gold.toLocaleString()} Ouro</span>
+                        <span class="reward-chip chip-gold">🪙 +${m.reward.gold.toLocaleString()} ${goldLabel}</span>
                         <span class="reward-chip chip-xp">⭐ +${m.reward.xp.toLocaleString()} XP</span>
                         <span class="reward-chip chip-title ${titleClass}">🎖️ ${m.reward.title}</span>
                     </div>

@@ -182,6 +182,7 @@ class Game {
 
     updateStageUI() {
         if (!window.stageSystem) return;
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         const stage = window.stageSystem.selectedStage;
         const stageTitle = document.getElementById('map-stage-title-text');
         const stageInfo = document.getElementById('map-stage-info-text');
@@ -191,11 +192,11 @@ class Game {
             const range = window.stageSystem.getZombieLevelRange(stage);
             const kills = window.stageSystem.getTargetKills(stage);
             const rewards = window.stageSystem.getStageRewards(stage);
-            const bossChip = isBoss ? '<span class="stage-chip chip-boss">👑 CHEFE (2x OURO/XP)</span>' : '';
+            const bossChip = isBoss ? `<span class="stage-chip chip-boss">${tr('bossBadge', '👑 CHEFE (2x OURO/XP)')}</span>` : '';
             stageInfo.innerHTML = `
                 ${bossChip}
                 <span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span>
-                <span class="stage-chip chip-target">🎯 ${kills} Alvos</span>
+                <span class="stage-chip chip-target">🎯 ${kills} ${tr('targetsUnit', 'Alvos')}</span>
                 <span class="stage-chip chip-gold">🪙 +${rewards.coins}</span>
                 <span class="stage-chip chip-xp">⭐ +${rewards.xp} XP</span>
             `;
@@ -204,6 +205,7 @@ class Game {
 
     renderHeroRoster() {
         if (!window.guitaristPool) return;
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         const pool = window.guitaristPool;
         const selectedHero = (pool.getSelectedGuitarist && pool.getSelectedGuitarist()) 
             || (pool.getActiveGuitarist && pool.getActiveGuitarist());
@@ -236,13 +238,13 @@ class Game {
         const lBadge = el('showcase-hero-level-badge'), xText = el('showcase-hero-xp-text'), xFill = el('showcase-hero-xp-fill'), lUpBtn = el('hero-level-up-btn');
 
         if (isUnlocked) {
-            if (lBadge) lBadge.innerText = `⭐ NÍVEL ${lvlData.level} / 100`;
-            if (xText) xText.innerText = lvlData.level >= 100 ? 'MÁXIMO' : `XP: ${lvlData.xp} / ${reqXp}`;
+            if (lBadge) lBadge.innerText = tr('heroLevelBadge', `⭐ NÍVEL ${lvlData.level} / 100`, { lvl: lvlData.level });
+            if (xText) xText.innerText = lvlData.level >= 100 ? tr('heroMaxXp', 'MÁXIMO') : `XP: ${lvlData.xp} / ${reqXp}`;
             if (xFill) xFill.style.width = `${lvlData.level >= 100 ? 100 : Math.min(100, Math.round((lvlData.xp / reqXp) * 100))}%`;
             if (lUpBtn) {
                 lUpBtn.disabled = (lvlData.level >= 100);
                 lUpBtn.className = 'hero-lvl-btn';
-                lUpBtn.innerText = lvlData.level >= 100 ? '⭐ NÍVEL MÁXIMO (100)' : `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`;
+                lUpBtn.innerText = lvlData.level >= 100 ? tr('heroMaxLevel', '⭐ NÍVEL MÁXIMO (100)') : tr('heroLevelUp', `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`, { cost: goldCost });
                 lUpBtn.onclick = () => {
                     if (lvlData.level >= 100) return;
                     const res = pool.levelUpWithGold(currentHero.id);
@@ -254,13 +256,13 @@ class Game {
             }
         } else {
             const uCost = pool.getHeroUnlockCost(currentHero.id);
-            if (lBadge) lBadge.innerText = `🔒 GUITARRISTA BLOQUEADO`;
-            if (xText) xText.innerText = `Custo: 🪙 ${uCost} Ouro`;
+            if (lBadge) lBadge.innerText = tr('heroLocked', '🔒 GUITARRISTA BLOQUEADO');
+            if (xText) xText.innerText = tr('heroUnlockCost', `Custo: 🪙 ${uCost} Ouro`, { cost: uCost });
             if (xFill) xFill.style.width = '0%';
             if (lUpBtn) {
                 lUpBtn.disabled = false;
                 lUpBtn.className = 'hero-lvl-btn hero-unlock-cta';
-                lUpBtn.innerText = `🪙 DESBLOQUEAR GUITARRISTA (🪙 ${uCost})`;
+                lUpBtn.innerText = tr('heroUnlock', `🪙 DESBLOQUEAR GUITARRISTA (🪙 ${uCost})`, { cost: uCost });
                 lUpBtn.onclick = () => {
                     const res = pool.unlockHeroWithGold(currentHero.id);
                     if (res.success) {

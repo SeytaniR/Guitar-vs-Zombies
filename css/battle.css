@@ -572,8 +572,12 @@
     transition: background 0.15s ease;
 }
 
-.gear-btn-choice:hover {
-    background: rgba(255, 255, 255, 0.2);
+.gear-btn-choice:hover,
+.gear-btn-choice.active {
+    background: rgba(0, 255, 102, 0.25);
+    border-color: #00ff66;
+    color: #00ff66;
+    box-shadow: 0 0 8px rgba(0, 255, 102, 0.35);
 }
 
 .gear-danger-zone {

@@ -359,15 +359,16 @@ class SongStudio {
     async renderLibrary() {
         const container = document.getElementById('studio-library-list');
         if (!container || !window.songDB) return;
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
 
-        container.innerHTML = '<div class="studio-loading">Carregando músicas...</div>';
+        container.innerHTML = `<div class="studio-loading">${tr('studioLoading', 'Carregando músicas...')}</div>`;
 
         try {
             const songs = await window.songDB.getAllSongs();
             container.innerHTML = '';
 
             if (songs.length === 0) {
-                container.innerHTML = '<div class="studio-empty">Nenhuma música encontrada. Crie uma nova música ou importe uma!</div>';
+                container.innerHTML = `<div class="studio-empty">${tr('studioEmpty', 'Nenhuma música encontrada. Crie uma nova música ou importe uma!')}</div>`;
                 return;
             }
 
@@ -399,10 +400,10 @@ class SongStudio {
                         </div>
                     </div>
                     <div class="song-card-actions">
-                        <button class="song-btn-play" title="Jogar Música">▶️ JOGAR</button>
-                        <button class="song-btn-edit" title="Editar Ritmo">✏️ EDITAR</button>
-                        <button class="song-btn-export" title="Exportar (.gvsong)">💾 EXPORTAR</button>
-                        <button class="song-btn-sync" title="Exportar Diretamente para o Servidor">⚡ P/ SERVIDOR</button>
+                        <button class="song-btn-play" title="Jogar Música">${tr('studioPlay', '▶️ JOGAR')}</button>
+                        <button class="song-btn-edit" title="Editar Ritmo">${tr('studioEdit', '✏️ EDITAR')}</button>
+                        <button class="song-btn-export" title="Exportar (.gvsong)">${tr('studioExport', '💾 EXPORTAR')}</button>
+                        <button class="song-btn-sync" title="Exportar Diretamente para o Servidor">${tr('studioSync', '⚡ P/ SERVIDOR')}</button>
                         ${!song.isDefault ? '<button class="song-btn-delete" title="Excluir">🗑️</button>' : ''}
                     </div>
                 `;

@@ -26,10 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-loadScript('js/stage-system.js');
-loadScript('js/skills.js');
-loadScript('js/guitarist-pool.js');
-loadScript('js/zombie-entity.js');
+['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -52,32 +49,23 @@ const pool = new GuitaristPoolSystem();
 window.guitaristPool = pool;
 
 assert(pool.guitarists.length === 6, 'Pool contains all 6 unique guitarists');
-
-// Test 1.1: Base Attack Speed 1.0/s for all guitarists
 pool.guitarists.forEach(g => {
-    assert(g.baseStats.baseAttackSpeed === 1.0, `Guitarist ${g.name} (${g.id}) baseAttackSpeed is configured to 1.0/s`);
-    const st = pool.getHeroStats(g.id);
-    assert(st.baseAttackSpeed === 1.0, `pool.getHeroStats('${g.id}') returns baseAttackSpeed === 1.0`);
+    assert(g.baseStats.baseAttackSpeed === 1.0 && pool.getHeroStats(g.id).baseAttackSpeed === 1.0, `Hero ${g.name} attack speed === 1.0/s`);
 });
 
 const johnny = pool.guitarists[0];
 const initialStats = pool.getHeroStats('johnny_blaze');
-assert(initialStats.level === 1, 'Johnny starts at Level 1');
-assert(Math.abs(initialStats.damageMult - 1.0) < 0.001, 'Level 1 damage multiplier is 1.0x (base)');
+assert(initialStats.level === 1 && Math.abs(initialStats.damageMult - 1.0) < 0.001, 'Johnny starts at Level 1 with 1.0x damage mult');
 
 // Test Level 100 stats
 pool.setLevel('johnny_blaze', 100);
 const maxStats = pool.getHeroStats('johnny_blaze');
-assert(maxStats.level === 100, 'Johnny reached Level 100');
-assert(Math.abs(maxStats.damageMult - 1.99) < 0.01, `Level 100 damage multiplier scales smoothly to ~2.0x (1.99x)`);
-assert(maxStats.critDamageBonusPercent >= 89, 'Level 100 Johnny has scaled crit bonus');
+assert(maxStats.level === 100 && Math.abs(maxStats.damageMult - 1.99) < 0.01 && maxStats.critDamageBonusPercent >= 89, 'Level 100 Johnny damage mult (1.99x) and crit scale smoothly');
 
 // Test XP Leveling & Gold Leveling
 pool.setLevel('johnny_blaze', 1);
 const xpNeeded = pool.getXpRequiredForNextLevel(1);
 assert(xpNeeded > 0, `XP required for Level 2 is calculated: ${xpNeeded}`);
-
-// Add XP to trigger level up
 const resXp = pool.addHeroXp('johnny_blaze', 500);
 assert(resXp.newLevel > 1, `Hero leveled up via XP from Level 1 to Level ${resXp.newLevel}`);
 
@@ -119,25 +107,18 @@ assert(roxieStatsLv100.critDamageBonusPercent >= 110, 'Mythic hero reaches high 
 console.log('\n2. Testing Infinite Procedural Stage System...');
 const stageSys = new StageSystem();
 window.stageSystem = stageSys;
-
-assert(stageSys.selectedStage === 1, 'Stage System starts at Stage 1');
-assert(stageSys.highestUnlockedStage === 1, 'Highest unlocked is Stage 1');
-
+assert(stageSys.selectedStage === 1 && stageSys.highestUnlockedStage === 1, 'Stage System starts at Stage 1');
 const stage1Info = stageSys.getStageInfo(1);
 assert(stage1Info.minZombieLevel === 1 && stage1Info.maxZombieLevel === 1, 'Stage 1 zombie level range is 1-1');
 assert(stage1Info.targetKills >= 5, `Stage 1 target kills is ${stage1Info.targetKills}`);
-
-// Unlock next stages
 stageSys.unlockNextStage();
-assert(stageSys.highestUnlockedStage === 2, 'Stage 2 successfully unlocked');
 stageSys.setSelectedStage(2);
-assert(stageSys.selectedStage === 2, 'Selected stage updated to 2');
+assert(stageSys.highestUnlockedStage === 2 && stageSys.selectedStage === 2, 'Stage 2 successfully unlocked and selected');
 
 // Test Infinite Stage 50
 const stage50Info = stageSys.getStageInfo(50);
 assert(stage50Info.minZombieLevel >= 60, `Stage 50 scales zombie levels: min ${stage50Info.minZombieLevel}, max ${stage50Info.maxZombieLevel}`);
-assert(stage50Info.rewardCoins > stage1Info.rewardCoins, `Stage 50 gives scaled gold reward (${stage50Info.rewardCoins} vs ${stage1Info.rewardCoins})`);
-assert(stage50Info.rewardXp > stage1Info.rewardXp, `Stage 50 gives scaled XP reward (${stage50Info.rewardXp} vs ${stage1Info.rewardXp})`);
+assert(stage50Info.rewardCoins > stage1Info.rewardCoins && stage50Info.rewardXp > stage1Info.rewardXp, `Stage 50 gives scaled gold/XP reward (${stage50Info.rewardCoins} vs ${stage1Info.rewardCoins})`);
 
 // ==========================================
 // TEST 3: PROCEDURAL ZOMBIES (LEVEL, STATS & REWARDS)
@@ -790,11 +771,11 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.7.9 Build 51)
+// Cache Buster Version & Modular CSS Links (v1.8.0 Build 52)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=51`), `index.html links ${f} with v=51`);
+    assert(htmlContent.includes(`${f}?v=52`), `index.html links ${f} with v=52`);
 });
-assert(htmlContent.includes('v1.7.9 (Build 51)'), 'index.html footer specifies v1.7.9 (Build 51)');
+assert(htmlContent.includes('v1.8.0 (Build 52)'), 'index.html footer specifies v1.8.0 (Build 52)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -955,19 +936,31 @@ assert(critAfter.currentVal >= 10 && critAfter.isReadyToClaim, '10 Critical hits
 const claimCrit = meta.claimPerformanceReward('critical_hits');
 assert(claimCrit && claimCrit.success && claimCrit.reward.gold === 15, 'Critical Hits Tier 1 claimed with low 15 gold reward');
 
-// Record Song Completion with 92% Accuracy
+// Record Song Completion with 92% Accuracy & 100% Full Combo
 meta.recordSongCompletion(92, { totalNotes: 100, hitNotes: 92, misses: 8, maxStreak: 45 });
-assert(meta.getPerformanceMission('songs_completed').currentVal >= 1, 'Song completion recorded');
-assert(meta.getPerformanceMission('high_accuracy_songs').currentVal >= 1, 'High accuracy song (≥90%) recorded');
-assert(meta.getPerformanceMission('max_streak').currentVal >= 45, 'Max streak recorded');
-
-// Record 100% Full Combo
+assert(meta.getPerformanceMission('songs_completed').currentVal >= 1 && meta.getPerformanceMission('high_accuracy_songs').currentVal >= 1 && meta.getPerformanceMission('max_streak').currentVal >= 45, 'Song completion, high accuracy & streak recorded');
 meta.recordSongCompletion(100, { totalNotes: 50, hitNotes: 50, misses: 0, maxStreak: 50 });
 assert(meta.getPerformanceMission('perfect_accuracy_songs').currentVal >= 1, '100% Full Combo song recorded');
+assert(htmlContent.includes('data-cat="performance"') && cssContent.includes('.perf-mission-card'), 'Performance category tab & CSS included');
 
-// UI DOM Category Tabs check
-assert(htmlContent.includes('data-cat="performance"'), 'index.html includes performance category tab');
-assert(cssContent.includes('.perf-mission-card'), 'CSS includes styling for performance cards');
+// ==========================================
+// 22. Testing Complete i18n Localization (PT-BR & EN) (v1.8.0 Build 52)
+// ==========================================
+console.log('\n22. Testing Complete i18n Localization (PT-BR & EN)...');
+assert(typeof i18n !== 'undefined' && i18n.currentLang, 'i18n engine is initialized');
+i18n.setLanguage('pt');
+assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'JOGAR / INICIAR BATALHA', 'i18n PT translation matches');
+assert(i18n.t('requiresPrereq', '', { name: 'Power Chord', level: 3 }) === '🔒 Requer: Power Chord Nv. 3', 'i18n parametric interpolation works');
+let callbackLang = null;
+i18n.onLanguageChange((lang) => { callbackLang = lang; });
+i18n.setLanguage('en');
+assert(i18n.currentLang === 'en' && callbackLang === 'en', 'i18n language switches to en and notifies listeners');
+assert(i18n.t('btnPlay') === 'PLAY / START BATTLE', 'i18n EN translation matches');
+assert(i18n.t('heroMaxLevel') === '⭐ MAX LEVEL (100)', 'i18n EN heroMaxLevel matches');
+assert(localStorage.getItem('gvs_language') === 'en', 'i18n language choice persisted to localStorage');
+assert(htmlContent.includes('data-i18n="btnPlay"') && htmlContent.includes('data-i18n-placeholder="phSearchMissions"'), 'index.html contains data-i18n and data-i18n-placeholder attributes');
+i18n.setLanguage('pt');
+assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'JOGAR / INICIAR BATALHA', 'i18n switches back to PT smoothly');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
