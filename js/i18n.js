@@ -20,7 +20,7 @@ class I18n {
                 'btnMissions': 'MISSÕES & CAÇADA DE ZUMBIS',
                 'btnStudio': 'ESTÚDIO DE MÚSICA & RITMO',
                 'btnSettings': 'CONFIGURAÇÕES',
-                'menuFooter': 'Guitar vs Zombies v1.9.3 (Build 57) • AAA Audio & Action Experience',
+                'menuFooter': 'Guitar vs Zombies v1.9.4 (Build 58) • AAA Audio & Action Experience',
 
                 // Pre-Battle Preparation
                 'mapBack': '⬅️ Voltar',
@@ -268,7 +268,7 @@ class I18n {
                 'btnMissions': 'MISSIONS & BOUNTY HUNT',
                 'btnStudio': 'MUSIC & RHYTHM STUDIO',
                 'btnSettings': 'SETTINGS',
-                'menuFooter': 'Guitar vs Zombies v1.9.3 (Build 57) • AAA Audio & Action Experience',
+                'menuFooter': 'Guitar vs Zombies v1.9.4 (Build 58) • AAA Audio & Action Experience',
 
                 // Pre-Battle Preparation
                 'mapBack': '⬅️ Back',

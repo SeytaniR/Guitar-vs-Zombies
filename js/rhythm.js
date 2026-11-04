@@ -414,15 +414,24 @@ class RhythmSystem {
             const trackWidth = this.canvas.width / this.tracks;
             const songDuration = Math.max(10, (this.currentSong && this.currentSong.duration) || 30);
 
-            // Clock synchronization: if audio is actively playing, use its currentTime; otherwise use delta time software clock
-            let curTime = 0;
-            const audioPlaying = this.songAudio && !this.songAudio.paused && !this.songAudio.ended && this.songAudio.currentTime > 0;
-            if (audioPlaying) {
-                curTime = this.songAudio.currentTime;
-                this.customSongTime = curTime;
-            } else {
-                this.customSongTime += dt;
-                curTime = this.customSongTime;
+            // Highway-Audio Dynamic Lockstep (Tethered Audio Clock):
+            // The highway advances by game dt. The audio playbackRate is dynamically coupled to game FPS so that
+            // if the highway drops FPS or stutters, the music slows down in unison and never drifts from the notes.
+            this.customSongTime += dt;
+            const curTime = this.customSongTime;
+
+            if (this.songAudio && !this.songAudio.paused && !this.songAudio.ended) {
+                const drift = this.songAudio.currentTime - curTime;
+                if (Math.abs(drift) > 0.12) {
+                    try { this.songAudio.currentTime = curTime; } catch (e) {}
+                    this.songAudio.playbackRate = 1.0;
+                } else if (drift > 0.025) {
+                    this.songAudio.playbackRate = Math.max(0.2, 1.0 - (drift * 4.0));
+                } else if (drift < -0.025) {
+                    this.songAudio.playbackRate = Math.min(1.35, 1.0 - (drift * 4.0));
+                } else if (this.songAudio.playbackRate !== 1.0) {
+                    this.songAudio.playbackRate = 1.0;
+                }
             }
 
             // Check if song finished (audio ended or reached duration)
@@ -662,8 +671,7 @@ class RhythmSystem {
 
             let tailY = headY;
             if (this.isCustomSongPlaying) {
-                const curTime = (this.songAudio && !this.songAudio.paused && this.songAudio.currentTime > 0) ? this.songAudio.currentTime : this.customSongTime;
-                tailY = hitZoneY - ((note.time + note.duration) - curTime) * this.noteSpeed;
+                tailY = hitZoneY - ((note.time + note.duration) - this.customSongTime) * this.noteSpeed;
             } else {
                 tailY = headY - (note.duration * this.noteSpeed);
             }
@@ -674,12 +682,7 @@ class RhythmSystem {
 
             const ribWidth = 14;
             this.ctx.save();
-            const grad = this.ctx.createLinearGradient(0, ribTop, 0, ribBottom);
-            grad.addColorStop(0, col.main);
-            grad.addColorStop(0.5, note.holding ? '#ffffff' : col.glow);
-            grad.addColorStop(1, col.main);
-
-            this.ctx.fillStyle = grad;
+            this.ctx.fillStyle = col.main;
             this.ctx.globalAlpha = note.holding ? 0.95 : 0.75;
 
             // Rounded sustain ribbon
@@ -956,7 +959,7 @@ class RhythmSystem {
             };
         }
         const h = this.hudBarCache;
-        const cur = (this.songAudio && !this.songAudio.paused && this.songAudio.currentTime > 0) ? this.songAudio.currentTime : (this.customSongTime || 0);
+        const cur = this.customSongTime || 0;
         const total = Math.max(10, this.currentSong.duration || 30);
         const pct = Math.min(100, Math.max(0, Math.round((cur / total) * 100)));
         const w = `${pct}%`;

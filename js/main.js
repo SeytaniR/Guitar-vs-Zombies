@@ -14,6 +14,7 @@ class Game {
         };
 
         this.lastTime = performance.now();
+        this.lastRenderTime = 0;
         this.animationId = null;
 
         this.setupScreenNavigation();
@@ -700,6 +701,7 @@ class Game {
             this.rhythm.resumeAudio();
         }
         this.lastTime = performance.now();
+        this.lastRenderTime = performance.now();
     }
 
     openGearModal(isFromMainMenu = false) {
@@ -850,9 +852,22 @@ class Game {
     }
 
     start() {
+        this.lastTime = performance.now();
+        this.lastRenderTime = 0;
+
         const loop = (currentTime) => {
-            const deltaTime = Math.min(currentTime - this.lastTime, 100);
-            this.lastTime = currentTime;
+            const now = currentTime || performance.now();
+
+            // 60 FPS Pacing Lock for High-Refresh Displays (e.g. Redmi Note 14 Pro 120Hz/90Hz)
+            // Locks battle updates & canvas draws at stable 60 FPS, eliminating GPU overheating and frame drops
+            if (this.lastRenderTime && (now - this.lastRenderTime < 15.2)) {
+                this.animationId = requestAnimationFrame(loop);
+                return;
+            }
+
+            const deltaTime = Math.min(now - (this.lastTime || now), 100);
+            this.lastTime = now;
+            this.lastRenderTime = now;
 
             if (this.currentScreen === 'battle') {
                 if (!this.isBattlePaused) {
