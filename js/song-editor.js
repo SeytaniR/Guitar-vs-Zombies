@@ -45,6 +45,11 @@ class SongEditor {
         // High-precision 60 FPS animation loop & reliable fallback software clock
         this.animFrameId = null;
         this.lastFrameTime = performance.now();
+        this.lastRenderTime = 0;
+        this._lastDeciDisplay = -1;
+        this._lastScrubUpdateTime = 0;
+        this.timeDisplayEl = null;
+        this.scrubberEl = null;
         this.isInitialized = false;
 
         this.setupAudioListeners();
@@ -58,6 +63,9 @@ class SongEditor {
         this.isInitialized = true;
 
         this.canvas = document.getElementById('editor-timeline-canvas');
+        this.timeDisplayEl = document.getElementById('editor-time-display');
+        this.scrubberEl = document.getElementById('editor-time-scrubber');
+
         if (this.canvas) {
             this.ctx = this.canvas.getContext('2d');
             this.resizeCanvas();
@@ -139,10 +147,24 @@ class SongEditor {
     startAnimationLoop() {
         this.stopAnimationLoop();
         this.lastFrameTime = performance.now();
+        this.lastRenderTime = 0;
 
         const loop = (timestamp) => {
-            const dt = Math.min(0.1, (timestamp - this.lastFrameTime) / 1000);
-            this.lastFrameTime = timestamp;
+            const now = timestamp || performance.now();
+
+            // Pacing cap for 90Hz/120Hz/144Hz high-refresh mobile screens (e.g. Redmi Note 14 Pro)
+            // Ensures smooth 60 FPS playback without overloading mobile GPU or causing thermal throttling
+            if (this.lastRenderTime && (now - this.lastRenderTime < 15.5)) {
+                const modal = document.getElementById('chart-editor-modal');
+                if (modal && modal.classList.contains('open')) {
+                    this.animFrameId = requestAnimationFrame(loop);
+                }
+                return;
+            }
+
+            const dt = Math.min(0.1, (now - this.lastFrameTime) / 1000);
+            this.lastFrameTime = now;
+            this.lastRenderTime = now;
 
             let needsRedraw = false;
             if (this.isPlaying) {
@@ -162,7 +184,7 @@ class SongEditor {
                 if (activeNote) {
                     const held = this.isPlaying
                         ? Math.max(0, this.currentTime - this.padPressStartTime[l])
-                        : ((performance.now() - (this.padPressPerfTime[l] || performance.now())) / 1000);
+                        : ((now - (this.padPressPerfTime[l] || now)) / 1000);
                     if (held >= 0.15) {
                         activeNote.duration = Math.round(held * 20) / 20;
                         needsRedraw = true;
@@ -199,16 +221,6 @@ class SongEditor {
         bindClick('editor-step-next', () => this.stepByBeats(1));
         bindClick('editor-zoom-in', () => { this.pixelsPerSecond = Math.min(360, this.pixelsPerSecond + 30); this.drawTimeline(); });
         bindClick('editor-zoom-out', () => { this.pixelsPerSecond = Math.max(60, this.pixelsPerSecond - 30); this.drawTimeline(); });
-
-        const snapSelect = document.getElementById('editor-snap-select');
-        if (snapSelect) snapSelect.onchange = (e) => { this.snapGrid = e.target.value; };
-
-        const speedSelect = document.getElementById('editor-speed-select');
-        if (speedSelect) speedSelect.onchange = (e) => {
-            this.playbackRate = parseFloat(e.target.value) || 1.0;
-            this.audio.playbackRate = this.playbackRate;
-        };
-
         bindClick('editor-undo-btn', () => this.undo());
         bindClick('editor-autogen-btn', () => this.autoGenerateBasicChart());
         bindClick('editor-clear-btn', () => this.clearAllNotes());
@@ -216,14 +228,17 @@ class SongEditor {
         bindClick('editor-save-play-btn', () => this.saveAndPlay());
         bindClick('editor-close-btn', () => this.close());
 
+        const snapSelect = document.getElementById('editor-snap-select');
+        if (snapSelect) snapSelect.onchange = (e) => { this.snapGrid = e.target.value; };
+        const speedSelect = document.getElementById('editor-speed-select');
+        if (speedSelect) speedSelect.onchange = (e) => {
+            this.playbackRate = parseFloat(e.target.value) || 1.0;
+            this.audio.playbackRate = this.playbackRate;
+        };
+
         // Time Scrubber Slider
         const scrubber = document.getElementById('editor-time-scrubber');
-        if (scrubber) {
-            scrubber.oninput = (e) => {
-                const targetTime = parseFloat(e.target.value) || 0;
-                this.seekTo(targetTime);
-            };
-        }
+        if (scrubber) scrubber.oninput = (e) => this.seekTo(parseFloat(e.target.value) || 0);
 
         // Note Mode Selector (Tap vs Hold)
         const modeTapBtn = document.getElementById('editor-mode-tap');
@@ -309,9 +324,11 @@ class SongEditor {
         const trackHeight = trackAreaHeight / this.tracks;
         const lane = Math.min(this.tracks - 1, Math.max(0, Math.floor((y - headerHeight) / trackHeight)));
         const playheadX = this.canvas.width * this.playheadRatio;
+        const targetTime = this.currentTime + (x - playheadX) / this.pixelsPerSecond;
 
         for (const n of this.song.notes) {
             if (n.lane !== lane) continue;
+            if (Math.abs(n.time - targetTime) > 3) continue;
             const noteX = playheadX + (n.time - this.currentTime) * this.pixelsPerSecond;
             const dur = Math.max(0, Number(n.duration) || 0);
             const isHold = dur >= 0.2;
@@ -568,52 +585,30 @@ class SongEditor {
         }
     }
 
-    togglePlay() {
-        if (this.isPlaying) {
-            this.pause();
-        } else {
-            this.play();
-        }
-    }
+    togglePlay() { this.isPlaying ? this.pause() : this.play(); }
 
     play() {
         this.isPlaying = true;
         this.lastFrameTime = performance.now();
-
-        if (this.currentTime >= this.duration - 0.2) {
-            this.currentTime = 0;
-        }
-
+        if (this.currentTime >= this.duration - 0.2) this.currentTime = 0;
         if (this.audio && this.audio.src) {
             this.audio.playbackRate = this.playbackRate;
             this.audio.currentTime = this.currentTime;
             const p = this.audio.play();
-            if (p !== undefined) {
-                p.catch(e => {
-                    console.warn("Audio autoplay blocked by mobile policy; continuing with precision software clock", e);
-                });
-            }
+            if (p !== undefined) p.catch(e => console.warn("Audio autoplay blocked by mobile policy; using software clock", e));
         }
-
         const btn = document.getElementById('editor-play-btn');
         if (btn) btn.innerText = '⏸️ PAUSAR';
     }
 
     pause() {
         this.isPlaying = false;
-        if (this.audio) {
-            try { this.audio.pause(); } catch (e) {}
-        }
-
+        if (this.audio) { try { this.audio.pause(); } catch (e) {} }
         const btn = document.getElementById('editor-play-btn');
         if (btn) btn.innerText = '▶️ TOCAR';
-
-        if (this.isRecording) {
-            this.toggleRecord(); // Auto-stop record on pause
-        }
-
+        if (this.isRecording) this.toggleRecord();
         this.updateTimeDisplay();
-        this.updateScrubber();
+        this.updateScrubber(true);
         this.drawTimeline();
     }
 
@@ -624,10 +619,7 @@ class SongEditor {
             btn.classList.toggle('recording', this.isRecording);
             btn.innerText = this.isRecording ? '⏹️ PARAR REC' : '⏺️ GRAVAR (REC)';
         }
-
-        if (this.isRecording && !this.isPlaying) {
-            this.play();
-        }
+        if (this.isRecording && !this.isPlaying) this.play();
     }
 
     seekTo(time) {
@@ -636,18 +628,14 @@ class SongEditor {
             try { this.audio.currentTime = this.currentTime; } catch (e) {}
         }
         this.updateTimeDisplay();
-        this.updateScrubber();
+        this.updateScrubber(true);
         this.drawTimeline();
     }
 
-    seekBy(seconds) {
-        this.seekTo(this.currentTime + seconds);
-    }
-
+    seekBy(seconds) { this.seekTo(this.currentTime + seconds); }
     stepByBeats(beats) {
         const bpm = (this.song && this.song.bpm) || 120;
-        const beatSec = 60 / bpm;
-        this.seekTo(this.currentTime + beats * beatSec);
+        this.seekTo(this.currentTime + beats * (60 / bpm));
     }
 
     pushUndo() {
@@ -730,29 +718,29 @@ class SongEditor {
         const trackHeight = trackAreaHeight / this.tracks;
         const playheadX = cw * this.playheadRatio;
 
-        // 1. Draw Track Backgrounds
+        // 1. Draw Track Backgrounds & Lane Dividing Lines
+        ctx.font = 'bold 10px sans-serif';
         for (let i = 0; i < this.tracks; i++) {
             const y = headerHeight + i * trackHeight;
             ctx.fillStyle = i % 2 === 0 ? '#11111d' : '#151525';
             ctx.fillRect(0, y, cw, trackHeight);
 
-            // Subtle colored line on left
+            // Colored track indicator on left
             ctx.fillStyle = this.colors[i].main;
             ctx.fillRect(0, y, 4, trackHeight);
-
-            // Dividing horizontal line
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, y + trackHeight);
-            ctx.lineTo(cw, y + trackHeight);
-            ctx.stroke();
-
-            // Track Label
-            ctx.font = 'bold 10px sans-serif';
-            ctx.fillStyle = this.colors[i].main;
             ctx.fillText(`Pista ${i + 1}`, 10, y + 16);
         }
+
+        // Batched horizontal dividing lines (1 draw call)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < this.tracks; i++) {
+            const y = headerHeight + (i + 1) * trackHeight;
+            ctx.moveTo(0, y);
+            ctx.lineTo(cw, y);
+        }
+        ctx.stroke();
 
         // 2. Draw Time Grid (Beats & Seconds)
         const bpm = (this.song && this.song.bpm) ? this.song.bpm : 120;
@@ -764,30 +752,38 @@ class SongEditor {
         const startBeat = Math.max(0, Math.floor(visibleStartTime / beatSec));
         const endBeat = Math.ceil(visibleEndTime / beatSec);
 
-        ctx.save();
+        // Batched minor beat lines (1 draw call)
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+        ctx.beginPath();
         for (let b = startBeat; b <= endBeat; b++) {
-            const beatTime = b * beatSec;
-            const x = playheadX + (beatTime - this.currentTime) * this.pixelsPerSecond;
-            if (x < 0 || x > cw) continue;
-
-            const isMeasure = b % 4 === 0;
-
-            // Vertical Grid Line
-            ctx.strokeStyle = isMeasure ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.07)';
-            ctx.lineWidth = isMeasure ? 1.5 : 1;
-            ctx.beginPath();
-            ctx.moveTo(x, headerHeight);
-            ctx.lineTo(x, ch);
-            ctx.stroke();
-
-            // Measure / Beat number on ruler
-            if (isMeasure) {
-                ctx.fillStyle = '#ffcc00';
-                ctx.font = 'bold 9px sans-serif';
-                ctx.fillText(`C.${b / 4 + 1}`, x + 3, headerHeight - 12);
+            if (b % 4 !== 0) {
+                const x = playheadX + (b * beatSec - this.currentTime) * this.pixelsPerSecond;
+                if (x >= 0 && x <= cw) {
+                    ctx.moveTo(x, headerHeight);
+                    ctx.lineTo(x, ch);
+                }
             }
         }
-        ctx.restore();
+        ctx.stroke();
+
+        // Batched measure lines + measure labels (1 stroke draw call)
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.fillStyle = '#ffcc00';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.beginPath();
+        for (let b = startBeat; b <= endBeat; b++) {
+            if (b % 4 === 0) {
+                const x = playheadX + (b * beatSec - this.currentTime) * this.pixelsPerSecond;
+                if (x >= 0 && x <= cw) {
+                    ctx.moveTo(x, headerHeight);
+                    ctx.lineTo(x, ch);
+                    ctx.fillText(`C.${b / 4 + 1}`, x + 3, headerHeight - 12);
+                }
+            }
+        }
+        ctx.stroke();
 
         // 3. Draw Time Ruler at Top
         ctx.fillStyle = '#0a0a14';
@@ -799,76 +795,80 @@ class SongEditor {
         ctx.lineTo(cw, headerHeight);
         ctx.stroke();
 
-        // Second markers
+        // Batched second markers
         const startSec = Math.max(0, Math.floor(visibleStartTime));
         const endSec = Math.ceil(visibleEndTime);
+        ctx.fillStyle = '#8899aa';
+        ctx.font = '9px sans-serif';
+        ctx.strokeStyle = '#556677';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
         for (let s = startSec; s <= endSec; s++) {
             const x = playheadX + (s - this.currentTime) * this.pixelsPerSecond;
             if (x >= 0 && x <= cw) {
-                ctx.fillStyle = '#8899aa';
-                ctx.font = '9px sans-serif';
                 const mins = Math.floor(s / 60);
                 const secs = s % 60;
                 ctx.fillText(`${mins}:${secs < 10 ? '0' : ''}${secs}s`, x + 2, headerHeight - 3);
-
-                ctx.strokeStyle = '#556677';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
                 ctx.moveTo(x, headerHeight - 6);
                 ctx.lineTo(x, headerHeight);
-                ctx.stroke();
             }
         }
+        ctx.stroke();
 
         // 4. Draw Charted Notes (Normal & Sustained Hold Notes)
-        if (this.song && this.song.notes) {
-            this.song.notes.forEach(note => {
-                const noteX = playheadX + (note.time - this.currentTime) * this.pixelsPerSecond;
+        if (this.song && this.song.notes && this.song.notes.length > 0) {
+            const notes = this.song.notes;
+            const maxVisibleTime = visibleEndTime + 1;
+
+            for (let i = 0; i < notes.length; i++) {
+                const note = notes[i];
+                if (note.time > maxVisibleTime) break; // Chronologically sorted early-exit
+
                 const dur = Math.max(0, Number(note.duration) || 0);
+                if (note.time + dur < visibleStartTime - 0.5) continue; // Offscreen culling from left
+
+                const noteX = playheadX + (note.time - this.currentTime) * this.pixelsPerSecond;
                 const isHold = dur >= 0.2;
                 const noteW = isHold ? Math.max(24, dur * this.pixelsPerSecond) : 16;
 
-                if (noteX + noteW < -30 || noteX > cw + 30) return;
+                if (noteX + noteW < -20 || noteX > cw + 20) continue;
 
                 const laneY = headerHeight + note.lane * trackHeight;
                 const noteH = trackHeight * 0.72;
                 const noteTop = laneY + (trackHeight - noteH) / 2;
-
                 const colorInfo = this.colors[note.lane] || this.colors[0];
 
-                ctx.save();
-                // Glow
-                ctx.shadowColor = colorInfo.main;
-                ctx.shadowBlur = 10;
-
                 if (isHold) {
-                    // 1. Draw elongated hold bar
-                    const barGrad = ctx.createLinearGradient(noteX, 0, noteX + noteW, 0);
-                    barGrad.addColorStop(0, colorInfo.main);
-                    barGrad.addColorStop(1, 'rgba(255, 255, 255, 0.85)');
-                    ctx.fillStyle = barGrad;
+                    // 1. Draw hold note body (Fast solid GPU fill)
+                    ctx.fillStyle = colorInfo.main;
                     ctx.beginPath();
                     ctx.roundRect(noteX, noteTop, noteW, noteH, 5);
                     ctx.fill();
 
-                    // Striped diagonal pattern along sustain trail
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
-                    ctx.lineWidth = 2;
-                    for (let sx = noteX + 12; sx < noteX + noteW - 6; sx += 14) {
-                        ctx.beginPath();
-                        ctx.moveTo(sx, noteTop + 2);
-                        ctx.lineTo(sx + 8, noteTop + noteH - 2);
-                        ctx.stroke();
-                    }
+                    // Specular top highlight (fast GPU fill, replaces expensive linear gradient)
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                    ctx.beginPath();
+                    ctx.roundRect(noteX + 2, noteTop + 2, noteW - 4, Math.max(2, noteH * 0.28), 3);
+                    ctx.fill();
 
-                    // Note head diamond / rounded mark at start
+                    // Batched diagonal pattern along sustain trail (single stroke call)
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    for (let sx = noteX + 14; sx < noteX + noteW - 10; sx += 14) {
+                        ctx.moveTo(sx, noteTop + 3);
+                        ctx.lineTo(sx + 7, noteTop + noteH - 3);
+                    }
+                    ctx.stroke();
+
+                    // Note head badge at start
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.roundRect(noteX + 2, noteTop + 4, 12, noteH - 8, 3);
+                    ctx.roundRect(noteX + 2, noteTop + 3, 11, noteH - 6, 3);
                     ctx.fill();
 
                     // Right resize handle [>]
-                    ctx.fillStyle = '#111122';
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                     ctx.beginPath();
                     ctx.roundRect(noteX + noteW - 10, noteTop + 2, 9, noteH - 4, 3);
                     ctx.fill();
@@ -876,16 +876,14 @@ class SongEditor {
                     ctx.font = 'bold 8px sans-serif';
                     ctx.fillText('>', noteX + noteW - 7, noteTop + noteH / 2 + 3);
 
-                    // Duration text badge if space allows
+                    // Duration text badge (Zero shadowBlur)
                     if (noteW >= 42) {
                         ctx.font = 'bold 10px monospace';
                         ctx.fillStyle = '#ffffff';
-                        ctx.shadowColor = '#000000';
-                        ctx.shadowBlur = 4;
                         ctx.fillText(`${dur}s`, noteX + 18, noteTop + noteH / 2 + 3.5);
                     }
                 } else {
-                    // Standard Tap Note
+                    // Standard Tap Note - Fast GPU dual-layer rendering (Zero shadowBlur)
                     ctx.fillStyle = colorInfo.main;
                     ctx.beginPath();
                     ctx.roundRect(noteX - noteW / 2, noteTop, noteW, noteH, 4);
@@ -894,20 +892,22 @@ class SongEditor {
                     // Core highlight
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.roundRect(noteX - noteW / 4, noteTop + 4, noteW / 2, noteH - 8, 2);
+                    ctx.roundRect(noteX - noteW / 4, noteTop + 3, noteW / 2, noteH - 6, 2);
                     ctx.fill();
                 }
-
-                ctx.restore();
-            });
+            }
         }
 
-        // 5. Draw Playhead Line
-        ctx.save();
-        ctx.strokeStyle = '#ff0055';
-        ctx.lineWidth = 2.5;
-        ctx.shadowColor = '#ff0055';
-        ctx.shadowBlur = 8;
+        // 5. Draw Playhead Line (Dual GPU strokes instead of CPU Gaussian shadowBlur)
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = 'rgba(255, 0, 85, 0.35)'; // Outer halo stroke
+        ctx.beginPath();
+        ctx.moveTo(playheadX, 0);
+        ctx.lineTo(playheadX, ch);
+        ctx.stroke();
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ff0055'; // Crisp inner playhead
         ctx.beginPath();
         ctx.moveTo(playheadX, 0);
         ctx.lineTo(playheadX, ch);
@@ -921,7 +921,6 @@ class SongEditor {
         ctx.lineTo(playheadX, 10);
         ctx.closePath();
         ctx.fill();
-        ctx.restore();
     }
 
     updateHeaderInfo() {
@@ -931,16 +930,23 @@ class SongEditor {
     }
 
     updateTimeDisplay() {
-        const el = document.getElementById('editor-time-display');
-        if (el) {
-            const fmt = (t) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}.${Math.floor((t % 1) * 10)}`;
-            el.innerText = `${fmt(this.currentTime)} / ${fmt(this.duration)}`;
-        }
+        if (!this.timeDisplayEl) this.timeDisplayEl = document.getElementById('editor-time-display');
+        if (!this.timeDisplayEl) return;
+        const deci = Math.floor(this.currentTime * 10);
+        if (this._lastDeciDisplay === deci) return;
+        this._lastDeciDisplay = deci;
+        const fmt = (t) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}.${Math.floor((t % 1) * 10)}`;
+        this.timeDisplayEl.innerText = `${fmt(this.currentTime)} / ${fmt(this.duration)}`;
     }
 
-    updateScrubber() {
-        const s = document.getElementById('editor-time-scrubber');
-        if (s) { s.max = Math.max(15, this.duration || 30); s.value = this.currentTime; }
+    updateScrubber(force = false) {
+        if (!this.scrubberEl) this.scrubberEl = document.getElementById('editor-time-scrubber');
+        if (!this.scrubberEl) return;
+        const now = performance.now();
+        if (!force && this.isPlaying && (now - (this._lastScrubUpdateTime || 0) < 65)) return;
+        this._lastScrubUpdateTime = now;
+        this.scrubberEl.max = Math.max(15, this.duration || 30);
+        this.scrubberEl.value = this.currentTime;
     }
 
     updateStatsDisplay() {

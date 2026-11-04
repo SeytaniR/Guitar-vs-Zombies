@@ -206,6 +206,9 @@
     position: relative;
     background: #080811;
     overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
+    contain: strict;
 }
 
 #editor-timeline-canvas {
@@ -214,6 +217,8 @@
     display: block;
     touch-action: none;
     cursor: crosshair;
+    will-change: transform;
+    image-rendering: -webkit-optimize-contrast;
 }
 
 /* Scrubber Row */
