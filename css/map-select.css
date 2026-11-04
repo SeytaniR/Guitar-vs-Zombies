@@ -201,31 +201,14 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-.badge-common {
-    background: rgba(160, 170, 184, 0.95);
-    color: #111;
-}
-
-.badge-rare {
-    background: linear-gradient(135deg, #0070f3, #00d4ff);
-    color: #fff;
-}
-
-.badge-epic {
-    background: linear-gradient(135deg, #7928ca, #d800ff);
-    color: #fff;
-}
-
-.badge-legendary {
-    background: linear-gradient(135deg, #ff8800, #ffea00);
-    color: #2b1100;
-}
-
-.badge-mythic {
-    background: linear-gradient(135deg, #ff0055, #ff00c8);
-    color: #fff;
-    box-shadow: 0 0 8px rgba(255, 0, 150, 0.8);
-}
+.badge-common { background: rgba(160, 170, 184, 0.95); color: #111; }
+.badge-rare { background: linear-gradient(135deg, #0070f3, #00d4ff); color: #fff; }
+.badge-epic { background: linear-gradient(135deg, #7928ca, #d800ff); color: #fff; }
+.badge-legendary { background: linear-gradient(135deg, #ff8800, #ffea00); color: #2b1100; }
+.badge-mythic { background: linear-gradient(135deg, #ff0055, #ff00c8); color: #fff; box-shadow: 0 0 8px rgba(255, 0, 150, 0.8); }
+.badge-ancestral { background: linear-gradient(135deg, #990000, #ff0033); color: #fff; box-shadow: 0 0 10px rgba(255, 0, 51, 0.8); }
+.badge-cosmic { background: linear-gradient(135deg, #00f0ff, #ffee00); color: #000; box-shadow: 0 0 12px rgba(0, 240, 255, 0.85); font-weight: 800; }
+.badge-divine { background: linear-gradient(135deg, #ffd700, #fff275, #ff8800); color: #000; box-shadow: 0 0 16px rgba(255, 215, 0, 0.95); font-weight: 900; }
 
 .hero-showcase-details {
     flex: 1;

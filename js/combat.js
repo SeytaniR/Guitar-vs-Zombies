@@ -27,6 +27,9 @@ class CombatSystem {
             heroSheet: loadSheet('assets/hero2.jpg'), heroVulkanSheet: loadSheet('assets/hero_vulkan.jpg'),
             heroHazmatSheet: loadSheet('assets/hero_hazmat.jpg'), heroCyborgSheet: loadSheet('assets/hero_cyborg.jpg'),
             heroGladiatorSheet: loadSheet('assets/hero_gladiator.jpg', 4, 4), heroAnarchySheet: loadSheet('assets/hero_anarchy.jpg'),
+            heroFinnSheet: loadSheet('assets/hero_finn.jpg'), heroDracoSheet: loadSheet('assets/hero_draco.jpg'),
+            heroFenrirSheet: loadSheet('assets/hero_fenrir.jpg'), heroSpongeSheet: loadSheet('assets/hero_sponge.jpg'),
+            heroSlashSheet: loadSheet('assets/hero_slash.jpg'),
             zombieSheet: loadSheet('assets/zombie2.jpg'), mutantSheet: loadSheet('assets/zombie_mutant.jpg'),
             leaperSheet: loadSheet('assets/zombie_leaper.jpg'), soldierSheet: loadSheet('assets/zombie_soldier.jpg'),
             sporeSheet: loadSheet('assets/zombie_spore.jpg'), bloaterSheet: loadSheet('assets/zombie_bloater.jpg'),
@@ -41,14 +44,10 @@ class CombatSystem {
         // Core Combat Entities with backwards-compatible accessors to FX
         const fxRef = this.fx;
         this.entities = {
-            zombies: [],
-            projectiles: [],
-            get particles() { return fxRef.particles; },
-            get explosions() { return fxRef.explosions; },
-            get shockwaves() { return fxRef.shockwaves; },
-            get floatingTexts() { return fxRef.floatingTexts; },
-            get acidPuddles() { return fxRef.acidPuddles; },
-            get ambientEmbers() { return fxRef.ambientEmbers; }
+            zombies: [], projectiles: [],
+            get particles() { return fxRef.particles; }, get explosions() { return fxRef.explosions; },
+            get shockwaves() { return fxRef.shockwaves; }, get floatingTexts() { return fxRef.floatingTexts; },
+            get acidPuddles() { return fxRef.acidPuddles; }, get ambientEmbers() { return fxRef.ambientEmbers; }
         };
 
         this.time = 0; this.heroStrumAnim = 0.8; this.heroFlashTime = 0;

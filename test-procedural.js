@@ -48,7 +48,7 @@ console.log('1. Testing Guitarist Pool & Leveling (1-100)...');
 const pool = new GuitaristPoolSystem();
 window.guitaristPool = pool;
 
-assert(pool.guitarists.length === 6, 'Pool contains all 6 unique guitarists');
+assert(pool.guitarists.length === 11, 'Pool contains all 11 unique guitarists');
 pool.guitarists.forEach(g => {
     assert(g.baseStats.baseAttackSpeed === 1.0 && pool.getHeroStats(g.id).baseAttackSpeed === 1.0, `Hero ${g.name} attack speed === 1.0/s`);
 });
@@ -180,14 +180,14 @@ console.log('\n4. Testing 4-Lane Skill System & Rock Mana...');
 const skillSys = new SkillSystem();
 window.skillSystem = skillSys;
 
-assert(skillSys.getAllSkills().length === 31, 'All 31 skills are registered in SkillSystem (30 unique + 1 universal basic)');
+assert(skillSys.getAllSkills().length === 56, 'All 56 skills are registered in SkillSystem (55 unique + 1 universal basic)');
 
 const defaultEquipped = skillSys.getEquippedSkills('johnny_blaze');
 assert(defaultEquipped.length === 4, '4 lanes are equipped');
 assert(skillSys.hasAtLeastOneBasicStrike(skillSys.loadEquipped('johnny_blaze')), 'Default loadout maintains at least one basic strike');
 
 // Check unique skills per guitarist (at least 5 unique each)
-const heroCatalogues = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy'];
+const heroCatalogues = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy', 'finn_punk', 'ignis_draco', 'fenrir_howler', 'spiky_sponge', 'saul_slash'];
 heroCatalogues.forEach(hid => {
     const uniqueSkills = skillSys.getSkillsForHero(hid).filter(s => s.id !== 'basic_strike');
     assert(uniqueSkills.length >= 5, `Hero ${hid} has at least 5 unique skills (${uniqueSkills.length} found)`);
@@ -603,7 +603,7 @@ assert(audioCode.includes('playMultiKill'), 'SoundEngine defines playMultiKill s
 console.log('\n11. Testing Unique Guitarist Skills, Mana Spending & Stage Rules...');
 
 // 1. Verify 5+ skills per guitarist
-const allHeroes = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy'];
+const allHeroes = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy', 'finn_punk', 'ignis_draco', 'fenrir_howler', 'spiky_sponge', 'saul_slash'];
 allHeroes.forEach(hid => {
     const list = skillSys.getSkillsForHero(hid);
     const uniqueOnly = list.filter(s => s.id !== 'basic_strike');
@@ -771,11 +771,11 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.8.1 Build 53)
+// Cache Buster Version & Modular CSS Links (v1.9.0 Build 54)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=53`), `index.html links ${f} with v=53`);
+    assert(htmlContent.includes(`${f}?v=54`), `index.html links ${f} with v=54`);
 });
-assert(htmlContent.includes('v1.8.1 (Build 53)'), 'index.html footer specifies v1.8.1 (Build 53)');
+assert(htmlContent.includes('v1.9.0 (Build 54)'), 'index.html footer specifies v1.9.0 (Build 54)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -910,6 +910,8 @@ window.talentSystem.gold = 10000;
 const unlockRes = heroPool.unlockHeroWithGold('vulkan_ironhead');
 assert(unlockRes.success === true && heroPool.isHeroUnlocked('vulkan_ironhead') === true, 'Hero unlocked with gold');
 assert(window.talentSystem.gold === 5000, '5000 gold deducted from talentSystem');
+assert(heroPool.getHeroUnlockCost('finn_punk') === 60000 && heroPool.getHeroUnlockCost('ignis_draco') === 80000, 'Finn (60k) and Draco (80k) unlock costs properly scaled');
+assert(heroPool.getHeroUnlockCost('fenrir_howler') === 100000 && heroPool.getHeroUnlockCost('spiky_sponge') === 135000 && heroPool.getHeroUnlockCost('saul_slash') === 180000, 'Fenrir (100k), Spiky (135k), and Slash (180k) supreme costs verified');
 assert(cssContent.includes('.chip-boss') && cssContent.includes('.hero-unlock-cta'), 'CSS includes boss chip and hero unlock CTA');
 
 // ==========================================

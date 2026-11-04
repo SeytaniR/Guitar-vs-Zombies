@@ -28,6 +28,26 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
 
 ## Changelog
 
+### [v1.9.0] - 2026-11-04 (Expansão Suprema de Guitarristas de Alto Rank & Roster Completo com 11 Heróis - Build 54)
+**Análise Profunda dos Sprite Sheets e Inclusão dos 5 Novos Guitarristas de Ranks Mais Altos (Lendário, Mítico, Ancestral, Cósmico e Divino)**
+- **5 Novos Guitarristas de Ranks Supremos Adicionados ao Pool (`js/guitarist-pool.js`):**
+  1. **Finn "Punk Hero" (`finn_punk`):** *Rank Lendário* (60.000 🪙). Espada-Guitarra Sonora de Ooo, jaqueta de rebite e gorro de urso. Passiva *Hora do Rock Multiversal* (+1.22% Dano, +0.75% Crítico e +0.3% velocidade de projétil por nível).
+  2. **Ignis "Draco" Hellfret (`ignis_draco`):** *Rank Mítico* (80.000 🪙). Guitarra Dracônica "Inferno", dragão de escamas vermelhas cuspindo fogo. Passiva *Sopro Ígneo Acústico* (+1.26% Dano, +0.82% Crítico e +0.35% chance de queima dracônica por nível).
+  3. **Fenrir "Bloodfang" Howler (`fenrir_howler`):** *Rank Ancestral* (100.000 🪙). Axe-Star "Lobo da Noite", lobisomem titânico heavy metal. Passiva *Frenesi da Lua de Sangue* (+1.30% Dano, +0.90% Crítico e vampirismo sônico por nível).
+  4. **Bob "Spiky" Punkrocker (`spiky_sponge`):** *Rank Cósmico* (135.000 🪙). Flying-V a Jato "Fenda do Biquíni", esponja com moicano punk e turbinas de propulsão. Passiva *Propulsão Hipersônica* (+1.35% Dano, +0.95% Crítico, +0.35% Ouro e +0.60% Mana Regen por nível).
+  5. **Saul "The God" Slash (`saul_slash`):** *Rank Divino / Deus do Rock* (180.000 🪙). Gibson Les Paul Goldtop Sagrada "1959", o supremo mestre da cartola. Passiva *Apetite Pela Destruição* (+1.45% Dano, +1.10% Crítico, +0.45% Ouro e +0.70% Mana Regen por nível).
+- **25 Novas Habilidades Únicas Registradas no Sistema (`js/skills.js`):**
+  - Cada um dos novos guitarristas recebeu 5 habilidades únicas (totalizando 55 habilidades únicas + 1 ataque básico universal = 56 habilidades no jogo).
+  - Inclui tipos variados: DPS crítico, buffs de velocidade, atordoamentos, escudos sônicos, ataques em área e cataclismos colossais.
+- **Assets e Sprite Sheets Extraídos e Otimizados:**
+  - 5 novos spritesheets 1024x571 (3 linhas x 4 colunas) integrados com chroma-key automático no canvas (`assets/hero_finn.jpg`, `assets/hero_draco.jpg`, `assets/hero_fenrir.jpg`, `assets/hero_sponge.jpg`, `assets/hero_slash.jpg`).
+  - 5 retratos/avatares 256x256 gerados e recortados com fundos temáticos em `assets/heroes/`.
+- **Estilos de Badges de Ranks Novos (`css/map-select.css`):**
+  - `.badge-ancestral`, `.badge-cosmic` e `.badge-divine` com animações e brilhos únicos.
+- **Testes Automatizados (676 testes):**
+  - 100% de aprovação na suíte `test-procedural.js` com validação de todos os 11 guitarristas e 56 habilidades.
+  - Regra *Zero God Object* estritamente respeitada (todos os arquivos JS e CSS < 1.000 linhas).
+
 ### [v1.8.1] - 2026-11-03 (Rebalanceamento de Custo dos Guitarristas 10x - Build 53)
 **Aumento de 10x no Custo em Ouro para Desbloqueio dos Guitarristas no Roster de Heróis**
 - **Escalonamento de Custos 10x (`GuitaristPoolSystem` / `js/guitarist-pool.js`):**
@@ -942,17 +962,9 @@ HTML5 Canvas, CSS3, JavaScript (ES6+):
     - *Impacto Sonoro:* +15% de força de repulsão / knockback (até 12 níveis).
     - *Air Sniper:* +25% de dano amplificado em zumbis saltadores interceptados no ar (até 10 níveis).
   - **Ramificação Defensiva (Palco & Resistência):**
-    - *Resistência Punk:* +15 de vida máxima para o guitarrista por nível (até 20 níveis).
-    - *Amplificador Blindado:* Reduz todo dano recebido em -1 HP por nível (até 15 níveis).
-    - *Barreira Sônica:* Gera escudo protetor eletromagnético periódico que anula 1 ataque de zumbi completamente (até 10 níveis).
-    - *Cura Rítmica:* Restaura HP a cada 10 notas seguidas no ritmo (até 12 níveis).
-    - *Rock Never Dies:* Concede até 5 segundos de imunidade e repulsão total após reviver (até 5 níveis).
+    - *Resistência Punk, Amplificador Blindado, Barreira Sônica, Cura Rítmica e Rock Never Dies.*
   - **Ramificação de Ritmo & Turnê (Economia & Ritmo):**
-    - *Palheta Dourada:* Concede moedas de ouro extras por cada zumbi eliminado (até 20 níveis).
-    - *Sincronia Fina:* Expande em +4% por nível a janela de tolerância para acertar notas com PERFECT! (até 15 níveis).
-    - *Overdrive Acelerado:* +10% de ganho de energia de Rock ao acertar notas (até 10 níveis).
-    - *Streak Lucrativo:* Concede bônus massivo em moedas a cada 15 notas em sequência (até 10 níveis).
-    - *Maestria do Solo:* Permite que o multiplicador de combo da highway alcance até x9 (até 5 níveis).
+    - *Palheta Dourada, Sincronia Fina, Overdrive Acelerado, Streak Lucrativo e Maestria do Solo.*
 - **Curva de Progressão Lenta:**
   - Fórmula exponencial por nível: `Math.floor(baseCost * Math.pow(costMult, level))`.
   - Mais de 188 níveis totais de melhoria para longa durabilidade de gameplay.
