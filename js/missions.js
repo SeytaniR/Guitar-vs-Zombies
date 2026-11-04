@@ -428,7 +428,7 @@ class MetaMissionSystem {
         }
     }
 
-    claimZombieReward(zombieId) {
+    claimZombieReward(zombieId, shouldRender = true) {
         const mission = this.getZombieMission(zombieId);
         if (!mission || !mission.isReadyToClaim) return null;
 
@@ -440,9 +440,13 @@ class MetaMissionSystem {
         this.state.totalClaimedGold = (this.state.totalClaimedGold || 0) + reward.gold;
         this.state.totalClaimedXp = (this.state.totalClaimedXp || 0) + reward.xp;
         this.saveState();
-        this.playClaimSfx();
-        this.updateBadgeCounter();
-        this.render();
+        if (shouldRender) {
+            this.playClaimSfx();
+            this.showClaimToast(reward.gold, reward.xp, reward.title);
+            this.updateBadgeCounter();
+            this.render();
+            if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
+        }
 
         return {
             success: true, id: zombieId, zombieId, category: 'zombies',
@@ -450,29 +454,25 @@ class MetaMissionSystem {
         };
     }
 
-    claimGuitaristReward(heroId) {
+    claimGuitaristReward(heroId, shouldRender = true) {
         const mission = this.getGuitaristMission(heroId);
         if (!mission || !mission.isReadyToClaim) return null;
 
         const { reward } = mission;
-        if (window.guitaristPool && typeof window.guitaristPool.addHeroXp === 'function') {
-            window.guitaristPool.addHeroXp(heroId, reward.xp);
-        }
-        if (window.talentSystem && typeof window.talentSystem.addGold === 'function') {
-            window.talentSystem.addGold(reward.gold);
-        } else if (window.game) {
-            window.game.gold = (window.game.gold || 0) + reward.gold;
-            if (typeof window.game.saveState === 'function') window.game.saveState();
-        }
+        this.grantRewards(reward);
 
         const nextClaimed = mission.claimedTier + 1;
         this.state.heroClaimedTiers[heroId] = nextClaimed;
         this.state.totalClaimedGold = (this.state.totalClaimedGold || 0) + reward.gold;
         this.state.totalClaimedXp = (this.state.totalClaimedXp || 0) + reward.xp;
         this.saveState();
-        this.playClaimSfx();
-        this.updateBadgeCounter();
-        this.render();
+        if (shouldRender) {
+            this.playClaimSfx();
+            this.showClaimToast(reward.gold, reward.xp, reward.title);
+            this.updateBadgeCounter();
+            this.render();
+            if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
+        }
 
         return {
             success: true, id: heroId, heroId, category: 'guitarists',
@@ -480,7 +480,7 @@ class MetaMissionSystem {
         };
     }
 
-    claimPerformanceReward(statId) {
+    claimPerformanceReward(statId, shouldRender = true) {
         const mission = this.getPerformanceMission(statId);
         if (!mission || !mission.isReadyToClaim) return null;
 
@@ -492,9 +492,13 @@ class MetaMissionSystem {
         this.state.totalClaimedGold = (this.state.totalClaimedGold || 0) + reward.gold;
         this.state.totalClaimedXp = (this.state.totalClaimedXp || 0) + reward.xp;
         this.saveState();
-        this.playClaimSfx();
-        this.updateBadgeCounter();
-        this.render();
+        if (shouldRender) {
+            this.playClaimSfx();
+            this.showClaimToast(reward.gold, reward.xp, reward.title);
+            this.updateBadgeCounter();
+            this.render();
+            if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
+        }
 
         return {
             success: true, id: statId, statId, category: 'performance',
@@ -516,6 +520,8 @@ class MetaMissionSystem {
     }
 
     grantRewards(reward) {
+        if (!reward) return;
+        // 1. Direct deposit of Gold to TalentSystem wallet
         if (window.talentSystem && typeof window.talentSystem.addGold === 'function') {
             window.talentSystem.addGold(reward.gold);
         } else if (window.game) {
@@ -523,19 +529,55 @@ class MetaMissionSystem {
             if (typeof window.game.saveState === 'function') window.game.saveState();
         }
 
-        if (window.guitaristPool && typeof window.guitaristPool.addHeroXp === 'function') {
-            const activeHero = window.combat
-                ? window.combat.getActiveHeroData()
-                : (window.guitaristPool.getActiveHero ? window.guitaristPool.getActiveHero() : null);
-            if (activeHero) window.guitaristPool.addHeroXp(activeHero.id, reward.xp);
+        // 2. Direct deposit of XP to Player XP Inventory
+        if (window.guitaristPool && typeof window.guitaristPool.addPlayerXp === 'function') {
+            window.guitaristPool.addPlayerXp(reward.xp);
+        }
+
+        // 3. Keep HUD and currency representations in sync
+        if (window.talentSystem && typeof window.talentSystem.updateHUDGold === 'function') {
+            window.talentSystem.updateHUDGold();
+        }
+        if (window.game && typeof window.game.updateMenuCurrencies === 'function') {
+            window.game.updateMenuCurrencies();
         }
     }
 
     playClaimSfx() {
         if (window.soundEngine) {
             if (typeof window.soundEngine.playStageClear === 'function') window.soundEngine.playStageClear();
+            else if (typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord();
             else if (typeof window.soundEngine.playExplosion === 'function') window.soundEngine.playExplosion();
         }
+    }
+
+    showClaimToast(gold, xp, title = null) {
+        if (typeof document === 'undefined') return;
+        let toast = document.getElementById('missions-claim-toast');
+        if (!toast) {
+            if (typeof document.createElement !== 'function') return;
+            toast = document.createElement('div');
+            toast.id = 'missions-claim-toast';
+            toast.className = 'missions-claim-toast';
+            const modal = document.getElementById('meta-missions-modal') || document.body;
+            if (modal && typeof modal.appendChild === 'function') modal.appendChild(toast);
+        }
+        if (!toast || !toast.classList) return;
+        const titleHtml = title ? `<span class="toast-title">🎉 ${title}</span>` : '';
+        toast.innerHTML = `
+            ${titleHtml}
+            <div class="toast-chips-row">
+                <span class="toast-chip gold">+🪙 ${gold.toLocaleString()} Ouro</span>
+                <span class="toast-chip xp">+✨ ${xp.toLocaleString()} XP no Inventário</span>
+            </div>
+        `;
+        toast.classList.remove('show');
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        clearTimeout(this._toastTimeout);
+        this._toastTimeout = setTimeout(() => {
+            if (toast && toast.classList) toast.classList.remove('show');
+        }, 3000);
     }
 
     claimAllRewards(category = null) {
@@ -561,9 +603,9 @@ class MetaMissionSystem {
         let totalGold = 0, totalXp = 0;
         missionsToClaim.forEach(m => {
             let res = null;
-            if (m.category === 'guitarists') res = this.claimGuitaristReward(m.heroId || m.id);
-            else if (m.category === 'performance') res = this.claimPerformanceReward(m.statId || m.id);
-            else res = this.claimZombieReward(m.zombieId || m.id);
+            if (m.category === 'guitarists') res = this.claimGuitaristReward(m.heroId || m.id, false);
+            else if (m.category === 'performance') res = this.claimPerformanceReward(m.statId || m.id, false);
+            else res = this.claimZombieReward(m.zombieId || m.id, false);
 
             if (res && res.success) {
                 totalGold += res.reward.gold;
@@ -571,7 +613,11 @@ class MetaMissionSystem {
             }
         });
 
+        this.playClaimSfx();
+        this.showClaimToast(totalGold, totalXp, `${missionsToClaim.length} Missões Reivindicadas!`);
+        this.updateBadgeCounter();
         this.render();
+        if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
         return { count: missionsToClaim.length, totalGold, totalXp };
     }
 
@@ -723,12 +769,23 @@ class MetaMissionSystem {
 
         const statKills = document.getElementById('missions-stat-kills');
         const statGold = document.getElementById('missions-stat-gold');
+        const statWallet = document.getElementById('missions-stat-wallet-gold');
+        const statInvXp = document.getElementById('missions-stat-inventory-xp');
         const statCompleted = document.getElementById('missions-stat-completed');
         const statKillsLabel = document.getElementById('missions-stat-kills-label');
+
+        const currentWalletGold = (window.talentSystem && typeof window.talentSystem.gold === 'number')
+            ? window.talentSystem.gold
+            : (window.game ? (window.game.gold || 0) : 0);
+        const currentInvXp = (window.guitaristPool && typeof window.guitaristPool.getPlayerXp === 'function')
+            ? window.guitaristPool.getPlayerXp()
+            : 0;
 
         if (statKills) statKills.innerText = totalCount.toLocaleString();
         if (statKillsLabel) statKillsLabel.innerText = labelText;
         if (statGold) statGold.innerText = totalClaimedGold.toLocaleString();
+        if (statWallet) statWallet.innerText = currentWalletGold.toLocaleString();
+        if (statInvXp) statInvXp.innerText = currentInvXp.toLocaleString();
         if (statCompleted) statCompleted.innerText = `${maxCompletedCount} / ${missions.length}`;
     }
 
@@ -778,18 +835,6 @@ class MetaMissionSystem {
                     else this.claimZombieReward(id);
                 };
             });
-            container.querySelectorAll('.mission-claim-btn[data-zombie]').forEach(btn => {
-                btn.onclick = () => {
-                    const zid = btn.dataset ? btn.dataset.zombie : null;
-                    if (zid) this.claimZombieReward(zid);
-                };
-            });
-            container.querySelectorAll('.mission-claim-btn[data-hero]').forEach(btn => {
-                btn.onclick = () => {
-                    const hid = btn.dataset ? btn.dataset.hero : null;
-                    if (hid) this.claimGuitaristReward(hid);
-                };
-            });
         }
     }
 
@@ -823,7 +868,7 @@ class MetaMissionSystem {
                         ${m.category === 'zombies' ? `data-zombie="${m.id}"` : ''}
                         ${m.category === 'guitarists' ? `data-hero="${m.id}"` : ''}>
                     <span class="btn-label">✨ ${claimLabel}</span>
-                    <span class="btn-reward-preview">+${m.reward.gold.toLocaleString()} 🪙</span>
+                    <span class="btn-reward-preview">+${m.reward.gold.toLocaleString()} 🪙 • +${m.reward.xp.toLocaleString()} ✨</span>
                 </button>
             `;
         } else {

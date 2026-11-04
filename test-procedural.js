@@ -752,9 +752,7 @@ assert(htmlContent.includes('href="assets/branding/favicon-32.png"') && cssConte
 
 // 16. Testing 3 Battle Maps / Arenas System (v1.6.8)
 console.log('\n16. Testing 3 Battle Maps / Arenas System...');
-['map_void.jpg', 'map_ruins.jpg', 'map_wasteland.jpg', 'thumb_void.jpg', 'thumb_ruins.jpg', 'thumb_wasteland.jpg'].forEach(f => {
-    assert(fs.existsSync(path.resolve(__dirname, 'assets/maps', f)), `assets/maps/${f} exists`);
-});
+['map_void.jpg', 'map_ruins.jpg', 'map_wasteland.jpg', 'thumb_void.jpg', 'thumb_ruins.jpg', 'thumb_wasteland.jpg'].forEach(f => assert(fs.existsSync(path.resolve(__dirname, 'assets/maps', f)), `assets/maps/${f} exists`));
 
 const stgSys = new StageSystem();
 assert(stgSys.getAllMaps().length === 3, 'StageSystem contains all 3 battle maps');
@@ -771,11 +769,11 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.9.0 Build 54)
+// Cache Buster Version & Modular CSS Links (v1.9.1 Build 55)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=54`), `index.html links ${f} with v=54`);
+    assert(htmlContent.includes(`${f}?v=55`), `index.html links ${f} with v=55`);
 });
-assert(htmlContent.includes('v1.9.0 (Build 54)'), 'index.html footer specifies v1.9.0 (Build 54)');
+assert(htmlContent.includes('v1.9.1 (Build 55)'), 'index.html footer specifies v1.9.1 (Build 55)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -806,14 +804,11 @@ console.log('\n18. Testing 8 Expanded Zombie Archetypes...');
 [['assets', ['zombie_clown.jpg', 'zombie_builder.jpg', 'zombie_scientist.jpg', 'zombie_firefighter.jpg', 'zombie_sheriff.jpg', 'zombie_politician.jpg', 'zombie_batman.jpg', 'zombie_kratos.jpg']],
  ['assets/zombies', ['sinister_clown.jpg', 'builder_demolisher.jpg', 'mad_scientist.jpg', 'inferno_firefighter.jpg', 'sheriff_walker.jpg', 'presidential_politician.jpg', 'dark_knight_undead.jpg', 'god_of_war_spartan.jpg']]
 ].forEach(([dir, files]) => files.forEach(f => assert(fs.existsSync(path.resolve(__dirname, dir, f)), `${dir}/${f} exists`)));
-
 assert(enemyPool.masterPool.length === 16, `EnemyPool masterPool now contains all 16 distinct zombies (${enemyPool.masterPool.length} found)`);
-
-[
-    ['clown_jester', 130, 50, 'clown', 'Clown Jester'], ['builder_demolisher', 245, 31, 'builder', 'Builder Demolisher'],
-    ['mad_scientist', 155, 40, 'scientist', 'Mad Scientist'], ['inferno_firefighter', 310, 25, 'firefighter', 'Inferno Firefighter'],
-    ['sheriff_walker', 170, 36, 'sheriff', 'Sheriff Walker (Rick Grimes)'], ['presidential_politician', 220, 32, 'politician', 'Presidential Politician'],
-    ['dark_knight_undead', 260, 45, 'batman', 'Dark Knight (Batman)'], ['god_of_war_spartan', 380, 28, 'kratos', 'Spartan (Kratos)']
+[['clown_jester', 130, 50, 'clown', 'Clown Jester'], ['builder_demolisher', 245, 31, 'builder', 'Builder Demolisher'],
+ ['mad_scientist', 155, 40, 'scientist', 'Mad Scientist'], ['inferno_firefighter', 310, 25, 'firefighter', 'Inferno Firefighter'],
+ ['sheriff_walker', 170, 36, 'sheriff', 'Sheriff Walker (Rick Grimes)'], ['presidential_politician', 220, 32, 'politician', 'Presidential Politician'],
+ ['dark_knight_undead', 260, 45, 'batman', 'Dark Knight (Batman)'], ['god_of_war_spartan', 380, 28, 'kratos', 'Spartan (Kratos)']
 ].forEach(([id, hp, speed, type, label]) => {
     const z = enemyPool.masterPool.find(item => item.id === id);
     assert(z && z.hp === hp && z.speed === speed && z.type === type, `${label} defined correctly`);
@@ -861,28 +856,21 @@ pool.guitarists.push({ id: 'test_rocker', name: 'Test Rocker', instrument: 'Bass
 assert(meta.getGuitaristMission('test_rocker').targetKills === 10, 'New guitarist automatically enters meta missions pool with 0/10 kills');
 pool.guitarists.pop();
 
-// Kill Tracking on Zombie (Builder) & Guitarist (Johnny Blaze)
+// Kill Tracking & Claiming
 pool.activeHeroId = 'johnny_blaze';
-const bStart = meta.getZombieMission('builder_demolisher').kills;
-const jStart = meta.getGuitaristMission('johnny_blaze').kills;
+const bStart = meta.getZombieMission('builder_demolisher').kills, jStart = meta.getGuitaristMission('johnny_blaze').kills;
 for (let i = 0; i < 10; i++) meta.recordKill('builder_demolisher', 'johnny_blaze');
-
-const bAfter = meta.getZombieMission('builder_demolisher');
-const jAfter = meta.getGuitaristMission('johnny_blaze');
+const bAfter = meta.getZombieMission('builder_demolisher'), jAfter = meta.getGuitaristMission('johnny_blaze');
 assert(bAfter.kills === bStart + 10 && bAfter.isReadyToClaim, 'Zombie kills recorded & Tier 1 ready to claim');
 assert(jAfter.kills === jStart + 10 && jAfter.isReadyToClaim, 'Guitarist kills recorded on active hero & Tier 1 ready');
 
-// Claiming Zombie Tier 1 & Progression to 100
 const zClaim = meta.claimReward('builder_demolisher');
-assert(zClaim && zClaim.success && zClaim.claimedTier === 1 && zClaim.reward.gold > 0, 'Zombie Tier 1 awards rebalanced gold (with HP modifier)');
+assert(zClaim && zClaim.success && zClaim.claimedTier === 1 && zClaim.reward.gold > 0, 'Zombie Tier 1 awards rebalanced gold');
 assert(meta.getZombieMission('builder_demolisher').targetKills === 100, 'Zombie target advances to 100 kills');
 
-// Claiming Guitarist Tier 1 & Progression to 100 (10% scale)
 const gClaim = meta.claimGuitaristReward('johnny_blaze');
 assert(gClaim && gClaim.success && gClaim.claimedTier === 1 && gClaim.reward.gold === 25, 'Guitarist Tier 1 awards 25 gold (10% scale)');
 assert(meta.getGuitaristMission('johnny_blaze').targetKills === 100, 'Guitarist target advances to 100 kills');
-
-// UI DOM & CSS checks
 assert(htmlContent.includes('id="meta-missions-modal"') && htmlContent.includes('data-cat="guitarists"'), 'index.html contains modal & category tabs');
 assert(cssContent.includes('.mission-card') && cssContent.includes('.hero-mission-card'), 'CSS includes styling for mission & hero cards');
 
@@ -922,7 +910,7 @@ assert(meta.getAllPerformanceMissions().length === 6, 'Performance missions cate
 const unbMission = meta.getPerformanceMission('unbelievable');
 assert(unbMission && unbMission.unitLabel === 'Acertos' && unbMission.reward.gold === 15, 'Unbelievable Tier 1 configured with low reward (15 gold)');
 
-// Record Unbelievables
+// Record Unbelievables & Critical Hits
 const prevUnb = unbMission.currentVal;
 meta.recordStat('unbelievable', 10);
 const unbAfter = meta.getPerformanceMission('unbelievable');
@@ -931,7 +919,6 @@ const claimUnb = meta.claimPerformanceReward('unbelievable');
 assert(claimUnb && claimUnb.success && claimUnb.claimedTier === 1 && claimUnb.reward.gold === 15, 'Unbelievable Tier 1 claimed with low 15 gold reward');
 assert(meta.getPerformanceMission('unbelievable').targetVal === 100, 'Unbelievable advances to 100 target');
 
-// Record Critical Hits
 meta.recordStat('critical_hits', 10);
 const critAfter = meta.getPerformanceMission('critical_hits');
 assert(critAfter.currentVal >= 10 && critAfter.isReadyToClaim, '10 Critical hits recorded & Tier 1 ready to claim');
@@ -963,6 +950,27 @@ assert(localStorage.getItem('gvs_language') === 'en', 'i18n language choice pers
 assert(htmlContent.includes('data-i18n="btnPlay"') && htmlContent.includes('data-i18n-placeholder="phSearchMissions"'), 'index.html contains data-i18n and data-i18n-placeholder attributes');
 i18n.setLanguage('pt');
 assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'JOGAR / INICIAR BATALHA', 'i18n switches back to PT smoothly');
+
+// ==========================================
+// 23. Testing Player XP Bank & Inventory Injection (v1.9.1 Build 55)
+// ==========================================
+console.log('\n23. Testing Player XP Bank & Inventory Injection...');
+localStorage.removeItem('gvs_player_xp');
+const pPool = new GuitaristPoolSystem();
+assert(pPool.getPlayerXp() === 0, 'Player XP starts at 0');
+pPool.addPlayerXp(500);
+assert(pPool.getPlayerXp() === 500 && localStorage.getItem('gvs_player_xp') === '500', '500 XP added to player inventory & persisted');
+
+const jLvlBefore = pPool.getHeroLevelData('johnny_blaze').level, reqForLvl = pPool.getXpRequiredForNextLevel(jLvlBefore);
+const injRes = pPool.injectXpIntoHero('johnny_blaze');
+assert(injRes.success === true && injRes.leveledUp === true, 'Hero leveled up from inventory XP injection');
+assert(pPool.getPlayerXp() === 500 - injRes.injectedXp && pPool.getHeroLevelData('johnny_blaze').level === jLvlBefore + 1, 'XP deducted and level incremented');
+
+pPool.playerXp = 0;
+assert(pPool.injectXpIntoHero('johnny_blaze').success === false, 'Injection blocked when inventory is empty');
+assert(htmlContent.includes('id="menu-xp-count"') && htmlContent.includes('id="showcase-hero-inv-xp"') && htmlContent.includes('id="hero-inject-xp-btn"'), 'index.html contains all XP inventory elements');
+assert(htmlContent.includes('id="missions-stat-wallet-gold"') && htmlContent.includes('id="missions-stat-inventory-xp"'), 'index.html missions stats bar has wallet gold & inventory XP');
+assert(cssContent.includes('.missions-claim-toast') && cssContent.includes('.hero-inject-xp-action') && cssContent.includes('.hero-inventory-xp-row'), 'CSS includes toast & XP injection button styling');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {

@@ -194,6 +194,8 @@ class I18n {
                 'statKillsHordes': '💀 Kills Hordas:',
                 'statKillsHeroes': '🎸 Kills Heróis:',
                 'statRhythmActions': '⚡ Ações de Ritmo:',
+                'statWalletGold': '💰 Carteira:',
+                'statInventoryXp': '✨ XP Guardado:',
                 'statMissionsGold': '🪙 Ouro Coletado:',
                 'statMasters': '👑 Mestres (100k):',
                 'btnClaimAll': '✨ REIVINDICAR TODAS',
@@ -216,6 +218,11 @@ class I18n {
                 'goldUnit': 'Ouro',
 
                 // Hero & Stage dynamic texts
+                'menuXpTitle': 'Inventário de XP',
+                'xpInventoryLabel': 'XP no Inventário:',
+                'btnInjectXp': '✨ INJETAR XP (+{amount} XP)',
+                'btnInjectLevelUp': '✨ INJETAR XP (+1 NÍVEL)',
+                'noXpInInventory': '✨ SEM XP NO INVENTÁRIO',
                 'heroMaxLevel': '⭐ NÍVEL MÁXIMO (100)',
                 'heroLevelUp': '⬆️ SUBIR NÍVEL (🪙 {cost})',
                 'heroUnlock': '🪙 DESBLOQUEAR GUITARRISTA (🪙 {cost})',
@@ -425,6 +432,8 @@ class I18n {
                 'statKillsHordes': '💀 Horde Kills:',
                 'statKillsHeroes': '🎸 Hero Kills:',
                 'statRhythmActions': '⚡ Rhythm Actions:',
+                'statWalletGold': '💰 Wallet:',
+                'statInventoryXp': '✨ Stored XP:',
                 'statMissionsGold': '🪙 Gold Collected:',
                 'statMasters': '👑 Masters (100k):',
                 'btnClaimAll': '✨ CLAIM ALL',
@@ -447,6 +456,11 @@ class I18n {
                 'goldUnit': 'Gold',
 
                 // Hero & Stage dynamic texts
+                'menuXpTitle': 'XP Inventory',
+                'xpInventoryLabel': 'Inventory XP:',
+                'btnInjectXp': '✨ INJECT XP (+{amount} XP)',
+                'btnInjectLevelUp': '✨ INJECT XP (+1 LEVEL)',
+                'noXpInInventory': '✨ NO XP IN INVENTORY',
                 'heroMaxLevel': '⭐ MAX LEVEL (100)',
                 'heroLevelUp': '⬆️ LEVEL UP (🪙 {cost})',
                 'heroUnlock': '🪙 UNLOCK GUITARIST (🪙 {cost})',

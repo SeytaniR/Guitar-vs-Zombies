@@ -664,3 +664,61 @@
     border-color: rgba(255, 215, 0, 0.35);
     color: #ffd700;
 }
+
+/* Claim Toast Notification */
+.missions-claim-toast {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg, rgba(20, 15, 35, 0.96), rgba(35, 20, 60, 0.96));
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 20px rgba(255, 215, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.missions-claim-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-title {
+    font-size: 13px;
+    font-weight: 900;
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.toast-chips-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.toast-chip {
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.toast-chip.gold {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    color: #ffe680;
+}
+
+.toast-chip.xp {
+    background: rgba(0, 240, 255, 0.15);
+    border: 1px solid rgba(0, 240, 255, 0.5);
+    color: #67e8f9;
+}

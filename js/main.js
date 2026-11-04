@@ -29,15 +29,10 @@ class Game {
         const bpm = 136;
         const beatSec = 60 / bpm;
         const pattern = [
-            { b: 4, l: 0 }, { b: 5, l: 1 }, { b: 6, l: 0 }, { b: 7, l: 2 }, { b: 8, l: 0 }, { b: 9, l: 1 }, { b: 10, l: 2 }, { b: 11, l: 3 },
-            { b: 12, l: 0 }, { b: 12.5, l: 0 }, { b: 13, l: 1 }, { b: 14, l: 2 }, { b: 15, l: 3 }, { b: 16, l: 2 }, { b: 17, l: 1 }, { b: 18, l: 0 },
-            { b: 19, l: 1 }, { b: 19.5, l: 2 }, { b: 20, l: 3 }, { b: 21, l: 2 }, { b: 22, l: 1 }, { b: 23, l: 0 }, { b: 24, l: 0 }, { b: 24.5, l: 1 },
-            { b: 25, l: 2 }, { b: 25.5, l: 3 }, { b: 26, l: 2 }, { b: 26.5, l: 1 }, { b: 27, l: 0 }, { b: 28, l: 3 }, { b: 29, l: 2 }, { b: 29.5, l: 1 },
-            { b: 30, l: 0 }, { b: 31, l: 1 }, { b: 32, l: 2 }, { b: 32.5, l: 3 }, { b: 33, l: 2 }, { b: 33.5, l: 1 }, { b: 34, l: 0 }, { b: 35, l: 1 },
-            { b: 36, l: 2 }, { b: 37, l: 3 }, { b: 38, l: 2 }, { b: 39, l: 1 }, { b: 40, l: 0 }, { b: 41, l: 3 }, { b: 41.5, l: 2 }, { b: 42, l: 1 },
-            { b: 42.5, l: 0 }, { b: 43, l: 1 }, { b: 44, l: 2 }, { b: 44.5, l: 3 }, { b: 45, l: 2 }, { b: 46, l: 1 }, { b: 47, l: 0 }, { b: 48, l: 3 },
-            { b: 49, l: 2 }, { b: 50, l: 1 }, { b: 50.5, l: 2 }, { b: 51, l: 3 }, { b: 52, l: 0 }, { b: 53, l: 1 }, { b: 54, l: 2 }, { b: 55, l: 3 },
-            { b: 56, l: 3 }, { b: 57, l: 2 }, { b: 58, l: 0 }
+            { b: 4, l: 0 }, { b: 5, l: 1 }, { b: 6, l: 0 }, { b: 7, l: 2 }, { b: 8, l: 0 }, { b: 9, l: 1 }, { b: 10, l: 2 }, { b: 11, l: 3 }, { b: 12, l: 0 }, { b: 12.5, l: 0 }, { b: 13, l: 1 }, { b: 14, l: 2 }, { b: 15, l: 3 }, { b: 16, l: 2 }, { b: 17, l: 1 }, { b: 18, l: 0 },
+            { b: 19, l: 1 }, { b: 19.5, l: 2 }, { b: 20, l: 3 }, { b: 21, l: 2 }, { b: 22, l: 1 }, { b: 23, l: 0 }, { b: 24, l: 0 }, { b: 24.5, l: 1 }, { b: 25, l: 2 }, { b: 25.5, l: 3 }, { b: 26, l: 2 }, { b: 26.5, l: 1 }, { b: 27, l: 0 }, { b: 28, l: 3 }, { b: 29, l: 2 }, { b: 29.5, l: 1 },
+            { b: 30, l: 0 }, { b: 31, l: 1 }, { b: 32, l: 2 }, { b: 32.5, l: 3 }, { b: 33, l: 2 }, { b: 33.5, l: 1 }, { b: 34, l: 0 }, { b: 35, l: 1 }, { b: 36, l: 2 }, { b: 37, l: 3 }, { b: 38, l: 2 }, { b: 39, l: 1 }, { b: 40, l: 0 }, { b: 41, l: 3 }, { b: 41.5, l: 2 }, { b: 42, l: 1 },
+            { b: 42.5, l: 0 }, { b: 43, l: 1 }, { b: 44, l: 2 }, { b: 44.5, l: 3 }, { b: 45, l: 2 }, { b: 46, l: 1 }, { b: 47, l: 0 }, { b: 48, l: 3 }, { b: 49, l: 2 }, { b: 50, l: 1 }, { b: 50.5, l: 2 }, { b: 51, l: 3 }, { b: 52, l: 0 }, { b: 53, l: 1 }, { b: 54, l: 2 }, { b: 55, l: 3 }, { b: 56, l: 3 }, { b: 57, l: 2 }, { b: 58, l: 0 }
         ];
         const notes = pattern.map(p => ({
             time: Math.round((p.b * beatSec) * 1000) / 1000, lane: p.l, id: 'n_' + Math.random().toString(36).substr(2, 9)
@@ -166,40 +161,26 @@ class Game {
         if (!window.stageSystem) return;
         const currentMap = window.stageSystem.getSelectedMap();
         if (!currentMap) return;
-
-        const imgEl = document.getElementById('showcase-arena-img');
-        const badgeEl = document.getElementById('showcase-arena-badge');
-        const nameEl = document.getElementById('showcase-arena-name');
-        const subEl = document.getElementById('showcase-arena-sub');
-        const descEl = document.getElementById('showcase-arena-desc');
-
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+        const imgEl = document.getElementById('showcase-arena-img'), badgeEl = document.getElementById('showcase-arena-badge');
         if (imgEl) imgEl.src = currentMap.thumb;
         if (badgeEl) { badgeEl.innerText = `${currentMap.badge} • ALEATÓRIO`; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
-        if (nameEl) nameEl.innerText = currentMap.name;
-        if (subEl) subEl.innerText = currentMap.subtitle;
-        if (descEl) descEl.innerText = currentMap.description;
+        setTxt('showcase-arena-name', currentMap.name);
+        setTxt('showcase-arena-sub', currentMap.subtitle);
+        setTxt('showcase-arena-desc', currentMap.description);
     }
 
     updateStageUI() {
         if (!window.stageSystem) return;
         const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         const stage = window.stageSystem.selectedStage;
-        const stageTitle = document.getElementById('map-stage-title-text');
-        const stageInfo = document.getElementById('map-stage-info-text');
+        const stageTitle = document.getElementById('map-stage-title-text'), stageInfo = document.getElementById('map-stage-info-text');
         if (stageTitle) stageTitle.innerText = window.stageSystem.getStageName(stage);
         if (stageInfo) {
             const isBoss = window.stageSystem.isBossStage && window.stageSystem.isBossStage(stage);
-            const range = window.stageSystem.getZombieLevelRange(stage);
-            const kills = window.stageSystem.getTargetKills(stage);
-            const rewards = window.stageSystem.getStageRewards(stage);
+            const range = window.stageSystem.getZombieLevelRange(stage), kills = window.stageSystem.getTargetKills(stage), rewards = window.stageSystem.getStageRewards(stage);
             const bossChip = isBoss ? `<span class="stage-chip chip-boss">${tr('bossBadge', '👑 CHEFE (2x OURO/XP)')}</span>` : '';
-            stageInfo.innerHTML = `
-                ${bossChip}
-                <span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span>
-                <span class="stage-chip chip-target">🎯 ${kills} ${tr('targetsUnit', 'Alvos')}</span>
-                <span class="stage-chip chip-gold">🪙 +${rewards.coins}</span>
-                <span class="stage-chip chip-xp">⭐ +${rewards.xp} XP</span>
-            `;
+            stageInfo.innerHTML = `${bossChip}<span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span><span class="stage-chip chip-target">🎯 ${kills} ${tr('targetsUnit', 'Alvos')}</span><span class="stage-chip chip-gold">🪙 +${rewards.coins}</span><span class="stage-chip chip-xp">⭐ +${rewards.xp} XP</span>`;
         }
     }
 
@@ -235,7 +216,10 @@ class Game {
         const lvlData = pool.getHeroLevelData(currentHero.id);
         const reqXp = pool.getXpRequiredForNextLevel(lvlData.level);
         const goldCost = pool.getGoldCostForLevelUp(lvlData.level);
-        const lBadge = el('showcase-hero-level-badge'), xText = el('showcase-hero-xp-text'), xFill = el('showcase-hero-xp-fill'), lUpBtn = el('hero-level-up-btn');
+        const lBadge = el('showcase-hero-level-badge'), xText = el('showcase-hero-xp-text'), xFill = el('showcase-hero-xp-fill');
+        const lUpBtn = el('hero-level-up-btn'), invXpEl = el('showcase-hero-inv-xp'), injectBtn = el('hero-inject-xp-btn');
+        const playerXp = pool.getPlayerXp();
+        if (invXpEl) invXpEl.innerText = playerXp.toLocaleString();
 
         if (isUnlocked) {
             if (lBadge) lBadge.innerText = tr('heroLevelBadge', `⭐ NÍVEL ${lvlData.level} / 100`, { lvl: lvlData.level });
@@ -243,7 +227,7 @@ class Game {
             if (xFill) xFill.style.width = `${lvlData.level >= 100 ? 100 : Math.min(100, Math.round((lvlData.xp / reqXp) * 100))}%`;
             if (lUpBtn) {
                 lUpBtn.disabled = (lvlData.level >= 100);
-                lUpBtn.className = 'hero-lvl-btn';
+                lUpBtn.className = 'hero-level-up-action';
                 lUpBtn.innerText = lvlData.level >= 100 ? tr('heroMaxLevel', '⭐ NÍVEL MÁXIMO (100)') : tr('heroLevelUp', `⬆️ SUBIR NÍVEL (🪙 ${goldCost})`, { cost: goldCost });
                 lUpBtn.onclick = () => {
                     if (lvlData.level >= 100) return;
@@ -254,14 +238,36 @@ class Game {
                     } else alert(res.reason || 'Ouro insuficiente!');
                 };
             }
+            if (injectBtn) {
+                injectBtn.style.display = (lvlData.level >= 100) ? 'none' : 'inline-flex';
+                const neededForLevel = Math.max(1, reqXp - lvlData.xp);
+                if (playerXp <= 0) {
+                    injectBtn.disabled = true;
+                    injectBtn.innerText = tr('noXpInInventory', '✨ SEM XP NO INVENTÁRIO');
+                } else {
+                    injectBtn.disabled = false;
+                    const toInject = Math.min(neededForLevel, playerXp);
+                    injectBtn.innerText = (playerXp >= neededForLevel)
+                        ? tr('btnInjectLevelUp', '✨ INJETAR XP (+1 NÍVEL)')
+                        : tr('btnInjectXp', `✨ INJETAR XP (+${toInject.toLocaleString()} XP)`, { amount: toInject.toLocaleString() });
+                    injectBtn.onclick = () => {
+                        const res = pool.injectXpIntoHero(currentHero.id);
+                        if (res.success) {
+                            if (window.soundEngine) window.soundEngine.playPowerChord();
+                            this.renderHeroRoster(); this.updateMenuCurrencies();
+                        } else alert(res.reason || 'Erro ao injetar XP!');
+                    };
+                }
+            }
         } else {
             const uCost = pool.getHeroUnlockCost(currentHero.id);
             if (lBadge) lBadge.innerText = tr('heroLocked', '🔒 GUITARRISTA BLOQUEADO');
             if (xText) xText.innerText = tr('heroUnlockCost', `Custo: 🪙 ${uCost} Ouro`, { cost: uCost });
             if (xFill) xFill.style.width = '0%';
+            if (injectBtn) injectBtn.style.display = 'none';
             if (lUpBtn) {
                 lUpBtn.disabled = false;
-                lUpBtn.className = 'hero-lvl-btn hero-unlock-cta';
+                lUpBtn.className = 'hero-level-up-action hero-unlock-cta';
                 lUpBtn.innerText = tr('heroUnlock', `🪙 DESBLOQUEAR GUITARRISTA (🪙 ${uCost})`, { cost: uCost });
                 lUpBtn.onclick = () => {
                     const res = pool.unlockHeroWithGold(currentHero.id);
@@ -592,17 +598,13 @@ class Game {
 
     updateMapSongDetailsUI(song) {
         if (!song) return;
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
         const coverImg = document.getElementById('map-selected-song-cover');
-        const titleEl = document.getElementById('map-selected-song-title');
-        const bpmTag = document.getElementById('selected-song-bpm-tag');
-        const artistEl = document.getElementById('map-song-artist');
-        const notesEl = document.getElementById('map-song-notes-count');
-
         if (coverImg) coverImg.src = song.cover || 'assets/covers/default_cover.jpg';
-        if (titleEl) titleEl.innerText = song.title || 'Música';
-        if (bpmTag) bpmTag.innerText = `${song.bpm || 120} BPM`;
-        if (artistEl) artistEl.innerText = `Autoria: ${song.artist || 'Desconhecido'}`;
-        if (notesEl) notesEl.innerText = `${(song.notes || []).length} notas mapeadas`;
+        setTxt('map-selected-song-title', song.title || 'Música');
+        setTxt('selected-song-bpm-tag', `${song.bpm || 120} BPM`);
+        setTxt('map-song-artist', `Autoria: ${song.artist || 'Desconhecido'}`);
+        setTxt('map-song-notes-count', `${(song.notes || []).length} notas mapeadas`);
     }
 
     startMatchWithSong(song) {
@@ -651,12 +653,11 @@ class Game {
     // ==========================================
     setupBattleControls() {
         const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+        const closeM = id => { const m = document.getElementById(id); if (m) m.classList.remove('open'); };
         bind('battle-sound-toggle', () => {
             if (window.soundEngine) {
-                const isMuted = window.soundEngine.toggleMute();
-                const icon = isMuted ? '🔇' : '🔊';
-                const b1 = document.getElementById('battle-sound-toggle'); if (b1) b1.innerText = icon;
-                const b2 = document.getElementById('menu-sound-toggle'); if (b2) b2.innerText = icon;
+                const isMuted = window.soundEngine.toggleMute(), icon = isMuted ? '🔇' : '🔊';
+                ['battle-sound-toggle', 'menu-sound-toggle'].forEach(id => { const b = document.getElementById(id); if (b) b.innerText = icon; });
             }
         });
         bind('battle-stats-toggle', () => this.openStatsModal());
@@ -667,37 +668,17 @@ class Game {
         bind('gear-footer-action-btn', () => this.closeGearModal());
         bind('gear-abandon-battle-btn', () => {
             if (confirm("⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido.")) {
-                const modal = document.getElementById('battle-gear-modal');
-                if (modal) modal.classList.remove('open');
-                this.switchScreen('menu');
+                closeM('battle-gear-modal'); this.switchScreen('menu');
             }
         });
-        bind('result-replay-btn', () => {
-            const m = document.getElementById('song-results-modal');
-            if (m) m.classList.remove('open');
-            this.startMatch();
-        });
-        bind('result-close-btn', () => {
-            const m = document.getElementById('song-results-modal');
-            if (m) m.classList.remove('open');
-            this.switchScreen('menu');
-        });
-        bind('defeat-retry-btn', () => {
-            const m = document.getElementById('battle-defeat-modal');
-            if (m) m.classList.remove('open');
-            this.startMatch();
-        });
+        bind('result-replay-btn', () => { closeM('song-results-modal'); this.startMatch(); });
+        bind('result-close-btn', () => { closeM('song-results-modal'); this.switchScreen('menu'); });
+        bind('defeat-retry-btn', () => { closeM('battle-defeat-modal'); this.startMatch(); });
         bind('defeat-talents-btn', () => {
-            const m = document.getElementById('battle-defeat-modal');
-            if (m) m.classList.remove('open');
-            this.switchScreen('menu');
+            closeM('battle-defeat-modal'); this.switchScreen('menu');
             if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
         });
-        bind('defeat-close-btn', () => {
-            const m = document.getElementById('battle-defeat-modal');
-            if (m) m.classList.remove('open');
-            this.switchScreen('menu');
-        });
+        bind('defeat-close-btn', () => { closeM('battle-defeat-modal'); this.switchScreen('menu'); });
     }
 
     pauseBattle() {
@@ -803,9 +784,7 @@ class Game {
         const modal = document.getElementById('song-results-modal');
         if (!modal) return;
 
-        const coverEl = document.getElementById('result-song-cover');
-        const titleEl = document.getElementById('result-song-title');
-        const artistEl = document.getElementById('result-song-artist');
+        const coverEl = document.getElementById('result-song-cover'), titleEl = document.getElementById('result-song-title'), artistEl = document.getElementById('result-song-artist');
         if (coverEl) coverEl.src = (song && song.cover) || 'assets/covers/default_cover.jpg';
         if (titleEl) titleEl.innerText = (song && song.title) || 'Show Concluído';
         if (artistEl) artistEl.innerText = (song && song.artist) || 'Solo de Guitarra';
@@ -815,7 +794,8 @@ class Game {
         const accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
 
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-        setVal('result-accuracy', `${accPct}%`); setVal('result-hits', `${hitNotes} / ${totalNotes}`);
+        setVal('result-accuracy', `${accPct}%`);
+        setVal('result-hits', `${hitNotes} / ${totalNotes}`);
         setVal('result-zombies-killed', `${(this.combat && this.combat.battleStats ? this.combat.battleStats.zombiesKilled : 0)} 💀`);
         setVal('result-max-streak', `${stats.maxStreak || (this.rhythm ? this.rhythm.maxStreak : 0)} 🔥`);
         setVal('result-gold-reward', `+${(this.combat && this.combat.battleStats ? this.combat.battleStats.coinsEarned : 0)} 🪙`);
@@ -955,9 +935,11 @@ class Game {
 
     updateMenuHUD() {
         const goldCount = document.getElementById('menu-gold-count');
+        const xpCount = document.getElementById('menu-xp-count');
         const highscoreVal = document.getElementById('menu-highscore-val');
         const killsVal = document.getElementById('menu-total-kills');
-        if (goldCount && window.talentSystem) goldCount.innerText = window.talentSystem.gold;
+        if (goldCount && window.talentSystem) goldCount.innerText = (window.talentSystem.gold || 0).toLocaleString();
+        if (xpCount && window.guitaristPool) xpCount.innerText = window.guitaristPool.getPlayerXp().toLocaleString();
         if (highscoreVal) highscoreVal.innerText = parseInt(localStorage.getItem('gvs_highscore') || '0').toLocaleString();
         if (killsVal) killsVal.innerText = parseInt(localStorage.getItem('gvs_total_kills') || '0').toLocaleString();
         if (window.metaMissionSystem) window.metaMissionSystem.updateBadgeCounter();

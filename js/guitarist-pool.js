@@ -340,7 +340,73 @@ class GuitaristPoolSystem {
 
         this.heroLevels = this.loadHeroLevels();
         this.unlockedHeroes = this.loadUnlockedHeroes();
+        this.playerXp = this.loadPlayerXp();
         this.selectedId = this.loadSelectedGuitaristId();
+    }
+
+    loadPlayerXp() {
+        try {
+            const raw = localStorage.getItem('gvs_player_xp');
+            if (raw !== null && !isNaN(parseInt(raw, 10))) return Math.max(0, parseInt(raw, 10));
+        } catch(e) {}
+        return 0;
+    }
+
+    savePlayerXp() {
+        try {
+            localStorage.setItem('gvs_player_xp', (this.playerXp || 0).toString());
+        } catch(e) {}
+    }
+
+    addPlayerXp(amount) {
+        const val = Math.max(0, parseInt(amount, 10) || 0);
+        this.playerXp = (this.playerXp || 0) + val;
+        this.savePlayerXp();
+        this.updateXpDisplays();
+        return this.playerXp;
+    }
+
+    getPlayerXp() {
+        return this.playerXp || 0;
+    }
+
+    updateXpDisplays() {
+        if (typeof document === 'undefined') return;
+        const count = (this.playerXp || 0).toLocaleString();
+        const menuXp = document.getElementById('menu-xp-count');
+        if (menuXp) menuXp.innerText = count;
+        const statXp = document.getElementById('missions-stat-inventory-xp');
+        if (statXp) statXp.innerText = count;
+        const showcaseInvXp = document.getElementById('showcase-hero-inv-xp');
+        if (showcaseInvXp) showcaseInvXp.innerText = count;
+    }
+
+    injectXpIntoHero(heroId, amount = null) {
+        const data = this.getHeroLevelData(heroId);
+        if (data.level >= this.maxLevel) return { success: false, reason: 'Nível Máximo Atingido (100)' };
+        if ((this.playerXp || 0) <= 0) return { success: false, reason: 'Sem XP no inventário!' };
+
+        const reqXp = this.getXpRequiredForNextLevel(data.level);
+        const neededForLevel = Math.max(1, reqXp - data.xp);
+
+        let toInject = (amount !== null && amount > 0) ? Math.min(amount, this.playerXp) : Math.min(neededForLevel, this.playerXp);
+        toInject = Math.max(0, toInject);
+        if (toInject <= 0) return { success: false, reason: 'XP insuficiente!' };
+
+        this.playerXp -= toInject;
+        this.savePlayerXp();
+
+        const addRes = this.addHeroXp(heroId, toInject);
+        this.updateXpDisplays();
+
+        return {
+            success: true,
+            injectedXp: toInject,
+            leveledUp: addRes.leveledUp,
+            newLevel: addRes.newLevel,
+            currentXp: addRes.currentXp,
+            remainingPlayerXp: this.playerXp
+        };
     }
 
     loadHeroLevels() {
