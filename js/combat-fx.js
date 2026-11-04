@@ -13,16 +13,23 @@ class CombatFX {
 
     initEmbers(count = 25, width = 800, height = 600, theme = 'map_void') {
         this.ambientEmbers = [];
-        const hues = theme === 'map_ruins'
-            ? ['#ff2244', '#ff6600', '#ffaa00']
-            : (theme === 'map_wasteland' ? ['#ffaa00', '#e08800', '#d4a373'] : ['#00ffcc', '#00aaff', '#39ff14']);
+        const themeHues = {
+            map_ruins: ['#ff2244', '#ff6600', '#ffaa00'],
+            map_wasteland: ['#ffaa00', '#e08800', '#d4a373'],
+            map_thermopylae: ['#e63946', '#d4a373', '#ff6b35', '#b08968'],
+            map_coliseum: ['#ffd700', '#c1121f', '#f4a261', '#8338ec'],
+            map_bikini_bottom: ['#00f0ff', '#39ff14', '#06d6a0', '#ffe600'],
+            map_valhalla: ['#e0fbfc', '#98c1d9', '#ffffff', '#3d5a80'],
+            map_stadium: ['#00ff88', '#ff0055', '#ffffaa', '#8899aa']
+        };
+        const hues = themeHues[theme] || ['#00ffcc', '#00aaff', '#39ff14'];
+        const isSnow = (theme === 'map_valhalla'), isBubbles = (theme === 'map_bikini_bottom');
         for (let i = 0; i < count; i++) {
             this.ambientEmbers.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                vx: -10 - Math.random() * 15,
-                vy: 8 + Math.random() * 14,
-                size: 1 + Math.random() * 2,
+                x: Math.random() * width, y: Math.random() * height,
+                vx: isSnow ? (-4 + Math.random() * 8) : (-10 - Math.random() * 15),
+                vy: isBubbles ? (-12 - Math.random() * 15) : (8 + Math.random() * 14),
+                size: isSnow ? (1.5 + Math.random() * 2.5) : (1 + Math.random() * 2),
                 alpha: 0.2 + Math.random() * 0.5,
                 hue: hues[Math.floor(Math.random() * hues.length)]
             });
@@ -379,7 +386,9 @@ class CombatFX {
             em.x += em.vx * dt;
             em.y += em.vy * dt;
             if (em.x < -20) em.x = canvasWidth + 20;
-            if (em.y > canvasHeight) em.y = -10;
+            else if (em.x > canvasWidth + 20) em.x = -20;
+            if (em.y > canvasHeight + 10) em.y = -10;
+            else if (em.y < -10) em.y = canvasHeight + 10;
         });
 
         // Update Acid Puddles

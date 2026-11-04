@@ -41,6 +41,61 @@ class StageSystem {
                 themeColor: '#ffaa00',
                 src: 'assets/maps/map_wasteland.jpg',
                 thumb: 'assets/maps/thumb_wasteland.jpg'
+            },
+            {
+                id: 'map_thermopylae',
+                name: 'Desfiladeiro de Esparta',
+                subtitle: 'O Desfiladeiro dos 300 & Paredão de Riffs',
+                description: 'O lendário desfiladeiro grego fortificado contra hordas mortas com escudos espartanos, estacas e torres de amplificadores.',
+                badge: 'ESPARTA',
+                badgeClass: 'badge-sparta',
+                themeColor: '#e63946',
+                src: 'assets/maps/map_thermopylae.jpg',
+                thumb: 'assets/maps/thumb_thermopylae.jpg'
+            },
+            {
+                id: 'map_coliseum',
+                name: 'Coliseu Imperial',
+                subtitle: 'A Arena Romana dos Gladiadores',
+                description: 'As ruínas milenares de Roma transformadas no palco supremo onde gladiadores enfrentavam feras e zumbis ao som de solos impiedosos.',
+                badge: 'COLISEU',
+                badgeClass: 'badge-coliseum',
+                themeColor: '#ffd700',
+                src: 'assets/maps/map_coliseum.jpg',
+                thumb: 'assets/maps/thumb_coliseum.jpg'
+            },
+            {
+                id: 'map_bikini_bottom',
+                name: 'Fenda Submarina',
+                subtitle: 'As Profundezas Tóxicas do Siri Cascudo',
+                description: 'A icônica fenda submarina submersa em lixo tóxico, onde o abacaxi enferrujado e o Siri Cascudo viraram redutos do punk aquático.',
+                badge: 'FENDA',
+                badgeClass: 'badge-ocean',
+                themeColor: '#00f0ff',
+                src: 'assets/maps/map_bikini_bottom.jpg',
+                thumb: 'assets/maps/thumb_bikini_bottom.jpg'
+            },
+            {
+                id: 'map_valhalla',
+                name: 'Fiorde de Valhalla',
+                subtitle: 'O Fiorde Congelado de Odin',
+                description: 'Picos congelados, drakkars ancestrais e muralhas de madeira nórdica onde os guerreiros vikings ecoam riffs ancestrais no gelo.',
+                badge: 'VIKING',
+                badgeClass: 'badge-valhalla',
+                themeColor: '#a0d8ef',
+                src: 'assets/maps/map_valhalla.jpg',
+                thumb: 'assets/maps/thumb_valhalla.jpg'
+            },
+            {
+                id: 'map_stadium',
+                name: 'Estádio Devastado',
+                subtitle: 'O Caldeirão Devastado do Rock',
+                description: 'Um antigo estádio esportivo monumental com traves retorcidas e arquibancadas em ruínas onde multidões agora se chocam em mosh pits letais.',
+                badge: 'ESTÁDIO',
+                badgeClass: 'badge-stadium',
+                themeColor: '#00ff88',
+                src: 'assets/maps/map_stadium.jpg',
+                thumb: 'assets/maps/thumb_stadium.jpg'
             }
         ];
     }

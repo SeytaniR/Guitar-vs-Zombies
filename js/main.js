@@ -161,13 +161,15 @@ class Game {
         if (!window.stageSystem) return;
         const currentMap = window.stageSystem.getSelectedMap();
         if (!currentMap) return;
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
         const imgEl = document.getElementById('showcase-arena-img'), badgeEl = document.getElementById('showcase-arena-badge');
         if (imgEl) imgEl.src = currentMap.thumb;
-        if (badgeEl) { badgeEl.innerText = `${currentMap.badge} • ALEATÓRIO`; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
-        setTxt('showcase-arena-name', currentMap.name);
-        setTxt('showcase-arena-sub', currentMap.subtitle);
-        setTxt('showcase-arena-desc', currentMap.description);
+        const bTxt = tr(currentMap.id + '_badge', currentMap.badge);
+        if (badgeEl) { badgeEl.innerText = `${bTxt} • ${tr('badgeRandom', 'ALEATÓRIO')}`; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
+        setTxt('showcase-arena-name', tr(currentMap.id + '_name', currentMap.name));
+        setTxt('showcase-arena-sub', tr(currentMap.id + '_sub', currentMap.subtitle));
+        setTxt('showcase-arena-desc', tr(currentMap.id + '_desc', currentMap.description));
     }
 
     updateStageUI() {

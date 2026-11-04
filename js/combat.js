@@ -15,9 +15,9 @@ class CombatSystem {
         const loadImg = src => { const img = new Image(); img.src = src; return img; };
         const loadSheet = (src, cols = 4, rows = 3) => new SheetClass(loadImg(src), cols, rows);
         this.assets = {
-            map_void: loadImg('assets/maps/map_void.jpg'),
-            map_ruins: loadImg('assets/maps/map_ruins.jpg'),
-            map_wasteland: loadImg('assets/maps/map_wasteland.jpg'),
+            map_void: loadImg('assets/maps/map_void.jpg'), map_ruins: loadImg('assets/maps/map_ruins.jpg'), map_wasteland: loadImg('assets/maps/map_wasteland.jpg'),
+            map_thermopylae: loadImg('assets/maps/map_thermopylae.jpg'), map_coliseum: loadImg('assets/maps/map_coliseum.jpg'),
+            map_bikini_bottom: loadImg('assets/maps/map_bikini_bottom.jpg'), map_valhalla: loadImg('assets/maps/map_valhalla.jpg'), map_stadium: loadImg('assets/maps/map_stadium.jpg'),
             get bg() {
                 const mapId = (window.stageSystem && typeof window.stageSystem.getSelectedMap === 'function')
                     ? window.stageSystem.getSelectedMap().id

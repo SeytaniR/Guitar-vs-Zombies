@@ -821,6 +821,11 @@ button.hero-roster-card {
 .badge-urban { background: rgba(0, 255, 204, 0.25); color: #00ffcc; border: 1px solid #00ffcc; }
 .badge-concert { background: rgba(255, 0, 85, 0.25); color: #ff0055; border: 1px solid #ff0055; }
 .badge-desert { background: rgba(255, 170, 0, 0.25); color: #ffaa00; border: 1px solid #ffaa00; }
+.badge-sparta { background: rgba(230, 57, 70, 0.25); color: #ff4d6d; border: 1px solid #ff4d6d; }
+.badge-coliseum { background: rgba(255, 215, 0, 0.25); color: #ffd700; border: 1px solid #ffd700; }
+.badge-ocean { background: rgba(0, 240, 255, 0.25); color: #00f0ff; border: 1px solid #00f0ff; }
+.badge-valhalla { background: rgba(160, 216, 239, 0.25); color: #a0d8ef; border: 1px solid #a0d8ef; }
+.badge-stadium { background: rgba(0, 255, 136, 0.25); color: #00ff88; border: 1px solid #00ff88; }
 
 .selected-arena-showcase {
     display: flex;

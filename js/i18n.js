@@ -233,7 +233,17 @@ class I18n {
                 'bossBadge': '👑 CHEFE (2x OURO/XP)',
                 'targetsUnit': 'Alvos',
                 'stagePrefix': 'Fase {stage}',
-                'bossShowdown': 'Fase {stage}: 👑 CONFRONTO DE CHEFE: {name}!',
+                                'bossShowdown': 'Fase {stage}: 👑 CONFRONTO DE CHEFE: {name}!',
+
+                // Arenas & Maps
+                'map_void_name': 'The Void Club', 'map_void_sub': 'Clube Subterrâneo & Escombros Urbanos', 'map_void_desc': 'Fachada do lendário pub underground "The Void", barricadas de concreto e ônibus blindado abandonado.', 'map_void_badge': 'URBANO',
+                'map_ruins_name': 'Palco dos Escombros', 'map_ruins_sub': 'Arena Central do Apocalipse', 'map_ruins_desc': 'Palco de metal destruído no coração das ruínas metropolitanas, cercado por amplificadores e fumaça.', 'map_ruins_badge': 'CONCERTO',
+                'map_wasteland_name': 'Wasteland do Metal', 'map_wasteland_sub': 'Deserto Anárquico & Posto Tóxico', 'map_wasteland_desc': 'Autoestrada árida estilo Mad Max, posto de gasolina fortificado, cactos e sucatas sob tempestade de areia.', 'map_wasteland_badge': 'DESERTO',
+                'map_thermopylae_name': 'Desfiladeiro de Esparta', 'map_thermopylae_sub': 'O Desfiladeiro dos 300 & Paredão de Riffs', 'map_thermopylae_desc': 'O lendário desfiladeiro grego fortificado contra hordas mortas com escudos espartanos, estacas e torres de amplificadores.', 'map_thermopylae_badge': 'ESPARTA',
+                'map_coliseum_name': 'Coliseu Imperial', 'map_coliseum_sub': 'A Arena Romana dos Gladiadores', 'map_coliseum_desc': 'As ruínas milenares de Roma transformadas no palco supremo onde gladiadores enfrentavam feras e zumbis ao som de solos impiedosos.', 'map_coliseum_badge': 'COLISEU',
+                'map_bikini_bottom_name': 'Fenda Submarina', 'map_bikini_bottom_sub': 'As Profundezas Tóxicas do Siri Cascudo', 'map_bikini_bottom_desc': 'A icônica fenda submarina submersa em lixo tóxico, onde o abacaxi enferrujado e o Siri Cascudo viraram redutos do punk aquático.', 'map_bikini_bottom_badge': 'FENDA',
+                'map_valhalla_name': 'Fiorde de Valhalla', 'map_valhalla_sub': 'O Fiorde Congelado de Odin', 'map_valhalla_desc': 'Picos congelados, drakkars ancestrais e muralhas de madeira nórdica onde os guerreiros vikings ecoam riffs ancestrais no gelo.', 'map_valhalla_badge': 'VIKING',
+                'map_stadium_name': 'Estádio Devastado', 'map_stadium_sub': 'O Caldeirão Devastado do Rock', 'map_stadium_desc': 'Um antigo estádio esportivo monumental com traves retorcidas e arquibancadas em ruínas onde multidões agora se chocam em mosh pits letais.', 'map_stadium_badge': 'ESTÁDIO',
 
                 // MultiKill subtitles
                 'mk1Sub': 'PRIMEIRA VÍTIMA! 🔥',
@@ -471,7 +481,17 @@ class I18n {
                 'bossBadge': '👑 BOSS (2x GOLD/XP)',
                 'targetsUnit': 'Targets',
                 'stagePrefix': 'Stage {stage}',
-                'bossShowdown': 'Stage {stage}: 👑 BOSS SHOWDOWN: {name}!',
+                                'bossShowdown': 'Stage {stage}: 👑 BOSS SHOWDOWN: {name}!',
+
+                // Arenas & Maps
+                'map_void_name': 'The Void Club', 'map_void_sub': 'Underground Club & Urban Rubble', 'map_void_desc': 'Facade of the legendary underground pub "The Void", concrete barricades and abandoned armored bus.', 'map_void_badge': 'URBAN',
+                'map_ruins_name': 'Rubble Stage', 'map_ruins_sub': 'Central Apocalypse Arena', 'map_ruins_desc': 'Destroyed metal stage in the heart of metropolitan ruins, surrounded by amplifiers and heavy smoke.', 'map_ruins_badge': 'CONCERT',
+                'map_wasteland_name': 'Metal Wasteland', 'map_wasteland_sub': 'Anarchic Desert & Toxic Outpost', 'map_wasteland_desc': 'Mad Max style arid highway, fortified gas station, mutated cacti and scrap piles in sandstorms.', 'map_wasteland_badge': 'DESERT',
+                'map_thermopylae_name': 'Spartan Pass', 'map_thermopylae_sub': 'The Pass of 300 & Wall of Riffs', 'map_thermopylae_desc': 'Legendary Greek canyon pass fortified against undead hordes with bronze shields, Spartan barricades and amp stacks.', 'map_thermopylae_badge': 'SPARTA',
+                'map_coliseum_name': 'Imperial Coliseum', 'map_coliseum_sub': 'Roman Gladiators Arena', 'map_coliseum_desc': 'Ancient ruins of Rome turned into the ultimate stage where gladiators and undead face off to blistering solos.', 'map_coliseum_badge': 'COLISEUM',
+                'map_bikini_bottom_name': 'Bikini Depths', 'map_bikini_bottom_sub': 'The Toxic Depths of Krusty Krab', 'map_bikini_bottom_desc': 'Iconic underwater trench submerged in toxic fallout, where the rusted pineapple and Krusty Krab harbor oceanic punk.', 'map_bikini_bottom_badge': 'DEPTHS',
+                'map_valhalla_name': 'Valhalla Fjord', 'map_valhalla_sub': 'Frozen Fjord of Odin', 'map_valhalla_desc': 'Glacial peaks, ancestral drakkars, and snow-capped Norse palisades where Viking warriors echo thunderous metal riffs.', 'map_valhalla_badge': 'VIKING',
+                'map_stadium_name': 'Ruined Stadium', 'map_stadium_sub': 'Devastated Rock Cauldron', 'map_stadium_desc': 'Monumental ruined soccer arena with twisted goalposts and crumbling terraces where mosh pits tear through the pitch.', 'map_stadium_badge': 'STADIUM',
 
                 // MultiKill subtitles
                 'mk1Sub': 'FIRST CASUALTY! 🔥',

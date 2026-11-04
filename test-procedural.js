@@ -708,10 +708,10 @@ assert(roxiePool && roxiePool.instrument.toLowerCase().includes('guitarra') && !
 
 // 4.7. Screen Isolation & Pre-Battle Responsiveness Regression Tests
 console.log('\n14. Testing Screen Isolation, Pre-Battle Layout & Modal CSS...');
-const htmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
+const htmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8').replace(/\r\n/g, '\n');
 const allCssFiles = fs.readdirSync(path.resolve(__dirname, 'css')).filter(f => f.endsWith('.css'));
-const cssContent = allCssFiles.map(f => fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8')).join('\n');
-const masterStyleContent = fs.readFileSync(path.resolve(__dirname, 'css/style.css'), 'utf8');
+const cssContent = allCssFiles.map(f => fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').replace(/\r\n/g, '\n')).join('\n');
+const masterStyleContent = fs.readFileSync(path.resolve(__dirname, 'css/style.css'), 'utf8').replace(/\r\n/g, '\n');
 const mainJsContent = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
 
 // Master CSS Orchestrator
@@ -750,13 +750,13 @@ console.log('\n15. Testing Branding Assets & Visual Identity Integration...');
 assert(htmlContent.includes('assets/branding/logo.png') && htmlContent.includes('class="menu-brand-logo"'), 'index.html includes brand logo');
 assert(htmlContent.includes('href="assets/branding/favicon-32.png"') && cssContent.includes("assets/branding/wallpaper.jpg"), 'favicon and wallpaper integrated');
 
-// 16. Testing 3 Battle Maps / Arenas System (v1.6.8)
-console.log('\n16. Testing 3 Battle Maps / Arenas System...');
-['map_void.jpg', 'map_ruins.jpg', 'map_wasteland.jpg', 'thumb_void.jpg', 'thumb_ruins.jpg', 'thumb_wasteland.jpg'].forEach(f => assert(fs.existsSync(path.resolve(__dirname, 'assets/maps', f)), `assets/maps/${f} exists`));
-
+// 16. Testing 8 Battle Maps / Arenas System (v1.9.2 Build 56)
+console.log('\n16. Testing 8 Battle Maps / Arenas System...');
+const allMapFiles = ['map_void', 'map_ruins', 'map_wasteland', 'map_thermopylae', 'map_coliseum', 'map_bikini_bottom', 'map_valhalla', 'map_stadium'];
+allMapFiles.forEach(m => assert(fs.existsSync(path.resolve(__dirname, 'assets/maps', m + '.jpg')) && fs.existsSync(path.resolve(__dirname, 'assets/maps', 'thumb_' + m.replace('map_', '') + '.jpg')), `assets/maps/${m} & thumb exist`));
 const stgSys = new StageSystem();
-assert(stgSys.getAllMaps().length === 3, 'StageSystem contains all 3 battle maps');
-['map_void', 'map_ruins', 'map_wasteland'].forEach(id => assert(stgSys.maps.some(m => m.id === id), `Map ${id} defined`));
+assert(stgSys.getAllMaps().length === 8, 'StageSystem contains all 8 battle maps (Void, Ruins, Wasteland, Sparta, Coliseum, Bikini, Valhalla, Stadium)');
+allMapFiles.forEach(id => assert(stgSys.maps.some(m => m.id === id), `Map ${id} defined in StageSystem`));
 
 // Test Random Map per Stage (v1.7.0)
 const rolled = stgSys.rollRandomMap();
@@ -769,11 +769,9 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.9.1 Build 55)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => {
-    assert(htmlContent.includes(`${f}?v=55`), `index.html links ${f} with v=55`);
-});
-assert(htmlContent.includes('v1.9.1 (Build 55)'), 'index.html footer specifies v1.9.1 (Build 55)');
+// Cache Buster Version & Modular CSS Links (v1.9.2 Build 56)
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=56`), `index.html links ${f} with v=56`));
+assert(htmlContent.includes('v1.9.2 (Build 56)'), 'index.html footer specifies v1.9.2 (Build 56)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
