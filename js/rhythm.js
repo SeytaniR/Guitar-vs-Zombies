@@ -35,6 +35,7 @@ class RhythmSystem {
         this.currentSong = null;
         this.songAudio = null;
         this.isCustomSongPlaying = false;
+        this.audioNeedsUnlock = false;
         this.songStats = null;
 
         this.resize();
@@ -71,8 +72,9 @@ class RhythmSystem {
             if (id !== undefined) this.pointerLaneMap.set(id, lane);
             if (window.soundEngine) window.soundEngine.resume();
 
-            // Unlock audio on mobile interaction if paused
-            if (this.isCustomSongPlaying && this.songAudio && this.songAudio.paused) {
+            // Unlock audio on mobile interaction only if autoplay was blocked
+            if (this.isCustomSongPlaying && this.songAudio && this.songAudio.paused && this.audioNeedsUnlock) {
+                this.audioNeedsUnlock = false;
                 this.songAudio.currentTime = Math.max(0, this.customSongTime);
                 this.songAudio.play().catch(e => console.warn("Audio unlock tap issue", e));
             }
@@ -414,25 +416,22 @@ class RhythmSystem {
             const trackWidth = this.canvas.width / this.tracks;
             const songDuration = Math.max(10, (this.currentSong && this.currentSong.duration) || 30);
 
-            // Highway-Audio Dynamic Lockstep (Tethered Audio Clock):
-            // The highway advances by game dt. The audio playbackRate is dynamically coupled to game FPS so that
-            // if the highway drops FPS or stutters, the music slows down in unison and never drifts from the notes.
-            this.customSongTime += dt;
-            const curTime = this.customSongTime;
-
-            if (this.songAudio && !this.songAudio.paused && !this.songAudio.ended) {
-                const drift = this.songAudio.currentTime - curTime;
-                if (Math.abs(drift) > 0.12) {
-                    try { this.songAudio.currentTime = curTime; } catch (e) {}
-                    this.songAudio.playbackRate = 1.0;
-                } else if (drift > 0.025) {
-                    this.songAudio.playbackRate = Math.max(0.2, 1.0 - (drift * 4.0));
-                } else if (drift < -0.025) {
-                    this.songAudio.playbackRate = Math.min(1.35, 1.0 - (drift * 4.0));
-                } else if (this.songAudio.playbackRate !== 1.0) {
-                    this.songAudio.playbackRate = 1.0;
+            // Audio-Master Hardware Clock Sync:
+            // HTML5 Audio stream plays freely at native 1.0x playbackRate with ZERO buffer-resampling or seeking,
+            // eliminating any packet-loss-like stutter or Bluetooth audio dropouts.
+            // The visual highway (customSongTime) follows the audio clock with smooth sub-frame convergence.
+            if (this.songAudio && !this.songAudio.paused && !this.songAudio.ended && this.songAudio.currentTime > 0) {
+                const audioTime = this.songAudio.currentTime;
+                const diff = audioTime - this.customSongTime;
+                if (Math.abs(diff) > 0.08) {
+                    this.customSongTime = audioTime;
+                } else {
+                    this.customSongTime += dt + diff * 0.15;
                 }
+            } else {
+                this.customSongTime += dt;
             }
+            const curTime = this.customSongTime;
 
             // Check if song finished (audio ended or reached duration)
             if ((this.songAudio && this.songAudio.ended) || curTime >= songDuration + 0.8) {
@@ -887,7 +886,7 @@ class RhythmSystem {
                     console.warn("RhythmSystem audio error, continuing with precision software clock:", e);
                 };
                 const playPromise = this.songAudio.play();
-                if (playPromise !== undefined) playPromise.catch(() => {});
+                if (playPromise !== undefined) playPromise.catch(() => { this.audioNeedsUnlock = true; });
             } catch (err) {
                 this.songAudio = null;
             }

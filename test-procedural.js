@@ -743,9 +743,9 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.9.5 Build 59)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=59`), `index.html links ${f} with v=59`));
-assert(htmlContent.includes('v1.9.5 (Build 59)'), 'index.html footer specifies v1.9.5 (Build 59)');
+// Cache Buster Version & Modular CSS Links (v1.9.6 Build 60)
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=60`), `index.html links ${f} with v=60`));
+assert(htmlContent.includes('v1.9.6 (Build 60)'), 'index.html footer specifies v1.9.6 (Build 60)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -952,8 +952,8 @@ assert(editorCss.includes('contain: strict;') && editorCss.includes('will-change
 console.log('\n25. Testing Battle 60 FPS Pacing & Lockstep Audio Sync...');
 const mainJs = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8'), rhythmJs = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8'), baseCss = fs.readFileSync(path.resolve(__dirname, 'css/base.css'), 'utf8');
 assert(mainJs.includes('this.lastRenderTime && (now - this.lastRenderTime < 15.2)'), 'Main gameLoop implements 60 FPS pacing lock');
-assert(rhythmJs.includes('this.songAudio.playbackRate = Math.max(0.2, 1.0 - (drift * 4.0))'), 'RhythmSystem drops audio playback rate when highway lags');
-assert(rhythmJs.includes('this.songAudio.currentTime = curTime'), 'RhythmSystem snaps audio to highway time during severe frame spikes');
+assert(rhythmJs.includes('this.customSongTime += dt + diff * 0.15'), 'RhythmSystem uses Audio-Master Hardware Sync with smooth visual convergence');
+assert(!rhythmJs.includes('this.songAudio.playbackRate = Math.max'), 'Eliminated audio playbackRate throttling to prevent Bluetooth-like packet stutter');
 assert(!rhythmJs.includes('this.ctx.createLinearGradient(0, ribTop, 0, ribBottom)'), 'Eliminated expensive gradient in rhythm.js hold note ribbon');
 assert(baseCss.includes('contain: strict;') && baseCss.includes('#combat-zone') && baseCss.includes('#rhythm-zone'), 'CSS hardware containment applied to combat and rhythm zones');
 
