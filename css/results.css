@@ -21,6 +21,42 @@
     display: flex;
 }
 
+.results-modal-overlay.open .results-modal-dialog {
+    animation: victoryModalPopIn 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.results-modal-overlay.open .defeat-modal-dialog {
+    animation: defeatModalDrop 0.42s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+}
+
+@keyframes victoryModalPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.72) translateY(24px);
+    }
+    70% {
+        transform: scale(1.04) translateY(-3px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes defeatModalDrop {
+    0% {
+        opacity: 0;
+        transform: scale(1.18) translateY(-32px);
+    }
+    60% {
+        transform: scale(0.96) translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
 .results-modal-dialog {
     width: 100%;
     max-width: 420px;

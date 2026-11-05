@@ -20,7 +20,7 @@ class I18n {
                 'btnMissions': 'MISSÕES & CAÇADA DE ZUMBIS',
                 'btnStudio': 'ESTÚDIO DE MÚSICA & RITMO',
                 'btnSettings': 'CONFIGURAÇÕES',
-                'menuFooter': 'Guitar vs Zombies v1.9.4 (Build 58) • AAA Audio & Action Experience',
+                'menuFooter': 'Guitar vs Zombies v1.9.5 (Build 59) • AAA Audio & Action Experience',
 
                 // Pre-Battle Preparation
                 'mapBack': '⬅️ Voltar',
@@ -137,6 +137,8 @@ class I18n {
 
                 // Results / Victory Modal
                 'victoryTitle': '🏆 VITÓRIA! SHOW CONCLUÍDO!',
+                'victoryBannerTitle': '👑 SHOW CONCLUÍDO! 🎸',
+                'victoryBannerSub': '⚡ HORDA OBLITERADA • OVAÇÃO DA PLATÉIA! ⚡',
                 'statAccuracy': 'Precisão',
                 'statNotesHit': 'Notas Acertadas',
                 'statZombiesKilled': 'Zumbis Derrotados',
@@ -148,6 +150,8 @@ class I18n {
 
                 // Defeat Modal
                 'defeatTitle': '☠️ DERROTA! O PALCO FOI INVADIDO!',
+                'defeatBannerTitle': '⚡ AMPLIFICADOR DESTRUÍDO! ⚡',
+                'defeatBannerSub': '☠️ SILÊNCIO NO PALCO • A HORDA AVANÇOU ☠️',
                 'defeatSub': 'Sua energia esgotou e os zumbis interromperam o show!',
                 'statDamageDealt': 'Dano Causado',
                 'statGoldCollected': 'Ouro Coletado',
@@ -268,7 +272,7 @@ class I18n {
                 'btnMissions': 'MISSIONS & BOUNTY HUNT',
                 'btnStudio': 'MUSIC & RHYTHM STUDIO',
                 'btnSettings': 'SETTINGS',
-                'menuFooter': 'Guitar vs Zombies v1.9.4 (Build 58) • AAA Audio & Action Experience',
+                'menuFooter': 'Guitar vs Zombies v1.9.5 (Build 59) • AAA Audio & Action Experience',
 
                 // Pre-Battle Preparation
                 'mapBack': '⬅️ Back',
@@ -385,6 +389,8 @@ class I18n {
 
                 // Results / Victory Modal
                 'victoryTitle': '🏆 VICTORY! SHOW COMPLETED!',
+                'victoryBannerTitle': '👑 SHOW CONCLUDED! 🎸',
+                'victoryBannerSub': '⚡ HORDE OBLITERATED • STANDING OVATION! ⚡',
                 'statAccuracy': 'Accuracy',
                 'statNotesHit': 'Notes Hit',
                 'statZombiesKilled': 'Zombies Defeated',
@@ -396,6 +402,8 @@ class I18n {
 
                 // Defeat Modal
                 'defeatTitle': '☠️ DEFEAT! THE STAGE WAS OVERRUN!',
+                'defeatBannerTitle': '⚡ AMPLIFIER DESTROYED! ⚡',
+                'defeatBannerSub': '☠️ SILENCE ON STAGE • THE HORDE OVERRAN ☠️',
                 'defeatSub': 'Your energy ran out and the zombies stopped the show!',
                 'statDamageDealt': 'Damage Dealt',
                 'statGoldCollected': 'Gold Collected',

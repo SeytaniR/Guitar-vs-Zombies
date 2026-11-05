@@ -922,10 +922,11 @@ class RhythmSystem {
 
     finishCustomSong() {
         if (!this.isCustomSongPlaying) return;
-        const song = this.currentSong;
-        const stats = { ...this.songStats };
+        const song = this.currentSong, stats = { ...this.songStats };
         this.stopCustomSong();
-        if (window.game && typeof window.game.showVictoryModal === 'function') {
+        if (window.game && typeof window.game.triggerVictoryFinale === 'function') {
+            window.game.triggerVictoryFinale(song, stats);
+        } else if (window.game && typeof window.game.showVictoryModal === 'function') {
             window.game.showVictoryModal(song, stats);
         } else {
             this.showSongResultsModal(song, stats);

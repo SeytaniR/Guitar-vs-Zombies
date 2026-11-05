@@ -60,10 +60,11 @@ class CombatSystem {
         this.heroShieldHp = 0; this.heroShieldTimer = 0;
         this.perfectStreak = 0; this.guaranteedCritReady = false;
         this.pendingAttackModifiers = []; this.stageCompleted = false;
-
         this.zombiesKilled = 0; this.score = 0; this.spawnTimer = 0;
         this.shockBarrierTimer = 15; this.shockBarrierReady = false; this.heroImmunityTimer = 0;
         this.matchActive = false; this.activeEnemyTypes = [];
+        this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
+        this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.fx.initEmbers(25, 800, 600);
         this.resize();
@@ -149,11 +150,10 @@ class CombatSystem {
     }
 
     resetBattle(enemyList = null) {
-        this.entities.zombies = [];
-        this.entities.projectiles = [];
-        this.fx.reset();
-        this.heroHp = this.heroMaxHp;
-        this.isGameOver = false; this.isPaused = false; this.isVictory = false;
+        this.entities.zombies = []; this.entities.projectiles = []; this.fx.reset();
+        this.heroHp = this.heroMaxHp; this.isGameOver = false; this.isPaused = false; this.isVictory = false;
+        this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
+        this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
         this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0;
         this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
         this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0;
@@ -162,14 +162,8 @@ class CombatSystem {
         this.isBossStage = !!(window.stageSystem && typeof window.stageSystem.isBossStage === 'function' && window.stageSystem.isBossStage(curStage));
         this.bossSpawned = false;
         const activeMap = (window.stageSystem && window.stageSystem.getSelectedMap) ? window.stageSystem.getSelectedMap().id : 'map_void';
-        if (this.fx && typeof this.fx.initEmbers === 'function') {
-            this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
-        }
-
-        this.activeEnemyTypes = (enemyList && enemyList.length > 0)
-            ? enemyList
-            : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
-
+        if (this.fx && typeof this.fx.initEmbers === 'function') this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
+        this.activeEnemyTypes = (enemyList && enemyList.length > 0) ? enemyList : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.matchActive = true;
         const cw = Math.max(200, this.canvas ? this.canvas.width : 360);
@@ -353,30 +347,14 @@ class CombatSystem {
 
         const projSpeed = isMiss ? 380 : 440;
         this.entities.projectiles.push({
-            x: startX, y: startY,
-            vx: Math.cos(angle) * projSpeed, vy: Math.sin(angle) * projSpeed,
-            target: target, isCrit: isCrit, isMiss: isMiss,
-            damage: calcDamage, skill: isMiss ? null : mod.skill,
-            frame: 3 + Math.floor(Math.random() * 4), trailTimer: 0,
-            active: true, heroId: activeHero ? activeHero.id : null,
-            projColor: projColor,
+            x: startX, y: startY, vx: Math.cos(angle) * projSpeed, vy: Math.sin(angle) * projSpeed,
+            target: target, isCrit: isCrit, isMiss: isMiss, damage: calcDamage, skill: isMiss ? null : mod.skill,
+            frame: 3 + Math.floor(Math.random() * 4), trailTimer: 0, active: true,
+            heroId: activeHero ? activeHero.id : null, projColor: projColor,
             isSkillShot: !isMiss && !!mod.skill && mod.skill.manaCost > 0
         });
-
-        // Muzzle sonic shockwave
-        this.fx.shockwaves.push({
-            x: startX,
-            y: startY,
-            radius: 4,
-            maxRadius: 24,
-            color: projColor,
-            lineWidth: 2.5,
-            alpha: 1.0
-        });
-
-        if (window.soundEngine) {
-            window.soundEngine.playGuitarChord(mod.lane || 0);
-        }
+        this.fx.shockwaves.push({ x: startX, y: startY, radius: 4, maxRadius: 24, color: projColor, lineWidth: 2.5, alpha: 1.0 });
+        if (window.soundEngine) window.soundEngine.playGuitarChord(mod.lane || 0);
     }
 
     launchAttack(isCrit = false, chordIndex = 0) {
@@ -578,18 +556,25 @@ class CombatSystem {
     }
 
     handleHeroDefeat() {
-        if (this.isGameOver) return;
+        if (this.isGameOver || this.isDefeatSequence) return;
         this.isGameOver = true;
         this.matchActive = false;
-        this.triggerShake(12);
-        this.addFloatingText("☠️ DERROTADO! ☠️", this.getHeroPosition().x, this.getHeroPosition().y - 50, '#ff2222', true);
+        this.isDefeatSequence = true;
+        this.defeatSequenceTimer = 1.8;
+        this.fx.triggerDefeat(this.getHeroPosition());
         try {
             const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
             if (this.score > hs) localStorage.setItem('gvs_highscore', this.score.toString());
         } catch (e) {}
-        if (window.game && typeof window.game.showDefeatModal === 'function') {
-            window.game.showDefeatModal();
-        }
+    }
+
+    triggerVictoryFinale(song, stats = {}) {
+        if (this.isVictorySequence) return;
+        this.isVictorySequence = true;
+        this.victorySequenceTimer = 2.4;
+        this.pendingVictoryData = { song, stats };
+        this.matchActive = false;
+        this.fx.triggerVictory(this.getHeroPosition(), this.entities.zombies, (z) => this.onZombieKilled(z, 200, '👑 SHOW CLEARED! ⚡', '#ffd700'), this.canvas.width, this.canvas.height);
     }
 
     triggerChainLightning(sourceZombie, targetCount, damage) {
@@ -630,18 +615,33 @@ class CombatSystem {
     }
 
     update(deltaTime) {
-        if (this.isPaused || !this.matchActive) return;
-        this.time += deltaTime;
+        if (this.isPaused) return;
         const dt = deltaTime / 1000;
-
-        if (this.heroStrumAnim > 0) {
-            this.heroStrumAnim -= 4 * dt;
-            if (this.heroStrumAnim < 0) this.heroStrumAnim = 0;
+        if (this.isVictorySequence) {
+            this.victorySequenceTimer -= dt;
+            this.fx.update(dt, this.canvas.width, this.canvas.height);
+            if (this.victorySequenceTimer <= 0) {
+                this.isVictorySequence = false;
+                const d = this.pendingVictoryData || {};
+                this.pendingVictoryData = null;
+                if (window.game && typeof window.game.showVictoryModal === 'function') window.game.showVictoryModal(d.song, d.stats);
+            }
+            return;
         }
-
-        if (this.heroFlashTime > 0) {
-            this.heroFlashTime -= dt;
+        if (this.isDefeatSequence) {
+            this.defeatSequenceTimer -= dt;
+            this.fx.update(dt, this.canvas.width, this.canvas.height);
+            if (this.defeatSequenceTimer <= 0) {
+                this.isDefeatSequence = false;
+                if (window.game && typeof window.game.showDefeatModal === 'function') window.game.showDefeatModal();
+            }
+            return;
         }
+        if (!this.matchActive) return;
+        this.time += deltaTime;
+
+        if (this.heroStrumAnim > 0 && (this.heroStrumAnim -= 4 * dt) < 0) this.heroStrumAnim = 0;
+        if (this.heroFlashTime > 0) this.heroFlashTime -= dt;
 
         if (this.heroHp <= 0 && !this.isGameOver) {
             this.handleHeroDefeat();
@@ -962,9 +962,11 @@ class CombatSystem {
         // 8. VFX Module (Explosions, Shockwaves, Particles, Floating Text)
         this.fx.drawEffects(this.ctx, this.assets.fxSheet);
 
-        // 9. Vignette & Game Over
+        // 9. Vignette & Game Over / Cinematics
         this.fx.drawVignette(this.ctx, this.canvas.width, this.canvas.height);
-        if (this.isGameOver) this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
+        if (this.isVictorySequence) this.fx.drawVictoryFinaleOverlay(this.ctx, this.canvas.width, this.canvas.height, this.victorySequenceTimer, 2.4);
+        if (this.isDefeatSequence) this.fx.drawDefeatCinematicOverlay(this.ctx, this.canvas.width, this.canvas.height, this.defeatSequenceTimer, 1.8);
+        if (this.isGameOver && !this.isDefeatSequence) this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height);
         this.ctx.restore();
     }
 

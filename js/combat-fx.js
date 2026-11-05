@@ -676,6 +676,127 @@ class CombatFX {
 
         ctx.restore();
     }
+
+    triggerVictory(heroPos, zombies, onKilledCb, canvasWidth = 800, canvasHeight = 600) {
+        if (window.soundEngine) {
+            if (typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord(0);
+            if (typeof window.soundEngine.playExplosion === 'function') window.soundEngine.playExplosion();
+        }
+        this.triggerShake(16);
+        this.shockwaves.push(
+            { x: heroPos.x, y: heroPos.y - 15, radius: 10, maxRadius: 520, color: '#ffd700', lineWidth: 8, alpha: 1.0 },
+            { x: heroPos.x, y: heroPos.y - 15, radius: 6, maxRadius: 380, color: '#00ffff', lineWidth: 5, alpha: 1.0 },
+            { x: heroPos.x, y: heroPos.y - 15, radius: 2, maxRadius: 240, color: '#ffffff', lineWidth: 3, alpha: 1.0 }
+        );
+
+        if (Array.isArray(zombies)) {
+            for (const z of zombies) {
+                if (z.active) {
+                    z.hp = 0;
+                    z.active = false;
+                    const zy = z.y + (z.jumpArcY || 0);
+                    this.spawnBurst(z.x, zy - 15, '#ffd700', 16, 120, 3.5, 0.65);
+                    this.spawnBurst(z.x, zy - 15, '#ff3344', 12, 100, 3.0, 0.55);
+                    this.explosions.push({ x: z.x, y: zy - 15, frame: 0, maxFrames: 8, scale: 0.35, timer: 0 });
+                    this.addFloatingText('💥 VAPORIZADO!', z.x, zy - 32, '#ffd700', true);
+                    if (typeof onKilledCb === 'function') onKilledCb(z);
+                }
+            }
+        }
+
+        const confettiHues = ['#ffd700', '#00ffff', '#ff007f', '#ffffff', '#39ff14', '#ffaa00'];
+        for (let i = 0; i < 45; i++) {
+            this.particles.push({
+                x: Math.random() * canvasWidth,
+                y: -10 - Math.random() * 80,
+                vx: -25 + Math.random() * 50,
+                vy: 60 + Math.random() * 90,
+                color: confettiHues[i % confettiHues.length],
+                size: 2.5 + Math.random() * 3,
+                life: 2.6,
+                maxLife: 2.6
+            });
+        }
+        this.addFloatingText('👑 VITÓRIA SUPREMA! 🎸', heroPos.x + 40, heroPos.y - 50, '#ffd700', true);
+    }
+
+    triggerDefeat(heroPos) {
+        if (window.soundEngine) {
+            if (typeof window.soundEngine.playSkillSfx === 'function') window.soundEngine.playSkillSfx('emp');
+            if (typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
+        }
+        this.triggerShake(18);
+        const ampX = heroPos.x - 20, ampY = heroPos.y - 18;
+        this.spawnBurst(ampX, ampY, '#ff2222', 24, 120, 3.5, 0.75);
+        this.spawnBurst(ampX, ampY, '#ffaa00', 18, 90, 2.5, 0.65);
+        this.spawnBurst(ampX, ampY, '#ffffff', 12, 140, 2.0, 0.45);
+        this.shockwaves.push(
+            { x: ampX, y: ampY, radius: 5, maxRadius: 85, color: '#ff2222', lineWidth: 4, alpha: 1.0 },
+            { x: ampX, y: ampY, radius: 2, maxRadius: 55, color: '#ffaa00', lineWidth: 2.5, alpha: 0.9 }
+        );
+        this.addFloatingText("☠️ AMPLIFICADOR QUEBRADO! ☠️", heroPos.x + 10, heroPos.y - 45, '#ff2222', true);
+    }
+
+    drawVictoryFinaleOverlay(ctx, cw, ch, timer, total = 2.4) {
+        const progress = Math.max(0, Math.min(1, 1.0 - (timer / total)));
+        ctx.save();
+        const pulse = Math.sin(progress * Math.PI * 4);
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.08 + pulse * 0.05})`;
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.5, 0); ctx.lineTo(cw * 0.1, ch); ctx.lineTo(cw * 0.9, ch);
+        ctx.closePath();
+        ctx.fill();
+
+        const bannerW = Math.min(cw * 0.88, 380), bannerH = 50, bannerX = (cw - bannerW) / 2, bannerY = 16;
+        ctx.fillStyle = 'rgba(10, 10, 20, 0.85)';
+        ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(bannerX, bannerY, bannerW, bannerH);
+
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+        ctx.textAlign = 'center';
+        ctx.font = "bold 16px 'Impact', sans-serif";
+        ctx.fillStyle = '#ffd700';
+        ctx.fillText(tr('victoryBannerTitle', '👑 SHOW CONCLUÍDO! 🎸'), cw / 2, bannerY + 22);
+
+        ctx.font = "bold 10px 'Segoe UI', sans-serif";
+        ctx.fillStyle = '#00ffff';
+        ctx.fillText(tr('victoryBannerSub', '⚡ HORDA OBLITERADA • OVAÇÃO DA PLATÉIA! ⚡'), cw / 2, bannerY + 40);
+        ctx.restore();
+    }
+
+    drawDefeatCinematicOverlay(ctx, cw, ch, timer, total = 1.8) {
+        const progress = Math.max(0, Math.min(1, 1.0 - (timer / total)));
+        ctx.save();
+
+        const grad = ctx.createRadialGradient(cw / 2, ch / 2, ch * 0.2, cw / 2, ch / 2, cw * 0.75);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(1, `rgba(160, 0, 20, ${0.45 + progress * 0.35})`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, cw, ch);
+
+        if (Math.random() < 0.4) {
+            ctx.fillStyle = 'rgba(255, 50, 50, 0.25)';
+            ctx.fillRect(0, Math.random() * ch, cw, 2 + Math.random() * 4);
+        }
+
+        const bannerW = Math.min(cw * 0.88, 380), bannerH = 50, bannerX = (cw - bannerW) / 2, bannerY = 16;
+        ctx.fillStyle = 'rgba(15, 0, 5, 0.88)';
+        ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
+        ctx.strokeStyle = '#ff2222'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(bannerX, bannerY, bannerW, bannerH);
+
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+        ctx.textAlign = 'center';
+        ctx.font = "bold 15px 'Impact', sans-serif";
+        ctx.fillStyle = '#ff2222';
+        ctx.fillText(tr('defeatBannerTitle', '⚡ AMPLIFICADOR DESTRUÍDO! ⚡'), cw / 2, bannerY + 22);
+
+        ctx.font = "bold 10px 'Segoe UI', sans-serif";
+        ctx.fillStyle = '#ffaaaa';
+        ctx.fillText(tr('defeatBannerSub', '☠️ SILÊNCIO NO PALCO • A HORDA AVANÇOU ☠️'), cw / 2, bannerY + 40);
+        ctx.restore();
+    }
 }
 
 window.CombatFX = CombatFX;

@@ -274,41 +274,23 @@ assert(greatResult.damage === 48 && !greatResult.isCrit, `GREAT delivers 1.2x da
 const perfectResult = calculateAttackDamage('perfect', baseDmg, critPercent);
 assert(perfectResult.damage === 64 && perfectResult.isCrit, `PERFECT delivers Critical Strike with hero crit stat (${perfectResult.damage} vs expected 64)`);
 
-// 6. Testing Game Polish, Audio, Skills, Talents & Line Count Compliance
-console.log('\n6. Testing Game Polish, Audio, Skills, Talents & Line Limits...');
-
-// 6.1 Audio SoundEngine playPowerChord verification
+// 6. Testing Game Polish, Audio, Skills & Talents
+console.log('\n6. Testing Game Polish, Audio, Skills, Talents...');
 const audioCode = fs.readFileSync('js/audio.js', 'utf8');
 assert(audioCode.includes('playPowerChord'), 'SoundEngine defines playPowerChord method');
-
-// 6.2 Healing Melody skill talent reference
 const skillsCode = fs.readFileSync('js/skills.js', 'utf8');
 assert(skillsCode.includes("getStat('rhythmic_heal')"), 'Skill healing_melody references correct rhythmic_heal talent');
 assert(!skillsCode.includes("regen_pick"), 'No obsolete regen_pick talent referenced in skills.js');
-
-// 6.3 Lifetime stats verification
 let mockLocalStorage = {};
 global.localStorage = {
     getItem: (k) => mockLocalStorage[k] || null,
     setItem: (k, v) => { mockLocalStorage[k] = v.toString(); },
     removeItem: (k) => { delete mockLocalStorage[k]; }
 };
-
 localStorage.setItem('gvs_total_kills', '42');
 localStorage.setItem('gvs_highscore', '15000');
 assert(parseInt(localStorage.getItem('gvs_total_kills')) === 42, 'gvs_total_kills persists correctly');
 assert(parseInt(localStorage.getItem('gvs_highscore')) === 15000, 'gvs_highscore persists correctly');
-
-// 6.4 Strict Zero God Object Line Count Rule (< 1000 lines for every single JS file)
-const jsFiles = fs.readdirSync('js').filter(f => f.endsWith('.js'));
-let allUnder1000 = true;
-jsFiles.forEach(file => {
-    const lines = fs.readFileSync('js/' + file, 'utf8').split('\n').length;
-    const isUnder = lines < 1000;
-    if (!isUnder) allUnder1000 = false;
-    assert(isUnder, `File js/${file} has ${lines} lines (< 1000 lines limit)`);
-});
-assert(allUnder1000, `All ${jsFiles.length} JavaScript files adhere strictly to the < 1000 lines limit`);
 
 // ==========================================
 // TEST 7: ON-SCREEN SPAWN & TARGETING INTEGRITY (ZERO GHOST KILLS)
@@ -448,7 +430,9 @@ combat.takeDamage(25, true, 'FATAL STRIKE');
 assert(combat.heroHp === 0, 'Hero HP correctly reduced to 0');
 assert(combat.isGameOver === true, 'Fatal damage sets isGameOver to true');
 assert(combat.matchActive === false, 'Fatal damage halts matchActive in combat');
-assert(defeatModalCalled === true, 'handleHeroDefeat triggers window.game.showDefeatModal()');
+assert(combat.isDefeatSequence === true && combat.defeatSequenceTimer > 0, 'Fatal damage initiates defeat cinematic sequence');
+combat.update(1900);
+assert(defeatModalCalled === true, 'Cinematic timer expiration opens showDefeatModal()');
 
 // 3. Victory Flow Check
 let victoryModalCalled = false;
@@ -714,25 +698,15 @@ const cssContent = allCssFiles.map(f => fs.readFileSync(path.resolve(__dirname, 
 const masterStyleContent = fs.readFileSync(path.resolve(__dirname, 'css/style.css'), 'utf8').replace(/\r\n/g, '\n');
 const mainJsContent = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
 
-// Master CSS Orchestrator
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css'].forEach(f => {
-    assert(masterStyleContent.includes(`@import url('${f}');`), `style.css imports ${f}`);
-});
-
-// Screen Isolation & Initial State
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css'].forEach(f => assert(masterStyleContent.includes(`@import url('${f}');`), `style.css imports ${f}`));
 assert(cssContent.includes('.game-screen {\n    display: none !important;') && cssContent.includes('.game-screen.active {\n    display: flex !important;'), 'CSS enforces screen isolation rules');
 assert(mainJsContent.includes("this.switchScreen('menu');"), "main.js constructor enforces switchScreen('menu') on startup");
 assert(htmlContent.includes('id="screen-main-menu" class="game-screen active"') && htmlContent.includes('id="screen-map-select" class="game-screen"'), 'index.html initializes #screen-main-menu active and map inactive');
-
-// Pre-Battle Scrolling, Cards & Modals
 assert(cssContent.includes('.map-screen-scroll {\n    flex: 1 1 0%;') && cssContent.includes('touch-action: pan-y !important;'), '.map-screen-scroll uses flex & touch-action: pan-y');
 assert(cssContent.includes('repeat(3, minmax(0, 1fr))') && cssContent.includes('repeat(2, minmax(0, 1fr))'), 'Grids configured for 3 and 2 columns on mobile');
 assert(cssContent.includes('flex-shrink: 0;') && htmlContent.includes('class="hero-showcase-top-row"'), 'Card flex-shrink & hero showcase row present');
 assert(cssContent.includes('.game-modal,\n.skill-modal-overlay') && htmlContent.includes('id="skill-picker-modal"'), 'Skill picker modal present in HTML & CSS');
-
-// Pre-Battle Header Reroll Removal & Clean Balance Spacer
-assert(!htmlContent.includes('id="map-reroll-btn"'), 'map-reroll-btn successfully removed from pre-battle screen');
-assert(htmlContent.includes('class="map-header-spacer"'), 'map-header-spacer maintains balanced centered title layout');
+assert(!htmlContent.includes('id="map-reroll-btn"') && htmlContent.includes('class="map-header-spacer"'), 'map-header-spacer maintains balanced centered title layout');
 
 // Zombie Thumbnail Badge Compactness (< 10 chars, no multiple words covering art)
 loadScript('js/enemy-pool.js');
@@ -769,9 +743,9 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.9.4 Build 58)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=58`), `index.html links ${f} with v=58`));
-assert(htmlContent.includes('v1.9.4 (Build 58)'), 'index.html footer specifies v1.9.4 (Build 58)');
+// Cache Buster Version & Modular CSS Links (v1.9.5 Build 59)
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=59`), `index.html links ${f} with v=59`));
+assert(htmlContent.includes('v1.9.5 (Build 59)'), 'index.html footer specifies v1.9.5 (Build 59)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -982,6 +956,28 @@ assert(rhythmJs.includes('this.songAudio.playbackRate = Math.max(0.2, 1.0 - (dri
 assert(rhythmJs.includes('this.songAudio.currentTime = curTime'), 'RhythmSystem snaps audio to highway time during severe frame spikes');
 assert(!rhythmJs.includes('this.ctx.createLinearGradient(0, ribTop, 0, ribBottom)'), 'Eliminated expensive gradient in rhythm.js hold note ribbon');
 assert(baseCss.includes('contain: strict;') && baseCss.includes('#combat-zone') && baseCss.includes('#rhythm-zone'), 'CSS hardware containment applied to combat and rhythm zones');
+
+// 26. Testing Victory Finale & Defeat Cinematic Sequences (v1.9.5 Build 59)
+console.log('\n26. Testing Victory Finale & Defeat Cinematic Sequences...');
+const resCss = fs.readFileSync(path.resolve(__dirname, 'css/results.css'), 'utf8');
+assert(resCss.includes('@keyframes victoryModalPopIn') && resCss.includes('@keyframes defeatModalDrop'), 'CSS results defines entrance keyframes for victory and defeat');
+assert(resCss.includes('animation: victoryModalPopIn') && resCss.includes('animation: defeatModalDrop'), 'Results dialogs have punchy entrance animations applied');
+const testCombat = new CombatSystem();
+testCombat.entities.zombies = [{ x: 200, y: 150, hp: 120, active: true }, { x: 300, y: 150, hp: 200, active: true }];
+let vicModalTriggered = false, defModalTriggered = false;
+window.game = { showVictoryModal: () => { vicModalTriggered = true; }, showDefeatModal: () => { defModalTriggered = true; }, pauseBattle: () => {} };
+testCombat.triggerVictoryFinale({ id: 'solo_rock', title: 'Solo' }, { totalNotes: 10, hitNotes: 10 });
+assert(testCombat.isVictorySequence === true && testCombat.victorySequenceTimer > 2.0, 'triggerVictoryFinale initiates 2.4s victory sequence');
+assert(testCombat.entities.zombies.every(z => !z.active && z.hp === 0), 'Victory finale obliterates and vaporizes every living zombie');
+assert(testCombat.fx.shockwaves.some(s => s.color === '#ffd700'), 'Victory finale emits golden supreme sonic shockwaves');
+assert(testCombat.fx.particles.some(p => p.life > 2.0), 'Celebratory confetti particles spawned across arena');
+testCombat.update(2500);
+assert(vicModalTriggered === true && testCombat.isVictorySequence === false, 'Victory sequence triggers showVictoryModal upon completion');
+testCombat.resetBattle(); testCombat.heroHp = 0; testCombat.handleHeroDefeat();
+assert(testCombat.isDefeatSequence === true && testCombat.defeatSequenceTimer > 1.5, 'handleHeroDefeat initiates 1.8s defeat sequence');
+assert(testCombat.fx.shockwaves.some(s => s.color === '#ff2222'), 'Defeat cinematic emits amp short-circuit shockwave');
+testCombat.update(1900);
+assert(defModalTriggered === true && testCombat.isDefeatSequence === false, 'Defeat sequence triggers showDefeatModal upon completion');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {

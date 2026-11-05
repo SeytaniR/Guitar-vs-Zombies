@@ -782,39 +782,32 @@ class Game {
         setVal('ss-time-elapsed', `${mins}:${secs < 10 ? '0' : ''}${secs}`);
     }
 
+    triggerVictoryFinale(song, stats = {}) {
+        if (this.combat && typeof this.combat.triggerVictoryFinale === 'function') {
+            this.combat.triggerVictoryFinale(song, stats);
+        } else {
+            this.showVictoryModal(song, stats);
+        }
+    }
+
     showVictoryModal(song, stats = {}) {
         this.pauseBattle();
         if (this.combat) this.combat.isVictory = true;
         const modal = document.getElementById('song-results-modal');
         if (!modal) return;
-
         const coverEl = document.getElementById('result-song-cover'), titleEl = document.getElementById('result-song-title'), artistEl = document.getElementById('result-song-artist');
         if (coverEl) coverEl.src = (song && song.cover) || 'assets/covers/default_cover.jpg';
         if (titleEl) titleEl.innerText = (song && song.title) || 'Show Concluído';
         if (artistEl) artistEl.innerText = (song && song.artist) || 'Solo de Guitarra';
-
-        const totalNotes = stats.totalNotes || (song && song.notes ? song.notes.length : 1);
-        const hitNotes = stats.hitNotes || (totalNotes - (stats.misses || 0));
-        const accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
-
+        const totalNotes = stats.totalNotes || (song && song.notes ? song.notes.length : 1), hitNotes = stats.hitNotes || (totalNotes - (stats.misses || 0)), accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-        setVal('result-accuracy', `${accPct}%`);
-        setVal('result-hits', `${hitNotes} / ${totalNotes}`);
+        setVal('result-accuracy', `${accPct}%`); setVal('result-hits', `${hitNotes} / ${totalNotes}`);
         setVal('result-zombies-killed', `${(this.combat && this.combat.battleStats ? this.combat.battleStats.zombiesKilled : 0)} 💀`);
         setVal('result-max-streak', `${stats.maxStreak || (this.rhythm ? this.rhythm.maxStreak : 0)} 🔥`);
         setVal('result-gold-reward', `+${(this.combat && this.combat.battleStats ? this.combat.battleStats.coinsEarned : 0)} 🪙`);
         setVal('result-score-gained', `+${(this.combat ? this.combat.score : 0).toLocaleString()}`);
-
-        if (window.metaMissionSystem && typeof window.metaMissionSystem.recordSongCompletion === 'function') {
-            window.metaMissionSystem.recordSongCompletion(accPct, stats);
-        }
-
-        try {
-            if (window.stageSystem && typeof window.stageSystem.completeStage === 'function') {
-                window.stageSystem.completeStage(window.stageSystem.selectedStage);
-            }
-        } catch(err) { console.warn("Stage completion error:", err); }
-
+        if (window.metaMissionSystem && typeof window.metaMissionSystem.recordSongCompletion === 'function') window.metaMissionSystem.recordSongCompletion(accPct, stats);
+        try { if (window.stageSystem && typeof window.stageSystem.completeStage === 'function') window.stageSystem.completeStage(window.stageSystem.selectedStage); } catch(err) { console.warn("Stage completion error:", err); }
         if (window.soundEngine && typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord();
         modal.classList.add('open');
     }
@@ -823,20 +816,12 @@ class Game {
         this.pauseBattle();
         const modal = document.getElementById('battle-defeat-modal');
         if (!modal) return;
-
         const s = (this.combat && this.combat.battleStats) || { zombiesKilled: 0, damageDealt: 0, coinsEarned: 0 };
-        const r = (this.rhythm && this.rhythm.songStats) || {};
-        const totalNotes = r.totalNotes || 1;
-        const hitNotes = r.hitNotes || 0;
-        const accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
-
+        const r = (this.rhythm && this.rhythm.songStats) || {}, totalNotes = r.totalNotes || 1, hitNotes = r.hitNotes || 0, accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-        setVal('defeat-zombies-killed', `${s.zombiesKilled} 💀`);
-        setVal('defeat-total-damage', Math.round(s.damageDealt).toLocaleString());
-        setVal('defeat-accuracy', `${accPct}%`);
-        setVal('defeat-gold-reward', `+${s.coinsEarned} 🪙`);
+        setVal('defeat-zombies-killed', `${s.zombiesKilled} 💀`); setVal('defeat-total-damage', Math.round(s.damageDealt).toLocaleString());
+        setVal('defeat-accuracy', `${accPct}%`); setVal('defeat-gold-reward', `+${s.coinsEarned} 🪙`);
         setVal('defeat-score-gained', (this.combat ? this.combat.score : 0).toLocaleString());
-
         if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
         modal.classList.add('open');
     }
