@@ -44,16 +44,10 @@ class RhythmSystem {
     }
 
     resize() {
-        const parent = this.canvas.parentElement;
-        const w = (parent && parent.clientWidth > 0) ? parent.clientWidth : (window.innerWidth || 360);
-        const h = (parent && parent.clientHeight > 0) ? parent.clientHeight : (Math.floor(window.innerHeight * 0.5) || 300);
-        this.canvas.width = w;
-        this.canvas.height = h;
+        const p = this.canvas.parentElement, w = (p && p.clientWidth > 0) ? p.clientWidth : (window.innerWidth || 360), h = (p && p.clientHeight > 0) ? p.clientHeight : (Math.floor(window.innerHeight * 0.5) || 300);
+        this.canvas.width = w; this.canvas.height = h;
     }
-
-    getHitZoneY() {
-        return Math.round(this.canvas.height - 54);
-    }
+    getHitZoneY() { return Math.round(this.canvas.height - 54); }
 
     setupInputHandlers() {
         const getLaneFromX = (clientX) => {
@@ -175,11 +169,7 @@ class RhythmSystem {
         });
     }
 
-    triggerLaneHit(lane) {
-        // Shorthand for tap / compatibility
-        this.triggerLaneDown(lane);
-        setTimeout(() => this.triggerLaneUp(lane), 60);
-    }
+    triggerLaneHit(lane) { this.triggerLaneDown(lane); setTimeout(() => this.triggerLaneUp(lane), 60); }
 
     triggerLaneDown(lane) {
         this.laneFlashes[lane] = 1.0;
@@ -441,6 +431,12 @@ class RhythmSystem {
 
             // Sync notes on the highway according to exact audio timestamp
             this.notes.forEach(note => {
+                if (!note.oppProcessed && curTime >= note.time) {
+                    note.oppProcessed = true;
+                    if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem) {
+                        window.game.combat.pvpSystem.onSongNotePassed(note, 'perfect', curTime, window.game.combat);
+                    }
+                }
                 if (note.holding) {
                     note.y = hitZoneY; // Clamped at hitzone during hold
                 } else {
@@ -923,6 +919,10 @@ class RhythmSystem {
         if (!this.isCustomSongPlaying) return;
         const song = this.currentSong, stats = { ...this.songStats };
         this.stopCustomSong();
+        if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem) {
+            window.game.combat.pvpSystem.endPvPBattle('song_complete', window.game.combat, this);
+            return;
+        }
         if (window.game && typeof window.game.triggerVictoryFinale === 'function') {
             window.game.triggerVictoryFinale(song, stats);
         } else if (window.game && typeof window.game.showVictoryModal === 'function') {

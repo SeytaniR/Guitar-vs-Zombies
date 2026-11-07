@@ -20,7 +20,8 @@ class I18n {
                 'btnMissions': 'MISSÕES & CAÇADA DE ZUMBIS',
                 'btnStudio': 'ESTÚDIO DE MÚSICA & RITMO',
                 'btnSettings': 'CONFIGURAÇÕES',
-                'menuFooter': 'Guitar vs Zombies v1.9.6 (Build 60) • AAA Audio & Action Experience',
+                'btnPvP': '⚔️ DUELO ONLINE PVP',
+                'menuFooter': 'Guitar vs Zombies v1.9.7 (Build 61) • AAA Audio & Action Experience',
 
                 // Pre-Battle Preparation
                 'mapBack': '⬅️ Voltar',
@@ -158,6 +159,24 @@ class I18n {
                 'statScoreReached': 'Pontuação Alcançada',
                 'btnRetry': '🔄 TENTAR NOVAMENTE',
 
+                // PvP Duel & Matchmaking
+                'pvpMatchmakingTitle': 'PROCURANDO ADVERSÁRIO...',
+                'pvpConnecting': 'Conectando ao servidor SA-East (São Paulo)...',
+                'pvpSearching': 'Buscando guitarristas no mesmo tier de troféus...',
+                'pvpPing': '📡 Ping: 24ms • Região: SA (BR)',
+                'pvpOpponentFound': '🎯 ADVERSÁRIO ENCONTRADO!',
+                'pvpStartingIn': 'Duelo iniciando em: ',
+                'pvpCancel': 'CANCELAR',
+                'pvpConfrontLine': '⚡ LINHA DE CONFRONTO • TIROS LIVRES CURAM ZUMBIS DO OPONENTE ⚡',
+                'pvpWinTitle': '🏆 VITÓRIA NO DUELO PVP!',
+                'pvpDefeatTitle': '☠️ DERROTA NO DUELO PVP!',
+                'pvpWinKo': 'O adversário foi derrubado pela horda de zumbis!',
+                'pvpLoseKo': 'Sua defesa sucumbiu e os zumbis invadiram seu palco!',
+                'pvpWinScore': 'Vitória por Domínio Rítmico e Maior Pontuação!',
+                'pvpLoseScore': 'O adversário alcançou maior pontuação na música!',
+                'pvpTrophies': 'Troféus',
+                'pvpOverHeals': 'Curas Inimigas Geradas',
+
                 // Battle Stats Modal (SS)
                 'ssTitle': '📊 ESTATÍSTICAS DE BATALHA',
                 'ssSub': 'Performance em tempo real do confronto',
@@ -272,7 +291,8 @@ class I18n {
                 'btnMissions': 'MISSIONS & BOUNTY HUNT',
                 'btnStudio': 'MUSIC & RHYTHM STUDIO',
                 'btnSettings': 'SETTINGS',
-                'menuFooter': 'Guitar vs Zombies v1.9.6 (Build 60) • AAA Audio & Action Experience',
+                'btnPvP': '⚔️ ONLINE PVP DUEL',
+                'menuFooter': 'Guitar vs Zombies v1.9.7 (Build 61) • AAA Audio & Action Experience',
 
                 // Pre-Battle Preparation
                 'mapBack': '⬅️ Back',
@@ -409,6 +429,24 @@ class I18n {
                 'statGoldCollected': 'Gold Collected',
                 'statScoreReached': 'Score Reached',
                 'btnRetry': '🔄 TRY AGAIN',
+
+                // PvP Duel & Matchmaking
+                'pvpMatchmakingTitle': 'SEARCHING FOR OPPONENT...',
+                'pvpConnecting': 'Connecting to SA-East server (São Paulo)...',
+                'pvpSearching': 'Finding guitarists in the same trophy elo...',
+                'pvpPing': '📡 Latency: 24ms • Region: SA (BR)',
+                'pvpOpponentFound': '🎯 OPPONENT FOUND!',
+                'pvpStartingIn': 'Duel starting in: ',
+                'pvpCancel': 'CANCEL',
+                'pvpConfrontLine': '⚡ CONFRONTATION LINE • CLEAR-LANE SHOTS HEAL OPPONENT ZOMBIES ⚡',
+                'pvpWinTitle': '🏆 PVP DUEL VICTORY!',
+                'pvpDefeatTitle': '☠️ PVP DUEL DEFEAT!',
+                'pvpWinKo': 'Opponent was overrun by the zombie horde!',
+                'pvpLoseKo': 'Your defenses fell and zombies invaded your stage!',
+                'pvpWinScore': 'Victory by Rhythmic Domination & Highest Score!',
+                'pvpLoseScore': 'Opponent achieved higher score on the track!',
+                'pvpTrophies': 'Trophies',
+                'pvpOverHeals': 'Enemy Zombie Heals Created',
 
                 // Battle Stats Modal (SS)
                 'ssTitle': '📊 BATTLE STATISTICS',

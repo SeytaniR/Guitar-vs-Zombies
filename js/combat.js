@@ -66,6 +66,7 @@ class CombatSystem {
         this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
         this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
+        this.isPvPMode = false; this.pvpSystem = null;
         this.fx.initEmbers(25, 800, 600);
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -81,9 +82,7 @@ class CombatSystem {
     createExplosion(x, y, isCrit = false) { this.fx.createExplosion(x, y, isCrit, window.soundEngine); }
 
     resize() {
-        const parent = this.canvas.parentElement;
-        const w = (parent && parent.clientWidth) || window.innerWidth || 360;
-        const h = (parent && parent.clientHeight) || Math.round(window.innerHeight * 0.5) || 300;
+        const p = this.canvas.parentElement, w = (p && p.clientWidth) || window.innerWidth || 360, h = (p && p.clientHeight) || Math.round(window.innerHeight * 0.5) || 300;
         if (w > 0 && h > 0) { this.canvas.width = w; this.canvas.height = h; }
     }
 
@@ -94,14 +93,9 @@ class CombatSystem {
 
     getActiveHeroStats() {
         const heroData = this.getActiveHeroData();
-        if (heroData && window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function') {
-            return window.guitaristPool.getHeroStats(heroData.id);
-        }
-        return {
-            level: 1, baseAttackSpeed: 1.0, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0,
-            goldBonus: 0, armorPen: 0, slowHorde: 0, burnChance: 0, knockbackBonus: 0,
-            chainLightning: false, chainTargets: 0
-        };
+        return (heroData && window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function')
+            ? window.guitaristPool.getHeroStats(heroData.id)
+            : { level: 1, baseAttackSpeed: 1.0, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0, goldBonus: 0, armorPen: 0, slowHorde: 0, burnChance: 0, knockbackBonus: 0, chainLightning: false, chainTargets: 0 };
     }
 
     getHeroAttackSpeed() {
@@ -143,13 +137,12 @@ class CombatSystem {
     }
 
     getHeroPosition() {
-        const metrics = this.getRoadMetrics();
-        const heroX = Math.max(50, Math.round(this.canvas.width * 0.16));
-        const heroY = Math.round(metrics.laneY);
-        return { x: heroX, y: heroY };
+        const m = this.getRoadMetrics();
+        return { x: Math.max(50, Math.round(this.canvas.width * 0.16)), y: Math.round(m.laneY) };
     }
 
-    resetBattle(enemyList = null) {
+    resetBattle(enemyList = null, isPvP = false) {
+        this.isPvPMode = !!isPvP;
         this.entities.zombies = []; this.entities.projectiles = []; this.fx.reset();
         this.heroHp = this.heroMaxHp; this.isGameOver = false; this.isPaused = false; this.isVictory = false;
         this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
@@ -159,7 +152,7 @@ class CombatSystem {
         this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0;
         this.perfectStreak = 0; this.guaranteedCritReady = false;
         const curStage = window.stageSystem ? window.stageSystem.selectedStage : 1;
-        this.isBossStage = !!(window.stageSystem && typeof window.stageSystem.isBossStage === 'function' && window.stageSystem.isBossStage(curStage));
+        this.isBossStage = !this.isPvPMode && !!(window.stageSystem && typeof window.stageSystem.isBossStage === 'function' && window.stageSystem.isBossStage(curStage));
         this.bossSpawned = false;
         const activeMap = (window.stageSystem && window.stageSystem.getSelectedMap) ? window.stageSystem.getSelectedMap().id : 'map_void';
         if (this.fx && typeof this.fx.initEmbers === 'function') this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
@@ -167,12 +160,21 @@ class CombatSystem {
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.matchActive = true;
         const cw = Math.max(200, this.canvas ? this.canvas.width : 360);
-        this.spawnZombie(cw * 0.78);
-        this.spawnZombie(cw * 0.92);
+        if (this.isPvPMode && this.pvpSystem) {
+            this.pvpSystem.spawnZombiePair(this);
+            this.pvpSystem.spawnZombiePair(this);
+        } else {
+            this.spawnZombie(cw * 0.78);
+            this.spawnZombie(cw * 0.92);
+        }
     }
 
     spawnZombie(initialX = null, forceDef = null) {
         if (this.isGameOver || !this.matchActive) return;
+        if (this.isPvPMode && this.pvpSystem) {
+            this.pvpSystem.spawnZombiePair(this, forceDef);
+            return;
+        }
         const metrics = this.getRoadMetrics();
         const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
 
@@ -598,13 +600,8 @@ class CombatSystem {
     }
 
     reviveHero() {
-        this.heroHp = this.heroMaxHp;
-        this.isGameOver = false;
-        this.entities.zombies = [];
-        this.entities.projectiles = [];
-
-        const rndBonus = window.talentSystem ? window.talentSystem.getStat('rock_never_dies') : 0;
-        const heroPos = this.getHeroPosition();
+        this.heroHp = this.heroMaxHp; this.isGameOver = false; this.entities.zombies = []; this.entities.projectiles = [];
+        const rndBonus = window.talentSystem ? window.talentSystem.getStat('rock_never_dies') : 0, heroPos = this.getHeroPosition();
         if (rndBonus > 0) {
             this.heroImmunityTimer = rndBonus;
             this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 10, maxRadius: 120, color: '#ffcc00', lineWidth: 6, alpha: 1.0 });
@@ -642,6 +639,7 @@ class CombatSystem {
 
         if (this.heroStrumAnim > 0 && (this.heroStrumAnim -= 4 * dt) < 0) this.heroStrumAnim = 0;
         if (this.heroFlashTime > 0) this.heroFlashTime -= dt;
+        if (this.isPvPMode && this.pvpSystem) this.pvpSystem.update(dt, this);
 
         if (this.heroHp <= 0 && !this.isGameOver) {
             this.handleHeroDefeat();
@@ -743,6 +741,7 @@ class CombatSystem {
                 const hitRadius = (z.type === 'mutant' || z.type === 'bloater') ? 34 : 22;
 
                 if (Math.abs(p.x - z.x) < hitRadius && Math.abs(p.y - (currentY - 15)) < 26) {
+                    if (this.isPvPMode && this.pvpSystem && this.pvpSystem.handleCollision(p, z, this)) break;
                     if (z.type === 'gladiator' && !p.isCrit && Math.random() < z.deflectChance) {
                         p.active = false;
                         this.addFloatingText("🛡️ CORRENTE DEFLETIU!", z.x, currentY - 34, '#ff3333', true);
@@ -949,6 +948,7 @@ class CombatSystem {
         if (this.rockPower > 30) this.fx.drawElectricAura(this.ctx, heroPos.x + 10, heroPos.y - 18);
         if (this.shockBarrierReady) this.fx.drawShockBarrier(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
         if (this.heroImmunityTimer > 0) this.fx.drawImmunityAura(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
+        if (this.isPvPMode && this.pvpSystem) this.pvpSystem.draw(this.ctx, this);
 
         // 7. Projectiles
         this.ctx.save();
@@ -974,9 +974,7 @@ class CombatSystem {
     drawAmpAndShadow(heroX, heroY) { this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time); }
     drawBackground() {
         const bg = this.assets.bg;
-        if (!bg.complete || bg.naturalWidth === 0 || this.canvas.width <= 10 || this.canvas.height <= 10) {
-            this.ctx.fillStyle = '#1a1a2e'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); return;
-        }
+        if (!bg.complete || bg.naturalWidth === 0 || this.canvas.width <= 10 || this.canvas.height <= 10) { this.ctx.fillStyle = '#1a1a2e'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); return; }
         const m = this.getRoadMetrics();
         if (m.drawW > 0 && m.drawH > 0) this.ctx.drawImage(bg, m.drawX, m.drawY, m.drawW, m.drawH);
     }

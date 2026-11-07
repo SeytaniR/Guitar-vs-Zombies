@@ -7,6 +7,8 @@ class ZombieEntity {
         this.type = (enemyDef && enemyDef.type) || 'normal';
         this.baseName = (enemyDef && enemyDef.name) || 'Zumbi';
         this.name = `[Nv.${this.level}] ${this.baseName}`;
+        this.side = (enemyDef && enemyDef.side) || 'player';
+        this.direction = (this.side === 'opponent') ? 1 : -1;
         this.badge = enemyDef.badge || '';
         this.tint = enemyDef.tint || null;
         this.scale = enemyDef.scale || 0.50;
@@ -165,6 +167,11 @@ class ZombieEntity {
             }
         }
 
+        if (this.side === 'opponent') {
+            this.updateOpponentSideZombie(effectiveDt, combat);
+            return;
+        }
+
         const heroPos = combat.getHeroPosition();
         const attackDistance = heroPos.x + 28 + (this.attackSlot * 12);
 
@@ -214,6 +221,32 @@ class ZombieEntity {
             default:
                 this.updateStandard(effectiveDt, combat, attackDistance);
                 break;
+        }
+    }
+
+    updateOpponentSideZombie(dt, combat) {
+        const cw = (combat && combat.canvas && combat.canvas.width) || 800;
+        const oppPos = (combat && combat.pvpSystem && typeof combat.pvpSystem.getOpponentPosition === 'function')
+            ? combat.pvpSystem.getOpponentPosition(combat)
+            : { x: Math.round(cw * 0.84), y: this.y };
+        const attackDistance = oppPos.x - 30 - (this.attackSlot * 12);
+
+        if (this.x < attackDistance) {
+            this.x += this.speed * dt;
+            this.walkTimer += dt * 6.5;
+            this.frame = Math.floor(this.walkTimer) % 8;
+            this.isAttacking = false;
+        } else {
+            this.x = attackDistance;
+            this.isAttacking = true;
+            this.attackCooldown -= dt;
+            if (this.attackCooldown <= 0) {
+                this.attackCooldown = this.attackInterval || 1.1;
+                this.frame = 8 + (Math.floor(this.walkTimer) % 4);
+                if (combat && combat.pvpSystem) {
+                    combat.pvpSystem.damageOpponent(this.attackDamage, false, `-${this.attackDamage} HP`, '#ff3344');
+                }
+            }
         }
     }
 
@@ -742,7 +775,7 @@ class ZombieEntity {
             this.x,
             currentY - yOffset,
             this.scale,
-            true, // Face left towards hero
+            this.side === 'opponent' ? false : true, // Face right towards opponent, or left towards hero
             this.flashTime > 0
         );
 

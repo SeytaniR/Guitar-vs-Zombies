@@ -1,0 +1,493 @@
+/* ==========================================================================
+   10. SIMULATED ONLINE PVP DUEL SYSTEM (MATCHMAKING, RADAR, VERSUS, HUD & RESULTS)
+   ========================================================================== */
+
+/* Matchmaking Modal Overlay */
+.pvp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 12, 0.94);
+    backdrop-filter: blur(10px);
+    z-index: 1300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.pvp-modal-overlay.open {
+    display: flex;
+}
+
+.pvp-matchmaking-dialog {
+    width: 100%;
+    max-width: 440px;
+    background: linear-gradient(180deg, #121024 0%, #080612 100%);
+    border: 2px solid #00d4ff;
+    border-radius: 16px;
+    box-shadow: 0 0 35px rgba(0, 212, 255, 0.35);
+    padding: 22px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    animation: pvpModalEntrance 0.35s cubic-bezier(0.18, 0.9, 0.3, 1.25) forwards;
+}
+
+@keyframes pvpModalEntrance {
+    0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Radar Search Graphic */
+.pvp-radar-wrapper {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 6px 0;
+}
+
+.pvp-radar-circle {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 212, 255, 0.4);
+    box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.pvp-radar-circle::before {
+    content: '';
+    position: absolute;
+    inset: 22px;
+    border-radius: 50%;
+    border: 1px dashed rgba(0, 212, 255, 0.5);
+}
+
+.pvp-radar-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, rgba(0, 212, 255, 0.6) 0deg, transparent 65deg, transparent 360deg);
+    animation: pvpRadarRotate 1.8s linear infinite;
+}
+
+@keyframes pvpRadarRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.pvp-radar-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    animation: pvpIconPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pvpIconPulse {
+    from { transform: translate(-50%, -50%) scale(0.9); filter: drop-shadow(0 0 4px #00d4ff); }
+    to { transform: translate(-50%, -50%) scale(1.15); filter: drop-shadow(0 0 12px #ffcc00); }
+}
+
+/* Status & Queue Info */
+.pvp-queue-title {
+    font-family: 'Impact', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: #00d4ff;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+.pvp-queue-timer {
+    font-family: 'Impact', monospace;
+    font-size: 24px;
+    color: #ffd700;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 3px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.pvp-queue-status {
+    font-size: 11px;
+    color: #88aacc;
+    min-height: 18px;
+}
+
+.pvp-server-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #00ff66;
+    background: rgba(0, 255, 102, 0.12);
+    border: 1px solid rgba(0, 255, 102, 0.3);
+    padding: 2px 10px;
+    border-radius: 12px;
+}
+
+.pvp-cancel-btn {
+    background: rgba(255, 51, 68, 0.2);
+    border: 1px solid #ff3344;
+    color: #ff3344;
+    padding: 8px 24px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pvp-cancel-btn:hover {
+    background: #ff3344;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 51, 68, 0.5);
+}
+
+/* Versus Face-Off Card */
+.pvp-versus-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 8px;
+    gap: 8px;
+    animation: pvpVersusEntrance 0.4s cubic-bezier(0.18, 0.9, 0.3, 1.2) forwards;
+}
+
+@keyframes pvpVersusEntrance {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.pvp-fighter-box {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.pvp-fighter-box.player-box {
+    border-color: #00d4ff;
+    box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.pvp-fighter-box.opponent-box {
+    border-color: #ff3344;
+    box-shadow: inset 0 0 15px rgba(255, 51, 68, 0.2);
+}
+
+.pvp-avatar-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #ffd700;
+    position: relative;
+    background: #151525;
+}
+
+.pvp-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pvp-fighter-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    max-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pvp-fighter-hero {
+    font-size: 10px;
+    color: #00d4ff;
+    font-weight: 700;
+}
+
+.pvp-fighter-level {
+    font-size: 9px;
+    color: #ffd700;
+    font-weight: 800;
+    background: rgba(255, 215, 0, 0.15);
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.pvp-vs-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pvp-vs-text {
+    font-family: 'Impact', sans-serif;
+    font-size: 26px;
+    color: #ffcc00;
+    text-shadow: 0 0 15px rgba(255, 204, 0, 0.8), 2px 2px 0 #000;
+}
+
+.pvp-countdown-number {
+    font-family: 'Impact', sans-serif;
+    font-size: 20px;
+    color: #00ff66;
+    animation: pvpCountPulse 0.9s infinite;
+}
+
+@keyframes pvpCountPulse {
+    0% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* In-Battle Opponent PvP HUD (Top-Right) */
+.pvp-opponent-hud {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(10, 8, 20, 0.88);
+    border: 1px solid rgba(255, 51, 68, 0.5);
+    border-radius: 10px;
+    padding: 6px 10px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    box-shadow: 0 0 15px rgba(255, 51, 68, 0.25);
+    pointer-events: none;
+}
+
+.pvp-active .pvp-opponent-hud {
+    display: flex;
+}
+
+.pvp-opp-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1.5px solid #ff3344;
+    object-fit: cover;
+}
+
+.pvp-opp-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pvp-opp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pvp-opp-name {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffaaaa;
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pvp-opp-score {
+    font-size: 11px;
+    font-weight: 900;
+    color: #ffd700;
+    font-family: 'Impact', sans-serif;
+}
+
+.pvp-opp-hp-bar-wrap {
+    width: 95px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #441111;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.pvp-opp-hp-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff0044, #ff3300);
+    transition: width 0.15s ease;
+}
+
+/* Arena Confrontation Center Line & Indicator */
+.pvp-confront-banner {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(5, 5, 12, 0.75);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    border-radius: 12px;
+    padding: 3px 12px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #00d4ff;
+    letter-spacing: 1px;
+    z-index: 50;
+    display: none;
+    pointer-events: none;
+}
+
+.pvp-active .pvp-confront-banner {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* PvP Results Comparison Modal */
+.pvp-results-dialog {
+    width: 100%;
+    max-width: 440px;
+    background: #111022;
+    border: 2px solid #ffd700;
+    border-radius: 16px;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.35);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #fff;
+    text-align: center;
+}
+
+.pvp-results-dialog.defeat {
+    border-color: #ff3344;
+    box-shadow: 0 0 35px rgba(255, 51, 68, 0.4);
+}
+
+.pvp-res-header h2 {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    font-family: 'Impact', sans-serif;
+}
+
+.pvp-res-header.win h2 {
+    color: #ffd700;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.pvp-res-header.lose h2 {
+    color: #ff3344;
+    text-shadow: 0 0 12px rgba(255, 51, 68, 0.6);
+}
+
+.pvp-res-comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.pvp-comp-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pvp-comp-col.player {
+    text-align: left;
+}
+
+.pvp-comp-col.opponent {
+    text-align: right;
+}
+
+.pvp-comp-col.labels {
+    text-align: center;
+}
+
+.pvp-comp-val {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pvp-comp-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #88aacc;
+    text-transform: uppercase;
+}
+
+.pvp-rewards-box {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px dashed rgba(255, 215, 0, 0.4);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.pvp-reward-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.pvp-rew-val {
+    font-size: 15px;
+    font-weight: 900;
+    font-family: 'Impact', sans-serif;
+    color: #ffd700;
+}
+
+.pvp-rew-tag {
+    font-size: 9px;
+    font-weight: 700;
+    color: #aaa;
+}
+
+/* Menu PvP Button Styling */
+.btn-pvp-duel {
+    background: linear-gradient(135deg, #ff0055 0%, #ff5500 50%, #ffd700 100%) !important;
+    border: 1.5px solid #ffd700 !important;
+    box-shadow: 0 0 16px rgba(255, 85, 0, 0.5) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-pvp-duel:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 24px rgba(255, 85, 0, 0.8) !important;
+}
+
+.btn-pvp-duel::after {
+    content: 'ONLINE';
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 7.5px;
+    font-weight: 900;
+    background: #000;
+    color: #00ff66;
+    padding: 1px 4px;
+    border-radius: 4px;
+    border: 1px solid #00ff66;
+    letter-spacing: 0.5px;
+}

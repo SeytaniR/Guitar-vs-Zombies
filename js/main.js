@@ -4,6 +4,8 @@ class Game {
         this.currentScreen = 'menu'; // 'menu', 'map-select', 'battle'
         this.combat = new CombatSystem('combat-canvas');
         this.rhythm = new RhythmSystem('rhythm-canvas');
+        this.pvpSystem = (typeof PvPSystem !== 'undefined') ? new PvPSystem() : null;
+        if (this.combat && this.pvpSystem) this.combat.pvpSystem = this.pvpSystem;
 
         this.selectedSong = this.getBuiltinDefaultSong();
         this.currentMapZombies = (typeof window !== 'undefined' && window.enemyPool) ? window.enemyPool.rollMapEnemies(5) : [];
@@ -66,6 +68,10 @@ class Game {
             }
         });
 
+        if (screenName !== 'battle') {
+            const b = document.getElementById('screen-battle'); if (b) b.classList.remove('pvp-active');
+            if (this.combat) this.combat.isPvPMode = false;
+        }
         if (screenName === 'menu') {
             this.isBattlePaused = false;
             this.combat.matchActive = false;
@@ -82,10 +88,7 @@ class Game {
             // Force immediate synchronous resize of canvases to match newly visible parent DOM
             this.combat.resize();
             this.rhythm.resize();
-            setTimeout(() => {
-                this.combat.resize();
-                this.rhythm.resize();
-            }, 50);
+            setTimeout(() => { this.combat.resize(); this.rhythm.resize(); }, 50);
         }
     }
 
@@ -95,6 +98,7 @@ class Game {
     setupScreenNavigation() {
         const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
         bind('menu-btn-play', (e) => { if (e) e.preventDefault(); this.switchScreen('map-select'); });
+        bind('menu-btn-pvp', (e) => { if (e) e.preventDefault(); this.openPvPModal(); });
         bind('menu-btn-talents', (e) => {
             if (e) e.preventDefault();
             if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
@@ -617,6 +621,27 @@ class Game {
         this.startMatch();
     }
 
+    openPvPModal() {
+        if (!this.pvpSystem) this.pvpSystem = (typeof PvPSystem !== 'undefined') ? new PvPSystem() : null;
+        if (this.combat && this.pvpSystem) this.combat.pvpSystem = this.pvpSystem;
+        if (this.pvpSystem) this.pvpSystem.startMatchmaking((opp) => this.startPvPBattle(opp));
+    }
+
+    startPvPBattle(opponent) {
+        if (!opponent) return;
+        this.combat.isPvPMode = true;
+        this.combat.pvpSystem = this.pvpSystem;
+        const allSongs = (window.songDB && typeof window.songDB.getAllSongs === 'function') ? window.songDB.getAllSongs() : [];
+        const song = (allSongs.length > 0) ? allSongs[0] : (this.selectedSong || this.getBuiltinDefaultSong());
+        this.selectedSong = song;
+        const enemies = (window.enemyPool && typeof window.enemyPool.rollMapEnemies === 'function') ? window.enemyPool.rollMapEnemies(4) : [];
+        this.switchScreen('battle');
+        const bScreen = document.getElementById('screen-battle');
+        if (bScreen) bScreen.classList.add('pvp-active');
+        this.combat.resetBattle(enemies, true);
+        if (this.rhythm) this.rhythm.playCustomSong(song);
+    }
+
     startMatch() {
         if (!this.selectedSong) {
             this.selectedSong = this.getBuiltinDefaultSong();
@@ -677,31 +702,23 @@ class Game {
         bind('result-replay-btn', () => { closeM('song-results-modal'); this.startMatch(); });
         bind('result-close-btn', () => { closeM('song-results-modal'); this.switchScreen('menu'); });
         bind('defeat-retry-btn', () => { closeM('battle-defeat-modal'); this.startMatch(); });
-        bind('defeat-talents-btn', () => {
-            closeM('battle-defeat-modal'); this.switchScreen('menu');
-            if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
-        });
+        bind('defeat-talents-btn', () => { closeM('battle-defeat-modal'); this.switchScreen('menu'); if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open(); });
         bind('defeat-close-btn', () => { closeM('battle-defeat-modal'); this.switchScreen('menu'); });
+        bind('pvp-res-close-btn', () => { closeM('pvp-results-modal'); this.switchScreen('menu'); });
+        bind('pvp-res-rematch-btn', () => { closeM('pvp-results-modal'); this.openPvPModal(); });
     }
 
     pauseBattle() {
         this.isBattlePaused = true;
         if (this.combat) this.combat.isPaused = true;
-        if (this.rhythm) {
-            this.rhythm.isPaused = true;
-            this.rhythm.pauseAudio();
-        }
+        if (this.rhythm) { this.rhythm.isPaused = true; this.rhythm.pauseAudio(); }
     }
 
     resumeBattle() {
         this.isBattlePaused = false;
         if (this.combat) this.combat.isPaused = false;
-        if (this.rhythm) {
-            this.rhythm.isPaused = false;
-            this.rhythm.resumeAudio();
-        }
-        this.lastTime = performance.now();
-        this.lastRenderTime = performance.now();
+        if (this.rhythm) { this.rhythm.isPaused = false; this.rhythm.resumeAudio(); }
+        this.lastTime = performance.now(); this.lastRenderTime = performance.now();
     }
 
     openGearModal(isFromMainMenu = false) {
@@ -783,11 +800,8 @@ class Game {
     }
 
     triggerVictoryFinale(song, stats = {}) {
-        if (this.combat && typeof this.combat.triggerVictoryFinale === 'function') {
-            this.combat.triggerVictoryFinale(song, stats);
-        } else {
-            this.showVictoryModal(song, stats);
-        }
+        if (this.combat && typeof this.combat.triggerVictoryFinale === 'function') this.combat.triggerVictoryFinale(song, stats);
+        else this.showVictoryModal(song, stats);
     }
 
     showVictoryModal(song, stats = {}) {
@@ -827,13 +841,8 @@ class Game {
     }
 
     setupAudioGlobalUnlock() {
-        const unlockAudio = () => {
-            if (window.soundEngine) window.soundEngine.resume();
-            window.removeEventListener('pointerdown', unlockAudio);
-            window.removeEventListener('touchstart', unlockAudio);
-        };
-        window.addEventListener('pointerdown', unlockAudio);
-        window.addEventListener('touchstart', unlockAudio);
+        const unlock = () => { if (window.soundEngine) window.soundEngine.resume(); window.removeEventListener('pointerdown', unlock); window.removeEventListener('touchstart', unlock); };
+        window.addEventListener('pointerdown', unlock); window.addEventListener('touchstart', unlock);
     }
 
     start() {

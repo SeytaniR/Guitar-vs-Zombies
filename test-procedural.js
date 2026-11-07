@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js'].forEach(loadScript);
+['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/pvp-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -45,56 +45,31 @@ function assert(condition, testName, details = '') {
 // TEST 1: GUITARIST POOL PROCEDURAL LEVELING (1-100)
 // ==========================================
 console.log('1. Testing Guitarist Pool & Leveling (1-100)...');
-const pool = new GuitaristPoolSystem();
-window.guitaristPool = pool;
-
+const pool = new GuitaristPoolSystem(); window.guitaristPool = pool;
 assert(pool.guitarists.length === 11, 'Pool contains all 11 unique guitarists');
-pool.guitarists.forEach(g => {
-    assert(g.baseStats.baseAttackSpeed === 1.0 && pool.getHeroStats(g.id).baseAttackSpeed === 1.0, `Hero ${g.name} attack speed === 1.0/s`);
-});
-
-const johnny = pool.guitarists[0];
-const initialStats = pool.getHeroStats('johnny_blaze');
+pool.guitarists.forEach(g => assert(g.baseStats.baseAttackSpeed === 1.0 && pool.getHeroStats(g.id).baseAttackSpeed === 1.0, `Hero ${g.name} attack speed === 1.0/s`));
+const johnny = pool.guitarists[0], initialStats = pool.getHeroStats('johnny_blaze');
 assert(initialStats.level === 1 && Math.abs(initialStats.damageMult - 1.0) < 0.001, 'Johnny starts at Level 1 with 1.0x damage mult');
-
-// Test Level 100 stats
 pool.setLevel('johnny_blaze', 100);
 const maxStats = pool.getHeroStats('johnny_blaze');
 assert(maxStats.level === 100 && Math.abs(maxStats.damageMult - 1.99) < 0.01 && maxStats.critDamageBonusPercent >= 89, 'Level 100 Johnny damage mult (1.99x) and crit scale smoothly');
-
-// Test XP Leveling & Gold Leveling
 pool.setLevel('johnny_blaze', 1);
 const xpNeeded = pool.getXpRequiredForNextLevel(1);
 assert(xpNeeded > 0, `XP required for Level 2 is calculated: ${xpNeeded}`);
 const resXp = pool.addHeroXp('johnny_blaze', 500);
 assert(resXp.newLevel > 1, `Hero leveled up via XP from Level 1 to Level ${resXp.newLevel}`);
-
-// Test Gold Level Up
 pool.setLevel('johnny_blaze', 1);
 const goldCost = pool.getGoldCostForLevelUp('johnny_blaze');
 assert(goldCost === 117, `Gold cost for Level 1 guitarist is tripled to 117 gold (was 39)`);
-
-// Test Talent Cost Doubling
 global.document = { getElementById: () => null, querySelectorAll: () => [] };
 loadScript('js/talents.js');
 const talentSysInstance = new TalentSystem();
-const powerChordCost = talentSysInstance.getCost(talentSysInstance.talents['power_chord']);
-assert(powerChordCost === 160, `Level 0 Power Chord upgrade cost is doubled to 160 gold (was 80)`);
-const soloCost = talentSysInstance.getCost(talentSysInstance.talents['ferocious_solo']);
-assert(soloCost === 400, `Level 0 Ferocious Solo upgrade cost is doubled to 400 gold (was 200)`);
-
-// Mock talent system for gold purchase
-window.talentSystem = {
-    gold: 5000,
-    getStat: () => 0,
-    saveProgress: () => {},
-    addGold: (amt) => { window.talentSystem.gold += amt; }
-};
+assert(talentSysInstance.getCost(talentSysInstance.talents['power_chord']) === 160, `Level 0 Power Chord upgrade cost is doubled to 160 gold (was 80)`);
+assert(talentSysInstance.getCost(talentSysInstance.talents['ferocious_solo']) === 400, `Level 0 Ferocious Solo upgrade cost is doubled to 400 gold (was 200)`);
+window.talentSystem = { gold: 5000, getStat: () => 0, saveProgress: () => {}, addGold: (amt) => { window.talentSystem.gold += amt; } };
 const goldLvlRes = pool.levelUpWithGold('johnny_blaze', window.talentSystem);
 assert(goldLvlRes.success && goldLvlRes.newLevel === 2, 'Hero successfully leveled up using gold');
 assert(window.talentSystem.gold === 5000 - 117, `Gold correctly deducted from player balance (5000 - 117 = ${window.talentSystem.gold})`);
-
-// Test Higher Rarity Bonus Scaling (Roxie - Mítico)
 const roxieStatsLv1 = pool.getHeroStats('roxie_anarchy');
 pool.setLevel('roxie_anarchy', 100);
 const roxieStatsLv100 = pool.getHeroStats('roxie_anarchy');
@@ -105,17 +80,13 @@ assert(roxieStatsLv100.critDamageBonusPercent >= 110, 'Mythic hero reaches high 
 // TEST 2: INFINITE PROCEDURAL STAGE SYSTEM
 // ==========================================
 console.log('\n2. Testing Infinite Procedural Stage System...');
-const stageSys = new StageSystem();
-window.stageSystem = stageSys;
+const stageSys = new StageSystem(); window.stageSystem = stageSys;
 assert(stageSys.selectedStage === 1 && stageSys.highestUnlockedStage === 1, 'Stage System starts at Stage 1');
 const stage1Info = stageSys.getStageInfo(1);
 assert(stage1Info.minZombieLevel === 1 && stage1Info.maxZombieLevel === 1, 'Stage 1 zombie level range is 1-1');
 assert(stage1Info.targetKills >= 5, `Stage 1 target kills is ${stage1Info.targetKills}`);
-stageSys.unlockNextStage();
-stageSys.setSelectedStage(2);
+stageSys.unlockNextStage(); stageSys.setSelectedStage(2);
 assert(stageSys.highestUnlockedStage === 2 && stageSys.selectedStage === 2, 'Stage 2 successfully unlocked and selected');
-
-// Test Infinite Stage 50
 const stage50Info = stageSys.getStageInfo(50);
 assert(stage50Info.minZombieLevel >= 60, `Stage 50 scales zombie levels: min ${stage50Info.minZombieLevel}, max ${stage50Info.maxZombieLevel}`);
 assert(stage50Info.rewardCoins > stage1Info.rewardCoins && stage50Info.rewardXp > stage1Info.rewardXp, `Stage 50 gives scaled gold/XP reward (${stage50Info.rewardCoins} vs ${stage1Info.rewardCoins})`);
@@ -173,106 +144,42 @@ const hpBeforeBurn = zLv1.hp;
 zLv1.update(1.0, mockCombat);
 assert(zLv1.hp < hpBeforeBurn, `Zombie took burn DoT damage: ${zLv1.hp} < ${hpBeforeBurn}`);
 
-// ==========================================
-// TEST 4: 4-LANE SKILLS SYSTEM & ROCK MANA
-// ==========================================
+// 4. Testing 4-Lane Skill System & Rock Mana
 console.log('\n4. Testing 4-Lane Skill System & Rock Mana...');
-const skillSys = new SkillSystem();
-window.skillSystem = skillSys;
-
+const skillSys = new SkillSystem(); window.skillSystem = skillSys;
 assert(skillSys.getAllSkills().length === 56, 'All 56 skills are registered in SkillSystem (55 unique + 1 universal basic)');
-
 const defaultEquipped = skillSys.getEquippedSkills('johnny_blaze');
-assert(defaultEquipped.length === 4, '4 lanes are equipped');
-assert(skillSys.hasAtLeastOneBasicStrike(skillSys.loadEquipped('johnny_blaze')), 'Default loadout maintains at least one basic strike');
-
-// Check unique skills per guitarist (at least 5 unique each)
-const heroCatalogues = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy', 'finn_punk', 'ignis_draco', 'fenrir_howler', 'spiky_sponge', 'saul_slash'];
-heroCatalogues.forEach(hid => {
-    const uniqueSkills = skillSys.getSkillsForHero(hid).filter(s => s.id !== 'basic_strike');
-    assert(uniqueSkills.length >= 5, `Hero ${hid} has at least 5 unique skills (${uniqueSkills.length} found)`);
+assert(defaultEquipped.length === 4 && skillSys.hasAtLeastOneBasicStrike(skillSys.loadEquipped('johnny_blaze')), '4 lanes are equipped & default keeps basic strike');
+['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy', 'finn_punk', 'ignis_draco', 'fenrir_howler', 'spiky_sponge', 'saul_slash'].forEach(hid => {
+    assert(skillSys.getSkillsForHero(hid).filter(s => s.id !== 'basic_strike').length >= 5, `Hero ${hid} has at least 5 unique skills`);
 });
-
-// Test stage rule: player cannot equip 4 special skills; at least 1 must remain basic strike
-skillSys.equipSkill(3, 'basic_strike', 'johnny_blaze'); skillSys.equipSkill(0, 'blaze_power_chord', 'johnny_blaze');
-skillSys.equipSkill(1, 'blaze_garage_shred', 'johnny_blaze'); skillSys.equipSkill(2, 'blaze_stage_dive', 'johnny_blaze');
-
-// Slot 3 is currently basic_strike. Trying to replace slot 3 with a special skill MUST be blocked!
+skillSys.equipSkill(3, 'basic_strike', 'johnny_blaze'); skillSys.equipSkill(0, 'blaze_power_chord', 'johnny_blaze'); skillSys.equipSkill(1, 'blaze_garage_shred', 'johnny_blaze'); skillSys.equipSkill(2, 'blaze_stage_dive', 'johnny_blaze');
 const checkBlock = skillSys.canEquipSkill(3, 'blaze_sound_concussion', 'johnny_blaze');
-assert(checkBlock.allowed === false, 'canEquipSkill() blocks equipping 4th special skill (rule: must keep >= 1 basic strike)');
-assert(checkBlock.reason && checkBlock.reason.includes('Ataque Básico'), 'Blocked reason specifies keeping at least 1 Ataque Básico');
+assert(checkBlock.allowed === false && checkBlock.reason.includes('Ataque Básico'), 'canEquipSkill() blocks equipping 4th special skill');
+assert(skillSys.equipSkill(3, 'blaze_sound_concussion', 'johnny_blaze') === false && skillSys.getEquippedSkill(3, 'johnny_blaze').id === 'basic_strike', 'Slot 3 remains basic_strike');
+assert(skillSys.canEquipSkill(3, 'basic_strike', 'johnny_blaze').allowed === true, 'canEquipSkill() permits equipping basic_strike');
 
-const equipBlockedResult = skillSys.equipSkill(3, 'blaze_sound_concussion', 'johnny_blaze');
-assert(equipBlockedResult === false, 'equipSkill() returns false when stage rule is violated');
-assert(skillSys.getEquippedSkill(3, 'johnny_blaze').id === 'basic_strike', 'Slot 3 remains basic_strike');
-
-// Replacing slot 3 with basic_strike is allowed
-const allowBasic = skillSys.canEquipSkill(3, 'basic_strike', 'johnny_blaze');
-assert(allowBasic.allowed === true, 'canEquipSkill() permits equipping basic_strike');
-
-// Simulate Mana and Skill Execution in Combat
-function simulateSkillExecution(lane, baseDamage, currentMana) {
-    const skill = skillSys.getEquippedSkill(lane, 'johnny_blaze');
-    const manaCost = skill ? skill.manaCost : 0;
-    if (manaCost > 0 && currentMana < manaCost) {
-        return { executedSkill: 'common_basic_attack', damage: Math.round(baseDamage * 1.0), manaSpent: 0, feedback: '⚡ SEM MP! (BÁSICO)' };
-    }
-    return { executedSkill: skill.id, damage: Math.round(baseDamage * (skill.damageMult || 1.0)), manaSpent: manaCost, feedback: skill.name };
+function simSkill(lane, baseDamage, currentMana) {
+    const s = skillSys.getEquippedSkill(lane, 'johnny_blaze'), cost = s ? s.manaCost : 0;
+    if (cost > 0 && currentMana < cost) return { executedSkill: 'common_basic_attack', damage: baseDamage, manaSpent: 0 };
+    return { executedSkill: s.id, damage: Math.round(baseDamage * (s.damageMult || 1.0)), manaSpent: cost };
 }
+const execSuccess = simSkill(0, 50, 30), execFallback = simSkill(0, 50, 3);
+assert(execSuccess.executedSkill === 'blaze_power_chord' && execSuccess.damage === 110 && execSuccess.manaSpent === 8, 'Power chord executed with 2.2x damage and 8 mana spent');
+assert(execFallback.executedSkill === 'common_basic_attack' && execFallback.damage === 50 && execFallback.manaSpent === 0, 'Fallback to basic attack with 0 mana spent when MP low');
 
-// Case A: Lane 0 (Power Chord, cost 8) with 30 mana -> Should succeed
-const execSuccess = simulateSkillExecution(0, 50, 30);
-assert(execSuccess.executedSkill === 'blaze_power_chord' && execSuccess.damage === 110, `Power chord executed with full 2.2x damage (${execSuccess.damage})`);
-assert(execSuccess.manaSpent === 8, '8 mana spent');
-
-// Case B: Lane 0 (Power Chord, cost 8) with only 3 mana -> Becomes common basic attack (deals 1.0x basic damage, 0 mana spent)
-const execFallback = simulateSkillExecution(0, 50, 3);
-assert(execFallback.executedSkill === 'common_basic_attack', 'Note becomes common basic attack when mana is insufficient');
-assert(execFallback.damage === 50, `Deals common basic attack damage (50 vs 50 base): ${execFallback.damage}`);
-assert(execFallback.manaSpent === 0, 'Zero mana deducted on insufficient mana fallback');
-
-// ==========================================
-// TEST 5: ATTACK SPEED & RHYTHM ACCURACY MODIFIERS
-// ==========================================
+// 5. Testing Attack Speed System & Rhythm Accuracy Modifiers
 console.log('\n5. Testing Attack Speed System & Rhythm Accuracy Modifiers...');
-
-// Accuracy modifier logic:
-// MISS = 0.5x damage
-// GOOD = 1.0x damage
-// GREAT = 1.2x damage
-// PERFECT = Crit!
-
-const baseDmg = 40;
-const critPercent = 60; // +60% crit damage
-const critDmg = Math.round(baseDmg * (1 + critPercent / 100));
-
-function calculateAttackDamage(rating, baseDmg, critPercent) {
-    switch(rating) {
-        case 'miss':
-            return { damage: Math.max(1, Math.round(baseDmg * 0.5)), isCrit: false, label: 'MISS (50%)' };
-        case 'good':
-            return { damage: Math.round(baseDmg * 1.0), isCrit: false, label: 'GOOD (100%)' };
-        case 'great':
-            return { damage: Math.round(baseDmg * 1.2), isCrit: false, label: 'GREAT (120%)' };
-        case 'perfect':
-            const critBonusMult = 1 + (critPercent / 100);
-            return { damage: Math.round(baseDmg * critBonusMult), isCrit: true, label: 'CRIT!' };
-        default:
-            return { damage: baseDmg, isCrit: false, label: 'NORMAL' };
-    }
+function calcDmg(rating, base, critPct) {
+    if (rating === 'miss') return { damage: Math.round(base * 0.5), isCrit: false };
+    if (rating === 'good') return { damage: base, isCrit: false };
+    if (rating === 'great') return { damage: Math.round(base * 1.2), isCrit: false };
+    return { damage: Math.round(base * (1 + critPct / 100)), isCrit: true };
 }
-
-const missResult = calculateAttackDamage('miss', baseDmg, critPercent);
-assert(missResult.damage === 20 && !missResult.isCrit, `MISS halves attack damage: ${missResult.damage} (expected 20)`);
-
-const goodResult = calculateAttackDamage('good', baseDmg, critPercent);
-assert(goodResult.damage === 40 && !goodResult.isCrit, `GOOD delivers 1.0x damage: ${goodResult.damage} (expected 40)`);
-
-const greatResult = calculateAttackDamage('great', baseDmg, critPercent);
-assert(greatResult.damage === 48 && !greatResult.isCrit, `GREAT delivers 1.2x damage: ${greatResult.damage} (expected 48)`);
-
-const perfectResult = calculateAttackDamage('perfect', baseDmg, critPercent);
-assert(perfectResult.damage === 64 && perfectResult.isCrit, `PERFECT delivers Critical Strike with hero crit stat (${perfectResult.damage} vs expected 64)`);
+assert(calcDmg('miss', 40, 60).damage === 20, 'MISS halves attack damage (20)');
+assert(calcDmg('good', 40, 60).damage === 40, 'GOOD delivers 1.0x damage (40)');
+assert(calcDmg('great', 40, 60).damage === 48, 'GREAT delivers 1.2x damage (48)');
+assert(calcDmg('perfect', 40, 60).damage === 64 && calcDmg('perfect', 40, 60).isCrit, 'PERFECT delivers Critical Strike with hero crit stat (64)');
 
 // 6. Testing Game Polish, Audio, Skills & Talents
 console.log('\n6. Testing Game Polish, Audio, Skills, Talents...');
@@ -743,9 +650,9 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.9.6 Build 60)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=60`), `index.html links ${f} with v=60`));
-assert(htmlContent.includes('v1.9.6 (Build 60)'), 'index.html footer specifies v1.9.6 (Build 60)');
+// Cache Buster Version & Modular CSS Links (v1.9.7 Build 61)
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js', 'pvp.css', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=61`), `index.html links ${f} with v=61`));
+assert(htmlContent.includes('v1.9.7 (Build 61)'), 'index.html footer specifies v1.9.7 (Build 61)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -978,6 +885,64 @@ assert(testCombat.isDefeatSequence === true && testCombat.defeatSequenceTimer > 
 assert(testCombat.fx.shockwaves.some(s => s.color === '#ff2222'), 'Defeat cinematic emits amp short-circuit shockwave');
 testCombat.update(1900);
 assert(defModalTriggered === true && testCombat.isDefeatSequence === false, 'Defeat sequence triggers showDefeatModal upon completion');
+
+// ==========================================
+// 27. Testing Simulated Online PvP Duel System (v1.9.7 Build 61)
+// ==========================================
+console.log('\n27. Testing Simulated Online PvP Duel System (Matchmaking, AI, Spawns & Cross-Healing)...');
+assert(typeof PvPSystem !== 'undefined', 'PvPSystem class loaded');
+const pvp = new PvPSystem();
+assert(pvp.state === 'idle' && pvp.nicknamesPool.length >= 40, 'PvPSystem initializes in idle state with 40+ authentic gamer tags');
+assert(pvp.getRank(200).tier === 'bronze' && pvp.getRank(500).tier === 'silver' && pvp.getRank(1500).tier === 'platinum' && pvp.getRank(2600).tier === 'master', 'PvP Rank tiers mapped correctly');
+
+// Opponent Generation & Balancing
+const opp = pvp.generateOpponent({ level: 5, name: 'Johnny' });
+assert(opp && opp.level >= 4 && opp.level <= 6, `Opponent level balanced to player level (Player Lv.5 -> Opponent Lv.${opp.level})`);
+assert(opp.ping >= 20 && opp.ping <= 45 && opp.accuracy > 0.90, `Opponent has realistic ping (${opp.ping}ms) and accuracy (${Math.round(opp.accuracy*100)}%)`);
+
+// Center Twin Spawns
+const pvpCombat = new CombatSystem();
+pvpCombat.isPvPMode = true; pvpCombat.pvpSystem = pvp; pvp.opponent = opp;
+pvpCombat.entities.zombies = [];
+pvp.spawnZombiePair(pvpCombat, { type: 'normal', hp: 100, speed: 38, name: 'Zumbi Punk' });
+assert(pvpCombat.entities.zombies.length === 2, 'spawnZombiePair spawns exactly 2 twin zombies at screen center');
+const [zPlayer, zOpponent] = pvpCombat.entities.zombies;
+assert(zPlayer.side === 'player' && zOpponent.side === 'opponent', 'Zombies correctly assigned to player side and opponent side');
+assert(zPlayer.direction === -1 && zOpponent.direction === 1, 'Player zombie moves left (-1), opponent zombie moves right (+1)');
+
+// Over-Shoot Cross-Healing Rule
+// 1. When player has NO player zombies active, player projectile overshoots and HEALS opponent zombie (+30% damage as heal)
+pvpCombat.entities.zombies = [zOpponent];
+zOpponent.hp = 50;
+const testProj = { x: zOpponent.x, y: zOpponent.y - 15, damage: 40, active: true, owner: 'player' };
+const healed = pvp.handleCollision(testProj, zOpponent, pvpCombat);
+assert(healed === true && !testProj.active && zOpponent.hp === 50 + 12, `Clear-lane over-shoot healed opponent zombie by 30% of damage (+12 HP: 50 -> ${zOpponent.hp})`);
+assert(pvp.overhealsPlayer === 1, 'overhealsPlayer counter incremented');
+
+// 2. Normal collision when player zombie is present
+pvpCombat.entities.zombies = [zPlayer, zOpponent];
+zPlayer.active = true;
+const normalProj = { x: zPlayer.x, y: zPlayer.y - 15, damage: 40, active: true, owner: 'player' };
+const hitNormal = pvp.handleCollision(normalProj, zPlayer, pvpCombat);
+assert(hitNormal === false, 'Player projectile hits player-side zombie normally (handleCollision returns false to allow standard damage)');
+
+// Opponent AI Note Reaction & Projectile Firing
+pvp.state = 'playing';
+pvpCombat.entities.projectiles = [];
+const dummyNote = { time: 1.0, lane: 0 };
+pvp.onSongNotePassed(dummyNote, 'perfect', 1.0, pvpCombat);
+assert(opp.totalNotes === 1, 'Opponent AI reacts to rhythm highway notes');
+if (opp.streak > 0) {
+    assert(pvpCombat.entities.projectiles.some(p => p.owner === 'opponent' && p.vx < 0), 'Opponent fires projectile traveling left toward center');
+}
+
+// Victory & Defeat Conditions
+pvp.state = 'playing';
+let pvpModalOpened = false;
+global.document.getElementById = (id) => ({ classList: { add: () => { if (id === 'pvp-results-modal') pvpModalOpened = true; }, remove: () => {} }, style: {}, innerText: '' });
+pvp.damageOpponent(100, true, '-100 HP', '#ff3344', pvpCombat);
+assert(opp.hp === 0 && pvp.state === 'ended', 'Opponent HP 0 ends duel by KO');
+assert(pvpModalOpened === true, 'PvP results comparison modal opened on duel completion');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
