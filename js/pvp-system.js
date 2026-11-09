@@ -14,6 +14,11 @@ class PvPSystem {
         this.overhealsPlayer = 0;
         this.overhealsOpponent = 0;
         this.opponentZombiesKilled = 0;
+        this.oppLaneFlashes = [0, 0, 0, 0];
+        this.oppParticles = [];
+        this.oppFloatingRatings = [];
+        this.oppStreak = 0;
+        this.oppMultiplier = 1;
 
         // Realistic Player Nicknames Pool (Brazilian & Global rhythm gamers)
         this.nicknamesPool = [
@@ -86,6 +91,15 @@ class PvPSystem {
         this.searchTimer = 0;
         this.searchTargetTime = (Math.random() * 1.8 + 2.4); // 2.4s to 4.2s realistic queue
         this.versusCountdown = 3;
+        this.opponent = null;
+        this.overhealsPlayer = 0;
+        this.overhealsOpponent = 0;
+        this.opponentZombiesKilled = 0;
+        this.oppLaneFlashes = [0, 0, 0, 0];
+        this.oppParticles = [];
+        this.oppFloatingRatings = [];
+        this.oppStreak = 0;
+        this.oppMultiplier = 1;
 
         const modal = document.getElementById('pvp-matchmaking-modal');
         if (modal) modal.classList.add('open');
@@ -233,50 +247,67 @@ class PvPSystem {
         if (!this.opponent || this.state !== 'playing' || !combat) return;
         this.opponent.totalNotes++;
 
-        // Opponent simulated accuracy roll (~92% overall accuracy)
+        const track = (note && note.track !== undefined) ? note.track : 0;
         const roll = Math.random();
         let oppRating = 'perfect';
-        if (roll > this.opponent.accuracy) {
-            oppRating = 'miss';
-        } else if (roll > 0.70) {
-            oppRating = 'great';
-        } else if (roll > 0.88) {
-            oppRating = 'good';
-        }
+        if (roll > this.opponent.accuracy) oppRating = 'miss';
+        else if (roll > 0.70) oppRating = 'great';
+        else if (roll > 0.88) oppRating = 'good';
 
         const oppPos = this.getOpponentPosition(combat);
 
         if (oppRating === 'miss') {
             this.opponent.streak = 0;
+            this.oppStreak = 0;
+            this.oppMultiplier = 1;
+            this.addOpponentRating('MISS', track, '#ff4444');
             combat.addFloatingText('MISS (OPP)', oppPos.x - 15, oppPos.y - 45, '#ff4444', false);
             return;
         }
 
         this.opponent.streak++;
+        this.oppStreak = this.opponent.streak;
         this.opponent.maxStreak = Math.max(this.opponent.maxStreak, this.opponent.streak);
         this.opponent.notesHit++;
+        this.oppMultiplier = Math.min(4, 1 + Math.floor(this.oppStreak / 6));
 
         const mult = oppRating === 'perfect' ? 1.5 : (oppRating === 'great' ? 1.2 : 1.0);
         const dmg = Math.round(this.opponent.damage * mult);
-        const scoreGained = Math.round(150 * mult * Math.min(4, 1 + this.opponent.streak * 0.05));
+        const scoreGained = Math.round(150 * mult * this.oppMultiplier);
         this.opponent.score += scoreGained;
 
+        const ratingText = oppRating === 'perfect' ? 'PERFECT!' : (oppRating === 'great' ? 'GREAT!' : 'GOOD');
+        const ratingCol = oppRating === 'perfect' ? '#ffcc00' : (oppRating === 'great' ? '#00ff66' : '#00d4ff');
+        this.oppLaneFlashes[track] = 1.0;
+        this.addOpponentRating(ratingText, track, ratingCol);
+        this.addOpponentHitSparks(track, ratingCol);
+
+        // Find target for opponent projectile
+        let target = null, maxDist = -Infinity;
+        for (const z of combat.entities.zombies) {
+            if (z.active && z.side === 'opponent' && z.x >= combat.canvas.width * 0.48 && z.x > maxDist) {
+                maxDist = z.x; target = z;
+            }
+        }
+        if (!target) {
+            let maxPX = -Infinity;
+            for (const z of combat.entities.zombies) {
+                if (z.active && z.side === 'player' && z.x > maxPX) { maxPX = z.x; target = z; }
+            }
+        }
+
         // Fire opponent projectile from right side towards center/left
-        const startX = oppPos.x - 22;
-        const startY = oppPos.y - 18;
+        const startX = oppPos.x - 22, startY = oppPos.y - 18;
+        let angle = Math.PI;
+        if (target) angle = Math.atan2((target.y - 15) - startY, target.x - startX);
+
         combat.entities.projectiles.push({
-            x: startX,
-            y: startY,
-            vx: -440,
-            vy: (Math.random() - 0.5) * 15,
-            owner: 'opponent',
-            target: null,
-            isCrit: oppRating === 'perfect',
-            damage: dmg,
+            x: startX, y: startY,
+            vx: Math.cos(angle) * 440, vy: Math.sin(angle) * 440,
+            owner: 'opponent', target: target,
+            isCrit: oppRating === 'perfect', damage: dmg,
             frame: 3 + Math.floor(Math.random() * 4),
-            trailTimer: 0,
-            active: true,
-            projColor: '#ff3344'
+            trailTimer: 0, active: true, projColor: '#ff3344'
         });
 
         combat.fx.shockwaves.push({ x: startX, y: startY, radius: 4, maxRadius: 22, color: '#ff3344', lineWidth: 2, alpha: 1.0 });
@@ -288,7 +319,6 @@ class PvPSystem {
 
         // 1. Player Projectile Collision Logic
         if (pOwner === 'player') {
-            // Count active player-side zombies
             const hasPlayerZombies = combat.entities.zombies.some(other => other.active && other.side === 'player' && other.x <= combat.canvas.width * 0.52);
 
             // If player projectile reaches opponent zombie when player side is clear -> OVER-SHOOT HEALS OPPONENT ZOMBIE!
@@ -339,7 +369,10 @@ class PvPSystem {
                 if (z.hp <= 0 && z.active) {
                     z.active = false;
                     this.opponentZombiesKilled++;
-                    combat.onZombieKilled(z, 120, 'OPP KILL! ⚡', '#ff3344');
+                    this.opponent.score += 150;
+                    combat.addFloatingText('OPP KILL! 💀', z.x, z.y - 30, '#ff3344', true);
+                    combat.fx.spawnBurst(z.x, z.y, '#ff3344', 12, 70, 3, 0.4);
+                    combat.fx.shockwaves.push({ x: z.x, y: z.y, radius: 4, maxRadius: 35, color: '#ff3344', lineWidth: 2, alpha: 1.0 });
                 }
                 return true;
             }
@@ -369,10 +402,161 @@ class PvPSystem {
         if (this.state !== 'playing' || !this.opponent) return;
         if (this.opponent.flashTime > 0) this.opponent.flashTime -= dt;
 
+        for (let i = 0; i < 4; i++) {
+            if (this.oppLaneFlashes[i] > 0) this.oppLaneFlashes[i] = Math.max(0, this.oppLaneFlashes[i] - 5 * dt);
+        }
+
+        this.oppParticles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= 2.2 * dt; });
+        this.oppParticles = this.oppParticles.filter(p => p.life > 0);
+
+        this.oppFloatingRatings.forEach(r => { r.y += r.vy * dt; r.alpha -= 2.2 * dt; });
+        this.oppFloatingRatings = this.oppFloatingRatings.filter(r => r.alpha > 0);
+
         // Player Defeat Check
         if (combat.heroHp <= 0) {
             this.endPvPBattle('opponent_ko', combat, window.game ? window.game.rhythm : null);
         }
+    }
+
+    addOpponentRating(text, track, color = '#00ff66') {
+        const cw = (window.game && window.game.rhythm && window.game.rhythm.canvas) ? window.game.rhythm.canvas.width : 400;
+        const startX = cw * 0.5, trackW = (cw * 0.5) / 4;
+        const hitZoneY = (window.game && window.game.rhythm) ? window.game.rhythm.getHitZoneY() : 200;
+        const x = startX + track * trackW + trackW / 2;
+        this.oppFloatingRatings.push({ text, x, y: hitZoneY - 24, color, alpha: 1.0, vy: -60, scale: 1.1 });
+    }
+
+    addOpponentHitSparks(track, color) {
+        const cw = (window.game && window.game.rhythm && window.game.rhythm.canvas) ? window.game.rhythm.canvas.width : 400;
+        const startX = cw * 0.5, trackW = (cw * 0.5) / 4;
+        const hitZoneY = (window.game && window.game.rhythm) ? window.game.rhythm.getHitZoneY() : 200;
+        const x = startX + track * trackW + trackW / 2;
+        for (let i = 0; i < 6; i++) {
+            const angle = Math.random() * Math.PI * 2, spd = 40 + Math.random() * 80;
+            this.oppParticles.push({ x, y: hitZoneY, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd, size: 2.5 + Math.random() * 2, color, life: 0.35 });
+        }
+    }
+
+    drawOpponentHighway(ctx, cw, ch, hitZoneY, curTime, notes, noteSpeed = 340) {
+        if (!this.opponent) return;
+        const startX = cw * 0.5, hwW = cw * 0.5, trackW = hwW / 4;
+
+        // 1. Opponent Highway Background
+        ctx.fillStyle = '#100a14'; ctx.fillRect(startX, 0, hwW, ch);
+
+        const oppColors = [
+            { main: '#ff2a5f', glow: 'rgba(255, 42, 95, 0.45)', core: '#ffe6ed' },
+            { main: '#ff7700', glow: 'rgba(255, 119, 0, 0.45)', core: '#fff0e6' },
+            { main: '#ff00bb', glow: 'rgba(255, 0, 187, 0.45)', core: '#ffe6f9' },
+            { main: '#00e5ff', glow: 'rgba(0, 229, 255, 0.45)', core: '#e6faff' }
+        ];
+
+        // 2. Fret Strings & Flashes
+        for (let i = 0; i < 4; i++) {
+            const tx = startX + i * trackW;
+            if (this.oppLaneFlashes[i] > 0) {
+                ctx.fillStyle = oppColors[i].glow;
+                ctx.globalAlpha = this.oppLaneFlashes[i] * 0.7;
+                ctx.fillRect(tx, 0, trackW, ch);
+                ctx.globalAlpha = 1.0;
+            }
+            ctx.strokeStyle = 'rgba(255, 100, 140, 0.15)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(tx + trackW / 2, 0); ctx.lineTo(tx + trackW / 2, ch); ctx.stroke();
+            ctx.strokeStyle = '#251220'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(tx, 0); ctx.lineTo(tx, ch); ctx.stroke();
+        }
+
+        // 3. Opponent Hit Zone Bar
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 51, 68, 0.35)'; ctx.lineWidth = 7;
+        ctx.beginPath(); ctx.moveTo(startX, hitZoneY); ctx.lineTo(cw, hitZoneY); ctx.stroke();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(startX, hitZoneY); ctx.lineTo(cw, hitZoneY); ctx.stroke();
+        ctx.restore();
+
+        // 4. Opponent Target Pads
+        for (let i = 0; i < 4; i++) {
+            const bx = startX + i * trackW + trackW / 2, col = oppColors[i], isPressed = this.oppLaneFlashes[i] > 0.2;
+            ctx.save(); ctx.translate(bx, hitZoneY);
+            if (isPressed) ctx.scale(1.18, 1.18);
+            ctx.strokeStyle = col.main + (isPressed ? '66' : '33'); ctx.lineWidth = isPressed ? 7 : 5;
+            ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = col.main; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = isPressed ? col.main : 'rgba(0, 0, 0, 0.6)';
+            ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        }
+
+        // 5. Opponent Notes & Sustains
+        if (notes && notes.length > 0) {
+            notes.forEach(note => {
+                const drawY = hitZoneY - (note.time - curTime) * noteSpeed;
+                if (drawY < -50 || drawY > ch + 50) return;
+                const nx = startX + note.track * trackW + trackW / 2, col = oppColors[note.track] || oppColors[0];
+                if (note.duration && note.duration >= 0.2) {
+                    const tailY = hitZoneY - ((note.time + note.duration) - curTime) * noteSpeed;
+                    const rTop = Math.min(tailY, drawY), rBot = Math.max(tailY, drawY);
+                    if (rBot - rTop > 2) {
+                        ctx.save(); ctx.fillStyle = col.main; ctx.globalAlpha = 0.75;
+                        ctx.fillRect(nx - 7, rTop, 14, rBot - rTop);
+                        ctx.strokeStyle = col.core; ctx.lineWidth = 2;
+                        ctx.beginPath(); ctx.moveTo(nx, rTop + 4); ctx.lineTo(nx, rBot - 4); ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+                ctx.save(); ctx.translate(nx, drawY);
+                ctx.strokeStyle = col.main + '66'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(0, -18); ctx.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx.bezierCurveTo(-18, 12, -20, -18, 0, -18); ctx.stroke();
+                ctx.fillStyle = col.main; ctx.fill();
+                ctx.fillStyle = col.core; ctx.beginPath(); ctx.arc(0, -2, 6.5, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // 6. Opponent Hit Sparks
+        ctx.save();
+        for (let i = 0; i < this.oppParticles.length; i++) {
+            const p = this.oppParticles[i];
+            ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life / 0.35);
+            ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        }
+        ctx.restore();
+
+        // 7. Opponent Floating Ratings
+        this.oppFloatingRatings.forEach(r => {
+            ctx.save(); ctx.globalAlpha = Math.max(0, r.alpha);
+            ctx.font = `bold ${Math.round(18 * r.scale)}px 'Impact', sans-serif`;
+            ctx.textAlign = 'center'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4;
+            ctx.strokeText(r.text, r.x, r.y); ctx.fillStyle = r.color; ctx.fillText(r.text, r.x, r.y);
+            ctx.restore();
+        });
+
+        // 8. Opponent Highway HUD
+        ctx.save();
+        ctx.font = "bold 13px 'Segoe UI', sans-serif";
+        ctx.fillStyle = this.oppMultiplier > 1 ? '#ff5577' : '#888888';
+        ctx.textAlign = 'left';
+        ctx.fillText(`🎮 ${this.opponent.name} • x${this.oppMultiplier}`, startX + 12, 22);
+        if (this.oppStreak > 4) {
+            ctx.font = "bold 12px 'Segoe UI', sans-serif";
+            ctx.fillStyle = '#ff3344';
+            ctx.fillText(`STREAK: ${this.oppStreak} 🔥`, startX + 12, 40);
+        }
+        ctx.restore();
+
+        // 9. Center Neon Divider Line & VS Badge
+        ctx.save();
+        ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 2.5; ctx.shadowColor = '#00d4ff'; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.moveTo(startX, 0); ctx.lineTo(startX, ch); ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        const badgeY = 22;
+        ctx.fillStyle = '#080612'; ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(startX, badgeY, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.font = "900 11px 'Impact', sans-serif"; ctx.fillStyle = '#ffd700'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('VS', startX, badgeY);
+        ctx.restore();
     }
 
     draw(ctx, combat) {
@@ -409,7 +593,7 @@ class PvPSystem {
         ctx.fillText(this.opponent.name, oppPos.x - 4, oppPos.y - 42);
         ctx.restore();
 
-        // Draw Center Confrontation Line
+        // Draw Center Confrontation Line in Arena
         const cw = combat.canvas.width, ch = combat.canvas.height;
         const metrics = combat.getRoadMetrics ? combat.getRoadMetrics() : { laneY: ch * 0.78 };
         ctx.save();

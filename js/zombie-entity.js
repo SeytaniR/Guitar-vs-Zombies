@@ -244,7 +244,7 @@ class ZombieEntity {
                 this.attackCooldown = this.attackInterval || 1.1;
                 this.frame = 8 + (Math.floor(this.walkTimer) % 4);
                 if (combat && combat.pvpSystem) {
-                    combat.pvpSystem.damageOpponent(this.attackDamage, false, `-${this.attackDamage} HP`, '#ff3344');
+                    combat.pvpSystem.damageOpponent(this.attackDamage, false, `-${this.attackDamage} HP`, '#ff3344', combat);
                 }
             }
         }

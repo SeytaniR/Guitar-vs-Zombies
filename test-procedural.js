@@ -650,9 +650,9 @@ assert(htmlContent.includes('id="map-selected-arena-showcase"') && !htmlContent.
 assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes('id="map-arena-next-btn"'), 'index.html removed manual map cycling buttons');
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
-// Cache Buster Version & Modular CSS Links (v1.9.7 Build 61)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js', 'pvp.css', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=61`), `index.html links ${f} with v=61`));
-assert(htmlContent.includes('v1.9.7 (Build 61)'), 'index.html footer specifies v1.9.7 (Build 61)');
+// Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js', 'pvp.css', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=62`), `index.html links ${f} with v=62`));
+assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -887,7 +887,7 @@ testCombat.update(1900);
 assert(defModalTriggered === true && testCombat.isDefeatSequence === false, 'Defeat sequence triggers showDefeatModal upon completion');
 
 // ==========================================
-// 27. Testing Simulated Online PvP Duel System (v1.9.7 Build 61)
+// 27. Testing Simulated Online PvP Duel System (v1.9.7 Build 62)
 // ==========================================
 console.log('\n27. Testing Simulated Online PvP Duel System (Matchmaking, AI, Spawns & Cross-Healing)...');
 assert(typeof PvPSystem !== 'undefined', 'PvPSystem class loaded');
@@ -929,12 +929,32 @@ assert(hitNormal === false, 'Player projectile hits player-side zombie normally 
 // Opponent AI Note Reaction & Projectile Firing
 pvp.state = 'playing';
 pvpCombat.entities.projectiles = [];
-const dummyNote = { time: 1.0, lane: 0 };
+const dummyNote = { time: 1.0, track: 0, lane: 0 };
 pvp.onSongNotePassed(dummyNote, 'perfect', 1.0, pvpCombat);
 assert(opp.totalNotes === 1, 'Opponent AI reacts to rhythm highway notes');
+assert(typeof pvp.drawOpponentHighway === 'function', 'drawOpponentHighway method available');
+assert(Array.isArray(pvp.oppLaneFlashes) && pvp.oppLaneFlashes.length === 4, 'Opponent highway 4 lane flashes initialized');
 if (opp.streak > 0) {
     assert(pvpCombat.entities.projectiles.some(p => p.owner === 'opponent' && p.vx < 0), 'Opponent fires projectile traveling left toward center');
+    assert(pvp.oppFloatingRatings.length > 0, 'Opponent highway creates floating ratings on note hit');
 }
+
+// Opponent Side Over-shoot cross healing (+30% HP)
+pvpCombat.entities.zombies = [zPlayer];
+zPlayer.hp = 50;
+const oppOverProj = { x: zPlayer.x, y: zPlayer.y - 15, damage: 30, active: true, owner: 'opponent' };
+const oppHealed = pvp.handleCollision(oppOverProj, zPlayer, pvpCombat);
+assert(oppHealed === true && zPlayer.hp === 59 && pvp.overhealsOpponent === 1, 'Opponent clear-lane projectile heals player zombie (+30% HP: 50 -> 59)');
+
+// Opponent kill integrity (does NOT award player score/kills)
+pvpCombat.entities.zombies = [zOpponent];
+zOpponent.hp = 10;
+const oppKillProj = { x: zOpponent.x, y: zOpponent.y - 15, damage: 30, active: true, owner: 'opponent' };
+const initialPlayerKills = pvpCombat.zombiesKilled;
+const initialPlayerScore = pvpCombat.score;
+pvp.handleCollision(oppKillProj, zOpponent, pvpCombat);
+assert(!zOpponent.active && pvp.opponentZombiesKilled === 1, 'Opponent kill credited to opponent kill count');
+assert(pvpCombat.zombiesKilled === initialPlayerKills && pvpCombat.score === initialPlayerScore, 'Opponent kill does NOT pollute player score or kill count');
 
 // Victory & Defeat Conditions
 pvp.state = 'playing';

@@ -99,18 +99,14 @@ class CombatSystem {
     }
 
     getHeroAttackSpeed() {
-        const heroStats = this.getActiveHeroStats();
-        let spd = (heroStats && heroStats.baseAttackSpeed) ? heroStats.baseAttackSpeed : (this.baseAttackSpeed || 1.0);
+        const hs = this.getActiveHeroStats();
+        let spd = (hs && hs.baseAttackSpeed) ? hs.baseAttackSpeed : (this.baseAttackSpeed || 1.0);
         if (this.heroAttackSpeedBuffTimer > 0) spd *= (this.heroAttackSpeedBuffMult || 1.4);
         if (window.talentSystem) spd += window.talentSystem.getStat('speed_shred') * 0.04;
-        const comboBonus = Math.min(2.0, Math.max(0, (this.combo || 0) * 0.01));
-        return spd + comboBonus;
+        return spd + Math.min(2.0, Math.max(0, (this.combo || 0) * 0.01));
     }
 
-    getActiveHeroSheet() {
-        const heroData = this.getActiveHeroData();
-        return (heroData && this.assets && this.assets[heroData.sheet]) ? this.assets[heroData.sheet] : this.assets.heroSheet;
-    }
+    getActiveHeroSheet() { const h = this.getActiveHeroData(); return (h && this.assets && this.assets[h.sheet]) ? this.assets[h.sheet] : this.assets.heroSheet; }
 
     getRoadMetrics() {
         const cw = Math.max(100, this.canvas.width || 360);
@@ -305,12 +301,20 @@ class CombatSystem {
         const heroPos = this.getHeroPosition();
         this.heroStrumAnim = 0.8;
 
-        let target = null;
-        let minX = Infinity;
-        for (const z of this.entities.zombies) {
-            if (z.active && z.x <= this.canvas.width - 5 && z.x > heroPos.x - 10 && z.x < minX) {
-                minX = z.x;
-                target = z;
+        let target = null, minX = Infinity;
+        if (this.isPvPMode) {
+            for (const z of this.entities.zombies) {
+                if (z.active && z.side === 'player' && z.x <= this.canvas.width * 0.52 && z.x > heroPos.x - 10 && z.x < minX) { minX = z.x; target = z; }
+            }
+            if (!target) {
+                let minOppX = Infinity;
+                for (const z of this.entities.zombies) {
+                    if (z.active && z.side === 'opponent' && z.x < minOppX) { minOppX = z.x; target = z; }
+                }
+            }
+        } else {
+            for (const z of this.entities.zombies) {
+                if (z.active && z.x <= this.canvas.width - 5 && z.x > heroPos.x - 10 && z.x < minX) { minX = z.x; target = z; }
             }
         }
 
@@ -351,7 +355,7 @@ class CombatSystem {
         this.entities.projectiles.push({
             x: startX, y: startY, vx: Math.cos(angle) * projSpeed, vy: Math.sin(angle) * projSpeed,
             target: target, isCrit: isCrit, isMiss: isMiss, damage: calcDamage, skill: isMiss ? null : mod.skill,
-            frame: 3 + Math.floor(Math.random() * 4), trailTimer: 0, active: true,
+            frame: 3 + Math.floor(Math.random() * 4), trailTimer: 0, active: true, owner: 'player',
             heroId: activeHero ? activeHero.id : null, projColor: projColor,
             isSkillShot: !isMiss && !!mod.skill && mod.skill.manaCost > 0
         });
@@ -455,12 +459,11 @@ class CombatSystem {
         // Rock Mana bonus on kill
         this.rockMana = Math.min(this.maxRockMana, this.rockMana + 5.0);
 
-        // Check Stage Clear Target or Boss Defeat
-        const targetKills = window.stageSystem ? window.stageSystem.getTargetKills() : 20;
-        const isClear = this.isBossStage ? (z.isBoss || this.zombiesKilled >= targetKills) : (this.zombiesKilled >= targetKills);
-        if (isClear && !this.stageCompleted) {
-            this.stageCompleted = true;
-            this.triggerStageClear(z.isBoss);
+        // Check Stage Clear Target or Boss Defeat (Single-player only)
+        if (!this.isPvPMode) {
+            const targetKills = window.stageSystem ? window.stageSystem.getTargetKills() : 20;
+            const isClear = this.isBossStage ? (z.isBoss || this.zombiesKilled >= targetKills) : (this.zombiesKilled >= targetKills);
+            if (isClear && !this.stageCompleted) { this.stageCompleted = true; this.triggerStageClear(z.isBoss); }
         }
 
         if (z.type === 'mutant') {
@@ -561,6 +564,10 @@ class CombatSystem {
         if (this.isGameOver || this.isDefeatSequence) return;
         this.isGameOver = true;
         this.matchActive = false;
+        if (this.isPvPMode && this.pvpSystem) {
+            this.pvpSystem.endPvPBattle('opponent_ko', this, window.game ? window.game.rhythm : null);
+            return;
+        }
         this.isDefeatSequence = true;
         this.defeatSequenceTimer = 1.8;
         this.fx.triggerDefeat(this.getHeroPosition());

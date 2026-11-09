@@ -52,9 +52,16 @@ class RhythmSystem {
     setupInputHandlers() {
         const getLaneFromX = (clientX) => {
             const rect = this.canvas.getBoundingClientRect();
-            const x = clientX - rect.left;
+            const relX = (clientX - rect.left) * (this.canvas.width / rect.width);
+            const isPvP = window.game && window.game.combat && window.game.combat.isPvPMode;
+            if (isPvP) {
+                const halfW = this.canvas.width * 0.5;
+                const effX = relX >= halfW ? (relX - halfW) : relX;
+                const trackWidth = halfW / this.tracks;
+                return Math.min(this.tracks - 1, Math.max(0, Math.floor(effX / trackWidth)));
+            }
             const trackWidth = this.canvas.width / this.tracks;
-            return Math.min(this.tracks - 1, Math.max(0, Math.floor(x / trackWidth)));
+            return Math.min(this.tracks - 1, Math.max(0, Math.floor(relX / trackWidth)));
         };
 
         const lastTapTime = [0, 0, 0, 0];
@@ -105,17 +112,13 @@ class RhythmSystem {
         let hasPointerEvents = false;
         // Pointer Events (supports stylus, mouse, and unified pointers)
         this.canvas.addEventListener('pointerdown', (e) => {
-            hasPointerEvents = true;
-            e.preventDefault();
+            hasPointerEvents = true; e.preventDefault();
             try { this.canvas.setPointerCapture(e.pointerId); } catch(err) {}
             onDown(getLaneFromX(e.clientX), e.pointerId);
         });
-        this.canvas.addEventListener('pointermove', (e) => {
-            if (this.pointerLaneMap.has(e.pointerId)) onMove(e.clientX, e.pointerId);
-        });
+        this.canvas.addEventListener('pointermove', (e) => { if (this.pointerLaneMap.has(e.pointerId)) onMove(e.clientX, e.pointerId); });
         this.canvas.addEventListener('pointerup', (e) => {
-            e.preventDefault();
-            try { this.canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+            e.preventDefault(); try { this.canvas.releasePointerCapture(e.pointerId); } catch(err) {}
             onUp(e.pointerId);
         });
         this.canvas.addEventListener('pointercancel', (e) => onUp(e.pointerId));
@@ -123,21 +126,15 @@ class RhythmSystem {
 
         // Touch Events fallback (only runs on devices without pointer events)
         this.canvas.addEventListener('touchstart', (e) => {
-            if (hasPointerEvents) return;
-            e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                const t = e.changedTouches[i];
-                onDown(getLaneFromX(t.clientX), 'touch_' + t.identifier);
-            }
+            if (hasPointerEvents) return; e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) onDown(getLaneFromX(e.changedTouches[i].clientX), 'touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
         this.canvas.addEventListener('touchmove', (e) => {
-            if (hasPointerEvents) return;
-            e.preventDefault();
+            if (hasPointerEvents) return; e.preventDefault();
             for (let i = 0; i < e.changedTouches.length; i++) onMove(e.changedTouches[i].clientX, 'touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
         this.canvas.addEventListener('touchend', (e) => {
-            if (hasPointerEvents) return;
-            e.preventDefault();
+            if (hasPointerEvents) return; e.preventDefault();
             for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
         }, { passive: false });
         this.canvas.addEventListener('touchcancel', (e) => {
@@ -569,7 +566,9 @@ class RhythmSystem {
 
         const cw = this.canvas.width;
         const ch = this.canvas.height;
-        const trackW = cw / this.tracks;
+        const isPvP = !!(window.game && window.game.combat && window.game.combat.isPvPMode);
+        const hwWidth = isPvP ? cw * 0.5 : cw;
+        const trackW = hwWidth / this.tracks;
         const hitZoneY = this.getHitZoneY();
 
         // 1. Draw Fretboard Background & Strings
@@ -607,14 +606,14 @@ class RhythmSystem {
         this.ctx.lineWidth = 7;
         this.ctx.beginPath();
         this.ctx.moveTo(0, hitZoneY);
-        this.ctx.lineTo(cw, hitZoneY);
+        this.ctx.lineTo(hwWidth, hitZoneY);
         this.ctx.stroke();
 
         this.ctx.strokeStyle = '#ffffff';
         this.ctx.lineWidth = 2.5;
         this.ctx.beginPath();
         this.ctx.moveTo(0, hitZoneY);
-        this.ctx.lineTo(cw, hitZoneY);
+        this.ctx.lineTo(hwWidth, hitZoneY);
         this.ctx.stroke();
         this.ctx.restore();
 
@@ -682,50 +681,30 @@ class RhythmSystem {
 
             // Rounded sustain ribbon
             this.ctx.beginPath();
-            if (typeof this.ctx.roundRect === 'function') {
-                this.ctx.roundRect(x - ribWidth / 2, ribTop, ribWidth, ribHeight, 6);
-            } else {
-                this.ctx.rect(x - ribWidth / 2, ribTop, ribWidth, ribHeight);
-            }
+            if (typeof this.ctx.roundRect === 'function') this.ctx.roundRect(x - ribWidth / 2, ribTop, ribWidth, ribHeight, 6);
+            else this.ctx.rect(x - ribWidth / 2, ribTop, ribWidth, ribHeight);
             this.ctx.fill();
 
             // Core electric laser line inside ribbon
             this.ctx.strokeStyle = note.holding ? '#ffffff' : col.core;
             this.ctx.lineWidth = note.holding ? 3.5 : 2.0;
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, ribTop + 4);
-            this.ctx.lineTo(x, ribBottom - 4);
-            this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.moveTo(x, ribTop + 4); this.ctx.lineTo(x, ribBottom - 4); this.ctx.stroke();
 
             // Animated chevrons / energy pulses along sustain trail
             const pulseOffset = (performance.now() * 0.25) % 24;
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-            this.ctx.lineWidth = 1.5;
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; this.ctx.lineWidth = 1.5;
             for (let py = ribTop + pulseOffset; py < ribBottom - 6; py += 24) {
-                this.ctx.beginPath();
-                this.ctx.moveTo(x - 5, py);
-                this.ctx.lineTo(x, py + 4);
-                this.ctx.lineTo(x + 5, py);
-                this.ctx.stroke();
+                this.ctx.beginPath(); this.ctx.moveTo(x - 5, py); this.ctx.lineTo(x, py + 4); this.ctx.lineTo(x + 5, py); this.ctx.stroke();
             }
 
             // End cap (stopper gem at the tail)
-            this.ctx.fillStyle = col.main;
-            this.ctx.beginPath();
-            this.ctx.arc(x, ribTop, 6, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.beginPath();
-            this.ctx.arc(x, ribTop, 2.5, 0, Math.PI * 2);
-            this.ctx.fill();
+            this.ctx.fillStyle = col.main; this.ctx.beginPath(); this.ctx.arc(x, ribTop, 6, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.fillStyle = '#ffffff'; this.ctx.beginPath(); this.ctx.arc(x, ribTop, 2.5, 0, Math.PI * 2); this.ctx.fill();
 
             // If actively holding, draw electric aura at hit zone
             if (note.holding) {
-                this.ctx.strokeStyle = '#ffffff';
-                this.ctx.lineWidth = 2;
-                this.ctx.beginPath();
-                this.ctx.arc(x, hitZoneY, 20 + Math.sin(performance.now() * 0.03) * 4, 0, Math.PI * 2);
-                this.ctx.stroke();
+                this.ctx.strokeStyle = '#ffffff'; this.ctx.lineWidth = 2;
+                this.ctx.beginPath(); this.ctx.arc(x, hitZoneY, 20 + Math.sin(performance.now() * 0.03) * 4, 0, Math.PI * 2); this.ctx.stroke();
             }
 
             this.ctx.restore();
@@ -745,8 +724,6 @@ class RhythmSystem {
 
             this.ctx.save();
             this.ctx.translate(x, drawY);
-
-            // GPU halo stroke & fill
             this.ctx.strokeStyle = col.main + (note.holding ? '88' : '44');
             this.ctx.lineWidth = note.holding ? 6 : 4;
             this.ctx.beginPath();
@@ -754,13 +731,8 @@ class RhythmSystem {
             this.ctx.bezierCurveTo(20, -18, 18, 12, 0, 20);
             this.ctx.bezierCurveTo(-18, 12, -20, -18, 0, -18);
             this.ctx.stroke();
-            this.ctx.fillStyle = col.main;
-            this.ctx.fill();
-
-            this.ctx.fillStyle = col.core;
-            this.ctx.beginPath();
-            this.ctx.arc(0, -2, 6.5, 0, Math.PI * 2);
-            this.ctx.fill();
+            this.ctx.fillStyle = col.main; this.ctx.fill();
+            this.ctx.fillStyle = col.core; this.ctx.beginPath(); this.ctx.arc(0, -2, 6.5, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.restore();
         });
 
@@ -790,23 +762,37 @@ class RhythmSystem {
 
         // 7. HUD Prompt & Multiplier
         this.drawHighwayHUD(cw, ch);
+
+        // 8. Opponent Dual Highway (PvP Mode)
+        if (isPvP && window.game && window.game.combat && window.game.combat.pvpSystem) {
+            window.game.combat.pvpSystem.drawOpponentHighway(this.ctx, cw, ch, hitZoneY, this.customSongTime, this.notes, this.noteSpeed);
+        }
     }
 
     drawHighwayHUD(cw, ch) {
         this.ctx.save();
+        const isPvP = !!(window.game && window.game.combat && window.game.combat.isPvPMode);
         this.ctx.font = "bold 13px 'Segoe UI', sans-serif";
         this.ctx.fillStyle = this.multiplier > 1 ? '#ffcc00' : '#888888';
         this.ctx.textAlign = 'left';
-        this.ctx.fillText(`COMBO x${this.multiplier}`, 12, 22);
-
-        if (this.streak > 4) {
-            this.ctx.font = "bold 12px 'Segoe UI', sans-serif";
-            this.ctx.fillStyle = '#00ff66';
-            this.ctx.fillText(`STREAK: ${this.streak} 🔥`, 12, 40);
-        } else if (!this.autoPlay && this.notes.length > 0) {
-            this.ctx.font = "bold 11px 'Segoe UI', sans-serif";
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-            this.ctx.fillText(`TOQUE NAS PISTAS NO RITMO! 👇`, 12, 40);
+        if (isPvP) {
+            this.ctx.fillText(`🎸 VOCÊ • x${this.multiplier}`, 12, 22);
+            if (this.streak > 4) {
+                this.ctx.font = "bold 12px 'Segoe UI', sans-serif";
+                this.ctx.fillStyle = '#00ff66';
+                this.ctx.fillText(`STREAK: ${this.streak} 🔥`, 12, 40);
+            }
+        } else {
+            this.ctx.fillText(`COMBO x${this.multiplier}`, 12, 22);
+            if (this.streak > 4) {
+                this.ctx.font = "bold 12px 'Segoe UI', sans-serif";
+                this.ctx.fillStyle = '#00ff66';
+                this.ctx.fillText(`STREAK: ${this.streak} 🔥`, 12, 40);
+            } else if (!this.autoPlay && this.notes.length > 0) {
+                this.ctx.font = "bold 11px 'Segoe UI', sans-serif";
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                this.ctx.fillText(`TOQUE NAS PISTAS NO RITMO! 👇`, 12, 40);
+            }
         }
         this.ctx.restore();
     }
