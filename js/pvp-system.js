@@ -274,17 +274,27 @@ class PvPSystem {
 
     getOpponentPosition(combat) {
         const cw = Math.max(200, (combat && combat.canvas && combat.canvas.width) || 800);
-        const heroPos = (combat && combat.getHeroPosition) ? combat.getHeroPosition() : { x: cw * 0.16, y: 200 };
-        return { x: Math.round(cw * 0.84), y: heroPos.y };
+        const heroPos = (combat && combat.getHeroPosition) ? combat.getHeroPosition() : { x: cw * 0.11, y: 200 };
+        return { x: Math.round(cw * 0.89), y: heroPos.y };
     }
 
     spawnZombiePair(combat, forceDef = null) {
         if (!combat || !combat.canvas) return;
         const cw = combat.canvas.width;
         const metrics = combat.getRoadMetrics ? combat.getRoadMetrics() : { laneY: combat.canvas.height * 0.78 };
-        const stage = window.stageSystem ? window.stageSystem.selectedStage : 1;
-        const range = window.stageSystem ? window.stageSystem.getZombieLevelRange(stage) : { min: 1, max: 2 };
-        const zLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+
+        // 1. Cap active zombies in PvP to max 2 per side to avoid mobbing
+        const activePlayerZombies = combat.entities.zombies.filter(z => z.active && z.side === 'player').length;
+        const activeOppZombies = combat.entities.zombies.filter(z => z.active && z.side === 'opponent').length;
+        if (activePlayerZombies >= 2 && activeOppZombies >= 2 && !forceDef) return;
+
+        // 2. Normalized PvP Duel Level (independent of PvE campaign stage)
+        const pPool = window.guitaristPool;
+        const pActive = pPool ? pPool.getSelectedGuitarist() : null;
+        const pLevel = (pActive && pActive.level) || 1;
+        const oLevel = (this.opponent && this.opponent.level) || pLevel;
+        const avgLevel = Math.round((pLevel + oLevel) / 2);
+        const zLevel = Math.max(1, Math.min(10, Math.round(1 + (avgLevel - 1) * 0.08)));
 
         let enemyDef = forceDef;
         if (!enemyDef) {
@@ -293,22 +303,69 @@ class PvPSystem {
                 : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
             enemyDef = pool.length > 0
                 ? pool[Math.floor(Math.random() * pool.length)]
-                : { type: 'normal', scale: 0.50, speed: 38, hp: 104, attackDamage: 7, name: 'Zumbi Punk' };
+                : { type: 'normal', scale: 0.50, speed: 38, hp: 68, attackDamage: 4, name: 'Zumbi Punk' };
         }
 
+        // 3. Balanced PvP Stats Overrides
+        const baseRawSpeed = (forceDef && forceDef.speed !== undefined) ? forceDef.speed : (enemyDef.speed || 38);
+        const pvpSpeed = (forceDef && forceDef.isPvP && forceDef.speed !== undefined) ? forceDef.speed : Math.max(16, Math.min(22, baseRawSpeed * 0.48));
+        const pvpDmg = (forceDef && forceDef.isPvP && forceDef.attackDamage !== undefined) ? forceDef.attackDamage : Math.max(3, Math.min(6, Math.round(3 + Math.min(10, zLevel) * 0.22)));
+        const pvpBaseHp = Math.round(68 + Math.min(10, zLevel) * 3.2);
+        const pvpHp = (forceDef && forceDef.isPvP && forceDef.hp !== undefined) ? forceDef.hp : (forceDef && forceDef.hp ? Math.min(forceDef.hp, 100) : pvpBaseHp);
+
+        const pvpBaseDef = {
+            ...enemyDef,
+            isPvP: true,
+            isBoss: false,
+            scale: Math.min(enemyDef.scale || 0.50, 0.52),
+            hp: pvpHp,
+            attackDamage: pvpDmg,
+            speed: pvpSpeed,
+            attackInterval: 1.6,
+            attackCooldown: 1.2
+        };
+
         const ZombieClass = window.ZombieEntity || ZombieEntity;
+        const centerX = cw * 0.50;
 
-        // Zombie 1: Player Side (starts left of center, moves left towards player)
-        const defPlayer = { ...enemyDef, side: 'player' };
-        const zPlayer = new ZombieClass(defPlayer, metrics.laneY, cw, zLevel, cw * 0.5 - 22);
-        zPlayer.side = 'player';
-        combat.entities.zombies.push(zPlayer);
+        // Center Portal Spawn VFX
+        if (combat.fx && typeof combat.fx.spawnBurst === 'function') {
+            combat.fx.spawnBurst(centerX, metrics.laneY - 14, '#b336ff', 8, 38, 2.2, 0.35);
+            if (Array.isArray(combat.fx.shockwaves)) {
+                combat.fx.shockwaves.push({ x: centerX, y: metrics.laneY - 14, radius: 4, maxRadius: 36, color: '#b336ff', lineWidth: 2.2, alpha: 1.0 });
+            }
+        }
+        if (typeof combat.addFloatingText === 'function') {
+            combat.addFloatingText('🌀 PORTAL!', centerX, metrics.laneY - 38, '#b336ff', false);
+        }
 
-        // Zombie 2: Opponent Side (starts right of center, moves right towards opponent)
-        const defOpponent = { ...enemyDef, side: 'opponent' };
-        const zOpponent = new ZombieClass(defOpponent, metrics.laneY, cw, zLevel, cw * 0.5 + 22);
-        zOpponent.side = 'opponent';
-        combat.entities.zombies.push(zOpponent);
+        // Zombie 1: Player Side (starts at center, moves left towards player)
+        if (activePlayerZombies < 2 || forceDef) {
+            const defPlayer = { ...pvpBaseDef, side: 'player' };
+            const zPlayer = new ZombieClass(defPlayer, metrics.laneY, cw, zLevel, centerX);
+            zPlayer.side = 'player';
+            zPlayer.isPvP = true;
+            zPlayer.speed = pvpSpeed;
+            zPlayer.hp = pvpHp;
+            zPlayer.maxHp = pvpHp;
+            zPlayer.attackDamage = pvpDmg;
+            zPlayer.attackInterval = 1.6;
+            combat.entities.zombies.push(zPlayer);
+        }
+
+        // Zombie 2: Opponent Side (starts at center, moves right towards opponent)
+        if (activeOppZombies < 2 || forceDef) {
+            const defOpponent = { ...pvpBaseDef, side: 'opponent' };
+            const zOpponent = new ZombieClass(defOpponent, metrics.laneY, cw, zLevel, centerX);
+            zOpponent.side = 'opponent';
+            zOpponent.isPvP = true;
+            zOpponent.speed = pvpSpeed;
+            zOpponent.hp = pvpHp;
+            zOpponent.maxHp = pvpHp;
+            zOpponent.attackDamage = pvpDmg;
+            zOpponent.attackInterval = 1.6;
+            combat.entities.zombies.push(zOpponent);
+        }
     }
 
     onSongNotePassed(note, rating, songTime, combat) {
@@ -429,6 +486,7 @@ class PvPSystem {
             // Hits opponent-side zombie -> Deals damage to opponent zombie
             if (z.side === 'opponent') {
                 z.hp -= p.damage;
+                z.x = Math.max(combat.canvas.width * 0.50, z.x - 8);
                 z.flashTime = 0.14;
                 p.active = false;
                 combat.addFloatingText(`${p.damage}`, z.x, z.y - 32, p.projColor || '#ff3344', p.isCrit);
@@ -545,6 +603,11 @@ class PvPSystem {
         ctx.moveTo(cw * 0.5, metrics.laneY - 70);
         ctx.lineTo(cw * 0.5, metrics.laneY + 25);
         ctx.stroke();
+        const pulse = 0.5 + 0.5 * Math.sin((combat.time || 0) * 0.005);
+        ctx.fillStyle = `rgba(179, 54, 255, ${0.12 + pulse * 0.16})`;
+        ctx.beginPath();
+        ctx.ellipse(cw * 0.5, metrics.laneY - 6, 16, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
 
         // Update In-Battle Opponent HUD

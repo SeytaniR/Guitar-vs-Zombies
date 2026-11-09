@@ -909,6 +909,10 @@ assert(pvpCombat.entities.zombies.length === 2, 'spawnZombiePair spawns exactly 
 const [zPlayer, zOpponent] = pvpCombat.entities.zombies;
 assert(zPlayer.side === 'player' && zOpponent.side === 'opponent', 'Zombies correctly assigned to player side and opponent side');
 assert(zPlayer.direction === -1 && zOpponent.direction === 1, 'Player zombie moves left (-1), opponent zombie moves right (+1)');
+assert(zPlayer.isPvP === true && zPlayer.attackInterval === 1.6, 'PvP zombie has isPvP flag and 1.6s attack interval');
+assert(zPlayer.speed <= 25 && zPlayer.attackDamage <= 7, 'PvP zombie has balanced speed (<=25) and bite damage (<=7)');
+pvpCombat.resetBattle(null, true);
+assert(pvpCombat.spawnTimer === 1.5 && pvpCombat.entities.zombies.length === 0, 'PvP match start grants 3.5s initial grace period before first wave');
 
 // Over-Shoot Cross-Healing Rule
 // 1. When player has NO player zombies active, player projectile overshoots and HEALS opponent zombie (+30% damage as heal)

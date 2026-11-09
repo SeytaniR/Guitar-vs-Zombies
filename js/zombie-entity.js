@@ -36,8 +36,19 @@ class ZombieEntity {
             this.attackDamage = Math.round(this.attackDamage * 1.5);
             this.name = `👑 [CHEFE] ${this.baseName} TITÃ`;
         }
-        this.attackInterval = enemyDef.attackInterval || 1.1;
-        this.attackCooldown = 0.3;
+        this.isPvP = !!(enemyDef && enemyDef.isPvP);
+        if (this.isPvP) {
+            this.isBoss = false;
+            this.speed = enemyDef.speed || Math.max(16, Math.min(22, baseSpeed * 0.48));
+            this.hp = enemyDef.hp || Math.round(68 + Math.min(10, this.level) * 3.2);
+            this.maxHp = this.hp;
+            this.attackDamage = enemyDef.attackDamage || Math.max(3, Math.min(6, Math.round(3 + Math.min(10, this.level) * 0.22)));
+            this.attackInterval = enemyDef.attackInterval || 1.6;
+            this.attackCooldown = 1.2;
+        } else {
+            this.attackInterval = enemyDef.attackInterval || 1.1;
+            this.attackCooldown = 0.3;
+        }
         this.attackTimer = 0;
         this.isAttacking = false;
         this.attackSlot = Math.floor(Math.random() * 3); // Stagger stopping positions
@@ -228,7 +239,7 @@ class ZombieEntity {
         const cw = (combat && combat.canvas && combat.canvas.width) || 800;
         const oppPos = (combat && combat.pvpSystem && typeof combat.pvpSystem.getOpponentPosition === 'function')
             ? combat.pvpSystem.getOpponentPosition(combat)
-            : { x: Math.round(cw * 0.84), y: this.y };
+            : { x: Math.round(cw * 0.89), y: this.y };
         const attackDistance = oppPos.x - 30 - (this.attackSlot * 12);
 
         if (this.x < attackDistance) {
@@ -241,7 +252,7 @@ class ZombieEntity {
             this.isAttacking = true;
             this.attackCooldown -= dt;
             if (this.attackCooldown <= 0) {
-                this.attackCooldown = this.attackInterval || 1.1;
+                this.attackCooldown = this.attackInterval || 1.6;
                 this.frame = 8 + (Math.floor(this.walkTimer) % 4);
                 if (combat && combat.pvpSystem) {
                     combat.pvpSystem.damageOpponent(this.attackDamage, false, `-${this.attackDamage} HP`, '#ff3344', combat);
@@ -253,7 +264,9 @@ class ZombieEntity {
     updateLeaper(dt, combat, heroPos, attackDistance) {
         if (this.jumpState === 'ground') {
             const distToHero = this.x - heroPos.x;
-            if (distToHero > 105 && distToHero < 165 && !this.hasJumped) {
+            const minJump = this.isPvP ? 45 : 105;
+            const maxJump = this.isPvP ? 85 : 165;
+            if (distToHero > minJump && distToHero < maxJump && !this.hasJumped) {
                 this.jumpState = 'windup';
                 this.jumpTimer = 0.22;
                 this.frame = 5; // Deep crouch windup

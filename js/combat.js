@@ -134,7 +134,9 @@ class CombatSystem {
 
     getHeroPosition() {
         const m = this.getRoadMetrics();
-        return { x: Math.max(50, Math.round(this.canvas.width * 0.16)), y: Math.round(m.laneY) };
+        const ratio = this.isPvPMode ? 0.11 : 0.16;
+        const minX = this.isPvPMode ? 36 : 50;
+        return { x: Math.max(minX, Math.round(this.canvas.width * ratio)), y: Math.round(m.laneY) };
     }
 
     resetBattle(enemyList = null, isPvP = false) {
@@ -156,9 +158,8 @@ class CombatSystem {
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.matchActive = true;
         const cw = Math.max(200, this.canvas ? this.canvas.width : 360);
-        if (this.isPvPMode && this.pvpSystem) {
-            this.pvpSystem.spawnZombiePair(this);
-            this.pvpSystem.spawnZombiePair(this);
+        if (this.isPvPMode) {
+            this.spawnTimer = 1.5;
         } else {
             this.spawnZombie(cw * 0.78);
             this.spawnZombie(cw * 0.92);
@@ -675,8 +676,8 @@ class CombatSystem {
 
         // Spawn Wave Timer
         this.spawnTimer += dt;
-        const targetSpawnInterval = Math.max(1.4, 3.2 - (this.zombiesKilled * 0.05));
-        if (this.entities.zombies.length === 0 && this.spawnTimer < targetSpawnInterval - 0.4) {
+        const targetSpawnInterval = this.isPvPMode ? 5.0 : Math.max(1.4, 3.2 - (this.zombiesKilled * 0.05));
+        if (!this.isPvPMode && this.entities.zombies.length === 0 && this.spawnTimer < targetSpawnInterval - 0.4) {
             this.spawnTimer = targetSpawnInterval - 0.4;
         }
         if (this.spawnTimer >= targetSpawnInterval) {
