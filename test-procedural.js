@@ -959,10 +959,16 @@ assert(pvpCombat.zombiesKilled === initialPlayerKills && pvpCombat.score === ini
 // Victory & Defeat Conditions
 pvp.state = 'playing';
 let pvpModalOpened = false;
-global.document.getElementById = (id) => ({ classList: { add: () => { if (id === 'pvp-results-modal') pvpModalOpened = true; }, remove: () => {} }, style: {}, innerText: '' });
+global.document.getElementById = (id) => ({ classList: { add: () => { if (id === 'pvp-results-modal') pvpModalOpened = true; }, remove: () => {} }, style: {}, innerText: '', appendChild: () => {} });
 pvp.damageOpponent(100, true, '-100 HP', '#ff3344', pvpCombat);
 assert(opp.hp === 0 && pvp.state === 'ended', 'Opponent HP 0 ends duel by KO');
 assert(pvpModalOpened === true, 'PvP results comparison modal opened on duel completion');
+
+// PvP Song Selection & Zero Ping Loading UI Checks
+assert(htmlContent.includes('id="pvp-song-select-view"'), 'index.html contains #pvp-song-select-view');
+assert(!htmlContent.includes('id="pvp-ping-display"') && !htmlContent.includes('data-i18n="pvpPing"'), 'index.html has zero ping mentions');
+pvp.openMatchmakingModal([{ id: 'test_song', title: 'Test Song', bpm: 140 }], null, null);
+assert(pvp.selectedSong && pvp.selectedSong.id === 'test_song', 'openMatchmakingModal successfully configures player chosen song for PvP');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {

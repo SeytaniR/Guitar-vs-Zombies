@@ -495,3 +495,96 @@
     border: 1px solid #00ff66;
     letter-spacing: 0.5px;
 }
+
+/* PvP Song Selection View */
+.pvp-song-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    width: 100%;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.pvp-song-cover {
+    width: 58px;
+    height: 58px;
+    border-radius: 8px;
+    border: 1.5px solid #00d4ff;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.pvp-song-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.pvp-song-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pvp-song-artist {
+    font-size: 11px;
+    color: #00d4ff;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pvp-song-info {
+    font-size: 10px;
+    color: #ffd700;
+    font-weight: 700;
+}
+
+.pvp-song-dropdown {
+    width: 100%;
+    background: #0f0f1c;
+    color: #fff;
+    border: 1px solid #335577;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.pvp-song-dropdown:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+}
+
+.btn-pvp-start {
+    background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+    border: 1.5px solid #00ffff;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.45);
+    transition: all 0.15s ease;
+}
+
+.btn-pvp-start:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.75);
+}

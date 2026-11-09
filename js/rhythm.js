@@ -53,13 +53,6 @@ class RhythmSystem {
         const getLaneFromX = (clientX) => {
             const rect = this.canvas.getBoundingClientRect();
             const relX = (clientX - rect.left) * (this.canvas.width / rect.width);
-            const isPvP = window.game && window.game.combat && window.game.combat.isPvPMode;
-            if (isPvP) {
-                const halfW = this.canvas.width * 0.5;
-                const effX = relX >= halfW ? (relX - halfW) : relX;
-                const trackWidth = halfW / this.tracks;
-                return Math.min(this.tracks - 1, Math.max(0, Math.floor(effX / trackWidth)));
-            }
             const trackWidth = this.canvas.width / this.tracks;
             return Math.min(this.tracks - 1, Math.max(0, Math.floor(relX / trackWidth)));
         };
@@ -566,9 +559,7 @@ class RhythmSystem {
 
         const cw = this.canvas.width;
         const ch = this.canvas.height;
-        const isPvP = !!(window.game && window.game.combat && window.game.combat.isPvPMode);
-        const hwWidth = isPvP ? cw * 0.5 : cw;
-        const trackW = hwWidth / this.tracks;
+        const trackW = cw / this.tracks;
         const hitZoneY = this.getHitZoneY();
 
         // 1. Draw Fretboard Background & Strings
@@ -606,14 +597,14 @@ class RhythmSystem {
         this.ctx.lineWidth = 7;
         this.ctx.beginPath();
         this.ctx.moveTo(0, hitZoneY);
-        this.ctx.lineTo(hwWidth, hitZoneY);
+        this.ctx.lineTo(cw, hitZoneY);
         this.ctx.stroke();
 
         this.ctx.strokeStyle = '#ffffff';
         this.ctx.lineWidth = 2.5;
         this.ctx.beginPath();
         this.ctx.moveTo(0, hitZoneY);
-        this.ctx.lineTo(hwWidth, hitZoneY);
+        this.ctx.lineTo(cw, hitZoneY);
         this.ctx.stroke();
         this.ctx.restore();
 
@@ -762,37 +753,23 @@ class RhythmSystem {
 
         // 7. HUD Prompt & Multiplier
         this.drawHighwayHUD(cw, ch);
-
-        // 8. Opponent Dual Highway (PvP Mode)
-        if (isPvP && window.game && window.game.combat && window.game.combat.pvpSystem) {
-            window.game.combat.pvpSystem.drawOpponentHighway(this.ctx, cw, ch, hitZoneY, this.customSongTime, this.notes, this.noteSpeed);
-        }
     }
 
     drawHighwayHUD(cw, ch) {
         this.ctx.save();
-        const isPvP = !!(window.game && window.game.combat && window.game.combat.isPvPMode);
         this.ctx.font = "bold 13px 'Segoe UI', sans-serif";
         this.ctx.fillStyle = this.multiplier > 1 ? '#ffcc00' : '#888888';
         this.ctx.textAlign = 'left';
-        if (isPvP) {
-            this.ctx.fillText(`🎸 VOCÊ • x${this.multiplier}`, 12, 22);
-            if (this.streak > 4) {
-                this.ctx.font = "bold 12px 'Segoe UI', sans-serif";
-                this.ctx.fillStyle = '#00ff66';
-                this.ctx.fillText(`STREAK: ${this.streak} 🔥`, 12, 40);
-            }
-        } else {
-            this.ctx.fillText(`COMBO x${this.multiplier}`, 12, 22);
-            if (this.streak > 4) {
-                this.ctx.font = "bold 12px 'Segoe UI', sans-serif";
-                this.ctx.fillStyle = '#00ff66';
-                this.ctx.fillText(`STREAK: ${this.streak} 🔥`, 12, 40);
-            } else if (!this.autoPlay && this.notes.length > 0) {
-                this.ctx.font = "bold 11px 'Segoe UI', sans-serif";
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-                this.ctx.fillText(`TOQUE NAS PISTAS NO RITMO! 👇`, 12, 40);
-            }
+        this.ctx.fillText(`COMBO x${this.multiplier}`, 12, 22);
+
+        if (this.streak > 4) {
+            this.ctx.font = "bold 12px 'Segoe UI', sans-serif";
+            this.ctx.fillStyle = '#00ff66';
+            this.ctx.fillText(`STREAK: ${this.streak} 🔥`, 12, 40);
+        } else if (!this.autoPlay && this.notes.length > 0) {
+            this.ctx.font = "bold 11px 'Segoe UI', sans-serif";
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+            this.ctx.fillText(`TOQUE NAS PISTAS NO RITMO! 👇`, 12, 40);
         }
         this.ctx.restore();
     }

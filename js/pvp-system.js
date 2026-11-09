@@ -11,6 +11,8 @@ class PvPSystem {
         this.playerTrophies = parseInt(localStorage.getItem('gvs_pvp_trophies') || '500', 10);
         this.playerWins = parseInt(localStorage.getItem('gvs_pvp_wins') || '0', 10);
         this.playerLosses = parseInt(localStorage.getItem('gvs_pvp_losses') || '0', 10);
+        this.selectedSong = null;
+        this.availableSongs = [];
         this.overhealsPlayer = 0;
         this.overhealsOpponent = 0;
         this.opponentZombiesKilled = 0;
@@ -86,6 +88,67 @@ class PvPSystem {
         };
     }
 
+    openMatchmakingModal(songs = [], defaultSong = null, onStartQueue = null) {
+        this.availableSongs = (songs && songs.length > 0) ? songs : [];
+        this.selectedSong = defaultSong || (this.availableSongs.length > 0 ? this.availableSongs[0] : null);
+
+        const modal = document.getElementById('pvp-matchmaking-modal');
+        if (modal) modal.classList.add('open');
+
+        const songView = document.getElementById('pvp-song-select-view');
+        const queueView = document.getElementById('pvp-queue-searching-view');
+        const versusView = document.getElementById('pvp-versus-found-view');
+        if (songView) songView.style.display = 'flex';
+        if (queueView) queueView.style.display = 'none';
+        if (versusView) versusView.style.display = 'none';
+
+        const dropdown = document.getElementById('pvp-song-dropdown');
+        if (dropdown && typeof document.createElement === 'function') {
+            dropdown.innerHTML = '';
+            this.availableSongs.forEach((s) => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = `${s.title} - ${s.artist || 'Artista'} (${s.bpm || 120} BPM)`;
+                if (this.selectedSong && s.id === this.selectedSong.id) opt.selected = true;
+                dropdown.appendChild(opt);
+            });
+            dropdown.onchange = (e) => {
+                const chosen = this.availableSongs.find(s => s.id === e.target.value);
+                if (chosen) {
+                    this.selectedSong = chosen;
+                    this.updateSongCardPreview(chosen);
+                }
+            };
+        }
+
+        if (this.selectedSong) this.updateSongCardPreview(this.selectedSong);
+
+        const startBtn = document.getElementById('pvp-start-queue-btn');
+        if (startBtn) {
+            startBtn.onclick = () => {
+                if (typeof onStartQueue === 'function') onStartQueue(this.selectedSong);
+                else this.startMatchmaking();
+            };
+        }
+
+        const closeBtn = document.getElementById('pvp-close-dialog-btn');
+        if (closeBtn) {
+            closeBtn.onclick = () => this.cancelMatchmaking();
+        }
+    }
+
+    updateSongCardPreview(song) {
+        if (!song) return;
+        const cover = document.getElementById('pvp-song-cover');
+        const title = document.getElementById('pvp-song-title');
+        const artist = document.getElementById('pvp-song-artist');
+        const info = document.getElementById('pvp-song-info');
+        if (cover) cover.src = song.cover || 'assets/covers/default_cover.jpg';
+        if (title) title.innerText = song.title || 'Música';
+        if (artist) artist.innerText = song.artist || 'Artista Desconhecido';
+        if (info) info.innerText = `BPM: ${song.bpm || 120} • Duração: ${Math.round(song.duration || 30)}s`;
+    }
+
     startMatchmaking(onMatchFound, onCancel) {
         this.state = 'searching';
         this.searchTimer = 0;
@@ -104,20 +167,25 @@ class PvPSystem {
         const modal = document.getElementById('pvp-matchmaking-modal');
         if (modal) modal.classList.add('open');
 
+        const songView = document.getElementById('pvp-song-select-view');
         const queueView = document.getElementById('pvp-queue-searching-view');
         const versusView = document.getElementById('pvp-versus-found-view');
+        if (songView) songView.style.display = 'none';
         if (queueView) queueView.style.display = 'flex';
         if (versusView) versusView.style.display = 'none';
 
         const timerEl = document.getElementById('pvp-timer-display');
         const statusEl = document.getElementById('pvp-status-text');
-        const pingEl = document.getElementById('pvp-ping-display');
+        const songBadge = document.getElementById('pvp-chosen-song-badge');
+        if (songBadge && this.selectedSong) {
+            songBadge.innerText = `🎵 Música: ${this.selectedSong.title} (${this.selectedSong.bpm || 120} BPM)`;
+        }
 
         const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
         const steps = [
             tr('pvpConnecting', 'Conectando ao servidor SA-East (São Paulo)...'),
             tr('pvpSearching', 'Buscando guitarristas no mesmo tier de troféus...'),
-            'Calculando latência e matchmaking balanceado...'
+            'Localizando adversário compatível...'
         ];
 
         let stepIndex = 0;
@@ -419,144 +487,17 @@ class PvPSystem {
     }
 
     addOpponentRating(text, track, color = '#00ff66') {
-        const cw = (window.game && window.game.rhythm && window.game.rhythm.canvas) ? window.game.rhythm.canvas.width : 400;
-        const startX = cw * 0.5, trackW = (cw * 0.5) / 4;
-        const hitZoneY = (window.game && window.game.rhythm) ? window.game.rhythm.getHitZoneY() : 200;
-        const x = startX + track * trackW + trackW / 2;
-        this.oppFloatingRatings.push({ text, x, y: hitZoneY - 24, color, alpha: 1.0, vy: -60, scale: 1.1 });
+        this.oppFloatingRatings.push({ text, track, color, alpha: 1.0 });
+        if (this.oppFloatingRatings.length > 10) this.oppFloatingRatings.shift();
     }
 
     addOpponentHitSparks(track, color) {
-        const cw = (window.game && window.game.rhythm && window.game.rhythm.canvas) ? window.game.rhythm.canvas.width : 400;
-        const startX = cw * 0.5, trackW = (cw * 0.5) / 4;
-        const hitZoneY = (window.game && window.game.rhythm) ? window.game.rhythm.getHitZoneY() : 200;
-        const x = startX + track * trackW + trackW / 2;
-        for (let i = 0; i < 6; i++) {
-            const angle = Math.random() * Math.PI * 2, spd = 40 + Math.random() * 80;
-            this.oppParticles.push({ x, y: hitZoneY, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd, size: 2.5 + Math.random() * 2, color, life: 0.35 });
-        }
+        this.oppParticles.push({ track, color, life: 0.35 });
+        if (this.oppParticles.length > 20) this.oppParticles.shift();
     }
 
-    drawOpponentHighway(ctx, cw, ch, hitZoneY, curTime, notes, noteSpeed = 340) {
-        if (!this.opponent) return;
-        const startX = cw * 0.5, hwW = cw * 0.5, trackW = hwW / 4;
-
-        // 1. Opponent Highway Background
-        ctx.fillStyle = '#100a14'; ctx.fillRect(startX, 0, hwW, ch);
-
-        const oppColors = [
-            { main: '#ff2a5f', glow: 'rgba(255, 42, 95, 0.45)', core: '#ffe6ed' },
-            { main: '#ff7700', glow: 'rgba(255, 119, 0, 0.45)', core: '#fff0e6' },
-            { main: '#ff00bb', glow: 'rgba(255, 0, 187, 0.45)', core: '#ffe6f9' },
-            { main: '#00e5ff', glow: 'rgba(0, 229, 255, 0.45)', core: '#e6faff' }
-        ];
-
-        // 2. Fret Strings & Flashes
-        for (let i = 0; i < 4; i++) {
-            const tx = startX + i * trackW;
-            if (this.oppLaneFlashes[i] > 0) {
-                ctx.fillStyle = oppColors[i].glow;
-                ctx.globalAlpha = this.oppLaneFlashes[i] * 0.7;
-                ctx.fillRect(tx, 0, trackW, ch);
-                ctx.globalAlpha = 1.0;
-            }
-            ctx.strokeStyle = 'rgba(255, 100, 140, 0.15)'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(tx + trackW / 2, 0); ctx.lineTo(tx + trackW / 2, ch); ctx.stroke();
-            ctx.strokeStyle = '#251220'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(tx, 0); ctx.lineTo(tx, ch); ctx.stroke();
-        }
-
-        // 3. Opponent Hit Zone Bar
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255, 51, 68, 0.35)'; ctx.lineWidth = 7;
-        ctx.beginPath(); ctx.moveTo(startX, hitZoneY); ctx.lineTo(cw, hitZoneY); ctx.stroke();
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.moveTo(startX, hitZoneY); ctx.lineTo(cw, hitZoneY); ctx.stroke();
-        ctx.restore();
-
-        // 4. Opponent Target Pads
-        for (let i = 0; i < 4; i++) {
-            const bx = startX + i * trackW + trackW / 2, col = oppColors[i], isPressed = this.oppLaneFlashes[i] > 0.2;
-            ctx.save(); ctx.translate(bx, hitZoneY);
-            if (isPressed) ctx.scale(1.18, 1.18);
-            ctx.strokeStyle = col.main + (isPressed ? '66' : '33'); ctx.lineWidth = isPressed ? 7 : 5;
-            ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI * 2); ctx.stroke();
-            ctx.strokeStyle = col.main; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.stroke();
-            ctx.fillStyle = isPressed ? col.main : 'rgba(0, 0, 0, 0.6)';
-            ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
-            ctx.restore();
-        }
-
-        // 5. Opponent Notes & Sustains
-        if (notes && notes.length > 0) {
-            notes.forEach(note => {
-                const drawY = hitZoneY - (note.time - curTime) * noteSpeed;
-                if (drawY < -50 || drawY > ch + 50) return;
-                const nx = startX + note.track * trackW + trackW / 2, col = oppColors[note.track] || oppColors[0];
-                if (note.duration && note.duration >= 0.2) {
-                    const tailY = hitZoneY - ((note.time + note.duration) - curTime) * noteSpeed;
-                    const rTop = Math.min(tailY, drawY), rBot = Math.max(tailY, drawY);
-                    if (rBot - rTop > 2) {
-                        ctx.save(); ctx.fillStyle = col.main; ctx.globalAlpha = 0.75;
-                        ctx.fillRect(nx - 7, rTop, 14, rBot - rTop);
-                        ctx.strokeStyle = col.core; ctx.lineWidth = 2;
-                        ctx.beginPath(); ctx.moveTo(nx, rTop + 4); ctx.lineTo(nx, rBot - 4); ctx.stroke();
-                        ctx.restore();
-                    }
-                }
-                ctx.save(); ctx.translate(nx, drawY);
-                ctx.strokeStyle = col.main + '66'; ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.moveTo(0, -18); ctx.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx.bezierCurveTo(-18, 12, -20, -18, 0, -18); ctx.stroke();
-                ctx.fillStyle = col.main; ctx.fill();
-                ctx.fillStyle = col.core; ctx.beginPath(); ctx.arc(0, -2, 6.5, 0, Math.PI * 2); ctx.fill();
-                ctx.restore();
-            });
-        }
-
-        // 6. Opponent Hit Sparks
-        ctx.save();
-        for (let i = 0; i < this.oppParticles.length; i++) {
-            const p = this.oppParticles[i];
-            ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life / 0.35);
-            ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-        }
-        ctx.restore();
-
-        // 7. Opponent Floating Ratings
-        this.oppFloatingRatings.forEach(r => {
-            ctx.save(); ctx.globalAlpha = Math.max(0, r.alpha);
-            ctx.font = `bold ${Math.round(18 * r.scale)}px 'Impact', sans-serif`;
-            ctx.textAlign = 'center'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4;
-            ctx.strokeText(r.text, r.x, r.y); ctx.fillStyle = r.color; ctx.fillText(r.text, r.x, r.y);
-            ctx.restore();
-        });
-
-        // 8. Opponent Highway HUD
-        ctx.save();
-        ctx.font = "bold 13px 'Segoe UI', sans-serif";
-        ctx.fillStyle = this.oppMultiplier > 1 ? '#ff5577' : '#888888';
-        ctx.textAlign = 'left';
-        ctx.fillText(`🎮 ${this.opponent.name} • x${this.oppMultiplier}`, startX + 12, 22);
-        if (this.oppStreak > 4) {
-            ctx.font = "bold 12px 'Segoe UI', sans-serif";
-            ctx.fillStyle = '#ff3344';
-            ctx.fillText(`STREAK: ${this.oppStreak} 🔥`, startX + 12, 40);
-        }
-        ctx.restore();
-
-        // 9. Center Neon Divider Line & VS Badge
-        ctx.save();
-        ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 2.5; ctx.shadowColor = '#00d4ff'; ctx.shadowBlur = 8;
-        ctx.beginPath(); ctx.moveTo(startX, 0); ctx.lineTo(startX, ch); ctx.stroke();
-        ctx.shadowBlur = 0;
-
-        const badgeY = 22;
-        ctx.fillStyle = '#080612'; ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(startX, badgeY, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.font = "900 11px 'Impact', sans-serif"; ctx.fillStyle = '#ffd700'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('VS', startX, badgeY);
-        ctx.restore();
+    drawOpponentHighway() {
+        // Intentionally hidden: only the player's highway is rendered on screen per user preference.
     }
 
     draw(ctx, combat) {

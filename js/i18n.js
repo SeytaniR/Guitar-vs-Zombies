@@ -160,10 +160,12 @@ class I18n {
                 'btnRetry': '🔄 TENTAR NOVAMENTE',
 
                 // PvP Duel & Matchmaking
+                'pvpSelectSongTitle': '⚔️ DUELO PVP ONLINE',
+                'pvpSelectSongSubtitle': 'Escolha a música para disputar o confronto:',
+                'pvpStartSearch': 'BUSCAR PARTIDA ⚡',
                 'pvpMatchmakingTitle': 'PROCURANDO ADVERSÁRIO...',
                 'pvpConnecting': 'Conectando ao servidor SA-East (São Paulo)...',
                 'pvpSearching': 'Buscando guitarristas no mesmo tier de troféus...',
-                'pvpPing': '📡 Ping: 24ms • Região: SA (BR)',
                 'pvpOpponentFound': '🎯 ADVERSÁRIO ENCONTRADO!',
                 'pvpStartingIn': 'Duelo iniciando em: ',
                 'pvpCancel': 'CANCELAR',
@@ -431,10 +433,12 @@ class I18n {
                 'btnRetry': '🔄 TRY AGAIN',
 
                 // PvP Duel & Matchmaking
+                'pvpSelectSongTitle': '⚔️ ONLINE PVP DUEL',
+                'pvpSelectSongSubtitle': 'Choose the song for the duel:',
+                'pvpStartSearch': 'SEARCH MATCH ⚡',
                 'pvpMatchmakingTitle': 'SEARCHING FOR OPPONENT...',
                 'pvpConnecting': 'Connecting to SA-East server (São Paulo)...',
                 'pvpSearching': 'Finding guitarists in the same trophy elo...',
-                'pvpPing': '📡 Latency: 24ms • Region: SA (BR)',
                 'pvpOpponentFound': '🎯 OPPONENT FOUND!',
                 'pvpStartingIn': 'Duel starting in: ',
                 'pvpCancel': 'CANCEL',

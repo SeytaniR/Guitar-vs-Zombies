@@ -621,18 +621,27 @@ class Game {
         this.startMatch();
     }
 
-    openPvPModal() {
+    async openPvPModal() {
         if (!this.pvpSystem) this.pvpSystem = (typeof PvPSystem !== 'undefined') ? new PvPSystem() : null;
         if (this.combat && this.pvpSystem) this.combat.pvpSystem = this.pvpSystem;
-        if (this.pvpSystem) this.pvpSystem.startMatchmaking((opp) => this.startPvPBattle(opp));
+        if (this.pvpSystem) {
+            let songs = [];
+            if (window.songDB && typeof window.songDB.getAllSongs === 'function') {
+                try { songs = await window.songDB.getAllSongs(); } catch (e) {}
+            }
+            if (!songs || songs.length === 0) songs = [this.selectedSong || this.getBuiltinDefaultSong()];
+            this.pvpSystem.openMatchmakingModal(songs, this.selectedSong, (chosenSong) => {
+                this.selectedSong = chosenSong;
+                this.pvpSystem.startMatchmaking((opp) => this.startPvPBattle(opp, chosenSong));
+            });
+        }
     }
 
-    startPvPBattle(opponent) {
+    startPvPBattle(opponent, chosenSong = null) {
         if (!opponent) return;
         this.combat.isPvPMode = true;
         this.combat.pvpSystem = this.pvpSystem;
-        const allSongs = (window.songDB && typeof window.songDB.getAllSongs === 'function') ? window.songDB.getAllSongs() : [];
-        const song = (allSongs.length > 0) ? allSongs[0] : (this.selectedSong || this.getBuiltinDefaultSong());
+        const song = chosenSong || this.selectedSong || this.getBuiltinDefaultSong();
         this.selectedSong = song;
         const enemies = (window.enemyPool && typeof window.enemyPool.rollMapEnemies === 'function') ? window.enemyPool.rollMapEnemies(4) : [];
         this.switchScreen('battle');
@@ -743,22 +752,18 @@ class Game {
     }
 
     closeGearModal() {
-        const m = document.getElementById('battle-gear-modal');
-        if (m) m.classList.remove('open');
+        const m = document.getElementById('battle-gear-modal'); if (m) m.classList.remove('open');
         if (!this.isGearFromMenu && this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) this.resumeBattle();
     }
 
     openStatsModal() {
-        const m = document.getElementById('battle-stats-modal');
-        if (!m) return;
-        this.updateBattleStatsModal();
-        if (this.currentScreen === 'battle') this.pauseBattle();
+        const m = document.getElementById('battle-stats-modal'); if (!m) return;
+        this.updateBattleStatsModal(); if (this.currentScreen === 'battle') this.pauseBattle();
         m.classList.add('open');
     }
 
     closeStatsModal() {
-        const m = document.getElementById('battle-stats-modal');
-        if (m) m.classList.remove('open');
+        const m = document.getElementById('battle-stats-modal'); if (m) m.classList.remove('open');
         if (this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) this.resumeBattle();
     }
 
@@ -771,15 +776,10 @@ class Game {
 
         if (window.guitaristPool) {
             const h = window.guitaristPool.getSelectedGuitarist();
-            const thumbEl = document.getElementById('ss-hero-thumb');
-            const nameTxt = document.getElementById('ss-hero-name');
-            const rarityTxt = document.getElementById('ss-hero-rarity');
+            const thumbEl = document.getElementById('ss-hero-thumb'), nameTxt = document.getElementById('ss-hero-name'), rarityTxt = document.getElementById('ss-hero-rarity');
             if (thumbEl && h) thumbEl.src = h.icon;
             if (nameTxt && h) nameTxt.innerText = h.name;
-            if (rarityTxt && h) {
-                rarityTxt.innerText = h.rarity.toUpperCase();
-                rarityTxt.className = `hero-rarity-badge ${h.rarityClass} ss-hero-rarity-badge`;
-            }
+            if (rarityTxt && h) { rarityTxt.innerText = h.rarity.toUpperCase(); rarityTxt.className = `hero-rarity-badge ${h.rarityClass} ss-hero-rarity-badge`; }
         }
 
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };

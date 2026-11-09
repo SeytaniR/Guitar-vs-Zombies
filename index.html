@@ -971,7 +971,27 @@
     <!-- Simulated Online PvP Matchmaking Modal -->
     <div id="pvp-matchmaking-modal" class="pvp-modal-overlay">
         <div class="pvp-matchmaking-dialog">
-            <div id="pvp-queue-searching-view" style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+            <!-- View 1: Choose Song for PvP Duel -->
+            <div id="pvp-song-select-view" style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+                <h3 class="pvp-queue-title" data-i18n="pvpSelectSongTitle">⚔️ DUELO PVP ONLINE</h3>
+                <p style="font-size: 11px; color: #88aacc; margin: -6px 0 2px 0;" data-i18n="pvpSelectSongSubtitle">Escolha a música para disputar o confronto:</p>
+                <div class="pvp-song-card">
+                    <img id="pvp-song-cover" class="pvp-song-cover" src="assets/covers/default_cover.jpg" alt="Capa">
+                    <div class="pvp-song-meta">
+                        <span id="pvp-song-title" class="pvp-song-title">Música</span>
+                        <span id="pvp-song-artist" class="pvp-song-artist">Artista</span>
+                        <span id="pvp-song-info" class="pvp-song-info">BPM: 120 • 4 Pistas</span>
+                    </div>
+                </div>
+                <select id="pvp-song-dropdown" class="pvp-song-dropdown"></select>
+                <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 4px;">
+                    <button id="pvp-start-queue-btn" class="btn-pvp-start" data-i18n="pvpStartSearch">BUSCAR PARTIDA ⚡</button>
+                    <button id="pvp-close-dialog-btn" class="pvp-cancel-btn" data-i18n="pvpCancel">CANCELAR</button>
+                </div>
+            </div>
+
+            <!-- View 2: Queue Searching (Zero ping mentions) -->
+            <div id="pvp-queue-searching-view" style="display: none; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
                 <h3 class="pvp-queue-title" data-i18n="pvpMatchmakingTitle">PROCURANDO ADVERSÁRIO...</h3>
                 <div class="pvp-radar-wrapper">
                     <div class="pvp-radar-circle"></div>
@@ -980,9 +1000,11 @@
                 </div>
                 <div id="pvp-timer-display" class="pvp-queue-timer">00:00</div>
                 <div id="pvp-status-text" class="pvp-queue-status" data-i18n="pvpConnecting">Conectando ao servidor SA-East (São Paulo)...</div>
-                <div id="pvp-ping-display" class="pvp-server-badge" data-i18n="pvpPing">📡 Ping: 24ms • Região: SA (BR)</div>
+                <div id="pvp-chosen-song-badge" class="pvp-server-badge" style="color: #ffd700; border-color: rgba(255, 215, 0, 0.4); background: rgba(255, 215, 0, 0.1);">🎵 Música: ...</div>
                 <button id="pvp-cancel-queue-btn" class="pvp-cancel-btn" data-i18n="pvpCancel">CANCELAR</button>
             </div>
+
+            <!-- View 3: Versus Found Face-off -->
             <div id="pvp-versus-found-view" style="display: none; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
                 <h3 class="pvp-queue-title" style="color: #ffd700;" data-i18n="pvpOpponentFound">🎯 ADVERSÁRIO ENCONTRADO!</h3>
                 <div class="pvp-versus-card">
