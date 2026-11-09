@@ -159,7 +159,7 @@ class CombatSystem {
         this.matchActive = true;
         const cw = Math.max(200, this.canvas ? this.canvas.width : 360);
         if (this.isPvPMode) {
-            this.spawnTimer = 1.5;
+            this.spawnTimer = 1.2;
         } else {
             this.spawnZombie(cw * 0.78);
             this.spawnZombie(cw * 0.92);
@@ -308,10 +308,13 @@ class CombatSystem {
                 if (z.active && z.side === 'player' && z.x <= this.canvas.width * 0.52 && z.x > heroPos.x - 10 && z.x < minX) { minX = z.x; target = z; }
             }
             if (!target) {
-                let minOppX = Infinity;
                 for (const z of this.entities.zombies) {
-                    if (z.active && z.side === 'opponent' && z.x < minOppX) { minOppX = z.x; target = z; }
+                    if (z.active && z.side === 'opponent' && z.x < minX) { minX = z.x; target = z; }
                 }
+            }
+            if (!target && this.pvpSystem) {
+                const oppPos = this.pvpSystem.getOpponentPosition(this);
+                target = { x: oppPos.x, y: oppPos.y - 12 };
             }
         } else {
             for (const z of this.entities.zombies) {
@@ -676,9 +679,9 @@ class CombatSystem {
 
         // Spawn Wave Timer
         this.spawnTimer += dt;
-        const targetSpawnInterval = this.isPvPMode ? 5.0 : Math.max(1.4, 3.2 - (this.zombiesKilled * 0.05));
-        if (!this.isPvPMode && this.entities.zombies.length === 0 && this.spawnTimer < targetSpawnInterval - 0.4) {
-            this.spawnTimer = targetSpawnInterval - 0.4;
+        const targetSpawnInterval = this.isPvPMode ? 2.8 : Math.max(1.4, 3.2 - (this.zombiesKilled * 0.05));
+        if (this.entities.zombies.length === 0 && this.spawnTimer < targetSpawnInterval - 0.8) {
+            this.spawnTimer = targetSpawnInterval - 0.8;
         }
         if (this.spawnTimer >= targetSpawnInterval) {
             this.spawnTimer = 0;
@@ -743,6 +746,7 @@ class CombatSystem {
 
             // Collisions with visible on-screen Zombies (miss shots bypass zombies)
             if (p.isMiss) return;
+            if (this.isPvPMode && this.pvpSystem && this.entities.zombies.every(z => !z.active) && this.pvpSystem.checkDirectHeroHit(p, this)) return;
             for (const z of this.entities.zombies) {
                 if (!z.active || z.x > this.canvas.width - 4) continue;
                 const currentY = z.y + (z.jumpArcY || 0);

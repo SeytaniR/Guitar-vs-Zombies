@@ -912,7 +912,14 @@ assert(zPlayer.direction === -1 && zOpponent.direction === 1, 'Player zombie mov
 assert(zPlayer.isPvP === true && zPlayer.attackInterval === 1.6, 'PvP zombie has isPvP flag and 1.6s attack interval');
 assert(zPlayer.speed <= 25 && zPlayer.attackDamage <= 7, 'PvP zombie has balanced speed (<=25) and bite damage (<=7)');
 pvpCombat.resetBattle(null, true);
-assert(pvpCombat.spawnTimer === 1.5 && pvpCombat.entities.zombies.length === 0, 'PvP match start grants 3.5s initial grace period before first wave');
+assert(pvpCombat.spawnTimer === 1.2 && pvpCombat.entities.zombies.length === 0, 'PvP match start grants 1.6s initial grace period before first wave');
+
+// Direct Hero Hit (95% damage reduction) when NO zombies in arena
+pvpCombat.entities.zombies = [];
+opp.hp = 100;
+const directProj = { x: pvp.getOpponentPosition(pvpCombat).x - 10, y: pvp.getOpponentPosition(pvpCombat).y, damage: 40, active: true, owner: 'player' };
+const hitHero = pvp.checkDirectHeroHit(directProj, pvpCombat);
+assert(hitHero === true && !directProj.active && opp.hp === 98, 'Direct hit on opponent with no zombies in arena deals 5% damage (95% reduction: 40 * 0.05 = 2 dmg, 100 -> 98 HP)');
 
 // Over-Shoot Cross-Healing Rule
 // 1. When player has NO player zombies active, player projectile overshoots and HEALS opponent zombie (+30% damage as heal)

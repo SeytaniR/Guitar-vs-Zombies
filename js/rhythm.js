@@ -286,6 +286,8 @@ class RhythmSystem {
 
             // Register note rating with CombatSystem (sync combo & apply note damage modifier / skill)
             if (window.game && window.game.combat) {
+                const noteMult = (ratingKey === 'unbelievable' || ratingKey === 'perfect') ? 1.5 : (ratingKey === 'great' ? 1.2 : 1.0);
+                window.game.combat.score += Math.round(150 * noteMult * this.multiplier);
                 window.game.combat.combo = this.streak;
                 window.game.combat.registerRhythmNote(ratingKey, lane);
             }

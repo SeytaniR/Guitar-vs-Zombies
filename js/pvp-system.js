@@ -283,10 +283,10 @@ class PvPSystem {
         const cw = combat.canvas.width;
         const metrics = combat.getRoadMetrics ? combat.getRoadMetrics() : { laneY: combat.canvas.height * 0.78 };
 
-        // 1. Cap active zombies in PvP to max 2 per side to avoid mobbing
+        // 1. Cap active zombies in PvP to max 3 per side to avoid mobbing
         const activePlayerZombies = combat.entities.zombies.filter(z => z.active && z.side === 'player').length;
         const activeOppZombies = combat.entities.zombies.filter(z => z.active && z.side === 'opponent').length;
-        if (activePlayerZombies >= 2 && activeOppZombies >= 2 && !forceDef) return;
+        if (activePlayerZombies >= 3 && activeOppZombies >= 3 && !forceDef) return;
 
         // 2. Normalized PvP Duel Level (independent of PvE campaign stage)
         const pPool = window.guitaristPool;
@@ -340,7 +340,7 @@ class PvPSystem {
         }
 
         // Zombie 1: Player Side (starts at center, moves left towards player)
-        if (activePlayerZombies < 2 || forceDef) {
+        if (activePlayerZombies < 3 || forceDef) {
             const defPlayer = { ...pvpBaseDef, side: 'player' };
             const zPlayer = new ZombieClass(defPlayer, metrics.laneY, cw, zLevel, centerX);
             zPlayer.side = 'player';
@@ -354,7 +354,7 @@ class PvPSystem {
         }
 
         // Zombie 2: Opponent Side (starts at center, moves right towards opponent)
-        if (activeOppZombies < 2 || forceDef) {
+        if (activeOppZombies < 3 || forceDef) {
             const defOpponent = { ...pvpBaseDef, side: 'opponent' };
             const zOpponent = new ZombieClass(defOpponent, metrics.laneY, cw, zLevel, centerX);
             zOpponent.side = 'opponent';
@@ -420,6 +420,10 @@ class PvPSystem {
                 if (z.active && z.side === 'player' && z.x > maxPX) { maxPX = z.x; target = z; }
             }
         }
+        if (!target) {
+            const heroPos = combat.getHeroPosition();
+            target = { x: heroPos.x, y: heroPos.y - 12 };
+        }
 
         // Fire opponent projectile from right side towards center/left
         const startX = oppPos.x - 22, startY = oppPos.y - 18;
@@ -436,6 +440,40 @@ class PvPSystem {
         });
 
         combat.fx.shockwaves.push({ x: startX, y: startY, radius: 4, maxRadius: 22, color: '#ff3344', lineWidth: 2, alpha: 1.0 });
+    }
+
+    checkDirectHeroHit(p, combat) {
+        if (!combat || !p || !p.active || p.isMiss) return false;
+        const pOwner = p.owner || 'player';
+
+        if (pOwner === 'player') {
+            const oppPos = this.getOpponentPosition(combat);
+            if (p.x >= oppPos.x - 24 && Math.abs(p.y - oppPos.y) < 55) {
+                p.active = false;
+                // Direct hero hit: damage reduced by 95% (deals only 5% of normal damage)
+                const directDmg = Math.max(1, Math.round(p.damage * 0.05));
+                this.damageOpponent(directDmg, false, `-${directDmg} HP 🎯 (95% DEF)`, '#ffaa00', combat);
+                if (combat.fx) {
+                    combat.fx.spawnBurst(oppPos.x, oppPos.y - 15, '#ffaa00', 8, 45, 2, 0.3);
+                    combat.fx.shockwaves.push({ x: oppPos.x, y: oppPos.y - 15, radius: 4, maxRadius: 30, color: '#ffaa00', lineWidth: 2, alpha: 1.0 });
+                }
+                return true;
+            }
+        } else if (pOwner === 'opponent') {
+            const heroPos = combat.getHeroPosition();
+            if (p.x <= heroPos.x + 24 && Math.abs(p.y - heroPos.y) < 55) {
+                p.active = false;
+                // Direct hero hit: damage reduced by 95% (deals only 5% of normal damage)
+                const directDmg = Math.max(1, Math.round(p.damage * 0.05));
+                combat.takeDamage(directDmg, false, `-${directDmg} HP 🎯 (95% DEF)`, '#ffaa00');
+                if (combat.fx) {
+                    combat.fx.spawnBurst(heroPos.x, heroPos.y - 15, '#ffaa00', 8, 45, 2, 0.3);
+                    combat.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 4, maxRadius: 30, color: '#ffaa00', lineWidth: 2, alpha: 1.0 });
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     handleCollision(p, z, combat) {
