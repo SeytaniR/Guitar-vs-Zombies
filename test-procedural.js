@@ -972,8 +972,9 @@ pvp.state = 'playing';
 let pvpModalOpened = false;
 global.document.getElementById = (id) => ({ classList: { add: () => { if (id === 'pvp-results-modal') pvpModalOpened = true; }, remove: () => {} }, style: {}, innerText: '', appendChild: () => {} });
 pvp.damageOpponent(100, true, '-100 HP', '#ff3344', pvpCombat);
-assert(opp.hp === 0 && pvp.state === 'ended', 'Opponent HP 0 ends duel by KO');
-assert(pvpModalOpened === true, 'PvP results comparison modal opened on duel completion');
+assert(opp.hp === 0 && pvp.state === 'finale', 'Opponent HP 0 initiates PvP duel finale transition');
+pvp.update(3.0, pvpCombat);
+assert(pvp.state === 'ended' && pvpModalOpened === true, 'PvP results comparison modal opened after finale');
 
 // PvP Song Selection & Zero Ping Loading UI Checks
 assert(htmlContent.includes('id="pvp-song-select-view"'), 'index.html contains #pvp-song-select-view');

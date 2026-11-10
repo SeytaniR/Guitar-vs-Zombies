@@ -563,7 +563,34 @@ class PvPSystem {
     }
 
     update(dt, combat) {
-        if (this.state !== 'playing' || !this.opponent) return;
+        if (!this.opponent) return;
+
+        // 1. PvP Finale Sequence Timer Loop
+        if (this.state === 'finale') {
+            this.finaleTimer -= dt;
+            if (this.finaleTimer <= 0) {
+                this.state = 'ended';
+                const rhythm = window.game ? window.game.rhythm : null;
+                if (rhythm) {
+                    rhythm.pvpFinaleMode = null;
+                    rhythm.stopCustomSong();
+                }
+                if (combat) {
+                    combat.matchActive = false;
+                    combat.isPaused = true;
+                }
+                if (window.game && typeof window.game.pauseBattle === 'function') {
+                    window.game.pauseBattle();
+                }
+                if (window.soundEngine && typeof window.soundEngine.stopSong === 'function') {
+                    window.soundEngine.stopSong();
+                }
+                this.showPvPResultsModal(this.finaleIsWin, this.finaleOutcomeKey, this.finaleGold, this.finaleXp, this.finaleTrophies, combat, rhythm);
+            }
+            return;
+        }
+
+        if (this.state !== 'playing') return;
         if (this.opponent.flashTime > 0) this.opponent.flashTime -= dt;
 
         for (let i = 0; i < 4; i++) {
@@ -650,6 +677,47 @@ class PvPSystem {
 
         // Update In-Battle Opponent HUD
         this.updateBattleHUD();
+
+        // Draw PvP Finale Top Emphasis Banner if in finale state
+        if (this.state === 'finale') {
+            const isWin = this.finaleIsWin;
+            const bannerW = Math.min(360, cw * 0.92);
+            const bannerH = 46;
+            const bannerX = (cw - bannerW) / 2;
+            const bannerY = 14;
+
+            ctx.save();
+            ctx.shadowColor = isWin ? '#00ff66' : '#ff2233';
+            ctx.shadowBlur = 18;
+            ctx.fillStyle = isWin ? 'rgba(0, 32, 12, 0.94)' : 'rgba(38, 4, 10, 0.94)';
+            ctx.strokeStyle = isWin ? '#00ff66' : '#ff3344';
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+                ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 8);
+            } else {
+                ctx.rect(bannerX, bannerY, bannerW, bannerH);
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+            ctx.textAlign = 'center';
+            ctx.font = "900 16px 'Impact', 'Segoe UI Black', sans-serif";
+            ctx.fillStyle = isWin ? '#55ff99' : '#ff5566';
+            ctx.fillText(
+                isWin ? '⚔️ 🏆 VITÓRIA NO DUELO PVP! 🏆 ⚔️' : '⚔️ ☠️ DERROTA NO DUELO! ☠️ ⚔️',
+                cw / 2,
+                bannerY + 22
+            );
+
+            ctx.font = "bold 10px 'Segoe UI', sans-serif";
+            ctx.fillStyle = '#ffffff';
+            const sub = isWin ? 'DOMÍNIO TOTAL NO PALCO!' : 'O ADVERSÁRIO SUPEROU O RITMO!';
+            ctx.fillText(sub, cw / 2, bannerY + 38);
+            ctx.restore();
+        }
     }
 
     updateBattleHUD() {
@@ -669,8 +737,7 @@ class PvPSystem {
     }
 
     endPvPBattle(reason = 'song_complete', combat = null, rhythm = null) {
-        if (this.state === 'ended') return;
-        this.state = 'ended';
+        if (this.state === 'ended' || this.state === 'finale') return;
 
         const playerScore = (combat && combat.score) || 0;
         const oppScore = (this.opponent && this.opponent.score) || 0;
@@ -708,10 +775,64 @@ class PvPSystem {
         const pActive = window.guitaristPool ? window.guitaristPool.getSelectedGuitarist() : null;
         if (pActive && window.guitaristPool) window.guitaristPool.addHeroXp(pActive.id, xpReward);
 
-        this.showPvPResultsModal(isPlayerWinner, outcomeKey, goldReward, xpReward, trophyChange, combat, rhythm);
+        // Store finale transition state (2.8 seconds transition)
+        this.state = 'finale';
+        this.finaleTimer = 2.8;
+        this.finaleTotal = 2.8;
+        this.finaleIsWin = isPlayerWinner;
+        this.finaleOutcomeKey = outcomeKey;
+        this.finaleGold = goldReward;
+        this.finaleXp = xpReward;
+        this.finaleTrophies = trophyChange;
+
+        // Disarm combat active state during finale to freeze attacks & spawns
+        if (combat) combat.matchActive = false;
+
+        const r = rhythm || (window.game ? window.game.rhythm : null);
+        if (r) {
+            r.pvpFinaleMode = isPlayerWinner ? 'victory' : 'defeat';
+            r.pvpFinaleTimer = 2.8;
+        }
+
+        // Update confrontation banner at top of screen
+        const banner = document.getElementById('pvp-confront-banner');
+        if (banner) {
+            banner.innerText = isPlayerWinner
+                ? '🏆 VITÓRIA NO DUELO PVP! DOMÍNIO TOTAL NO PALCO! 🏆'
+                : '☠️ DERROTA NO DUELO! O ADVERSÁRIO SUPEROU O RITMO! ☠️';
+            banner.style.background = isPlayerWinner ? 'rgba(0, 45, 15, 0.95)' : 'rgba(45, 5, 10, 0.95)';
+            banner.style.borderColor = isPlayerWinner ? '#00ff66' : '#ff2233';
+            banner.style.color = isPlayerWinner ? '#55ff99' : '#ff5566';
+            banner.style.boxShadow = isPlayerWinner ? '0 0 25px rgba(0, 255, 102, 0.7)' : '0 0 25px rgba(255, 34, 51, 0.7)';
+        }
+
+        if (combat && typeof combat.triggerShake === 'function') {
+            combat.triggerShake(isPlayerWinner ? 10 : 12);
+        }
+
+        if (window.soundEngine) {
+            if (isPlayerWinner && typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord(0);
+            else if (!isPlayerWinner && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
+        }
     }
 
     showPvPResultsModal(isWin, outcomeKey, gold, xp, trophyDelta, combat, rhythm) {
+        // Enforce total audio & combat stoppage in background
+        if (rhythm) {
+            rhythm.pvpFinaleMode = null;
+            rhythm.stopCustomSong();
+        }
+        if (combat) {
+            combat.matchActive = false;
+            combat.isPaused = true;
+        }
+        if (window.game && typeof window.game.pauseBattle === 'function') {
+            window.game.pauseBattle();
+        }
+        if (window.soundEngine && typeof window.soundEngine.stopSong === 'function') {
+            window.soundEngine.stopSong();
+        }
+
         const modal = document.getElementById('pvp-results-modal');
         if (!modal) return;
 

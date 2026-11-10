@@ -59,7 +59,7 @@ class RhythmSystem {
 
         const lastTapTime = [0, 0, 0, 0];
         const onDown = (lane, id) => {
-            if (this.isPaused) return;
+            if (this.isPaused || this.pvpFinaleMode) return;
             const now = performance.now();
             if (now - lastTapTime[lane] < 60) return;
             lastTapTime[lane] = now;
@@ -416,7 +416,7 @@ class RhythmSystem {
             const curTime = this.customSongTime;
 
             // Check if song finished (audio ended or reached duration)
-            if ((this.songAudio && this.songAudio.ended) || curTime >= songDuration + 0.8) {
+            if (!this.pvpFinaleMode && ((this.songAudio && this.songAudio.ended) || curTime >= songDuration + 0.8)) {
                 this.finishCustomSong();
                 return;
             }
@@ -425,7 +425,7 @@ class RhythmSystem {
             this.notes.forEach(note => {
                 if (!note.oppProcessed && curTime >= note.time) {
                     note.oppProcessed = true;
-                    if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem) {
+                    if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem && !this.pvpFinaleMode) {
                         window.game.combat.pvpSystem.onSongNotePassed(note, 'perfect', curTime, window.game.combat);
                     }
                 }
@@ -433,6 +433,28 @@ class RhythmSystem {
                     note.y = hitZoneY; // Clamped at hitzone during hold
                 } else {
                     note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
+                }
+
+                // PvP Finale Auto-Hit (Victory) or Skull (Defeat)
+                if (this.pvpFinaleMode && note.active && !note.autoDone && note.y >= hitZoneY - 14) {
+                    note.autoDone = true;
+                    note.active = false;
+                    const nX = note.track * trackWidth + trackWidth / 2;
+                    this.laneFlashes[note.track] = 1.0;
+                    if (this.pvpFinaleMode === 'victory') {
+                        this.addFloatingRating('PERFECT! ⭐', nX, hitZoneY - 26, '#00ff66', true);
+                        this.createHitSparks(nX, hitZoneY, '#00ff88', true, 10);
+                        if (window.soundEngine && typeof window.soundEngine.playGuitarChord === 'function') {
+                            window.soundEngine.playGuitarChord(note.track);
+                        }
+                    } else {
+                        this.addFloatingRating('💀', nX, hitZoneY - 26, '#ff2233', true);
+                        this.createHitSparks(nX, hitZoneY, '#ff2233', false, 10);
+                        if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') {
+                            window.soundEngine.playMiss();
+                        }
+                    }
+                    return;
                 }
 
                 // Missed note passed hit zone (if not struck and not holding)
@@ -567,6 +589,13 @@ class RhythmSystem {
         // 1. Draw Fretboard Background & Strings
         this.ctx.fillStyle = '#0f0f18';
         this.ctx.fillRect(0, 0, cw, ch);
+
+        if (this.pvpFinaleMode) {
+            const isWin = this.pvpFinaleMode === 'victory';
+            const pulse = 0.5 + 0.5 * Math.sin(this.time * 0.018);
+            this.ctx.fillStyle = isWin ? `rgba(0, 255, 100, ${0.14 + pulse * 0.18})` : `rgba(255, 25, 35, ${0.16 + pulse * 0.18})`;
+            this.ctx.fillRect(0, 0, cw, ch);
+        }
 
         for (let i = 0; i < this.tracks; i++) {
             const tx = i * trackW;
@@ -714,6 +743,18 @@ class RhythmSystem {
 
             const x = note.track * trackW + trackW / 2;
             const col = note.colorInfo;
+
+            // PvP Defeat Finale: notes turning into skulls as they reach hit line
+            if (this.pvpFinaleMode === 'defeat' && drawY >= hitZoneY - 35) {
+                this.ctx.save();
+                this.ctx.translate(x, drawY);
+                this.ctx.font = "24px 'Segoe UI Emoji', sans-serif";
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText('💀', 0, 0);
+                this.ctx.restore();
+                return;
+            }
 
             this.ctx.save();
             this.ctx.translate(x, drawY);
@@ -883,11 +924,11 @@ class RhythmSystem {
     finishCustomSong() {
         if (!this.isCustomSongPlaying) return;
         const song = this.currentSong, stats = { ...this.songStats };
-        this.stopCustomSong();
         if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem) {
             window.game.combat.pvpSystem.endPvPBattle('song_complete', window.game.combat, this);
             return;
         }
+        this.stopCustomSong();
         if (window.game && typeof window.game.triggerVictoryFinale === 'function') {
             window.game.triggerVictoryFinale(song, stats);
         } else if (window.game && typeof window.game.showVictoryModal === 'function') {

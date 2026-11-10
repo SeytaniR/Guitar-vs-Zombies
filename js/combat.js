@@ -625,6 +625,7 @@ class CombatSystem {
     update(deltaTime) {
         if (this.isPaused) return;
         const dt = deltaTime / 1000;
+        if (this.isPvPMode && this.pvpSystem) this.pvpSystem.update(dt, this);
         if (this.isVictorySequence) {
             this.victorySequenceTimer -= dt;
             this.fx.update(dt, this.canvas.width, this.canvas.height);
@@ -650,7 +651,6 @@ class CombatSystem {
 
         if (this.heroStrumAnim > 0 && (this.heroStrumAnim -= 4 * dt) < 0) this.heroStrumAnim = 0;
         if (this.heroFlashTime > 0) this.heroFlashTime -= dt;
-        if (this.isPvPMode && this.pvpSystem) this.pvpSystem.update(dt, this);
 
         if (this.heroHp <= 0 && !this.isGameOver) {
             this.handleHeroDefeat();

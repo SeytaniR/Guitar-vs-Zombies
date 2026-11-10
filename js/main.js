@@ -713,8 +713,8 @@ class Game {
         bind('defeat-retry-btn', () => { closeM('battle-defeat-modal'); this.startMatch(); });
         bind('defeat-talents-btn', () => { closeM('battle-defeat-modal'); this.switchScreen('menu'); if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open(); });
         bind('defeat-close-btn', () => { closeM('battle-defeat-modal'); this.switchScreen('menu'); });
-        bind('pvp-res-close-btn', () => { closeM('pvp-results-modal'); this.switchScreen('menu'); });
-        bind('pvp-res-rematch-btn', () => { closeM('pvp-results-modal'); this.openPvPModal(); });
+        bind('pvp-res-close-btn', () => { closeM('pvp-results-modal'); if (this.rhythm) this.rhythm.stopCustomSong(); this.switchScreen('menu'); });
+        bind('pvp-res-rematch-btn', () => { closeM('pvp-results-modal'); if (this.rhythm) this.rhythm.stopCustomSong(); this.openPvPModal(); });
     }
 
     pauseBattle() {
@@ -806,7 +806,9 @@ class Game {
 
     showVictoryModal(song, stats = {}) {
         this.pauseBattle();
-        if (this.combat) this.combat.isVictory = true;
+        if (this.rhythm) this.rhythm.stopCustomSong();
+        if (this.combat) { this.combat.isVictory = true; this.combat.matchActive = false; this.combat.isPaused = true; }
+        if (window.soundEngine && typeof window.soundEngine.stopSong === 'function') window.soundEngine.stopSong();
         const modal = document.getElementById('song-results-modal');
         if (!modal) return;
         const coverEl = document.getElementById('result-song-cover'), titleEl = document.getElementById('result-song-title'), artistEl = document.getElementById('result-song-artist');
@@ -828,6 +830,9 @@ class Game {
 
     showDefeatModal() {
         this.pauseBattle();
+        if (this.rhythm) this.rhythm.stopCustomSong();
+        if (this.combat) { this.combat.matchActive = false; this.combat.isPaused = true; }
+        if (window.soundEngine && typeof window.soundEngine.stopSong === 'function') window.soundEngine.stopSong();
         const modal = document.getElementById('battle-defeat-modal');
         if (!modal) return;
         const s = (this.combat && this.combat.battleStats) || { zombiesKilled: 0, damageDealt: 0, coinsEarned: 0 };
