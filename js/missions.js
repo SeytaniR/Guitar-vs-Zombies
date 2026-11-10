@@ -70,101 +70,81 @@ class MetaMissionSystem {
     getPerformanceDefinitions() {
         return [
             {
-                id: 'unbelievable',
-                name: 'Acertos UNBELIEVABLE!',
-                badge: 'RITMO', badgeClass: 'badge-legendary',
-                icon: 'assets/talents/lightning_note.jpg',
-                desc: 'Acertos no centro exato da pista ou multikills 7x.',
-                unitLabel: 'Acertos',
+                id: 'unbelievable', name: 'Acertos UNBELIEVABLE!', badge: 'RITMO', badgeClass: 'badge-legendary',
+                icon: 'assets/talents/lightning_note.jpg', desc: 'Acertos no centro exato da pista ou multikills 7x.', unitLabel: 'Acertos',
                 tiers: [10, 100, 1000, 10000, 100000],
-                rewards: [
-                    { gold: 15, xp: 10, title: 'Pulso Firme 🥉' },
-                    { gold: 80, xp: 40, title: 'Ouvido Absoluto 🥈' },
-                    { gold: 500, xp: 200, title: 'Mestre do Ritmo 🥇' },
-                    { gold: 3500, xp: 1200, title: 'Fenômeno Sônico 💎' },
-                    { gold: 25000, xp: 8000, title: 'DEUS DO RITMO 👑⚡' }
-                ]
+                rewards: [{ gold: 15, xp: 10, title: 'Pulso Firme 🥉' }, { gold: 80, xp: 40, title: 'Ouvido Absoluto 🥈' }, { gold: 500, xp: 200, title: 'Mestre do Ritmo 🥇' }, { gold: 3500, xp: 1200, title: 'Fenômeno Sônico 💎' }, { gold: 25000, xp: 8000, title: 'DEUS DO RITMO 👑⚡' }]
             },
             {
-                id: 'critical_hits',
-                name: 'Disparos Críticos',
-                badge: 'COMBATE', badgeClass: 'badge-danger',
-                icon: 'assets/talents/skull_crit.jpg',
-                desc: 'Tiros sônicos com Dano Crítico causados nos zumbis.',
-                unitLabel: 'Críticos',
+                id: 'critical_hits', name: 'Disparos Críticos', badge: 'COMBATE', badgeClass: 'badge-danger',
+                icon: 'assets/talents/skull_crit.jpg', desc: 'Tiros sônicos com Dano Crítico causados nos zumbis.', unitLabel: 'Críticos',
                 tiers: [10, 100, 1000, 10000, 100000],
-                rewards: [
-                    { gold: 15, xp: 10, title: 'Mira Certeira 🥉' },
-                    { gold: 80, xp: 40, title: 'Destruidor Sônico 🥈' },
-                    { gold: 500, xp: 200, title: 'Impacto Fatal 🥇' },
-                    { gold: 3500, xp: 1200, title: 'Cataclismo de Riffs 💎' },
-                    { gold: 25000, xp: 8000, title: 'DEUS DO CRÍTICO 👑⚡' }
-                ]
+                rewards: [{ gold: 15, xp: 10, title: 'Mira Certeira 🥉' }, { gold: 80, xp: 40, title: 'Destruidor Sônico 🥈' }, { gold: 500, xp: 200, title: 'Impacto Fatal 🥇' }, { gold: 3500, xp: 1200, title: 'Cataclismo de Riffs 💎' }, { gold: 25000, xp: 8000, title: 'DEUS DO CRÍTICO 👑⚡' }]
             },
             {
-                id: 'high_accuracy_songs',
-                name: 'Shows com Precisão ≥ 90%',
-                badge: 'SHOW', badgeClass: 'badge-tank',
-                icon: 'assets/talents/guitar_power.jpg',
-                desc: 'Shows concluídos com precisão de ritmo igual ou superior a 90%.',
-                unitLabel: 'Shows',
+                id: 'high_accuracy_songs', name: 'Shows com Precisão ≥ 90%', badge: 'SHOW', badgeClass: 'badge-tank',
+                icon: 'assets/talents/guitar_power.jpg', desc: 'Shows concluídos com precisão de ritmo igual ou superior a 90%.', unitLabel: 'Shows',
                 tiers: [1, 5, 20, 50, 150],
-                rewards: [
-                    { gold: 25, xp: 15, title: 'Show Impecável 🥉' },
-                    { gold: 120, xp: 60, title: 'Espetáculo Limpo 🥈' },
-                    { gold: 750, xp: 350, title: 'Perfeccionista do Palco 🥇' },
-                    { gold: 5000, xp: 2000, title: 'Sinfonia Sem Falhas 💎' },
-                    { gold: 35000, xp: 12000, title: 'MAESTRO ABSOLUTO 👑⚡' }
-                ]
+                rewards: [{ gold: 25, xp: 15, title: 'Show Impecável 🥉' }, { gold: 120, xp: 60, title: 'Espetáculo Limpo 🥈' }, { gold: 750, xp: 350, title: 'Perfeccionista do Palco 🥇' }, { gold: 5000, xp: 2000, title: 'Sinfonia Sem Falhas 💎' }, { gold: 35000, xp: 12000, title: 'MAESTRO ABSOLUTO 👑⚡' }]
             },
             {
-                id: 'perfect_accuracy_songs',
-                name: 'Shows Perfeitos (100% FC)',
-                badge: 'FULL COMBO', badgeClass: 'badge-legendary',
-                icon: 'assets/talents/gold_pick.jpg',
-                desc: 'Músicas finalizadas sem errar nenhuma nota (100% Full Combo).',
-                unitLabel: 'Shows 100%',
+                id: 'perfect_accuracy_songs', name: 'Shows Perfeitos (100% FC)', badge: 'FULL COMBO', badgeClass: 'badge-legendary',
+                icon: 'assets/talents/gold_pick.jpg', desc: 'Músicas finalizadas sem errar nenhuma nota (100% Full Combo).', unitLabel: 'Shows 100%',
                 tiers: [1, 3, 10, 25, 60],
-                rewards: [
-                    { gold: 30, xp: 20, title: 'Primeiro Full Combo 🥉' },
-                    { gold: 150, xp: 80, title: 'Mãos de Aço 🥈' },
-                    { gold: 1000, xp: 500, title: 'Virtuoso Sem Erros 🥇' },
-                    { gold: 6000, xp: 2500, title: 'Lenda dos Teclados 💎' },
-                    { gold: 40000, xp: 15000, title: 'DEUS DO FULL COMBO 👑⚡' }
-                ]
+                rewards: [{ gold: 30, xp: 20, title: 'Primeiro Full Combo 🥉' }, { gold: 150, xp: 80, title: 'Mãos de Aço 🥈' }, { gold: 1000, xp: 500, title: 'Virtuoso Sem Erros 🥇' }, { gold: 6000, xp: 2500, title: 'Lenda dos Teclados 💎' }, { gold: 40000, xp: 15000, title: 'DEUS DO FULL COMBO 👑⚡' }]
             },
             {
-                id: 'max_streak',
-                name: 'Maior Combo de Notas',
-                badge: 'COMBO', badgeClass: 'badge-rusher',
-                icon: 'assets/talents/amp_shield.jpg',
-                desc: 'Sequência ininterrupta máxima de notas acertadas no ritmo.',
-                unitLabel: 'Notas Seguidas',
-                isPeakStat: true,
+                id: 'max_streak', name: 'Maior Combo de Notas', badge: 'COMBO', badgeClass: 'badge-rusher',
+                icon: 'assets/talents/amp_shield.jpg', desc: 'Sequência ininterrupta máxima de notas acertadas no ritmo.', unitLabel: 'Notas Seguidas', isPeakStat: true,
                 tiers: [25, 50, 100, 250, 500],
-                rewards: [
-                    { gold: 20, xp: 15, title: 'No Embalo 🥉' },
-                    { gold: 100, xp: 50, title: 'Sequência Incandescente 🥈' },
-                    { gold: 600, xp: 250, title: 'Combo Destruidor 🥇' },
-                    { gold: 4000, xp: 1500, title: 'Fúria Rítmica 💎' },
-                    { gold: 30000, xp: 10000, title: 'COMBO INFINITO 👑⚡' }
-                ]
+                rewards: [{ gold: 20, xp: 15, title: 'No Embalo 🥉' }, { gold: 100, xp: 50, title: 'Sequência Incandescente 🥈' }, { gold: 600, xp: 250, title: 'Combo Destruidor 🥇' }, { gold: 4000, xp: 1500, title: 'Fúria Rítmica 💎' }, { gold: 30000, xp: 10000, title: 'COMBO INFINITO 👑⚡' }]
             },
             {
-                id: 'songs_completed',
-                name: 'Shows Realizados na Turnê',
-                badge: 'TURNÊ', badgeClass: 'badge-common',
-                icon: 'assets/branding/app-icon.png',
-                desc: 'Total de músicas e shows finalizados até o acorde final.',
-                unitLabel: 'Shows',
+                id: 'songs_completed', name: 'Shows Realizados na Turnê', badge: 'TURNÊ', badgeClass: 'badge-common',
+                icon: 'assets/branding/app-icon.png', desc: 'Total de músicas e shows finalizados até o acorde final.', unitLabel: 'Shows',
                 tiers: [1, 5, 20, 60, 150],
-                rewards: [
-                    { gold: 15, xp: 10, title: 'Primeiro Show 🥉' },
-                    { gold: 80, xp: 40, title: 'Banda de Garagem 🥈' },
-                    { gold: 500, xp: 200, title: 'Estrela Local 🥇' },
-                    { gold: 3000, xp: 1000, title: 'Headliner de Festival 💎' },
-                    { gold: 20000, xp: 7000, title: 'TURNÊ MUNDIAL 👑⚡' }
-                ]
+                rewards: [{ gold: 15, xp: 10, title: 'Primeiro Show 🥉' }, { gold: 80, xp: 40, title: 'Banda de Garagem 🥈' }, { gold: 500, xp: 200, title: 'Estrela Local 🥇' }, { gold: 3000, xp: 1000, title: 'Headliner de Festival 💎' }, { gold: 20000, xp: 7000, title: 'TURNÊ MUNDIAL 👑⚡' }]
+            }
+        ];
+    }
+
+    getPvPDefinitions() {
+        return [
+            {
+                id: 'pvp_matches', name: 'Duelos PvP Disputados', badge: 'PVP', badgeClass: 'badge-legendary',
+                icon: 'assets/branding/app-icon.png', desc: 'Participe de duelos rítmicos online no confronto de palcos.', unitLabel: 'Duelos',
+                tiers: [1, 5, 20, 50, 150],
+                rewards: [{ gold: 30, xp: 25, title: 'Desafiante do Palco 🥉' }, { gold: 120, xp: 80, title: 'Duelista Assíduo 🥈' }, { gold: 600, xp: 350, title: 'Veterano da Arena 🥇' }, { gold: 3500, xp: 1500, title: 'Gladiador Sônico 💎' }, { gold: 25000, xp: 8000, title: 'LENDA DO PVP 👑⚡' }]
+            },
+            {
+                id: 'pvp_wins', name: 'Vitórias em Duelo PvP', badge: 'VITÓRIA', badgeClass: 'badge-tank',
+                icon: 'assets/talents/guitar_power.jpg', desc: 'Vença duelos PvP por nocaute ou pontuação rítmica superior.', unitLabel: 'Vitórias',
+                tiers: [1, 3, 10, 30, 100],
+                rewards: [{ gold: 45, xp: 35, title: 'Primeira Conquista 🥉' }, { gold: 150, xp: 100, title: 'Dominador do Riff 🥈' }, { gold: 800, xp: 450, title: 'Campeão da Arena 🥇' }, { gold: 5000, xp: 2200, title: 'Soberano dos Duelos 💎' }, { gold: 35000, xp: 12000, title: 'IMORTAL DO PALCO 👑⚡' }]
+            },
+            {
+                id: 'pvp_kos', name: 'Nocautes de Guitarrista (KOs)', badge: 'NOCAUTE', badgeClass: 'badge-danger',
+                icon: 'assets/talents/skull_crit.jpg', desc: 'Derrube todo o HP do oponente antes do encerramento da música.', unitLabel: 'KOs',
+                tiers: [1, 3, 8, 20, 50],
+                rewards: [{ gold: 40, xp: 30, title: 'Golpe Brutal 🥉' }, { gold: 140, xp: 90, title: 'Solo Destruidor 🥈' }, { gold: 750, xp: 400, title: 'Carrasco de Riffs 🥇' }, { gold: 4500, xp: 2000, title: 'Devastador Sônico 💎' }, { gold: 30000, xp: 10000, title: 'MESTRE DO NOCAUTE 👑⚡' }]
+            },
+            {
+                id: 'pvp_heals', name: 'Cura Cruzada Tática', badge: 'TÁTICA', badgeClass: 'badge-rusher',
+                icon: 'assets/talents/lightning_note.jpg', desc: 'Dispare tiros livres na pista para curar e sobrecarregar o oponente.', unitLabel: 'Curas',
+                tiers: [5, 25, 100, 300, 1000],
+                rewards: [{ gold: 25, xp: 20, title: 'Sobrecarga Tática 🥉' }, { gold: 100, xp: 60, title: 'Estrategista Verde 🥈' }, { gold: 550, xp: 280, title: 'Mestre da Sabotagem 🥇' }, { gold: 3000, xp: 1400, title: 'Caos Cruzado 💎' }, { gold: 20000, xp: 7000, title: 'ALQUIMISTA SÔNICO 👑⚡' }]
+            },
+            {
+                id: 'pvp_high_score', name: 'Pontuação Épica no PvP', badge: 'PLACAR', badgeClass: 'badge-legendary',
+                icon: 'assets/talents/gold_pick.jpg', desc: 'Atinja pontuações altas em partidas individuais de PvP.', unitLabel: 'Pontos', isPeakStat: true,
+                tiers: [10000, 25000, 50000, 100000, 200000],
+                rewards: [{ gold: 25, xp: 20, title: 'Ritmo de Elite 🥉' }, { gold: 110, xp: 70, title: 'Show Competitivo 🥈' }, { gold: 650, xp: 320, title: 'Virtuoso Pontuador 🥇' }, { gold: 4000, xp: 1800, title: 'Pontuação Suprema 💎' }, { gold: 30000, xp: 10000, title: 'PONTUAÇÃO DIVINA 👑⚡' }]
+            },
+            {
+                id: 'pvp_zombie_kills', name: 'Zumbis Abatidos no PvP', badge: 'DEFESA', badgeClass: 'badge-common',
+                icon: 'assets/zombies/punk_walker.jpg', desc: 'Destrua os zumbis que marcham pela sua pista durante confrontos PvP.', unitLabel: 'Abates',
+                tiers: [10, 50, 200, 600, 2000],
+                rewards: [{ gold: 20, xp: 15, title: 'Guardião da Pista 🥉' }, { gold: 90, xp: 50, title: 'Defensor Firme 🥈' }, { gold: 500, xp: 250, title: 'Exterminador do Duelo 🥇' }, { gold: 3200, xp: 1200, title: 'Muralha Rítmica 💎' }, { gold: 22000, xp: 7500, title: 'FLAGELO DOS MORTOS 👑⚡' }]
             }
         ];
     }
@@ -286,7 +266,7 @@ class MetaMissionSystem {
     getPerformanceMission(statIdOrDef) {
         let def = null;
         if (typeof statIdOrDef === 'string') {
-            def = this.getPerformanceDefinitions().find(d => d.id === statIdOrDef);
+            def = this.getPerformanceDefinitions().find(d => d.id === statIdOrDef) || this.getPvPDefinitions().find(d => d.id === statIdOrDef);
         } else if (statIdOrDef && typeof statIdOrDef === 'object') {
             def = statIdOrDef;
         }
@@ -303,7 +283,7 @@ class MetaMissionSystem {
         const reward = { gold: rew.gold, xp: rew.xp, title: rew.title, tier: currentTierIndex + 1, target: targetVal };
 
         return {
-            category: 'performance', id: def.id, statId: def.id,
+            category: (def.id && def.id.startsWith('pvp_')) ? 'pvp' : 'performance', id: def.id, statId: def.id,
             name: def.name, icon: def.icon, badgeText: def.badge, badgeClass: def.badgeClass,
             desc: def.desc, unitLabel: def.unitLabel, currentVal, targetVal,
             claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1,
@@ -321,6 +301,14 @@ class MetaMissionSystem {
 
     getAllPerformanceMissions() {
         return this.getPerformanceDefinitions().map(d => this.getPerformanceMission(d)).filter(Boolean);
+    }
+
+    getAllPvPMissions() {
+        return this.getPvPDefinitions().map(d => {
+            const m = this.getPerformanceMission(d);
+            if (m) m.category = 'pvp';
+            return m;
+        }).filter(Boolean);
     }
 
     getAllMissions() {
@@ -379,7 +367,7 @@ class MetaMissionSystem {
     }
 
     recordStat(statId, amount = 1) {
-        const def = this.getPerformanceDefinitions().find(d => d.id === statId);
+        const def = this.getPerformanceDefinitions().find(d => d.id === statId) || this.getPvPDefinitions().find(d => d.id === statId);
         if (!def) return;
 
         const cur = this.state.performanceStats[statId] || 0;
@@ -390,7 +378,7 @@ class MetaMissionSystem {
         if (claimedTier < this.MAX_TIER) {
             const target = def.tiers[claimedTier];
             if (cur < target && nextVal >= target) {
-                this.onMilestoneReached(def.id, def.name, nextVal, 'performance');
+                this.onMilestoneReached(def.id, def.name, nextVal, (def.id && def.id.startsWith('pvp_')) ? 'pvp' : 'performance');
             }
         }
 
@@ -400,6 +388,15 @@ class MetaMissionSystem {
 
     recordMaxStreak(streak) {
         if (typeof streak === 'number' && streak > 0) this.recordStat('max_streak', streak);
+    }
+
+    recordPvPOutcome(data = {}) {
+        this.recordStat('pvp_matches', 1);
+        if (data.isWin) this.recordStat('pvp_wins', 1);
+        if (data.reason === 'player_ko') this.recordStat('pvp_kos', 1);
+        if (data.overheals > 0) this.recordStat('pvp_heals', data.overheals);
+        if (data.score > 0) this.recordStat('pvp_high_score', data.score);
+        if (data.kills > 0) this.recordStat('pvp_zombie_kills', data.kills);
     }
 
     recordSongCompletion(accPct, stats = {}) {
@@ -421,6 +418,7 @@ class MetaMissionSystem {
             const cy = window.combat.canvas ? window.combat.canvas.height * 0.28 : 120;
             let label = `🎯 META CONCLUÍDA: ${name} (${val.toLocaleString()})!`;
             if (type === 'guitarist') label = `🎸 MESTRIA: ${name} (${val.toLocaleString()} Kills)!`;
+            else if (type === 'pvp') label = `⚔️ MARCO PVP: ${name} (${val.toLocaleString()})!`;
             else if (type === 'performance') label = `⚡ MARCO DE RITMO: ${name} (${val.toLocaleString()})!`;
 
             window.combat.addFloatingText(label, cx, cy, '#ffd700', true);
@@ -604,7 +602,7 @@ class MetaMissionSystem {
         missionsToClaim.forEach(m => {
             let res = null;
             if (m.category === 'guitarists') res = this.claimGuitaristReward(m.heroId || m.id, false);
-            else if (m.category === 'performance') res = this.claimPerformanceReward(m.statId || m.id, false);
+            else if (m.category === 'performance' || m.category === 'pvp') res = this.claimPerformanceReward(m.statId || m.id, false);
             else res = this.claimZombieReward(m.zombieId || m.id, false);
 
             if (res && res.success) {
@@ -625,9 +623,11 @@ class MetaMissionSystem {
         if (category === 'zombies') return this.getAllZombieMissions().filter(m => m.isReadyToClaim).length;
         if (category === 'guitarists') return this.getAllGuitaristMissions().filter(m => m.isReadyToClaim).length;
         if (category === 'performance') return this.getAllPerformanceMissions().filter(m => m.isReadyToClaim).length;
+        if (category === 'pvp') return this.getAllPvPMissions().filter(m => m.isReadyToClaim).length;
         return this.getAllZombieMissions().filter(m => m.isReadyToClaim).length +
                this.getAllGuitaristMissions().filter(m => m.isReadyToClaim).length +
-               this.getAllPerformanceMissions().filter(m => m.isReadyToClaim).length;
+               this.getAllPerformanceMissions().filter(m => m.isReadyToClaim).length +
+               this.getAllPvPMissions().filter(m => m.isReadyToClaim).length;
     }
 
     updateBadgeCounter() {
@@ -660,9 +660,15 @@ class MetaMissionSystem {
         const zCount = this.getPendingClaimsCount('zombies');
         const hCount = this.getPendingClaimsCount('guitarists');
         const pCount = this.getPendingClaimsCount('performance');
+        const pvCount = this.getPendingClaimsCount('pvp');
         const zTabBadge = document.getElementById('cat-badge-zombies');
         const hTabBadge = document.getElementById('cat-badge-guitarists');
         const pTabBadge = document.getElementById('cat-badge-performance');
+        const pvTabBadge = document.getElementById('cat-badge-pvp');
+        if (pvTabBadge) {
+            pvTabBadge.innerText = pvCount > 0 ? `(${pvCount})` : '';
+            if (pvTabBadge.style) pvTabBadge.style.display = pvCount > 0 ? 'inline' : 'none';
+        }
 
         if (zTabBadge) {
             zTabBadge.innerText = zCount > 0 ? `(${zCount})` : '';
@@ -758,6 +764,10 @@ class MetaMissionSystem {
             missions = this.getAllPerformanceMissions();
             totalCount = Object.values(this.state.performanceStats).reduce((a, b) => a + (Number(b) || 0), 0);
             labelText = tr('statRhythmActions', 'Ações de Ritmo:');
+        } else if (this.activeCategory === 'pvp') {
+            missions = this.getAllPvPMissions();
+            totalCount = Object.entries(this.state.performanceStats).filter(([k]) => k.startsWith('pvp_')).reduce((a, [, v]) => a + (Number(v) || 0), 0);
+            labelText = tr('statPvPActions', 'Ações no PvP:');
         } else {
             missions = this.getAllZombieMissions();
             totalCount = Object.values(this.state.kills).reduce((a, b) => a + (Number(b) || 0), 0);
@@ -796,6 +806,7 @@ class MetaMissionSystem {
         let missions = [];
         if (this.activeCategory === 'guitarists') missions = this.getAllGuitaristMissions();
         else if (this.activeCategory === 'performance') missions = this.getAllPerformanceMissions();
+        else if (this.activeCategory === 'pvp') missions = this.getAllPvPMissions();
         else missions = this.getAllZombieMissions();
 
         if (this.searchQuery) {
@@ -811,7 +822,7 @@ class MetaMissionSystem {
         else if (this.activeFilter === 'completed') missions = missions.filter(m => m.isMaxCompleted);
 
         if (missions.length === 0) {
-            const icon = this.activeCategory === 'guitarists' ? '🎸' : (this.activeCategory === 'performance' ? '⚡' : '🧟');
+            const icon = this.activeCategory === 'guitarists' ? '🎸' : (this.activeCategory === 'pvp' ? '⚔️' : (this.activeCategory === 'performance' ? '⚡' : '🧟'));
             const emptyMsg = typeof i18n !== 'undefined' ? i18n.t('noMissionsFound', 'Nenhuma missão encontrada para o filtro selecionado.') : 'Nenhuma missão encontrada para o filtro selecionado.';
             container.innerHTML = `
                 <div class="missions-empty-state">
@@ -831,7 +842,7 @@ class MetaMissionSystem {
                     const id = btn.dataset ? btn.dataset.claimId : null;
                     if (!id) return;
                     if (cat === 'guitarists') this.claimGuitaristReward(id);
-                    else if (cat === 'performance') this.claimPerformanceReward(id);
+                    else if (cat === 'performance' || cat === 'pvp') this.claimPerformanceReward(id);
                     else this.claimZombieReward(id);
                 };
             });
@@ -841,16 +852,17 @@ class MetaMissionSystem {
     createCardHTML(m) {
         const isReady = m.isReadyToClaim;
         const isMax = m.isMaxCompleted;
-        const catClass = m.category === 'guitarists' ? 'hero-mission-card' : (m.category === 'performance' ? 'perf-mission-card' : '');
-        const fillClass = m.category === 'guitarists' ? 'hero-fill' : (m.category === 'performance' ? 'perf-fill' : '');
-        const titleClass = m.category === 'guitarists' ? 'hero-title' : (m.category === 'performance' ? 'perf-title' : '');
-        const tierPillClass = m.category === 'guitarists' ? 'hero-tier-pill' : (m.category === 'performance' ? 'perf-tier-pill' : '');
+        const catClass = m.category === 'guitarists' ? 'hero-mission-card' : (m.category === 'pvp' ? 'pvp-mission-card' : (m.category === 'performance' ? 'perf-mission-card' : ''));
+        const fillClass = m.category === 'guitarists' ? 'hero-fill' : (m.category === 'pvp' ? 'pvp-fill' : (m.category === 'performance' ? 'perf-fill' : ''));
+        const titleClass = m.category === 'guitarists' ? 'hero-title' : (m.category === 'pvp' ? 'pvp-title' : (m.category === 'performance' ? 'perf-title' : ''));
+        const tierPillClass = m.category === 'guitarists' ? 'hero-tier-pill' : (m.category === 'pvp' ? 'pvp-tier-pill' : (m.category === 'performance' ? 'perf-tier-pill' : ''));
 
         const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         let actionBtnHTML = '';
         if (isMax) {
             let masterTitle = tr('masterHunter', 'MESTRE CAÇADOR');
             if (m.category === 'guitarists') masterTitle = tr('rockLegend', 'LENDA DO ROCK');
+            else if (m.category === 'pvp') masterTitle = 'LENDA DO PVP';
             else if (m.category === 'performance') masterTitle = tr('supremeMastery', 'MESTRIA SUPREMA');
 
             const completedText = tr('completedUnits', `${m.targetVal.toLocaleString()} ${m.unitLabel} Concluídas!`, { target: m.targetVal.toLocaleString(), unit: m.unitLabel });
@@ -881,6 +893,7 @@ class MetaMissionSystem {
 
         let sectionTag = tr('milestoneReward', 'RECOMPENSA DO MARCO:');
         if (m.category === 'guitarists') sectionTag = tr('heroMastery', 'MESTRIA DO GUITARRISTA:');
+        else if (m.category === 'pvp') sectionTag = 'MARCO DO DUELO PVP:';
         else if (m.category === 'performance') sectionTag = tr('perfMilestone', 'MARCO DE PERFORMANCE:');
 
         const goldLabel = tr('goldUnit', 'Ouro');
@@ -896,7 +909,7 @@ class MetaMissionSystem {
                     <div class="mission-info-col">
                         <div class="mission-title-row">
                             <h4 class="mission-zombie-name ${m.category === 'guitarists' ? 'hero-name' : ''}">${m.name}</h4>
-                            <span class="mission-lifetime-kills ${m.category === 'guitarists' ? 'hero-kills' : ''}">${m.category === 'guitarists' ? '🎸' : (m.category === 'performance' ? '⚡' : '💀')} ${m.currentVal.toLocaleString()} ${m.unitLabel}</span>
+                            <span class="mission-lifetime-kills ${m.category === 'guitarists' ? 'hero-kills' : ''}">${m.category === 'guitarists' ? '🎸' : (m.category === 'pvp' ? '⚔️' : (m.category === 'performance' ? '⚡' : '💀'))} ${m.currentVal.toLocaleString()} ${m.unitLabel}</span>
                         </div>
                         <div class="mission-tier-indicator">
                             <span class="tier-pill ${tierPillClass}">Tier ${isMax ? '5/5' : `${m.currentTierNum}/5`}</span>

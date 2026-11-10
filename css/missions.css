@@ -722,3 +722,28 @@
     border: 1px solid rgba(0, 240, 255, 0.5);
     color: #67e8f9;
 }
+
+
+/* PvP Duel Mission Card Theme */
+.pvp-mission-card {
+    border-color: rgba(0, 212, 255, 0.25);
+}
+
+.pvp-mission-card:hover {
+    border-color: rgba(0, 212, 255, 0.55);
+    box-shadow: 0 4px 18px rgba(0, 212, 255, 0.2);
+}
+
+.pvp-tier-pill {
+    background: rgba(0, 212, 255, 0.12);
+    border-color: rgba(0, 212, 255, 0.35);
+    color: #00d4ff;
+}
+
+.pvp-fill {
+    background: linear-gradient(90deg, #00d4ff 0%, #0066ff 100%);
+}
+
+.pvp-title {
+    color: #00d4ff;
+}

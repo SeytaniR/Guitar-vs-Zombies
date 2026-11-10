@@ -807,6 +807,15 @@ meta.recordSongCompletion(100, { totalNotes: 50, hitNotes: 50, misses: 0, maxStr
 assert(meta.getPerformanceMission('perfect_accuracy_songs').currentVal >= 1, '100% Full Combo song recorded');
 assert(htmlContent.includes('data-cat="performance"') && cssContent.includes('.perf-mission-card'), 'Performance category tab & CSS included');
 
+// PvP Missions & Progression
+assert(meta.getAllPvPMissions().length === 6, 'PvP missions category contains all 6 missions');
+meta.recordPvPOutcome({ isWin: true, reason: 'player_ko', overheals: 5, score: 25000, kills: 12 });
+assert(meta.state.performanceStats['pvp_matches'] >= 1 && meta.state.performanceStats['pvp_wins'] >= 1 && meta.state.performanceStats['pvp_kos'] >= 1, 'PvP outcome recorded in stats');
+assert(meta.state.performanceStats['pvp_heals'] >= 5 && meta.state.performanceStats['pvp_high_score'] >= 25000 && meta.state.performanceStats['pvp_zombie_kills'] >= 12, 'PvP cross-heals, score and kills recorded');
+const pvpClaim = meta.claimPerformanceReward('pvp_matches');
+assert(pvpClaim && pvpClaim.success && pvpClaim.reward.gold === 30, 'PvP Matches Tier 1 claimed with 30 gold reward');
+assert(htmlContent.includes('data-cat="pvp"') && cssContent.includes('.pvp-mission-card'), 'PvP category tab and CSS included');
+
 // ==========================================
 // 22. Testing Complete i18n Localization (PT-BR & EN) (v1.8.0 Build 52)
 // ==========================================
@@ -938,38 +947,25 @@ const hitNormal = pvp.handleCollision(normalProj, zPlayer, pvpCombat);
 assert(hitNormal === false, 'Player projectile hits player-side zombie normally (handleCollision returns false to allow standard damage)');
 
 // Opponent AI Note Reaction & Projectile Firing
-pvp.state = 'playing';
-pvpCombat.entities.projectiles = [];
+pvp.state = 'playing'; pvpCombat.entities.projectiles = [];
 const dummyNote = { time: 1.0, track: 0, lane: 0 };
 pvp.onSongNotePassed(dummyNote, 'perfect', 1.0, pvpCombat);
-assert(opp.totalNotes === 1, 'Opponent AI reacts to rhythm highway notes');
-assert(typeof pvp.drawOpponentHighway === 'function', 'drawOpponentHighway method available');
-assert(Array.isArray(pvp.oppLaneFlashes) && pvp.oppLaneFlashes.length === 4, 'Opponent highway 4 lane flashes initialized');
+assert(opp.totalNotes === 1 && typeof pvp.drawOpponentHighway === 'function' && pvp.oppLaneFlashes.length === 4, 'Opponent AI reacts to notes & highway initialized');
 if (opp.streak > 0) {
-    assert(pvpCombat.entities.projectiles.some(p => p.owner === 'opponent' && p.vx < 0), 'Opponent fires projectile traveling left toward center');
-    assert(pvp.oppFloatingRatings.length > 0, 'Opponent highway creates floating ratings on note hit');
+    assert(pvpCombat.entities.projectiles.some(p => p.owner === 'opponent' && p.vx < 0) && pvp.oppFloatingRatings.length > 0, 'Opponent fires projectile & floating rating created');
 }
-
 // Opponent Side Over-shoot cross healing (+30% HP)
-pvpCombat.entities.zombies = [zPlayer];
-zPlayer.hp = 50;
+pvpCombat.entities.zombies = [zPlayer]; zPlayer.hp = 50;
 const oppOverProj = { x: zPlayer.x, y: zPlayer.y - 15, damage: 30, active: true, owner: 'opponent' };
-const oppHealed = pvp.handleCollision(oppOverProj, zPlayer, pvpCombat);
-assert(oppHealed === true && zPlayer.hp === 59 && pvp.overhealsOpponent === 1, 'Opponent clear-lane projectile heals player zombie (+30% HP: 50 -> 59)');
-
+assert(pvp.handleCollision(oppOverProj, zPlayer, pvpCombat) === true && zPlayer.hp === 59 && pvp.overhealsOpponent === 1, 'Opponent clear-lane projectile heals player zombie (+30% HP: 50 -> 59)');
 // Opponent kill integrity (does NOT award player score/kills)
-pvpCombat.entities.zombies = [zOpponent];
-zOpponent.hp = 10;
+pvpCombat.entities.zombies = [zOpponent]; zOpponent.hp = 10;
 const oppKillProj = { x: zOpponent.x, y: zOpponent.y - 15, damage: 30, active: true, owner: 'opponent' };
-const initialPlayerKills = pvpCombat.zombiesKilled;
-const initialPlayerScore = pvpCombat.score;
+const initialPlayerKills = pvpCombat.zombiesKilled, initialPlayerScore = pvpCombat.score;
 pvp.handleCollision(oppKillProj, zOpponent, pvpCombat);
-assert(!zOpponent.active && pvp.opponentZombiesKilled === 1, 'Opponent kill credited to opponent kill count');
-assert(pvpCombat.zombiesKilled === initialPlayerKills && pvpCombat.score === initialPlayerScore, 'Opponent kill does NOT pollute player score or kill count');
-
+assert(!zOpponent.active && pvp.opponentZombiesKilled === 1 && pvpCombat.zombiesKilled === initialPlayerKills && pvpCombat.score === initialPlayerScore, 'Opponent kill credited without polluting player stats');
 // Victory & Defeat Conditions
-pvp.state = 'playing';
-let pvpModalOpened = false;
+pvp.state = 'playing'; let pvpModalOpened = false;
 global.document.getElementById = (id) => ({ classList: { add: () => { if (id === 'pvp-results-modal') pvpModalOpened = true; }, remove: () => {} }, style: {}, innerText: '', appendChild: () => {} });
 pvp.damageOpponent(100, true, '-100 HP', '#ff3344', pvpCombat);
 assert(opp.hp === 0 && pvp.state === 'finale', 'Opponent HP 0 initiates PvP duel finale transition');

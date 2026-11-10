@@ -874,6 +874,10 @@ class PvPSystem {
         if (window.talentSystem) window.talentSystem.addGold(goldReward);
         const pActive = window.guitaristPool ? window.guitaristPool.getSelectedGuitarist() : null;
         if (pActive && window.guitaristPool) window.guitaristPool.addHeroXp(pActive.id, xpReward);
+        if (window.metaMissionSystem && typeof window.metaMissionSystem.recordPvPOutcome === 'function') {
+            const pKills = (combat && combat.battleStats && combat.battleStats.zombiesKilled != null) ? combat.battleStats.zombiesKilled : ((combat && combat.zombiesKilled) || 0);
+            window.metaMissionSystem.recordPvPOutcome({ isWin: isPlayerWinner, reason, overheals: this.overhealsPlayer || 0, score: playerScore, kills: pKills });
+        }
 
         // Store finale transition state (2.8 seconds transition)
         this.state = 'finale';
