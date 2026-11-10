@@ -123,6 +123,11 @@ class PvPSystem {
 
         if (this.selectedSong) this.updateSongCardPreview(this.selectedSong);
 
+        // Configure Character (Hero) Selection & Lane Skills Loadout
+        this.populateHeroDropdown();
+        this.updateHeroCardPreview();
+        this.renderPvPLaneSkills();
+
         const startBtn = document.getElementById('pvp-start-queue-btn');
         if (startBtn) {
             startBtn.onclick = () => {
@@ -147,6 +152,101 @@ class PvPSystem {
         if (title) title.innerText = song.title || 'Música';
         if (artist) artist.innerText = song.artist || 'Artista Desconhecido';
         if (info) info.innerText = `BPM: ${song.bpm || 120} • Duração: ${Math.round(song.duration || 30)}s`;
+    }
+
+    populateHeroDropdown() {
+        const dropdown = document.getElementById('pvp-hero-dropdown');
+        if (!dropdown || !window.guitaristPool || typeof document.createElement !== 'function') return;
+        const pool = window.guitaristPool;
+        const all = pool.getAllGuitarists ? pool.getAllGuitarists() : [];
+        const active = pool.getSelectedGuitarist ? pool.getSelectedGuitarist() : all[0];
+
+        dropdown.innerHTML = '';
+        all.forEach(h => {
+            if (pool.isHeroUnlocked && !pool.isHeroUnlocked(h.id)) return;
+            const opt = document.createElement('option');
+            opt.value = h.id;
+            const lvl = pool.getHeroLevelData ? pool.getHeroLevelData(h.id).level : (h.level || 1);
+            opt.innerText = `${h.name} (Nv. ${lvl})`;
+            if (active && h.id === active.id) opt.selected = true;
+            dropdown.appendChild(opt);
+        });
+
+        dropdown.onchange = (e) => {
+            const newId = e.target.value;
+            if (pool.setSelectedGuitarist) {
+                pool.setSelectedGuitarist(newId);
+            }
+            const newHero = pool.getSelectedGuitarist();
+            this.updateHeroCardPreview(newHero);
+            this.renderPvPLaneSkills();
+            if (window.soundEngine && typeof window.soundEngine.playGuitarChord === 'function') {
+                window.soundEngine.playGuitarChord(0);
+            }
+        };
+    }
+
+    updateHeroCardPreview(hero = null) {
+        if (!hero && window.guitaristPool) hero = window.guitaristPool.getSelectedGuitarist();
+        if (!hero) return;
+
+        const pool = window.guitaristPool;
+        const lvlData = pool && pool.getHeroLevelData ? pool.getHeroLevelData(hero.id) : { level: 1 };
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+
+        const avatar = document.getElementById('pvp-hero-avatar');
+        if (avatar) avatar.src = hero.avatar || 'assets/heroes/johnny_blaze.jpg';
+
+        setVal('pvp-hero-name', hero.name || 'Guitarrista');
+        setVal('pvp-hero-level', `⭐ Nv. ${lvlData.level || 1}`);
+        setVal('pvp-hero-inst', `🎸 ${hero.instrumentName || 'Guitarra Lendária'}`);
+        setVal('pvp-hero-passive', hero.passiveDesc || hero.title || 'Poder do Rock');
+
+        const rarityEl = document.getElementById('pvp-hero-rarity');
+        if (rarityEl) {
+            const tierMap = {
+                starter: { label: 'INICIAL', bg: '#888888' },
+                rare: { label: 'RARO', bg: '#00a2ff' },
+                epic: { label: 'ÉPICO', bg: '#b000ff' },
+                legendary: { label: 'LENDÁRIO', bg: '#ffd700', color: '#000' },
+                mythic: { label: 'MÍTICO', bg: '#ff0055' }
+            };
+            const r = tierMap[hero.tier] || { label: 'HERÓI', bg: '#00d4ff' };
+            rarityEl.innerText = r.label;
+            rarityEl.style.backgroundColor = r.bg;
+            rarityEl.style.color = r.color || '#fff';
+        }
+    }
+
+    renderPvPLaneSkills() {
+        const grid = document.getElementById('pvp-lane-skills-grid');
+        if (!grid || !window.skillSystem || typeof document.createElement !== 'function') return;
+
+        grid.innerHTML = '';
+        const hero = window.guitaristPool ? window.guitaristPool.getSelectedGuitarist() : null;
+        const hid = hero ? hero.id : null;
+        const laneNames = ['Pista 1', 'Pista 2', 'Pista 3', 'Pista 4'];
+
+        for (let l = 0; l < 4; l++) {
+            const skill = window.skillSystem.getEquippedSkill(l, hid);
+            const badge = window.skillSystem.getSkillTypeBadge ? window.skillSystem.getSkillTypeBadge(skill) : { label: 'SKILL', color: '#00d4ff', bg: 'rgba(0,0,0,0.3)' };
+            const costText = (skill && skill.manaCost > 0) ? `⚡ ${skill.manaCost} MP` : 'BÁSICO';
+
+            const slot = document.createElement('div');
+            slot.className = `pvp-lane-slot lane-${l}`;
+            slot.innerHTML = `
+                <span class="pvp-lane-tag">${laneNames[l]}</span>
+                <span class="pvp-lane-icon">${(skill && skill.icon) || '⚡'}</span>
+                <span class="pvp-lane-skill-name" title="${(skill && skill.name) || 'Ataque'}">${(skill && skill.name) || 'Ataque'}</span>
+                <span class="pvp-lane-cost-badge" style="background: ${badge.bg}; color: ${badge.color};">${costText}</span>
+            `;
+            slot.onclick = () => {
+                if (window.game && typeof window.game.openSkillPickerModal === 'function') {
+                    window.game.openSkillPickerModal(l);
+                }
+            };
+            grid.appendChild(slot);
+        }
     }
 
     startMatchmaking(onMatchFound, onCancel) {

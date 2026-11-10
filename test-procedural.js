@@ -981,7 +981,7 @@ assert(htmlContent.includes('id="pvp-song-select-view"'), 'index.html contains #
 assert(!htmlContent.includes('id="pvp-ping-display"') && !htmlContent.includes('data-i18n="pvpPing"'), 'index.html has zero ping mentions');
 pvp.openMatchmakingModal([{ id: 'test_song', title: 'Test Song', bpm: 140 }], null, null);
 assert(pvp.selectedSong && pvp.selectedSong.id === 'test_song', 'openMatchmakingModal successfully configures player chosen song for PvP');
-
+assert(htmlContent.includes('id="pvp-hero-dropdown"') && htmlContent.includes('id="pvp-lane-skills-grid"'), 'PvP pre-battle dialog provides hero and lane skills customization');
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;

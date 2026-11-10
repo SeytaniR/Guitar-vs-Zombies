@@ -421,6 +421,7 @@ class Game {
                 if (window.soundEngine) window.soundEngine.playPowerChord();
                 this.openSkillPickerModal(laneIndex);
                 this.renderLaneSkills();
+                if (this.pvpSystem && typeof this.pvpSystem.renderPvPLaneSkills === 'function') this.pvpSystem.renderPvPLaneSkills();
             };
         }
 
@@ -466,6 +467,7 @@ class Game {
                 if (window.soundEngine) window.soundEngine.playPowerChord();
                 modal.classList.remove('open');
                 this.renderLaneSkills();
+                if (this.pvpSystem && typeof this.pvpSystem.renderPvPLaneSkills === 'function') this.pvpSystem.renderPvPLaneSkills();
             };
 
             listEl.appendChild(card);

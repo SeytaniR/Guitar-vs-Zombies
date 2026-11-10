@@ -971,19 +971,60 @@
     <!-- Simulated Online PvP Matchmaking Modal -->
     <div id="pvp-matchmaking-modal" class="pvp-modal-overlay">
         <div class="pvp-matchmaking-dialog">
-            <!-- View 1: Choose Song for PvP Duel -->
-            <div id="pvp-song-select-view" style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
-                <h3 class="pvp-queue-title" data-i18n="pvpSelectSongTitle">⚔️ DUELO PVP ONLINE</h3>
-                <p style="font-size: 11px; color: #88aacc; margin: -6px 0 2px 0;" data-i18n="pvpSelectSongSubtitle">Escolha a música para disputar o confronto:</p>
-                <div class="pvp-song-card">
-                    <img id="pvp-song-cover" class="pvp-song-cover" src="assets/covers/default_cover.jpg" alt="Capa">
-                    <div class="pvp-song-meta">
-                        <span id="pvp-song-title" class="pvp-song-title">Música</span>
-                        <span id="pvp-song-artist" class="pvp-song-artist">Artista</span>
-                        <span id="pvp-song-info" class="pvp-song-info">BPM: 120 • 4 Pistas</span>
+            <!-- View 1: PvP Pre-Battle Setup (Hero, Skills, Song) -->
+            <div id="pvp-song-select-view" class="pvp-prebattle-view">
+                <h3 class="pvp-queue-title" data-i18n="pvpPreBattleTitle">⚔️ DUELO PVP ONLINE</h3>
+                <p class="pvp-prebattle-sub" data-i18n="pvpPreBattleSubtitle">Personalize seu Guitarrista, Habilidades e Música para o confronto:</p>
+
+                <!-- Section 1: Hero Selection -->
+                <div class="pvp-config-section">
+                    <div class="pvp-config-header">
+                        <span class="pvp-config-label" data-i18n="pvpHeroLabel">🎸 SEU GUITARRISTA</span>
+                        <select id="pvp-hero-dropdown" class="pvp-select-input"></select>
+                    </div>
+                    <div id="pvp-hero-card" class="pvp-hero-card">
+                        <div class="pvp-hero-portrait-wrap">
+                            <img id="pvp-hero-avatar" class="pvp-hero-avatar" src="assets/heroes/johnny_blaze.jpg" alt="Hero">
+                            <span id="pvp-hero-rarity" class="pvp-hero-rarity-badge">COMUM</span>
+                        </div>
+                        <div class="pvp-hero-info">
+                            <div class="pvp-hero-title-row">
+                                <span id="pvp-hero-name" class="pvp-hero-name">Johnny "Riff" Blaze</span>
+                                <span id="pvp-hero-level" class="pvp-hero-level-badge">⭐ Nv. 1</span>
+                            </div>
+                            <span id="pvp-hero-inst" class="pvp-hero-inst">🎸 Stratocaster "Hellfire"</span>
+                            <p id="pvp-hero-passive" class="pvp-hero-passive">+1.0% Dano por nível</p>
+                        </div>
                     </div>
                 </div>
-                <select id="pvp-song-dropdown" class="pvp-song-dropdown"></select>
+
+                <!-- Section 2: Equipped Lane Skills (4 Tracks) -->
+                <div class="pvp-config-section">
+                    <div class="pvp-config-header">
+                        <span class="pvp-config-label" data-i18n="pvpSkillsLabel">⚡ HABILIDADES POR TRILHO</span>
+                        <span class="pvp-config-hint" data-i18n="pvpSkillsHint">Toque para alterar</span>
+                    </div>
+                    <div id="pvp-lane-skills-grid" class="pvp-lane-skills-grid">
+                        <!-- Populated dynamically: 4 lanes -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Song Track Selection -->
+                <div class="pvp-config-section">
+                    <div class="pvp-config-header">
+                        <span class="pvp-config-label" data-i18n="pvpSongLabel">🎵 MÚSICA DO CONFRONTO</span>
+                        <select id="pvp-song-dropdown" class="pvp-select-input"></select>
+                    </div>
+                    <div class="pvp-song-card">
+                        <img id="pvp-song-cover" class="pvp-song-cover" src="assets/covers/default_cover.jpg" alt="Capa">
+                        <div class="pvp-song-meta">
+                            <span id="pvp-song-title" class="pvp-song-title">Música</span>
+                            <span id="pvp-song-artist" class="pvp-song-artist">Artista</span>
+                            <span id="pvp-song-info" class="pvp-song-info">BPM: 120 • 4 Pistas</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 4px;">
                     <button id="pvp-start-queue-btn" class="btn-pvp-start" data-i18n="pvpStartSearch">BUSCAR PARTIDA ⚡</button>
                     <button id="pvp-close-dialog-btn" class="pvp-cancel-btn" data-i18n="pvpCancel">CANCELAR</button>

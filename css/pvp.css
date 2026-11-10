@@ -588,3 +588,238 @@
     transform: scale(1.03);
     box-shadow: 0 0 24px rgba(0, 212, 255, 0.75);
 }
+
+/* Pre-Battle Setup View in PvP Matchmaking */
+.pvp-prebattle-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 4px;
+    box-sizing: border-box;
+}
+
+.pvp-prebattle-view::-webkit-scrollbar {
+    width: 5px;
+}
+.pvp-prebattle-view::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.4);
+    border-radius: 4px;
+}
+
+.pvp-prebattle-sub {
+    font-size: 11px;
+    color: #88aacc;
+    margin: -6px 0 2px 0;
+    text-align: center;
+}
+
+.pvp-config-section {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    border-radius: 12px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    text-align: left;
+}
+
+.pvp-config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+
+.pvp-config-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #00d4ff;
+    text-transform: uppercase;
+}
+
+.pvp-config-hint {
+    font-size: 9.5px;
+    color: #ffd700;
+    font-weight: 700;
+}
+
+.pvp-select-input {
+    background: #0f0f1c;
+    color: #fff;
+    border: 1px solid #335577;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+    max-width: 58%;
+}
+
+.pvp-select-input:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+/* PvP Hero Card */
+.pvp-hero-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(15, 12, 28, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 6px 8px;
+    box-sizing: border-box;
+}
+
+.pvp-hero-portrait-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.pvp-hero-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    border: 1.5px solid #00d4ff;
+    object-fit: cover;
+}
+
+.pvp-hero-rarity-badge {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    font-weight: 900;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: #00a2ff;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.pvp-hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.pvp-hero-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.pvp-hero-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pvp-hero-level-badge {
+    font-size: 10px;
+    color: #ffd700;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.pvp-hero-inst {
+    font-size: 9.5px;
+    color: #88aacc;
+    font-weight: 600;
+}
+
+.pvp-hero-passive {
+    font-size: 9px;
+    color: #39ff14;
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* PvP Lane Skills Grid */
+.pvp-lane-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pvp-lane-slot {
+    background: rgba(18, 14, 32, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 6px 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.pvp-lane-slot:hover {
+    border-color: #00d4ff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 212, 255, 0.3);
+}
+
+.pvp-lane-slot.lane-0 { border-top: 3px solid #00ff66; }
+.pvp-lane-slot.lane-1 { border-top: 3px solid #ff0055; }
+.pvp-lane-slot.lane-2 { border-top: 3px solid #ffcc00; }
+.pvp-lane-slot.lane-3 { border-top: 3px solid #00d4ff; }
+
+.pvp-lane-tag {
+    font-size: 8px;
+    font-weight: 800;
+    color: #88aacc;
+    text-transform: uppercase;
+}
+
+.pvp-lane-icon {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.pvp-lane-skill-name {
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.pvp-lane-cost-badge {
+    font-size: 7.5px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
