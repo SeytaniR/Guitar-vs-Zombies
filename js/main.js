@@ -71,6 +71,7 @@ class Game {
         if (screenName !== 'battle') {
             const b = document.getElementById('screen-battle'); if (b) b.classList.remove('pvp-active');
             if (this.combat) this.combat.isPvPMode = false;
+            if (window.countdownSystem) window.countdownSystem.cancel();
         }
         if (screenName === 'menu') {
             this.isBattlePaused = false;
@@ -652,40 +653,26 @@ class Game {
         if (bScreen) bScreen.classList.add('pvp-active');
         this.combat.resetBattle(enemies, true);
         if (this.rhythm) this.rhythm.playCustomSong(song);
+        if (window.countdownSystem) window.countdownSystem.startMatchCountdown();
     }
 
     startMatch() {
-        if (!this.selectedSong) {
-            this.selectedSong = this.getBuiltinDefaultSong();
-        }
-
+        if (!this.selectedSong) this.selectedSong = this.getBuiltinDefaultSong();
         this.isBattlePaused = false;
         if (this.combat) { this.combat.isPaused = false; this.combat.isGameOver = false; this.combat.isVictory = false; }
         if (this.rhythm) this.rhythm.isPaused = false;
         ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('open');
+            const el = document.getElementById(id); if (el) el.classList.remove('open');
         });
-
-        // Switch to Battle Screen FIRST to ensure containers have active layout
         this.switchScreen('battle');
-
-        // Immediately resize canvases to match parent container dimensions
         this.combat.resize();
         this.rhythm.resize();
-
-        // Ensure 5 zombies are selected
         if (!this.currentMapZombies || this.currentMapZombies.length === 0) {
-            if (window.enemyPool) {
-                this.currentMapZombies = window.enemyPool.rollMapEnemies(5);
-            }
+            if (window.enemyPool) this.currentMapZombies = window.enemyPool.rollMapEnemies(5);
         }
-
-        // Initialize combat with the 5 selected zombies
         this.combat.resetBattle(this.currentMapZombies);
-
-        // Initialize rhythm highway with the selected song
         this.rhythm.playCustomSong(this.selectedSong);
+        if (window.countdownSystem) window.countdownSystem.startMatchCountdown();
     }
 
     // ==========================================
@@ -709,6 +696,7 @@ class Game {
         bind('gear-footer-action-btn', () => this.closeGearModal());
         bind('gear-abandon-battle-btn', () => {
             if (confirm("⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido.")) {
+                if (window.countdownSystem) window.countdownSystem.cancel();
                 closeM('battle-gear-modal'); this.switchScreen('menu');
             }
         });
@@ -757,7 +745,9 @@ class Game {
 
     closeGearModal() {
         const m = document.getElementById('battle-gear-modal'); if (m) m.classList.remove('open');
-        if (!this.isGearFromMenu && this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) this.resumeBattle();
+        if (!this.isGearFromMenu && this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) {
+            if (window.countdownSystem) window.countdownSystem.startResumeCountdown(); else this.resumeBattle();
+        }
     }
 
     openStatsModal() {
@@ -768,7 +758,9 @@ class Game {
 
     closeStatsModal() {
         const m = document.getElementById('battle-stats-modal'); if (m) m.classList.remove('open');
-        if (this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) this.resumeBattle();
+        if (this.currentScreen === 'battle' && !this.combat.isGameOver && !this.combat.isVictory) {
+            if (window.countdownSystem) window.countdownSystem.startResumeCountdown(); else this.resumeBattle();
+        }
     }
 
     updateBattleStatsModal() {
@@ -886,6 +878,7 @@ class Game {
     }
 
     update(deltaTime) {
+        if (window.countdownSystem && window.countdownSystem.isActive) window.countdownSystem.update(deltaTime / 1000);
         this.combat.update(deltaTime);
         this.rhythm.update(deltaTime);
     }

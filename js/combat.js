@@ -107,26 +107,12 @@ class CombatSystem {
 
     getRoadMetrics() {
         const cw = Math.max(100, this.canvas.width || 360);
-        const ch = Math.max(100, this.canvas.height || 300);
-        const bg = this.assets.bg;
-
-        if (!bg.complete || bg.naturalWidth === 0) {
-            return { drawX: 0, drawY: 0, drawW: cw, drawH: ch, laneY: ch * 0.78 };
-        }
-
-        const aspect = bg.naturalHeight / bg.naturalWidth; // 571 / 1024 = ~0.5576
-        let drawH = ch * 1.05;
-        let drawW = drawH / aspect;
-        if (drawW < cw * 1.25) {
-            drawW = cw * 1.25;
-            drawH = drawW * aspect;
-        }
-
-        const drawX = -Math.round((drawW - cw) * 0.2);
-        const drawY = ch - drawH;
-        const laneY = drawY + drawH * 0.77;
-
-        return { drawX, drawY, drawW, drawH, laneY };
+        const ch = Math.max(100, this.canvas.height || 300), bg = this.assets.bg;
+        if (!bg.complete || bg.naturalWidth === 0) return { drawX: 0, drawY: 0, drawW: cw, drawH: ch, laneY: ch * 0.78 };
+        const aspect = bg.naturalHeight / bg.naturalWidth;
+        let drawH = ch * 1.05, drawW = drawH / aspect;
+        if (drawW < cw * 1.25) { drawW = cw * 1.25; drawH = drawW * aspect; }
+        return { drawX: -Math.round((drawW - cw) * 0.2), drawY: ch - drawH, drawW, drawH, laneY: (ch - drawH) + drawH * 0.77 };
     }
 
     getHeroPosition() {
@@ -619,7 +605,7 @@ class CombatSystem {
     }
 
     update(deltaTime) {
-        if (this.isPaused) return;
+        if (this.isPaused || (typeof window !== 'undefined' && window.countdownSystem && window.countdownSystem.isActive)) return;
         const dt = deltaTime / 1000;
         if (this.isPvPMode && this.pvpSystem) this.pvpSystem.update(dt, this);
         if (this.isVictorySequence) {

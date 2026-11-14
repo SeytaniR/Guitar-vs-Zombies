@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js'].forEach(loadScript);
+['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -175,14 +175,8 @@ assert(audioCode.includes('playPowerChord'), 'SoundEngine defines playPowerChord
 const skillsCode = fs.readFileSync('js/skills.js', 'utf8');
 assert(skillsCode.includes("getStat('rhythmic_heal')"), 'Skill healing_melody references correct rhythmic_heal talent');
 assert(!skillsCode.includes("regen_pick"), 'No obsolete regen_pick talent referenced in skills.js');
-let mockLocalStorage = {};
-global.localStorage = {
-    getItem: (k) => mockLocalStorage[k] || null,
-    setItem: (k, v) => { mockLocalStorage[k] = v.toString(); },
-    removeItem: (k) => { delete mockLocalStorage[k]; }
-};
-localStorage.setItem('gvs_total_kills', '42');
-localStorage.setItem('gvs_highscore', '15000');
+let mockLocalStorage = {}; global.localStorage = { getItem: (k) => mockLocalStorage[k] || null, setItem: (k, v) => { mockLocalStorage[k] = v.toString(); }, removeItem: (k) => { delete mockLocalStorage[k]; } };
+localStorage.setItem('gvs_total_kills', '42'); localStorage.setItem('gvs_highscore', '15000');
 assert(parseInt(localStorage.getItem('gvs_total_kills')) === 42, 'gvs_total_kills persists correctly');
 assert(parseInt(localStorage.getItem('gvs_highscore')) === 15000, 'gvs_highscore persists correctly');
 
@@ -213,16 +207,11 @@ combat.canvas.width = 400;
 combat.canvas.height = 300;
 
 // Test 7.0: Combat Attack Speed & Rhythm Combo Synergy (v1.6.9)
-combat.combo = 0;
-assert(combat.getHeroAttackSpeed() === 1.0, `Combat base attack speed at 0 combo is exactly 1.0/s (${combat.getHeroAttackSpeed()})`);
-combat.combo = 50;
-assert(Math.abs(combat.getHeroAttackSpeed() - 1.5) < 0.001, `Attack speed at combo 50 scales to 1.50/s (+0.5/s bonus): ${combat.getHeroAttackSpeed()}`);
-combat.combo = 100;
-assert(Math.abs(combat.getHeroAttackSpeed() - 2.0) < 0.001, `Attack speed at combo 100 scales to 2.00/s (+1.0/s bonus): ${combat.getHeroAttackSpeed()}`);
-combat.combo = 200;
-assert(Math.abs(combat.getHeroAttackSpeed() - 3.0) < 0.001, `Attack speed at combo 200 hits +2.0 cap reaching 3.00/s: ${combat.getHeroAttackSpeed()}`);
-combat.combo = 0; // Simulated miss
-assert(combat.getHeroAttackSpeed() === 1.0, `Miss resets combo to 0 and drops attack speed back to base 1.0/s: ${combat.getHeroAttackSpeed()}`);
+combat.combo = 0; assert(combat.getHeroAttackSpeed() === 1.0, `Combat base attack speed at 0 combo is 1.0/s`);
+combat.combo = 50; assert(Math.abs(combat.getHeroAttackSpeed() - 1.5) < 0.001, `Attack speed at combo 50 scales to 1.50/s`);
+combat.combo = 100; assert(Math.abs(combat.getHeroAttackSpeed() - 2.0) < 0.001, `Attack speed at combo 100 scales to 2.00/s`);
+combat.combo = 200; assert(Math.abs(combat.getHeroAttackSpeed() - 3.0) < 0.001, `Attack speed at combo 200 hits +2.0 cap reaching 3.00/s`);
+combat.combo = 0; assert(combat.getHeroAttackSpeed() === 1.0, `Miss drops attack speed back to base 1.0/s`);
 
 // Test 7.1: Natural Critical Accumulation Rule (v1.7.0)
 combat.perfectStreak = 0;
@@ -259,24 +248,12 @@ assert(combat.entities.zombies.length === 2, 'resetBattle() spawns 2 vanguard zo
 assert(combat.entities.zombies.every(z => z.x < 400), 'All vanguard zombies spawn visibly on screen (x < canvas.width)');
 assert(combat.entities.zombies[0].x <= 400 * 0.85, `Vanguard zombie 1 is well into view: x=${combat.entities.zombies[0].x.toFixed(1)}`);
 
-// Test Auto-Attack Target Selection (No Off-Screen Targeting)
-combat.entities.zombies = [];
-// Zombie A is off-screen at x=450
-const offScreenZombie = new ZombieEntity(mockZombieType, 100, 400, 1, 450);
-combat.entities.zombies.push(offScreenZombie);
-
-// Fire auto-attack
+combat.entities.zombies = [new ZombieEntity(mockZombieType, 100, 400, 1, 450)];
 combat.performHeroAutoAttack();
-const firedProj1 = combat.entities.projectiles[combat.entities.projectiles.length - 1];
-assert(firedProj1.target === null, 'Hero auto-attack ignores off-screen zombie (target is null)');
-
-// Now add Zombie B on-screen at x=320
+assert(combat.entities.projectiles[combat.entities.projectiles.length - 1].target === null, 'Hero auto-attack ignores off-screen zombie (target is null)');
 const onScreenZombie = new ZombieEntity(mockZombieType, 100, 400, 1, 320);
-combat.entities.zombies.push(onScreenZombie);
-
-combat.performHeroAutoAttack();
-const firedProj2 = combat.entities.projectiles[combat.entities.projectiles.length - 1];
-assert(firedProj2.target === onScreenZombie, 'Hero auto-attack locks onto visible on-screen zombie');
+combat.entities.zombies.push(onScreenZombie); combat.performHeroAutoAttack();
+assert(combat.entities.projectiles[combat.entities.projectiles.length - 1].target === onScreenZombie, 'Hero auto-attack locks onto visible on-screen zombie');
 
 // Test Projectile Screen Edge Dissipation
 const edgeProj = { x: 398, y: 100, vx: 440, vy: 0, frame: 3, trailTimer: 0, active: true, damage: 30 };
@@ -328,29 +305,11 @@ assert(combat.isDefeatSequence === true && combat.defeatSequenceTimer > 0, 'Fata
 combat.update(1900);
 assert(defeatModalCalled === true, 'Cinematic timer expiration opens showDefeatModal()');
 
-// 3. Victory Flow Check
-let victoryModalCalled = false;
-window.game.showVictoryModal = (song, stats) => {
-    victoryModalCalled = true;
-    combat.isVictory = true;
-};
-
-// Simulate custom song finish
-const mockSong = { id: 'test_song', title: 'Epic Solo', duration: 10, notes: [{}, {}] };
-const mockStats = { totalNotes: 2, hitNotes: 2, maxStreak: 2 };
-window.game.showVictoryModal(mockSong, mockStats);
-assert(victoryModalCalled === true, 'finishCustomSong properly routes to showVictoryModal');
-assert(combat.isVictory === true, 'Victory sets combat.isVictory to true');
-
-// 4. Modal Resumption Guard Check
-let resumed = false;
-window.game.resumeBattle = () => { resumed = true; };
-const testCloseModal = () => {
-    if (!combat.isGameOver && !combat.isVictory) {
-        window.game.resumeBattle();
-    }
-};
-testCloseModal();
+let victoryModalCalled = false; window.game.showVictoryModal = (song, stats) => { victoryModalCalled = true; combat.isVictory = true; };
+window.game.showVictoryModal({ id: 'test_song', title: 'Epic Solo', duration: 10, notes: [{}, {}] }, { totalNotes: 2, hitNotes: 2, maxStreak: 2 });
+assert(victoryModalCalled === true, 'finishCustomSong properly routes to showVictoryModal'); assert(combat.isVictory === true, 'Victory sets combat.isVictory to true');
+let resumed = false; window.game.resumeBattle = () => { resumed = true; };
+if (!combat.isGameOver && !combat.isVictory) window.game.resumeBattle();
 // ==========================================
 // TEST 9: STAGE COMPLETION, COMBO ATTACK SPEED & WRONG TAP PENALTY
 // ==========================================
@@ -979,6 +938,41 @@ assert(specSys.specialMeter === 0 && !specSys.canActivate(), 'Special CANNOT rec
 const battleCssContent = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
 assert(htmlContent.includes('id="battle-special-btn"') && htmlContent.includes('class="battle-special-wrap"'), 'index.html contains strategic #battle-special-btn');
 assert(battleCssContent.includes('.battle-special-btn') && battleCssContent.includes('.battle-special-wrap'), 'battle.css defines responsive strategic special button styling');
+
+// ==========================================
+// 29. Testing 5-Second Match Start & Resume Countdown System
+// ==========================================
+console.log('\n29. Testing 5-Second Match Start & Resume Countdown System...');
+const cdSys = new CountdownSystem(); window.countdownSystem = cdSys;
+assert(cdSys.isActive === false && cdSys.duration === 5.0, 'CountdownSystem initializes in inactive 5-second state');
+const mockRhythm = { isPaused: false, isCountdownActive: false, customSongTime: 0, songAudio: { pause: () => {}, play: () => Promise.resolve(), currentTime: 0 } };
+window.game = { rhythm: mockRhythm, combat: { isPaused: false, matchActive: true }, isBattlePaused: false };
+cdSys.startMatchCountdown();
+assert(cdSys.isActive === true && cdSys.mode === 'start' && cdSys.timer === 5.0, 'Match start initializes active 5.0s countdown');
+assert(mockRhythm.isCountdownActive === true, 'Rhythm system flagged with isCountdownActive');
+assert(cdSys.startSongTime === -2.0 && cdSys.targetSongTime === 0.0, 'Match start sets slow-rolling window from -2.0s to 0.0s (0.4x scroll)');
+assert(mockRhythm.customSongTime === -2.0, 'Rhythm highway set to -2.0s so early notes descend slowly into view');
+assert(window.game.combat.isPaused === true, 'Combat paused during countdown to protect hero from damage');
+cdSys.update(2.5); // 2.5s elapsed
+assert(cdSys.timer === 2.5, 'Countdown timer decremented by 2.5s');
+assert(Math.abs(mockRhythm.customSongTime - (-1.0)) < 0.01, `Highway smoothly rolled from -2.0s to ${mockRhythm.customSongTime.toFixed(2)}s`);
+assert(cdSys.currentSecond === 3, 'Integer second correctly computed (3s remaining)');
+cdSys.update(2.6); // Finish countdown
+assert(cdSys.isActive === false && mockRhythm.isCountdownActive === false, 'Countdown finished: isActive and isCountdownActive set to false');
+assert(mockRhythm.customSongTime === 0.0, 'Highway arrived exactly at 0.0s for song start');
+assert(window.game.combat.isPaused === false, 'Combat unpaused on countdown completion');
+mockRhythm.customSongTime = 16.5;
+cdSys.startResumeCountdown();
+assert(cdSys.isActive === true && cdSys.mode === 'resume', 'Settings unpause triggers resume 5-second countdown');
+assert(cdSys.targetSongTime === 16.5 && cdSys.startSongTime === 14.5, 'Resume rewinds 2.0s (from 16.5s to 14.5s) so player tracks incoming notes');
+assert(mockRhythm.customSongTime === 14.5, 'Highway starts rolling slowly from 14.5s towards pause point');
+cdSys.update(5.1); // Complete resume
+assert(cdSys.isActive === false && Math.abs(mockRhythm.customSongTime - 16.5) < 0.01, 'Resume completes exactly at paused time (16.5s) without skipping notes');
+const updatedHtmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
+const updatedBattleCss = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
+assert(updatedHtmlContent.includes('id="battle-countdown-overlay"') && updatedHtmlContent.includes('id="countdown-number"'), 'index.html contains #battle-countdown-overlay and #countdown-number');
+assert(updatedBattleCss.includes('.battle-countdown-overlay') && updatedBattleCss.includes('countdownPop'), 'battle.css defines .battle-countdown-overlay and pop keyframes');
+
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;

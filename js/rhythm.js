@@ -35,6 +35,7 @@ class RhythmSystem {
         this.currentSong = null;
         this.songAudio = null;
         this.isCustomSongPlaying = false;
+        this.isCountdownActive = false;
         this.audioNeedsUnlock = false;
         this.songStats = null;
 
@@ -162,6 +163,7 @@ class RhythmSystem {
     triggerLaneHit(lane) { this.triggerLaneDown(lane); setTimeout(() => this.triggerLaneUp(lane), 60); }
 
     triggerLaneDown(lane) {
+        if (this.isCountdownActive || (typeof window !== 'undefined' && window.countdownSystem && window.countdownSystem.isActive)) return;
         this.laneFlashes[lane] = 1.0;
         this.laneHolding[lane] = true;
         this.lanePresses[lane] = true;
@@ -402,10 +404,10 @@ class RhythmSystem {
             const songDuration = Math.max(10, (this.currentSong && this.currentSong.duration) || 30);
 
             // Audio-Master Hardware Clock Sync:
-            // HTML5 Audio stream plays freely at native 1.0x playbackRate with ZERO buffer-resampling or seeking,
-            // eliminating any packet-loss-like stutter or Bluetooth audio dropouts.
-            // The visual highway (customSongTime) follows the audio clock with smooth sub-frame convergence.
-            if (this.songAudio && !this.songAudio.paused && !this.songAudio.ended && this.songAudio.currentTime > 0) {
+            // Highway progression during countdown is driven smoothly by countdownSystem
+            if (this.isCountdownActive) {
+                // Smooth slow-rolling preparation highway driven by countdownSystem
+            } else if (this.songAudio && !this.songAudio.paused && !this.songAudio.ended && this.songAudio.currentTime > 0) {
                 const audioTime = this.songAudio.currentTime;
                 const diff = audioTime - this.customSongTime;
                 if (Math.abs(diff) > 0.08) {
@@ -427,7 +429,7 @@ class RhythmSystem {
             // Sync notes on the highway: continuous arithmetic update guarantees zero hit lag & zero pop-in
             for (let i = 0; i < this.notes.length; i++) {
                 const note = this.notes[i];
-                if (!note.oppProcessed && curTime >= note.time) {
+                if (!this.isCountdownActive && !note.oppProcessed && curTime >= note.time) {
                     note.oppProcessed = true;
                     if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem && !this.pvpFinaleMode) {
                         window.game.combat.pvpSystem.onSongNotePassed(note, 'perfect', curTime, window.game.combat);
@@ -454,7 +456,7 @@ class RhythmSystem {
                 }
 
                 // Missed note passed hit zone
-                if (note.active && !note.hit && !note.holding && curTime > note.time + 0.28) {
+                if (!this.isCountdownActive && note.active && !note.hit && !note.holding && curTime > note.time + 0.28) {
                     note.active = false; note.missed = true;
                     if (this.songStats) this.songStats.misses++;
                     this.addFloatingRating('MISS', note.track * trackWidth + trackWidth / 2, hitZoneY - 10, '#ff2222', false);
