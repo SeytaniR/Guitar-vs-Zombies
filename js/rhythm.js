@@ -436,7 +436,7 @@ class RhythmSystem {
             }
 
             // Viewport & timeline culling: advance firstActiveIndex past dead notes
-            const minCullTime = curTime - 0.5, maxLookAheadTime = curTime + 2.8;
+            const minCullTime = curTime - 0.5, maxLookAheadTime = curTime + (this.isCountdownActive ? 6.0 : 2.8);
             while (this.firstActiveIndex < this.notes.length) {
                 const n = this.notes[this.firstActiveIndex];
                 if ((!n.active && !n.holding) && (n.time < minCullTime)) this.firstActiveIndex++;
@@ -444,9 +444,14 @@ class RhythmSystem {
             }
 
             // Sync notes on the highway: continuous arithmetic update with early-break
+            const isStartCd = this.isCountdownActive && window.countdownSystem && window.countdownSystem.mode === 'start';
+            const cdProg = isStartCd ? Math.min(1.0, Math.max(0, (curTime - (-2.0)) / 2.0)) : 0;
+            const firstActiveNote = isStartCd ? (this.notes.find(n => n.active) || this.notes[0]) : null;
+            const firstT = firstActiveNote ? firstActiveNote.time : 0.44;
+
             for (let i = this.firstActiveIndex || 0; i < this.notes.length; i++) {
                 const note = this.notes[i];
-                if (note.time > maxLookAheadTime) break;
+                if (!this.isCountdownActive && note.time > maxLookAheadTime) break;
                 if (!this.isCountdownActive && !note.oppProcessed && curTime >= note.time) {
                     note.oppProcessed = true;
                     if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem && !this.pvpFinaleMode) {
@@ -454,6 +459,7 @@ class RhythmSystem {
                     }
                 }
                 if (note.holding) note.y = hitZoneY;
+                else if (isStartCd) note.y = (30 + cdProg * (hitZoneY - 45)) - (note.time - firstT) * 160;
                 else note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
 
                 // PvP Finale Auto-Hit (Victory) or Skull (Defeat)
@@ -594,6 +600,7 @@ class RhythmSystem {
         const ch = this.canvas.height;
         const trackW = cw / this.tracks;
         const hitZoneY = this.getHitZoneY();
+        const curTime = this.customSongTime || 0;
 
         // 1. Draw Fretboard Background & Strings (Stable solid fill without buffer-clear flash)
         this.ctx.fillStyle = '#0f0f18';
@@ -679,7 +686,7 @@ class RhythmSystem {
         // 4.1. Draw Sustain / Hold Ribbons (behind note heads)
         for (let idx = this.firstActiveIndex || 0; idx < this.notes.length; idx++) {
             const note = this.notes[idx];
-            if (this.isCustomSongPlaying && note.time > curTime + 2.8) break;
+            if (!this.isCountdownActive && this.isCustomSongPlaying && note.time > curTime + 2.8) break;
             if (!note.active && !note.holding) continue;
             if (!note.duration || note.duration < 0.2) continue;
 
@@ -738,7 +745,7 @@ class RhythmSystem {
         if (!this.noteSprites) this.buildNoteSpriteCache();
         for (let idx = this.firstActiveIndex || 0; idx < this.notes.length; idx++) {
             const note = this.notes[idx];
-            if (this.isCustomSongPlaying && note.time > curTime + 2.8) break;
+            if (!this.isCountdownActive && this.isCustomSongPlaying && note.time > curTime + 2.8) break;
             if (!note.active && !note.holding) continue;
             if (note.hit && !note.holding) continue;
 

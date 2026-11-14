@@ -972,6 +972,9 @@ const updatedHtmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html')
 const updatedBattleCss = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
 assert(updatedHtmlContent.includes('id="battle-countdown-overlay"') && updatedHtmlContent.includes('id="countdown-number"'), 'index.html contains #battle-countdown-overlay and #countdown-number');
 assert(updatedBattleCss.includes('.battle-countdown-overlay') && updatedBattleCss.includes('countdownPop'), 'battle.css defines .battle-countdown-overlay and pop keyframes');
+assert(updatedBattleCss.includes('background: transparent;'), 'battle.css keeps countdown overlay transparent so highway is fully visible');
+const rhythmCode = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8');
+assert(rhythmCode.includes('const curTime = this.customSongTime || 0;'), 'rhythm.js draw() safely defines curTime without ReferenceError');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
