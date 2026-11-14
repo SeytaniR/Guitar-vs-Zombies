@@ -63,8 +63,7 @@ class CombatSystem {
         this.zombiesKilled = 0; this.score = 0; this.spawnTimer = 0;
         this.shockBarrierTimer = 15; this.shockBarrierReady = false; this.heroImmunityTimer = 0;
         this.matchActive = false; this.activeEnemyTypes = [];
-        this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
-        this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
+        this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null; this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.isPvPMode = false; this.pvpSystem = null;
         this.fx.initEmbers(25, 800, 600);
@@ -73,17 +72,15 @@ class CombatSystem {
         this.canvas.addEventListener('pointerdown', () => { if (this.isGameOver) this.reviveHero(); });
     }
 
-    get rockPower() { return (this.rockMana / this.maxRockMana) * 100; }
-    set rockPower(v) { this.rockMana = Math.max(0, Math.min(this.maxRockMana, (v / 100) * this.maxRockMana)); }
-    get shakePower() { return this.fx.shakePower; }
-    set shakePower(v) { this.fx.shakePower = v; }
+    get rockPower() { return (this.rockMana / this.maxRockMana) * 100; } set rockPower(v) { this.rockMana = Math.max(0, Math.min(this.maxRockMana, (v / 100) * this.maxRockMana)); }
+    get shakePower() { return this.fx.shakePower; } set shakePower(v) { this.fx.shakePower = v; }
     triggerShake(amount = 6) { this.fx.triggerShake(amount); }
     addFloatingText(text, x, y, color = '#ffff00', isCrit = false) { this.fx.addFloatingText(text, x, y, color, isCrit); }
     createExplosion(x, y, isCrit = false) { this.fx.createExplosion(x, y, isCrit, window.soundEngine); }
 
     resize() {
         const p = this.canvas.parentElement, w = (p && p.clientWidth) || window.innerWidth || 360, h = (p && p.clientHeight) || Math.round(window.innerHeight * 0.5) || 300;
-        if (w > 0 && h > 0) { this.canvas.width = w; this.canvas.height = h; }
+        if (w > 0 && h > 0 && (this.canvas.width !== w || this.canvas.height !== h)) { this.canvas.width = w; this.canvas.height = h; }
     }
 
     getActiveHeroData() {
@@ -147,8 +144,7 @@ class CombatSystem {
         this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
         this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0;
         this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
-        this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0;
-        this.perfectStreak = 0; this.guaranteedCritReady = false;
+        this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0; this.perfectStreak = 0; this.guaranteedCritReady = false;
         const curStage = window.stageSystem ? window.stageSystem.selectedStage : 1;
         this.isBossStage = !this.isPvPMode && !!(window.stageSystem && typeof window.stageSystem.isBossStage === 'function' && window.stageSystem.isBossStage(curStage));
         this.bossSpawned = false;
@@ -715,6 +711,7 @@ class CombatSystem {
         this.entities.zombies.forEach(z => z.update(dt, this));
 
         // Update Projectiles
+        const hasZombies = this.isPvPMode && this.entities.zombies.some(z => z.active);
         this.entities.projectiles.forEach(p => {
             p.x += p.vx * dt;
             p.y += p.vy * dt;
@@ -746,7 +743,7 @@ class CombatSystem {
 
             // Collisions with visible on-screen Zombies (miss shots bypass zombies)
             if (p.isMiss) return;
-            if (this.isPvPMode && this.pvpSystem && this.entities.zombies.every(z => !z.active) && this.pvpSystem.checkDirectHeroHit(p, this)) return;
+            if (this.isPvPMode && this.pvpSystem && !hasZombies && this.pvpSystem.checkDirectHeroHit(p, this)) return;
             for (const z of this.entities.zombies) {
                 if (!z.active || z.x > this.canvas.width - 4) continue;
                 const currentY = z.y + (z.jumpArcY || 0);
@@ -888,9 +885,9 @@ class CombatSystem {
         // Update VFX Module
         this.fx.update(dt, this.canvas.width, this.canvas.height);
 
-        // Clean dead entities
-        this.entities.zombies = this.entities.zombies.filter(z => z.active);
-        this.entities.projectiles = this.entities.projectiles.filter(p => p.active);
+        // Clean dead entities (in-place retain loop - zero array allocations)
+        let wZ = 0; for (let r = 0; r < this.entities.zombies.length; r++) if (this.entities.zombies[r].active) this.entities.zombies[wZ++] = this.entities.zombies[r]; this.entities.zombies.length = wZ;
+        let wP = 0; for (let r = 0; r < this.entities.projectiles.length; r++) if (this.entities.projectiles[r].active) this.entities.projectiles[wP++] = this.entities.projectiles[r]; this.entities.projectiles.length = wP;
     }
 
     draw() {
@@ -921,9 +918,10 @@ class CombatSystem {
         // 4. Acid Puddles
         this.fx.drawAcidPuddles(this.ctx);
 
-        // 5. Draw Zombies (Sorted by depth without per-frame array allocation)
+        // 5. Draw Zombies (Sorted by depth without per-frame closure allocation)
         if (this.entities.zombies.length > 1) {
-            this.entities.zombies.sort((a, b) => (a.y + (a.jumpArcY || 0)) - (b.y + (b.jumpArcY || 0)));
+            if (!this._zSort) this._zSort = (a, b) => (a.y + (a.jumpArcY || 0)) - (b.y + (b.jumpArcY || 0));
+            this.entities.zombies.sort(this._zSort);
         }
         this.entities.zombies.forEach(z => z.draw(this.ctx, this.assets));
 

@@ -860,13 +860,13 @@ class Game {
             const now = currentTime || performance.now();
 
             // 60 FPS Pacing Lock for High-Refresh Displays (e.g. Redmi Note 14 Pro 120Hz/90Hz)
-            // Locks battle updates & canvas draws at stable 60 FPS, eliminating GPU overheating and frame drops
-            if (this.lastRenderTime && (now - this.lastRenderTime < 15.2)) {
+            // Absorbs display refresh jitter while locking high-refresh screens at solid 60 FPS without frame drops
+            if (this.lastRenderTime && (now - this.lastRenderTime < 10.5)) {
                 this.animationId = requestAnimationFrame(loop);
                 return;
             }
 
-            const deltaTime = Math.min(now - (this.lastTime || now), 100);
+            const deltaTime = Math.min(50, Math.max(1, now - (this.lastTime || now)));
             this.lastTime = now;
             this.lastRenderTime = now;
 

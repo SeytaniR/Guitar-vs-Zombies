@@ -859,7 +859,7 @@ console.log('\n24. Testing Studio Timeline Mobile Optimizations (60 FPS Highway)
 const editorJs = fs.readFileSync(path.resolve(__dirname, 'js/song-editor.js'), 'utf8'), editorCss = fs.readFileSync(path.resolve(__dirname, 'css/editor.css'), 'utf8');
 assert(!editorJs.includes('ctx.shadowBlur = 10'), 'Eliminated expensive shadowBlur in song-editor.js note loop');
 assert(!editorJs.includes('ctx.shadowBlur = 8'), 'Eliminated shadowBlur in playhead rendering');
-assert(editorJs.includes('this.lastRenderTime && (now - this.lastRenderTime < 15.5)'), 'Frame rate pacing cap present for 120Hz/90Hz mobile screens');
+assert(editorJs.includes('this.lastRenderTime && (now - this.lastRenderTime < 10.5)'), 'Frame rate pacing cap present for 120Hz/90Hz mobile screens');
 assert(editorJs.includes('note.time > maxVisibleTime) break;'), 'Chronologically sorted early-break present for viewport culling');
 assert(editorJs.includes('_lastDeciDisplay'), 'Throttled DOM time display updates present');
 assert(editorCss.includes('contain: strict;') && editorCss.includes('will-change: transform;'), 'CSS hardware acceleration & containment applied to canvas wrapper');
@@ -867,7 +867,7 @@ assert(editorCss.includes('contain: strict;') && editorCss.includes('will-change
 // 25. Testing Battle 60 FPS Pacing & Lockstep Audio Sync (v1.9.4 Build 58)
 console.log('\n25. Testing Battle 60 FPS Pacing & Lockstep Audio Sync...');
 const mainJs = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8'), rhythmJs = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8'), baseCss = fs.readFileSync(path.resolve(__dirname, 'css/base.css'), 'utf8');
-assert(mainJs.includes('this.lastRenderTime && (now - this.lastRenderTime < 15.2)'), 'Main gameLoop implements 60 FPS pacing lock');
+assert(mainJs.includes('this.lastRenderTime && (now - this.lastRenderTime < 10.5)'), 'Main gameLoop implements 60 FPS pacing lock');
 assert(rhythmJs.includes('this.customSongTime += dt + diff * 0.15'), 'RhythmSystem uses Audio-Master Hardware Sync with smooth visual convergence');
 assert(!rhythmJs.includes('this.songAudio.playbackRate = Math.max'), 'Eliminated audio playbackRate throttling to prevent Bluetooth-like packet stutter');
 assert(!rhythmJs.includes('this.ctx.createLinearGradient(0, ribTop, 0, ribBottom)'), 'Eliminated expensive gradient in rhythm.js hold note ribbon');

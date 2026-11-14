@@ -418,13 +418,26 @@ class CombatFX {
             b.alpha = Math.min(1.0, b.life / 0.35);
         });
 
-        // Clean dead entities
-        this.explosions = this.explosions.filter(ex => ex.active);
-        this.shockwaves = this.shockwaves.filter(sw => sw.alpha > 0);
-        this.particles = this.particles.filter(pt => pt.life > 0);
-        this.floatingTexts = this.floatingTexts.filter(ft => ft.alpha > 0);
-        this.acidPuddles = this.acidPuddles.filter(p => p.life > 0);
-        this.multiKillBanners = this.multiKillBanners.filter(b => b.life > 0);
+        // Clean dead entities (in-place fast backward loops - zero array allocations)
+        for (let i = this.explosions.length - 1; i >= 0; i--) {
+            if (!this.explosions[i].active) { this.explosions[i] = this.explosions[this.explosions.length - 1]; this.explosions.pop(); }
+        }
+        for (let i = this.shockwaves.length - 1; i >= 0; i--) {
+            if (this.shockwaves[i].alpha <= 0) { this.shockwaves[i] = this.shockwaves[this.shockwaves.length - 1]; this.shockwaves.pop(); }
+        }
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            if (this.particles[i].life <= 0) { this.particles[i] = this.particles[this.particles.length - 1]; this.particles.pop(); }
+        }
+        if (this.particles.length > 120) this.particles.length = 120;
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+            if (this.floatingTexts[i].alpha <= 0) { this.floatingTexts[i] = this.floatingTexts[this.floatingTexts.length - 1]; this.floatingTexts.pop(); }
+        }
+        for (let i = this.acidPuddles.length - 1; i >= 0; i--) {
+            if (this.acidPuddles[i].life <= 0) { this.acidPuddles[i] = this.acidPuddles[this.acidPuddles.length - 1]; this.acidPuddles.pop(); }
+        }
+        for (let i = this.multiKillBanners.length - 1; i >= 0; i--) {
+            if (this.multiKillBanners[i].life <= 0) { this.multiKillBanners[i] = this.multiKillBanners[this.multiKillBanners.length - 1]; this.multiKillBanners.pop(); }
+        }
     }
 
     drawAcidPuddles(ctx) {
@@ -556,15 +569,14 @@ class CombatFX {
 
     drawVignette(ctx, cw, ch) {
         if (cw <= 10 || ch <= 10) return;
-        const r0 = Math.max(1, cw * 0.4);
-        const r1 = Math.max(2, cw * 0.9);
-        const grad = ctx.createRadialGradient(
-            cw / 2, ch / 2, r0,
-            cw / 2, ch / 2, r1
-        );
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
-        ctx.fillStyle = grad;
+        if (!this.vignetteGrad || this._vigW !== cw || this._vigH !== ch) {
+            this._vigW = cw; this._vigH = ch;
+            const r0 = Math.max(1, cw * 0.4), r1 = Math.max(2, cw * 0.9);
+            this.vignetteGrad = ctx.createRadialGradient(cw / 2, ch / 2, r0, cw / 2, ch / 2, r1);
+            this.vignetteGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            this.vignetteGrad.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+        }
+        ctx.fillStyle = this.vignetteGrad;
         ctx.fillRect(0, 0, cw, ch);
     }
 

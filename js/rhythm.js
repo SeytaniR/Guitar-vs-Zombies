@@ -45,7 +45,7 @@ class RhythmSystem {
 
     resize() {
         const p = this.canvas.parentElement, w = (p && p.clientWidth > 0) ? p.clientWidth : (window.innerWidth || 360), h = (p && p.clientHeight > 0) ? p.clientHeight : (Math.floor(window.innerHeight * 0.5) || 300);
-        this.canvas.width = w; this.canvas.height = h;
+        if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; }
     }
     getHitZoneY() { return Math.round(this.canvas.height - 54); }
 
@@ -421,57 +421,53 @@ class RhythmSystem {
                 return;
             }
 
-            // Sync notes on the highway according to exact audio timestamp
-            this.notes.forEach(note => {
+            // Sync notes on the highway with chronological windowing (fast early exit)
+            const maxLookAheadTime = curTime + (hitZoneY + 120) / this.noteSpeed;
+            const startIdx = this.noteWindowStart || 0;
+            for (let i = startIdx; i < this.notes.length; i++) {
+                const note = this.notes[i];
+                if (note.time > maxLookAheadTime) break;
+                if (!note.active && !note.holding && curTime > note.time + 1.2 && i === this.noteWindowStart) {
+                    this.noteWindowStart++;
+                }
                 if (!note.oppProcessed && curTime >= note.time) {
                     note.oppProcessed = true;
                     if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem && !this.pvpFinaleMode) {
                         window.game.combat.pvpSystem.onSongNotePassed(note, 'perfect', curTime, window.game.combat);
                     }
                 }
-                if (note.holding) {
-                    note.y = hitZoneY; // Clamped at hitzone during hold
-                } else {
-                    note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
-                }
+                if (note.holding) note.y = hitZoneY;
+                else note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
 
                 // PvP Finale Auto-Hit (Victory) or Skull (Defeat)
                 if (this.pvpFinaleMode && note.active && !note.autoDone && note.y >= hitZoneY - 14) {
-                    note.autoDone = true;
-                    note.active = false;
+                    note.autoDone = true; note.active = false;
                     const nX = note.track * trackWidth + trackWidth / 2;
                     this.laneFlashes[note.track] = 1.0;
                     if (this.pvpFinaleMode === 'victory') {
                         this.addFloatingRating('PERFECT! ⭐', nX, hitZoneY - 26, '#00ff66', true);
                         this.createHitSparks(nX, hitZoneY, '#00ff88', true, 10);
-                        if (window.soundEngine && typeof window.soundEngine.playGuitarChord === 'function') {
-                            window.soundEngine.playGuitarChord(note.track);
-                        }
+                        if (window.soundEngine && typeof window.soundEngine.playGuitarChord === 'function') window.soundEngine.playGuitarChord(note.track);
                     } else {
                         this.addFloatingRating('💀', nX, hitZoneY - 26, '#ff2233', true);
                         this.createHitSparks(nX, hitZoneY, '#ff2233', false, 10);
-                        if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') {
-                            window.soundEngine.playMiss();
-                        }
+                        if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
                     }
-                    return;
+                    continue;
                 }
 
-                // Missed note passed hit zone (if not struck and not holding)
+                // Missed note passed hit zone
                 if (note.active && !note.hit && !note.holding && curTime > note.time + 0.28) {
-                    note.active = false;
-                    note.missed = true;
+                    note.active = false; note.missed = true;
                     if (this.songStats) this.songStats.misses++;
                     this.addFloatingRating('MISS', note.track * trackWidth + trackWidth / 2, hitZoneY - 10, '#ff2222', false);
-                    this.streak = 0;
-                    this.multiplier = 1;
+                    this.streak = 0; this.multiplier = 1;
                     if (window.game && window.game.combat) {
-                        window.game.combat.combo = 0;
-                        window.game.combat.comboKills = 0;
+                        window.game.combat.combo = 0; window.game.combat.comboKills = 0;
                         window.game.combat.registerRhythmNote('miss', note.track);
                     }
                 }
-            });
+            }
 
             this.updateCustomSongProgressBar();
         } else {
@@ -507,7 +503,7 @@ class RhythmSystem {
                 }
             });
 
-            this.notes = this.notes.filter(n => (n.y < this.canvas.height + 40 && n.active) || n.holding);
+            let wN = 0; for (let r = 0; r < this.notes.length; r++) { const n = this.notes[r]; if ((n.y < this.canvas.height + 40 && n.active) || n.holding) this.notes[wN++] = n; } this.notes.length = wN;
         }
 
         // Active Sustain / Hold notes tick processing
@@ -559,18 +555,14 @@ class RhythmSystem {
             }
         }
 
-        this.particles.forEach(p => {
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
-            p.life -= 2.2 * dt;
-        });
-        this.particles = this.particles.filter(p => p.life > 0);
-
-        this.floatingRatings.forEach(r => {
-            r.y += r.vy * dt;
-            r.alpha -= 2.2 * dt;
-        });
-        this.floatingRatings = this.floatingRatings.filter(r => r.alpha > 0);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= 2.2 * dt;
+            if (p.life <= 0) { this.particles[i] = this.particles[this.particles.length - 1]; this.particles.pop(); }
+        }
+        for (let i = this.floatingRatings.length - 1; i >= 0; i--) {
+            const r = this.floatingRatings[i]; r.y += r.vy * dt; r.alpha -= 2.2 * dt;
+            if (r.alpha <= 0) { this.floatingRatings[i] = this.floatingRatings[this.floatingRatings.length - 1]; this.floatingRatings.pop(); }
+        }
     }
 
     draw() {
@@ -675,9 +667,13 @@ class RhythmSystem {
         }
 
         // 4.1. Draw Sustain / Hold Ribbons (behind note heads)
-        this.notes.forEach(note => {
-            if (!note.active && !note.holding) return;
-            if (!note.duration || note.duration < 0.2) return;
+        const maxDrawTime = this.isCustomSongPlaying ? (this.customSongTime + (hitZoneY + 120) / this.noteSpeed) : Infinity;
+        const startNoteIdx = this.isCustomSongPlaying ? (this.noteWindowStart || 0) : 0;
+        for (let idx = startNoteIdx; idx < this.notes.length; idx++) {
+            const note = this.notes[idx];
+            if (note.time > maxDrawTime) break;
+            if (!note.active && !note.holding) continue;
+            if (!note.duration || note.duration < 0.2) continue;
 
             const col = note.colorInfo || this.colors[note.track];
             const x = note.track * trackW + trackW / 2;
@@ -730,12 +726,14 @@ class RhythmSystem {
             }
 
             this.ctx.restore();
-        });
+        }
 
         // 4.2. Draw Falling Notes (Neon Guitar Picks)
-        this.notes.forEach(note => {
-            if (!note.active && !note.holding) return;
-            if (note.hit && !note.holding) return;
+        for (let idx = startNoteIdx; idx < this.notes.length; idx++) {
+            const note = this.notes[idx];
+            if (note.time > maxDrawTime) break;
+            if (!note.active && !note.holding) continue;
+            if (note.hit && !note.holding) continue;
 
             let drawY = note.y;
             if (note.holding) drawY = hitZoneY;
@@ -768,7 +766,7 @@ class RhythmSystem {
             this.ctx.fillStyle = col.main; this.ctx.fill();
             this.ctx.fillStyle = col.core; this.ctx.beginPath(); this.ctx.arc(0, -2, 6.5, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.restore();
-        });
+        }
 
         // 5. Hit Sparks (Fast GPU rect batch)
         this.ctx.save();
@@ -842,6 +840,7 @@ class RhythmSystem {
         this.streak = 0;
         this.multiplier = 1;
         this.customSongTime = 0;
+        this.noteWindowStart = 0;
         this.customSongStartTime = performance.now();
         this.activeHoldNotes = [null, null, null, null];
         this.laneHolding = [false, false, false, false];

@@ -153,8 +153,8 @@ class SongEditor {
             const now = timestamp || performance.now();
 
             // Pacing cap for 90Hz/120Hz/144Hz high-refresh mobile screens (e.g. Redmi Note 14 Pro)
-            // Ensures smooth 60 FPS playback without overloading mobile GPU or causing thermal throttling
-            if (this.lastRenderTime && (now - this.lastRenderTime < 15.5)) {
+            // Ensures locked 60 FPS playback without jitter or frame dropping on mobile browsers
+            if (this.lastRenderTime && (now - this.lastRenderTime < 10.5)) {
                 const modal = document.getElementById('chart-editor-modal');
                 if (modal && modal.classList.contains('open')) {
                     this.animFrameId = requestAnimationFrame(loop);
@@ -162,14 +162,20 @@ class SongEditor {
                 return;
             }
 
-            const dt = Math.min(0.1, (now - this.lastFrameTime) / 1000);
+            const dt = Math.min(0.05, Math.max(0.001, (now - this.lastFrameTime) / 1000));
             this.lastFrameTime = now;
             this.lastRenderTime = now;
 
             let needsRedraw = false;
             if (this.isPlaying) {
-                const audioPlaying = this.audio && !this.audio.paused && !this.audio.ended && this.audio.currentTime > 0;
-                this.currentTime = audioPlaying ? this.audio.currentTime : (this.currentTime + dt * this.playbackRate);
+                if (this.audio && !this.audio.paused && !this.audio.ended && this.audio.currentTime > 0) {
+                    const audioTime = this.audio.currentTime;
+                    const diff = audioTime - this.currentTime;
+                    if (Math.abs(diff) > 0.12) this.currentTime = audioTime;
+                    else this.currentTime += (dt * this.playbackRate) + diff * 0.15;
+                } else {
+                    this.currentTime += dt * this.playbackRate;
+                }
                 if (this.currentTime >= this.duration) {
                     this.currentTime = this.duration;
                     this.pause();

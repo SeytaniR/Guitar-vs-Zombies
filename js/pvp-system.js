@@ -255,6 +255,7 @@ class PvPSystem {
         this.searchTargetTime = (Math.random() * 1.8 + 2.4); // 2.4s to 4.2s realistic queue
         this.versusCountdown = 3;
         this.opponent = null;
+        this.hudCache = null;
         this.overhealsPlayer = 0;
         this.overhealsOpponent = 0;
         this.opponentZombiesKilled = 0;
@@ -787,22 +788,16 @@ class PvPSystem {
             const bannerY = 14;
 
             ctx.save();
-            ctx.shadowColor = isWin ? '#00ff66' : '#ff2233';
-            ctx.shadowBlur = 18;
             ctx.fillStyle = isWin ? 'rgba(0, 32, 12, 0.94)' : 'rgba(38, 4, 10, 0.94)';
             ctx.strokeStyle = isWin ? '#00ff66' : '#ff3344';
             ctx.lineWidth = 2.5;
 
             ctx.beginPath();
-            if (typeof ctx.roundRect === 'function') {
-                ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 8);
-            } else {
-                ctx.rect(bannerX, bannerY, bannerW, bannerH);
-            }
+            if (typeof ctx.roundRect === 'function') ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 8);
+            else ctx.rect(bannerX, bannerY, bannerW, bannerH);
             ctx.fill();
             ctx.stroke();
 
-            ctx.shadowBlur = 0;
             ctx.textAlign = 'center';
             ctx.font = "900 16px 'Impact', 'Segoe UI Black', sans-serif";
             ctx.fillStyle = isWin ? '#55ff99' : '#ff5566';
@@ -822,18 +817,32 @@ class PvPSystem {
 
     updateBattleHUD() {
         if (!this.opponent) return;
-        const hpBar = document.getElementById('pvp-opp-hp-bar');
-        const scoreEl = document.getElementById('pvp-opp-score-val');
-        const nameEl = document.getElementById('pvp-opp-hud-name');
-        const avatarEl = document.getElementById('pvp-opp-hud-avatar');
-
-        if (hpBar) {
-            const pct = Math.max(0, Math.min(100, Math.round((this.opponent.hp / this.opponent.maxHp) * 100)));
-            hpBar.style.width = `${pct}%`;
+        if (!this.hudCache) {
+            this.hudCache = {
+                hpBar: document.getElementById('pvp-opp-hp-bar'),
+                scoreEl: document.getElementById('pvp-opp-score-val'),
+                nameEl: document.getElementById('pvp-opp-hud-name'),
+                avatarEl: document.getElementById('pvp-opp-hud-avatar'),
+                lastPct: -1, lastScore: -1, lastName: '', lastAvatar: ''
+            };
         }
-        if (scoreEl) scoreEl.innerText = this.opponent.score.toLocaleString();
-        if (nameEl) nameEl.innerText = this.opponent.name;
-        if (avatarEl && this.opponent.guitarist) avatarEl.src = this.opponent.guitarist.avatar || 'assets/covers/default_cover.jpg';
+        const h = this.hudCache;
+        if (h.hpBar) {
+            const pct = Math.max(0, Math.min(100, Math.round((this.opponent.hp / this.opponent.maxHp) * 100)));
+            if (pct !== h.lastPct) { h.lastPct = pct; h.hpBar.style.width = `${pct}%`; }
+        }
+        if (h.scoreEl && this.opponent.score !== h.lastScore) {
+            h.lastScore = this.opponent.score;
+            h.scoreEl.innerText = this.opponent.score.toLocaleString();
+        }
+        if (h.nameEl && this.opponent.name !== h.lastName) {
+            h.lastName = this.opponent.name;
+            h.nameEl.innerText = this.opponent.name;
+        }
+        if (h.avatarEl && this.opponent.guitarist) {
+            const av = this.opponent.guitarist.avatar || 'assets/covers/default_cover.jpg';
+            if (av !== h.lastAvatar) { h.lastAvatar = av; h.avatarEl.src = av; }
+        }
     }
 
     endPvPBattle(reason = 'song_complete', combat = null, rhythm = null) {
