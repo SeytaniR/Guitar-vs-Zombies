@@ -421,15 +421,9 @@ class RhythmSystem {
                 return;
             }
 
-            // Sync notes on the highway with chronological windowing (fast early exit)
-            const maxLookAheadTime = curTime + (hitZoneY + 120) / this.noteSpeed;
-            const startIdx = this.noteWindowStart || 0;
-            for (let i = startIdx; i < this.notes.length; i++) {
+            // Sync notes on the highway: continuous arithmetic update guarantees zero hit lag & zero pop-in
+            for (let i = 0; i < this.notes.length; i++) {
                 const note = this.notes[i];
-                if (note.time > maxLookAheadTime) break;
-                if (!note.active && !note.holding && curTime > note.time + 1.2 && i === this.noteWindowStart) {
-                    this.noteWindowStart++;
-                }
                 if (!note.oppProcessed && curTime >= note.time) {
                     note.oppProcessed = true;
                     if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem && !this.pvpFinaleMode) {
@@ -593,9 +587,11 @@ class RhythmSystem {
             const tx = i * trackW;
 
             if (this.laneFlashes[i] > 0) {
+                const flashH = Math.min(90, ch - hitZoneY + 50);
+                const flashY = Math.max(0, hitZoneY - 45);
                 this.ctx.fillStyle = this.colors[i].glow;
-                this.ctx.globalAlpha = this.laneFlashes[i] * 0.7;
-                this.ctx.fillRect(tx, 0, trackW, ch);
+                this.ctx.globalAlpha = Math.min(0.24, this.laneFlashes[i] * 0.20);
+                this.ctx.fillRect(tx, flashY, trackW, flashH);
                 this.ctx.globalAlpha = 1.0;
             }
 
@@ -667,11 +663,8 @@ class RhythmSystem {
         }
 
         // 4.1. Draw Sustain / Hold Ribbons (behind note heads)
-        const maxDrawTime = this.isCustomSongPlaying ? (this.customSongTime + (hitZoneY + 120) / this.noteSpeed) : Infinity;
-        const startNoteIdx = this.isCustomSongPlaying ? (this.noteWindowStart || 0) : 0;
-        for (let idx = startNoteIdx; idx < this.notes.length; idx++) {
+        for (let idx = 0; idx < this.notes.length; idx++) {
             const note = this.notes[idx];
-            if (note.time > maxDrawTime) break;
             if (!note.active && !note.holding) continue;
             if (!note.duration || note.duration < 0.2) continue;
 
@@ -729,9 +722,8 @@ class RhythmSystem {
         }
 
         // 4.2. Draw Falling Notes (Neon Guitar Picks)
-        for (let idx = startNoteIdx; idx < this.notes.length; idx++) {
+        for (let idx = 0; idx < this.notes.length; idx++) {
             const note = this.notes[idx];
-            if (note.time > maxDrawTime) break;
             if (!note.active && !note.holding) continue;
             if (note.hit && !note.holding) continue;
 
