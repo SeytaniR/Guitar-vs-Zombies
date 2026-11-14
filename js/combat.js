@@ -60,7 +60,7 @@ class CombatSystem {
         this.heroShieldHp = 0; this.heroShieldTimer = 0;
         this.perfectStreak = 0; this.guaranteedCritReady = false;
         this.pendingAttackModifiers = []; this.stageCompleted = false;
-        this.zombiesKilled = 0; this.score = 0; this.spawnTimer = 0;
+        this.zombiesKilled = 0; this.score = 0; this.spawnTimer = 0; this.isSpecialActive = false;
         this.shockBarrierTimer = 15; this.shockBarrierReady = false; this.heroImmunityTimer = 0;
         this.matchActive = false; this.activeEnemyTypes = [];
         this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null; this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
@@ -92,7 +92,7 @@ class CombatSystem {
         const heroData = this.getActiveHeroData();
         return (heroData && window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function')
             ? window.guitaristPool.getHeroStats(heroData.id)
-            : { level: 1, baseAttackSpeed: 1.0, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0, goldBonus: 0, armorPen: 0, slowHorde: 0, burnChance: 0, knockbackBonus: 0, chainLightning: false, chainTargets: 0 };
+            : { level: 1, baseAttackSpeed: 1.0, damageMult: 1.0, critDamageBonusPercent: 50.0, manaRegenRate: 1.0, goldBonus: 0, armorPen: 0, slowHorde: 0, burnChance: 0, knockbackBonus: 0, chainLightning: false, chainTargets: 0, specialDuration: 6.0, specialDurationMax: 12.0 };
     }
 
     getHeroAttackSpeed() {
@@ -142,7 +142,7 @@ class CombatSystem {
         this.heroHp = this.heroMaxHp; this.isGameOver = false; this.isPaused = false; this.isVictory = false;
         this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
         this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
-        this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0;
+        this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0; this.isSpecialActive = false; if (window.specialSystem) window.specialSystem.reset();
         this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
         this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0; this.perfectStreak = 0; this.guaranteedCritReady = false;
         const curStage = window.stageSystem ? window.stageSystem.selectedStage : 1;
@@ -345,7 +345,7 @@ class CombatSystem {
             const critBonusPercent = (heroStats.critDamageBonusPercent || 50) + (window.talentSystem ? window.talentSystem.getStat('ferocious_solo') * 6 : 0);
             calcDamage = Math.round(baseDmg * (1 + critBonusPercent / 100));
         }
-        if (!isMiss) calcDamage = Math.max(1, calcDamage);
+        if (!isMiss) calcDamage = Math.max(1, calcDamage); if (!isMiss && (this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive))) calcDamage = Math.round(calcDamage * 2);
 
         let projColor = isMiss ? '#777777' : (isCrit ? '#ff00ff' : '#00ffff');
         if (!isMiss && mod.skill && mod.skill.color) projColor = mod.skill.color;
@@ -383,7 +383,7 @@ class CombatSystem {
             }
         }
 
-        const tickDamage = 14 + (window.talentSystem ? Math.round(window.talentSystem.getStat('power_chord') * 0.25) : 0);
+        const tickDamage = Math.round((14 + (window.talentSystem ? Math.round(window.talentSystem.getStat('power_chord') * 0.25) : 0)) * ((this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive)) ? 2 : 1));
         const colors = ['#00ff66', '#ff0055', '#ffcc00', '#00d4ff'];
         const tickColor = colors[lane % 4];
 
@@ -410,7 +410,7 @@ class CombatSystem {
     onZombieKilled(z, bonusScore = 120, label = '+KILL!', color = '#00ff66') {
         this.zombiesKilled++;
         this.battleStats.zombiesKilled++;
-        this.score += bonusScore;
+        this.score += ((this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive)) ? bonusScore * 2 : bonusScore);
         this.comboKills = (this.comboKills || 0) + 1;
         this.fx.addMultiKillBanner(this.comboKills, this.canvas.width / 2, this.canvas.height * 0.38);
         if (this.comboKills >= 7 && window.metaMissionSystem) {
@@ -643,7 +643,7 @@ class CombatSystem {
             return;
         }
         if (!this.matchActive) return;
-        this.time += deltaTime;
+        this.time += deltaTime; if (window.specialSystem && typeof window.specialSystem.update === 'function') window.specialSystem.update(dt);
 
         if (this.heroStrumAnim > 0 && (this.heroStrumAnim -= 4 * dt) < 0) this.heroStrumAnim = 0;
         if (this.heroFlashTime > 0) this.heroFlashTime -= dt;

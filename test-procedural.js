@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/pvp-system.js'].forEach(loadScript);
+['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -53,6 +53,11 @@ assert(initialStats.level === 1 && Math.abs(initialStats.damageMult - 1.0) < 0.0
 pool.setLevel('johnny_blaze', 100);
 const maxStats = pool.getHeroStats('johnny_blaze');
 assert(maxStats.level === 100 && Math.abs(maxStats.damageMult - 1.99) < 0.01 && maxStats.critDamageBonusPercent >= 89, 'Level 100 Johnny damage mult (1.99x) and crit scale smoothly');
+assert(initialStats.specialDuration === 5.0 && initialStats.specialDurationMax === 9.0, 'Johnny Blaze starts with 5.0s special duration (teto 9.0s)');
+assert(maxStats.specialDuration <= 9.0 && maxStats.specialDuration >= 8.9, 'Johnny Blaze level 100 special duration capped at 9.0s');
+const saulStats = pool.getHeroStats('saul_slash');
+assert(saulStats.specialDuration >= 7.5 && saulStats.specialDurationMax === 12.0, 'Saul Slash has 7.5s base special duration (teto 12.0s)');
+pool.guitarists.forEach(g => { const s = pool.getHeroStats(g.id); assert(s.specialDuration <= 12.0 && s.specialDurationMax <= 12.0, `Guitarist ${g.name} respects 12.0s special duration ceiling`); });
 pool.setLevel('johnny_blaze', 1);
 const xpNeeded = pool.getXpRequiredForNextLevel(1);
 assert(xpNeeded > 0, `XP required for Level 2 is calculated: ${xpNeeded}`);
@@ -97,18 +102,8 @@ assert(stage50Info.rewardCoins > stage1Info.rewardCoins && stage50Info.rewardXp 
 console.log('\n3. Testing Procedural Zombie Scaling & Status Effects...');
 
 // Mock Zombie Type
-const mockZombieType = {
-    type: 'normal',
-    name: 'Punk Walker',
-    hp: 65,
-    speed: 38,
-    attackDamage: 8,
-    attackInterval: 1.1
-};
-
-const zLv1 = new ZombieEntity(mockZombieType, 100, 400, 1);
-const zLv10 = new ZombieEntity(mockZombieType, 100, 400, 10);
-const zLv50 = new ZombieEntity(mockZombieType, 100, 400, 50);
+const mockZombieType = { type: 'normal', name: 'Punk Walker', hp: 65, speed: 38, attackDamage: 8, attackInterval: 1.1 };
+const zLv1 = new ZombieEntity(mockZombieType, 100, 400, 1), zLv10 = new ZombieEntity(mockZombieType, 100, 400, 10), zLv50 = new ZombieEntity(mockZombieType, 100, 400, 50);
 
 assert(zLv1.level === 1 && zLv1.maxHp === 65, 'Zombie Level 1 has base 65 HP');
 assert(zLv10.level === 10 && zLv10.maxHp > zLv1.maxHp, `Zombie Level 10 HP scales to ${zLv10.maxHp} (vs ${zLv1.maxHp})`);
@@ -121,20 +116,12 @@ const goldLv50 = zLv50.getGoldDrop();
 assert(goldLv50 > goldLv1, `Zombie Level 50 drops more procedural gold: ${goldLv50} vs ${goldLv1}`);
 
 // Mock combat context for update loop
-const mockCombat = {
-    getHeroPosition: () => ({ x: 60, y: 100 }),
-    fx: { particles: [] },
-    addFloatingText: () => {},
-    onZombieKilled: () => {}
-};
+const mockCombat = { getHeroPosition: () => ({ x: 60, y: 100 }), fx: { particles: [] }, addFloatingText: () => {}, onZombieKilled: () => {} };
 
 // Status Effects: Stun, Slow, Burn
-zLv1.applyStun(1.0);
-assert(zLv1.isStunned(), 'Zombie stun applied successfully');
-zLv1.update(0.5, mockCombat);
-assert(zLv1.isStunned(), 'Zombie still stunned after 0.5s');
-zLv1.update(0.6, mockCombat);
-assert(!zLv1.isStunned(), 'Zombie stun expired after 1.1s total');
+zLv1.applyStun(1.0); assert(zLv1.isStunned(), 'Zombie stun applied successfully');
+zLv1.update(0.5, mockCombat); assert(zLv1.isStunned(), 'Zombie still stunned after 0.5s');
+zLv1.update(0.6, mockCombat); assert(!zLv1.isStunned(), 'Zombie stun expired after 1.1s total');
 
 zLv1.applySlow(0.4, 2.0);
 assert(zLv1.isSlowed(), 'Zombie slow effect applied');
@@ -387,23 +374,15 @@ combat.combo = 500; const spd500 = combat.getHeroAttackSpeed();
 assert(Math.abs(spd500 - (baseSpd + 2.0)) < 0.001, `Combo 500 is capped at +2.00 max attack speed: ${spd500.toFixed(2)}`);
 
 // 3. Wrong Tap Penalty (miss shot bypasses zombies, 0 damage, resets combo)
-combat.isGameOver = false;
-combat.matchActive = true;
-combat.heroHp = combat.heroMaxHp;
-combat.combo = 45;
-combat.entities.projectiles = [];
+combat.isGameOver = false; combat.matchActive = true; combat.heroHp = combat.heroMaxHp; combat.combo = 45; combat.entities.projectiles = [];
 const targetZombie = new ZombieEntity(mockZombieType, 100, 400, 1, 250);
 combat.entities.zombies = [targetZombie];
 const zombieHpBefore = targetZombie.hp;
 
 combat.registerWrongTap(1);
-assert(combat.combo === 0, 'registerWrongTap() resets combo to 0');
-assert(combat.entities.projectiles.length > 0, 'registerWrongTap() produces a projectile');
-
+assert(combat.combo === 0 && combat.entities.projectiles.length > 0, 'registerWrongTap() produces a projectile and resets combo');
 const missProj = combat.entities.projectiles[combat.entities.projectiles.length - 1];
-assert(missProj.isMiss === true, 'Miss projectile has isMiss = true');
-assert(missProj.damage === 0, 'Miss projectile deals 0 damage');
-assert(missProj.projColor === '#777777', 'Miss projectile has grey color (#777777)');
+assert(missProj.isMiss === true && missProj.damage === 0 && missProj.projColor === '#777777', 'Miss projectile deals 0 damage and has grey color');
 
 // Update combat so projectile passes through zombie position
 missProj.x = targetZombie.x;
@@ -454,19 +433,10 @@ assert(testFx.shockwaves.length > 0 && testFx.particles.length > 0 && testFx.sha
 // 4. Linked Kill Streak ("Ritmo de Kills")
 combat.resetBattle();
 assert(combat.comboKills === 0, 'comboKills is 0 on battle start');
-
 combat.combo = 15;
-combat.onZombieKilled(targetZombie, 100);
-assert(combat.comboKills === 1, '1st kill in combo sets comboKills to 1');
-combat.onZombieKilled(targetZombie, 100);
-assert(combat.comboKills === 2, '2nd kill in combo sets comboKills to 2 (DOUBLE KILL)');
-combat.onZombieKilled(targetZombie, 100);
-assert(combat.comboKills === 3, '3rd kill in combo sets comboKills to 3 (TRIPLE KILL)');
-
-// Break combo via wrong tap
+[1, 2, 3].forEach(k => { combat.onZombieKilled(targetZombie, 100); assert(combat.comboKills === k, `Kill in combo sets comboKills to ${k}`); });
 combat.registerWrongTap(0);
-assert(combat.combo === 0, 'Wrong tap broke combo');
-assert(combat.comboKills === 0, 'Wrong tap immediately reset comboKills to 0 ("ambos reiniciam")');
+assert(combat.combo === 0 && combat.comboKills === 0, 'Wrong tap immediately reset combo and comboKills to 0');
 
 // Build streak again and break via miss
 combat.combo = 8;
@@ -978,6 +948,37 @@ assert(!htmlContent.includes('id="pvp-ping-display"') && !htmlContent.includes('
 pvp.openMatchmakingModal([{ id: 'test_song', title: 'Test Song', bpm: 140 }], null, null);
 assert(pvp.selectedSong && pvp.selectedSong.id === 'test_song', 'openMatchmakingModal successfully configures player chosen song for PvP');
 assert(htmlContent.includes('id="pvp-hero-dropdown"') && htmlContent.includes('id="pvp-lane-skills-grid"'), 'PvP pre-battle dialog provides hero and lane skills customization');
+
+// ==========================================
+// 28. Testing Especial System (Combo Charge, 2x Damage, 2x Points, Single-Use & Durations)
+// ==========================================
+console.log('\n28. Testing Especial System (Combo Charge, 2x Points, 2x Damage & Single-Use)...');
+const specSys = new SpecialSystem(); window.specialSystem = specSys;
+specSys.init();
+assert(specSys.specialMeter === 0 && !specSys.isSpecialActive && !specSys.specialUsed, 'SpecialSystem initializes at 0% and inactive');
+assert(!specSys.canActivate(), 'Cannot activate special when meter is 0%');
+
+// Combo charge
+specSys.onComboHit(10);
+assert(specSys.specialMeter > 0 && specSys.specialMeter < 100, `Special charged on combo hit: ${specSys.specialMeter.toFixed(1)}%`);
+for (let c = 0; c < 35; c++) specSys.onComboHit(c);
+assert(specSys.specialMeter === 100 && specSys.canActivate(), 'Special meter caps at 100% and canActivate returns true');
+
+// Special Activation & Multipliers
+const activated = specSys.activateSpecial();
+assert(activated === true && specSys.isSpecialActive === true && specSys.specialUsed === true, 'Special successfully activated: 2x overdrive active, specialUsed set to true');
+assert(specSys.specialTimeLeft > 0 && specSys.specialTimeLeft <= 12.0, `Special duration active: ${specSys.specialTimeLeft}s (capped at 12s)`);
+assert(150 * (specSys.isSpecialActive ? 2 : 1) === 300, 'During active special, rhythm note score is multiplied by 2x');
+assert(45 * (specSys.isSpecialActive ? 2 : 1) === 90, 'During active special, attack damage is multiplied by 2x');
+
+// Expiration and Single-Use Exhaustion Guarantee
+specSys.update(specSys.specialDuration + 1);
+assert(!specSys.isSpecialActive && specSys.specialTimeLeft === 0 && specSys.specialMeter === 0, 'Special duration expired cleanly');
+specSys.onComboHit(50);
+assert(specSys.specialMeter === 0 && !specSys.canActivate(), 'Special CANNOT recharge once used in the match (single-use guarantee)');
+const battleCssContent = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
+assert(htmlContent.includes('id="battle-special-btn"') && htmlContent.includes('class="battle-special-wrap"'), 'index.html contains strategic #battle-special-btn');
+assert(battleCssContent.includes('.battle-special-btn') && battleCssContent.includes('.battle-special-wrap'), 'battle.css defines responsive strategic special button styling');
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;

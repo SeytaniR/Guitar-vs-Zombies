@@ -29,7 +29,8 @@ class GuitaristPoolSystem {
                     critBonusPerLevel: 0.40,         // +0.4% crit bonus per level
                     projSpeedBonusPerLevel: 0.002,   // +0.2% proj speed per level
                     manaRegenRatePerLevel: 0.002,
-                    goldBonusPerLevel: 0.0
+                    goldBonusPerLevel: 0.0,
+                    specialDurationBase: 5.0, specialDurationPerLevel: 0.040, specialDurationMax: 9.0
                 }
             },
             {
@@ -59,7 +60,8 @@ class GuitaristPoolSystem {
                     burnChanceBase: 0.20,
                     burnChancePerLevel: 0.0015,
                     manaRegenRatePerLevel: 0.003,
-                    goldBonusPerLevel: 0.0
+                    goldBonusPerLevel: 0.0,
+                    specialDurationBase: 5.5, specialDurationPerLevel: 0.040, specialDurationMax: 9.5
                 }
             },
             {
@@ -90,7 +92,8 @@ class GuitaristPoolSystem {
                     armorPenPerLevel: 0.0035,
                     slowHordeBase: 0.08,
                     slowHordePerLevel: 0.0012,
-                    manaRegenRatePerLevel: 0.002
+                    manaRegenRatePerLevel: 0.002,
+                    specialDurationBase: 5.5, specialDurationPerLevel: 0.040, specialDurationMax: 9.5
                 }
             },
             {
@@ -120,7 +123,8 @@ class GuitaristPoolSystem {
                     chainLightning: true,
                     chainTargets: 2,
                     manaRegenRatePerLevel: 0.004,
-                    goldBonusPerLevel: 0.0
+                    goldBonusPerLevel: 0.0,
+                    specialDurationBase: 6.0, specialDurationPerLevel: 0.040, specialDurationMax: 10.0
                 }
             },
             {
@@ -149,7 +153,8 @@ class GuitaristPoolSystem {
                     critBonusPerLevel: 0.85,
                     knockbackBonusBase: 0.25,
                     knockbackPerLevel: 0.004,
-                    manaRegenRatePerLevel: 0.003
+                    manaRegenRatePerLevel: 0.003,
+                    specialDurationBase: 6.0, specialDurationPerLevel: 0.040, specialDurationMax: 10.0
                 }
             },
             {
@@ -178,7 +183,8 @@ class GuitaristPoolSystem {
                     critBonusPerLevel: 0.70,
                     goldBonusBase: 0.10,
                     goldBonusPerLevel: 0.0025,
-                    manaRegenRatePerLevel: 0.005
+                    manaRegenRatePerLevel: 0.005,
+                    specialDurationBase: 6.2, specialDurationPerLevel: 0.040, specialDurationMax: 10.2
                 }
             },
             {
@@ -207,7 +213,8 @@ class GuitaristPoolSystem {
                     critBonusPerLevel: 0.75,
                     projSpeedBonusPerLevel: 0.003,
                     manaRegenRatePerLevel: 0.004,
-                    goldBonusPerLevel: 0.0
+                    goldBonusPerLevel: 0.0,
+                    specialDurationBase: 6.5, specialDurationPerLevel: 0.045, specialDurationMax: 11.0
                 }
             },
             {
@@ -237,7 +244,8 @@ class GuitaristPoolSystem {
                     burnChanceBase: 0.25,
                     burnChancePerLevel: 0.0035,
                     manaRegenRatePerLevel: 0.0045,
-                    goldBonusPerLevel: 0.0
+                    goldBonusPerLevel: 0.0,
+                    specialDurationBase: 6.8, specialDurationPerLevel: 0.045, specialDurationMax: 11.2
                 }
             },
             {
@@ -267,7 +275,8 @@ class GuitaristPoolSystem {
                     knockbackBonusBase: 0.28,
                     knockbackPerLevel: 0.005,
                     manaRegenRatePerLevel: 0.005,
-                    goldBonusPerLevel: 0.0
+                    goldBonusPerLevel: 0.0,
+                    specialDurationBase: 7.0, specialDurationPerLevel: 0.045, specialDurationMax: 11.5
                 }
             },
             {
@@ -296,7 +305,8 @@ class GuitaristPoolSystem {
                     critBonusPerLevel: 0.95,
                     goldBonusBase: 0.15,
                     goldBonusPerLevel: 0.0035,
-                    manaRegenRatePerLevel: 0.006
+                    manaRegenRatePerLevel: 0.006,
+                    specialDurationBase: 7.2, specialDurationPerLevel: 0.048, specialDurationMax: 12.0
                 }
             },
             {
@@ -325,7 +335,8 @@ class GuitaristPoolSystem {
                     critBonusPerLevel: 1.10,
                     goldBonusBase: 0.20,
                     goldBonusPerLevel: 0.0045,
-                    manaRegenRatePerLevel: 0.007
+                    manaRegenRatePerLevel: 0.007,
+                    specialDurationBase: 7.5, specialDurationPerLevel: 0.050, specialDurationMax: 12.0
                 }
             }
         ];
@@ -519,6 +530,12 @@ class GuitaristPoolSystem {
         const burnChance = (b.burnChanceBase || 0) + ((b.burnChancePerLevel || 0) * lvlIncrements);
         const knockbackBonus = (b.knockbackBonusBase || 0) + ((b.knockbackPerLevel || 0) * lvlIncrements);
 
+        // Especial Duration scaling in seconds (strictly capped at universal ceiling 12.0s)
+        const universalCeiling = 12.0;
+        const heroCeiling = Math.min(universalCeiling, b.specialDurationMax || 12.0);
+        const rawSpecialDur = (b.specialDurationBase || 5.0) + ((b.specialDurationPerLevel || 0.04) * lvlIncrements);
+        const specialDuration = Math.round(Math.min(heroCeiling, rawSpecialDur) * 10) / 10;
+
         return {
             level: lvl,
             baseAttackSpeed: b.baseAttackSpeed || 1.0,
@@ -531,7 +548,9 @@ class GuitaristPoolSystem {
             burnChance: burnChance,
             knockbackBonus: knockbackBonus,
             chainLightning: !!b.chainLightning,
-            chainTargets: b.chainTargets || 0
+            chainTargets: b.chainTargets || 0,
+            specialDuration: specialDuration,
+            specialDurationMax: heroCeiling
         };
     }
 

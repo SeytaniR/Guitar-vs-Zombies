@@ -287,9 +287,11 @@ class RhythmSystem {
             // Register note rating with CombatSystem (sync combo & apply note damage modifier / skill)
             if (window.game && window.game.combat) {
                 const noteMult = (ratingKey === 'unbelievable' || ratingKey === 'perfect') ? 1.5 : (ratingKey === 'great' ? 1.2 : 1.0);
-                window.game.combat.score += Math.round(150 * noteMult * this.multiplier);
+                const sMult = ((window.specialSystem && window.specialSystem.isSpecialActive) || window.game.combat.isSpecialActive) ? 2 : 1;
+                window.game.combat.score += Math.round(150 * noteMult * this.multiplier * sMult);
                 window.game.combat.combo = this.streak;
                 window.game.combat.registerRhythmNote(ratingKey, lane);
+                if (window.specialSystem && typeof window.specialSystem.onComboHit === 'function') window.specialSystem.onComboHit(this.streak);
             }
 
             if (this.onHitCallback) {
@@ -328,7 +330,8 @@ class RhythmSystem {
                 note.active = false;
                 this.addFloatingRating('SUSTAIN OK! ⭐', noteX, hitZoneY - 30, '#00ff66', true);
                 if (window.game && window.game.combat) {
-                    window.game.combat.score += 100 * this.multiplier;
+                    const sM = ((window.specialSystem && window.specialSystem.isSpecialActive) || window.game.combat.isSpecialActive) ? 2 : 1;
+                    window.game.combat.score += 100 * this.multiplier * sM;
                 }
                 this.createHitSparks(noteX, hitZoneY, this.colors[lane].main, true);
             } else {
@@ -516,7 +519,8 @@ class RhythmSystem {
                     if (window.soundEngine) window.soundEngine.playSustainTick(l);
                     if (window.game && window.game.combat) {
                         window.game.combat.launchSustainTick(l);
-                        window.game.combat.score += 20 * this.multiplier;
+                        const sM = ((window.specialSystem && window.specialSystem.isSpecialActive) || window.game.combat.isSpecialActive) ? 2 : 1;
+                        window.game.combat.score += 20 * this.multiplier * sM;
                     }
                     if (this.songStats) {
                         this.songStats.sustainTicks = (this.songStats.sustainTicks || 0) + 1;
@@ -533,7 +537,8 @@ class RhythmSystem {
 
                     this.addFloatingRating('SUSTAIN FULL! ⭐', noteX, hitZoneY - 35, '#ffcc00', true);
                     if (window.game && window.game.combat) {
-                        window.game.combat.score += 150 * this.multiplier;
+                        const sM = ((window.specialSystem && window.specialSystem.isSpecialActive) || window.game.combat.isSpecialActive) ? 2 : 1;
+                        window.game.combat.score += 150 * this.multiplier * sM;
                         window.game.combat.rockPower = Math.min(100, window.game.combat.rockPower + 10);
                     }
                     if (window.soundEngine) window.soundEngine.playGuitarChord(l);

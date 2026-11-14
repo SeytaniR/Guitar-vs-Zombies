@@ -199,7 +199,8 @@ class PvPSystem {
 
         setVal('pvp-hero-name', hero.name || 'Guitarrista');
         setVal('pvp-hero-level', `⭐ Nv. ${lvlData.level || 1}`);
-        setVal('pvp-hero-inst', `🎸 ${hero.instrumentName || 'Guitarra Lendária'}`);
+        const hStats = (window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function') ? window.guitaristPool.getHeroStats(hero.id) : null;
+        setVal('pvp-hero-inst', `🎸 ${hero.instrumentName || 'Guitarra Lendária'} • 🔥 Especial: ${(hStats && hStats.specialDuration) || 6}s`);
         setVal('pvp-hero-passive', hero.passiveDesc || hero.title || 'Poder do Rock');
 
         const rarityEl = document.getElementById('pvp-hero-rarity');

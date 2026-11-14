@@ -211,7 +211,8 @@ class Game {
         if (rBadge) { rBadge.innerText = (isUnlocked ? (currentHero.rarity || 'COMUM') : `🔒 ${currentHero.rarity}`).toUpperCase(); rBadge.className = `hero-rarity-badge ${currentHero.rarityClass || currentHero.badgeClass || 'badge-common'} ${isUnlocked ? '' : 'badge-locked'}`; }
         if (nEl) nEl.innerText = isUnlocked ? currentHero.name : `🔒 ${currentHero.name}`;
         if (tEl) tEl.innerText = currentHero.title;
-        if (iEl) iEl.innerText = isUnlocked ? `${currentHero.instrument} • ⚡ 1.0/s` : `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`;
+        const hStats = pool.getHeroStats(currentHero.id);
+        if (iEl) iEl.innerText = isUnlocked ? `${currentHero.instrument} • ⚡ 1.0/s • 🔥 Especial: ${hStats.specialDuration}s` : `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`;
         if (pnEl) pnEl.innerText = (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva';
         if (pdEl) pdEl.innerText = (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '';
         if (sBox) {
@@ -700,6 +701,7 @@ class Game {
             }
         });
         bind('battle-stats-toggle', () => this.openStatsModal());
+        bind('battle-special-btn', () => { if (window.specialSystem) window.specialSystem.activateSpecial(); }); if (window.specialSystem) window.specialSystem.init();
         bind('stats-modal-close-btn', () => this.closeStatsModal());
         bind('stats-resume-btn', () => this.closeStatsModal());
         bind('battle-gear-toggle', () => this.openGearModal(false));

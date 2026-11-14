@@ -354,6 +354,21 @@
             <!-- Top Half: Combat Canvas -->
             <div id="combat-zone">
                 <canvas id="combat-canvas"></canvas>
+                <!-- Strategic Floating Special Activation Button -->
+                <div id="battle-special-wrap" class="battle-special-wrap">
+                    <button id="battle-special-btn" class="battle-special-btn" title="Ativar Especial 2x (Espaço / Toque)" data-i18n-title="btnSpecialTitle" disabled>
+                        <div class="special-btn-inner">
+                            <span class="special-icon">⚡</span>
+                            <div class="special-info">
+                                <span class="special-title" data-i18n="specialBtnTitle">ESPECIAL</span>
+                                <span id="special-meter-text" class="special-pct">0%</span>
+                            </div>
+                        </div>
+                        <div class="special-progress-track">
+                            <div id="special-progress-fill" class="special-fill-bar"></div>
+                        </div>
+                    </button>
+                </div>
             </div>
 
             <!-- Divider Line & Active Song Banner -->
@@ -1136,8 +1151,9 @@
     <script src="js/stage-system.js?v=62"></script>
     <script src="js/song-db.js?v=62"></script>
     <script src="js/song-editor.js?v=62"></script>
-    <script src="js/song-studio.js?v=62"></script>
-    <script src="js/combat.js?v=62"></script>
+    <script src="js/song-studio.js?v=63"></script>
+    <script src="js/special-system.js?v=63"></script>
+    <script src="js/combat.js?v=63"></script>
     <script src="js/rhythm.js?v=62"></script>
     <script src="js/missions.js?v=62"></script>
     <script src="js/pvp-system.js?v=62"></script>
