@@ -1,4 +1,22 @@
 // Polymorphic Zombie Entity Class (Encapsulates AI, Animations, States, and Rendering for All 8 Archetypes)
+const ZOMBIE_META_MAP = {
+    mutant: { sheet: 'mutantSheet', yOffset: 14, bar: '#39ff14', name: '#39ff14' },
+    leaper: { sheet: 'leaperSheet', yOffset: 12, bar: '#ff9900', name: '#ff9900' },
+    soldier: { sheet: 'soldierSheet', yOffset: 12, bar: '#ff4455', name: '#ff4455' },
+    spore: { sheet: 'sporeSheet', yOffset: 12, bar: '#ffaa00', name: '#ffaa00' },
+    bloater: { sheet: 'bloaterSheet', yOffset: 14, bar: '#ffcc00', name: '#ffcc00' },
+    gladiator: { sheet: 'gladiatorSheet', yOffset: 13, bar: '#ff3333', name: '#ff5533' },
+    hazmat: { sheet: 'hazmatSheet', yOffset: 12, bar: '#39ff14', name: '#39ff14' },
+    clown: { sheet: 'clownSheet', yOffset: 12, bar: '#ff0077', name: '#ff0077' },
+    builder: { sheet: 'builderSheet', yOffset: 12, bar: '#ffaa00', name: '#ffaa00' },
+    scientist: { sheet: 'scientistSheet', yOffset: 12, bar: '#00ffcc', name: '#00ffcc' },
+    firefighter: { sheet: 'firefighterSheet', yOffset: 13, bar: '#ff4400', name: '#ff5522' },
+    sheriff: { sheet: 'sheriffSheet', yOffset: 12, bar: '#ffaa00', name: '#ffaa00' },
+    politician: { sheet: 'politicianSheet', yOffset: 12, bar: '#00ff66', name: '#00ff66' },
+    batman: { sheet: 'batmanSheet', yOffset: 12, bar: '#aa00ff', name: '#bb44ff' },
+    kratos: { sheet: 'kratosSheet', yOffset: 14, bar: '#ff2200', name: '#ff3322' }
+};
+
 class ZombieEntity {
     constructor(enemyDef, laneY, canvasWidth, level = 1, initialX = null) {
         this.level = Math.max(1, Math.round(level || 1));
@@ -730,56 +748,10 @@ class ZombieEntity {
         ctx.ellipse(this.x, this.y + 2, 16 * shadowMult, 5 * shadowMult, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Select sprite sheet & offset
-        let sheet = assets.zombieSheet;
-        let yOffset = 12;
-
-        if (this.type === 'mutant') {
-            sheet = assets.mutantSheet;
-            yOffset = 14;
-        } else if (this.type === 'leaper') {
-            sheet = assets.leaperSheet;
-            yOffset = 12;
-        } else if (this.type === 'soldier') {
-            sheet = assets.soldierSheet;
-            yOffset = 12;
-        } else if (this.type === 'spore') {
-            sheet = assets.sporeSheet;
-            yOffset = 12;
-        } else if (this.type === 'bloater') {
-            sheet = assets.bloaterSheet;
-            yOffset = 14;
-        } else if (this.type === 'gladiator') {
-            sheet = assets.gladiatorSheet;
-            yOffset = 13;
-        } else if (this.type === 'hazmat') {
-            sheet = assets.hazmatSheet;
-            yOffset = 12;
-        } else if (this.type === 'clown') {
-            sheet = assets.clownSheet;
-            yOffset = 12;
-        } else if (this.type === 'builder') {
-            sheet = assets.builderSheet;
-            yOffset = 12;
-        } else if (this.type === 'scientist') {
-            sheet = assets.scientistSheet;
-            yOffset = 12;
-        } else if (this.type === 'firefighter') {
-            sheet = assets.firefighterSheet;
-            yOffset = 13;
-        } else if (this.type === 'sheriff') {
-            sheet = assets.sheriffSheet;
-            yOffset = 12;
-        } else if (this.type === 'politician') {
-            sheet = assets.politicianSheet;
-            yOffset = 12;
-        } else if (this.type === 'batman') {
-            sheet = assets.batmanSheet;
-            yOffset = 12;
-        } else if (this.type === 'kratos') {
-            sheet = assets.kratosSheet;
-            yOffset = 14;
-        }
+        // Select sprite sheet & offset via O(1) metadata map
+        const meta = ZOMBIE_META_MAP[this.type];
+        const sheet = (meta && assets && assets[meta.sheet]) ? assets[meta.sheet] : assets.zombieSheet;
+        const yOffset = meta ? meta.yOffset : 12;
 
         // Draw Sprite
         sheet.drawFrame(
@@ -794,20 +766,19 @@ class ZombieEntity {
 
         // Health bar & Badge/Name Tag
         if (this.isBoss && this.x <= ctx.canvas.width - 5) {
-            ctx.save();
             ctx.beginPath();
             ctx.ellipse(this.x, currentY + 4, 30, 9, 0, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(255, 68, 0, 0.4)';
             ctx.fill();
-            ctx.restore();
         }
 
         const isSpecial = this.type !== 'normal' || this.isBoss;
         if (this.x <= ctx.canvas.width - 5 && (this.hp < this.maxHp || isSpecial)) {
-            const bw = this.isBoss ? 48 : ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 34 : (24 * (this.scale / 0.5)));
-            const bh = this.isBoss ? 5 : ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 4 : 3.5);
+            const isHeavy = this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos';
+            const bw = this.isBoss ? 48 : (isHeavy ? 34 : (24 * (this.scale / 0.5)));
+            const bh = this.isBoss ? 5 : (isHeavy ? 4 : 3.5);
             const bx = this.x - bw / 2;
-            const by = currentY - (this.isBoss ? 60 : ((this.type === 'mutant' || this.type === 'bloater' || this.type === 'kratos') ? 52 : (42 * (this.scale / 0.5))));
+            const by = currentY - (this.isBoss ? 60 : (isHeavy ? 52 : (42 * (this.scale / 0.5))));
 
             ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
             ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
@@ -816,49 +787,13 @@ class ZombieEntity {
                 ctx.strokeRect(bx - 1.5, by - 1.5, bw + 3, bh + 3);
             }
 
-            let barColor = '#00ff66';
-            if (this.type === 'mutant') barColor = '#39ff14';
-            else if (this.type === 'leaper') barColor = '#ff9900';
-            else if (this.type === 'soldier') barColor = '#ff4455';
-            else if (this.type === 'spore') barColor = '#ffaa00';
-            else if (this.type === 'bloater') barColor = '#ffcc00';
-            else if (this.type === 'gladiator') barColor = '#ff3333';
-            else if (this.type === 'hazmat') barColor = '#39ff14';
-            else if (this.type === 'clown') barColor = '#ff0077';
-            else if (this.type === 'builder') barColor = '#ffaa00';
-            else if (this.type === 'scientist') barColor = '#00ffcc';
-            else if (this.type === 'firefighter') barColor = '#ff4400';
-            else if (this.type === 'sheriff') barColor = '#ffaa00';
-            else if (this.type === 'politician') barColor = '#00ff66';
-            else if (this.type === 'batman') barColor = '#aa00ff';
-            else if (this.type === 'kratos') barColor = '#ff2200';
-
-            ctx.fillStyle = barColor;
+            ctx.fillStyle = (meta && meta.bar) ? meta.bar : '#00ff66';
             ctx.fillRect(bx, by, Math.max(0, bw * (this.hp / this.maxHp)), bh);
 
-            ctx.save();
             ctx.font = "bold 8px 'Segoe UI', sans-serif";
-            let nameColor = '#ffffff';
-            if (this.type === 'mutant') nameColor = '#39ff14';
-            else if (this.type === 'leaper') nameColor = '#ff9900';
-            else if (this.type === 'soldier') nameColor = '#ff4455';
-            else if (this.type === 'spore') nameColor = '#ffaa00';
-            else if (this.type === 'bloater') nameColor = '#ffcc00';
-            else if (this.type === 'gladiator') nameColor = '#ff5533';
-            else if (this.type === 'hazmat') nameColor = '#39ff14';
-            else if (this.type === 'clown') nameColor = '#ff0077';
-            else if (this.type === 'builder') nameColor = '#ffaa00';
-            else if (this.type === 'scientist') nameColor = '#00ffcc';
-            else if (this.type === 'firefighter') nameColor = '#ff5522';
-            else if (this.type === 'sheriff') nameColor = '#ffaa00';
-            else if (this.type === 'politician') nameColor = '#00ff66';
-            else if (this.type === 'batman') nameColor = '#bb44ff';
-            else if (this.type === 'kratos') nameColor = '#ff3322';
-
-            ctx.fillStyle = nameColor;
+            ctx.fillStyle = (meta && meta.name) ? meta.name : '#ffffff';
             ctx.textAlign = 'center';
             ctx.fillText(this.name || "ZUMBI", this.x, by - 2);
-            ctx.restore();
         }
     }
 

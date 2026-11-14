@@ -148,44 +148,56 @@ class SpecialSystem {
             this.btnEl = document.getElementById('battle-special-btn');
             this.fillEl = document.getElementById('special-progress-fill');
             this.pctEl = document.getElementById('special-meter-text');
+            this._lastUIState = {};
         }
         if (!this.btnEl) return;
+        const s = this._lastUIState || (this._lastUIState = {});
 
         const isReady = this.canActivate();
         const isActive = this.isSpecialActive;
         const isExhausted = this.specialUsed && !isActive;
 
         // Button interactive state
-        this.btnEl.disabled = !isReady && !isActive;
+        const shouldDisable = !isReady && !isActive;
+        if (s.disabled !== shouldDisable) {
+            s.disabled = shouldDisable;
+            this.btnEl.disabled = shouldDisable;
+        }
 
-        // CSS Classes
-        if (this.btnEl.classList) {
-            if (typeof this.btnEl.classList.toggle === 'function') {
-                this.btnEl.classList.toggle('ready', isReady);
-                this.btnEl.classList.toggle('active', isActive);
-                this.btnEl.classList.toggle('exhausted', isExhausted);
-            } else {
-                if (isReady) this.btnEl.classList.add('ready'); else this.btnEl.classList.remove('ready');
-                if (isActive) this.btnEl.classList.add('active'); else this.btnEl.classList.remove('active');
-                if (isExhausted) this.btnEl.classList.add('exhausted'); else this.btnEl.classList.remove('exhausted');
+        // CSS Classes (Cached state check)
+        if (s.ready !== isReady || s.active !== isActive || s.exhausted !== isExhausted) {
+            s.ready = isReady; s.active = isActive; s.exhausted = isExhausted;
+            if (this.btnEl.classList) {
+                if (typeof this.btnEl.classList.toggle === 'function') {
+                    this.btnEl.classList.toggle('ready', isReady);
+                    this.btnEl.classList.toggle('active', isActive);
+                    this.btnEl.classList.toggle('exhausted', isExhausted);
+                } else {
+                    if (isReady) this.btnEl.classList.add('ready'); else this.btnEl.classList.remove('ready');
+                    if (isActive) this.btnEl.classList.add('active'); else this.btnEl.classList.remove('active');
+                    if (isExhausted) this.btnEl.classList.add('exhausted'); else this.btnEl.classList.remove('exhausted');
+                }
             }
         }
 
-        // Progress bar fill width
-        if (this.fillEl && this.fillEl.style) {
-            this.fillEl.style.width = `${Math.min(100, Math.max(0, this.specialMeter))}%`;
+        // Progress bar fill width (integer-percentage throttling prevents continuous layout repaint)
+        const meterInt = Math.floor(this.specialMeter);
+        if (s.meterInt !== meterInt && this.fillEl && this.fillEl.style) {
+            s.meterInt = meterInt;
+            this.fillEl.style.width = `${Math.min(100, Math.max(0, meterInt))}%`;
         }
 
         // Percentage / Status label
         if (this.pctEl) {
-            if (isActive) {
-                this.pctEl.innerText = `🔥 2X (${this.specialTimeLeft.toFixed(1)}s)`;
-            } else if (isExhausted) {
-                this.pctEl.innerText = 'USADO ✖';
-            } else if (isReady) {
-                this.pctEl.innerText = 'PRONTO! ⚡';
-            } else {
-                this.pctEl.innerText = `${Math.floor(this.specialMeter)}%`;
+            let labelText;
+            if (isActive) labelText = `🔥 2X (${this.specialTimeLeft.toFixed(1)}s)`;
+            else if (isExhausted) labelText = 'USADO ✖';
+            else if (isReady) labelText = 'PRONTO! ⚡';
+            else labelText = `${meterInt}%`;
+
+            if (s.labelText !== labelText) {
+                s.labelText = labelText;
+                this.pctEl.innerText = labelText;
             }
         }
     }

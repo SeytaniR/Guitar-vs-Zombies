@@ -38,10 +38,40 @@ class RhythmSystem {
         this.isCountdownActive = false;
         this.audioNeedsUnlock = false;
         this.songStats = null;
+        this.firstActiveIndex = 0;
 
+        this.buildNoteSpriteCache();
         this.resize();
         window.addEventListener('resize', () => this.resize());
         this.setupInputHandlers();
+    }
+
+    buildNoteSpriteCache() {
+        if (typeof document === 'undefined') return;
+        this.noteSprites = []; this.holdNoteSprites = [];
+        const size = 48, center = 24;
+        for (let i = 0; i < 4; i++) {
+            const col = this.colors[i];
+            const c1 = document.createElement('canvas'); c1.width = size; c1.height = size;
+            const ctx1 = c1.getContext('2d'); ctx1.translate(center, center);
+            ctx1.strokeStyle = col.main + '44'; ctx1.lineWidth = 4;
+            ctx1.beginPath(); ctx1.moveTo(0, -18); ctx1.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx1.bezierCurveTo(-18, 12, -20, -18, 0, -18);
+            ctx1.stroke(); ctx1.fillStyle = col.main; ctx1.fill();
+            ctx1.fillStyle = col.core; ctx1.beginPath(); ctx1.arc(0, -2, 6.5, 0, Math.PI * 2); ctx1.fill();
+            this.noteSprites[i] = c1;
+
+            const c2 = document.createElement('canvas'); c2.width = size; c2.height = size;
+            const ctx2 = c2.getContext('2d'); ctx2.translate(center, center);
+            ctx2.strokeStyle = col.main + '88'; ctx2.lineWidth = 6;
+            ctx2.beginPath(); ctx2.moveTo(0, -18); ctx2.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx2.bezierCurveTo(-18, 12, -20, -18, 0, -18);
+            ctx2.stroke(); ctx2.fillStyle = col.main; ctx2.fill();
+            ctx2.fillStyle = col.core; ctx2.beginPath(); ctx2.arc(0, -2, 6.5, 0, Math.PI * 2); ctx2.fill();
+            this.holdNoteSprites[i] = c2;
+        }
+        const sc = document.createElement('canvas'); sc.width = size; sc.height = size;
+        const sctx = sc.getContext('2d'); sctx.translate(center, center);
+        sctx.font = "24px 'Segoe UI Emoji', sans-serif"; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+        sctx.fillText('💀', 0, 0); this.skullSprite = sc;
     }
 
     resize() {
@@ -104,37 +134,16 @@ class RhythmSystem {
         };
 
         let hasPointerEvents = false;
-        // Pointer Events (supports stylus, mouse, and unified pointers)
-        this.canvas.addEventListener('pointerdown', (e) => {
-            hasPointerEvents = true; e.preventDefault();
-            try { this.canvas.setPointerCapture(e.pointerId); } catch(err) {}
-            onDown(getLaneFromX(e.clientX), e.pointerId);
-        });
+        this.canvas.addEventListener('pointerdown', (e) => { hasPointerEvents = true; e.preventDefault(); try { this.canvas.setPointerCapture(e.pointerId); } catch(err) {} onDown(getLaneFromX(e.clientX), e.pointerId); });
         this.canvas.addEventListener('pointermove', (e) => { if (this.pointerLaneMap.has(e.pointerId)) onMove(e.clientX, e.pointerId); });
-        this.canvas.addEventListener('pointerup', (e) => {
-            e.preventDefault(); try { this.canvas.releasePointerCapture(e.pointerId); } catch(err) {}
-            onUp(e.pointerId);
-        });
+        this.canvas.addEventListener('pointerup', (e) => { e.preventDefault(); try { this.canvas.releasePointerCapture(e.pointerId); } catch(err) {} onUp(e.pointerId); });
         this.canvas.addEventListener('pointercancel', (e) => onUp(e.pointerId));
         window.addEventListener('pointerup', (e) => onUp(e.pointerId));
 
-        // Touch Events fallback (only runs on devices without pointer events)
-        this.canvas.addEventListener('touchstart', (e) => {
-            if (hasPointerEvents) return; e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) onDown(getLaneFromX(e.changedTouches[i].clientX), 'touch_' + e.changedTouches[i].identifier);
-        }, { passive: false });
-        this.canvas.addEventListener('touchmove', (e) => {
-            if (hasPointerEvents) return; e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) onMove(e.changedTouches[i].clientX, 'touch_' + e.changedTouches[i].identifier);
-        }, { passive: false });
-        this.canvas.addEventListener('touchend', (e) => {
-            if (hasPointerEvents) return; e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
-        }, { passive: false });
-        this.canvas.addEventListener('touchcancel', (e) => {
-            if (hasPointerEvents) return;
-            for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier);
-        });
+        this.canvas.addEventListener('touchstart', (e) => { if (hasPointerEvents) return; e.preventDefault(); for (let i = 0; i < e.changedTouches.length; i++) onDown(getLaneFromX(e.changedTouches[i].clientX), 'touch_' + e.changedTouches[i].identifier); }, { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => { if (hasPointerEvents) return; e.preventDefault(); for (let i = 0; i < e.changedTouches.length; i++) onMove(e.changedTouches[i].clientX, 'touch_' + e.changedTouches[i].identifier); }, { passive: false });
+        this.canvas.addEventListener('touchend', (e) => { if (hasPointerEvents) return; e.preventDefault(); for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier); }, { passive: false });
+        this.canvas.addEventListener('touchcancel', (e) => { if (hasPointerEvents) return; for (let i = 0; i < e.changedTouches.length; i++) onUp('touch_' + e.changedTouches[i].identifier); });
 
         // Keyboard Support (A, S, D, F or 1, 2, 3, 4)
         const keyMap = {
@@ -426,9 +435,18 @@ class RhythmSystem {
                 return;
             }
 
-            // Sync notes on the highway: continuous arithmetic update guarantees zero hit lag & zero pop-in
-            for (let i = 0; i < this.notes.length; i++) {
+            // Viewport & timeline culling: advance firstActiveIndex past dead notes
+            const minCullTime = curTime - 0.5, maxLookAheadTime = curTime + 2.8;
+            while (this.firstActiveIndex < this.notes.length) {
+                const n = this.notes[this.firstActiveIndex];
+                if ((!n.active && !n.holding) && (n.time < minCullTime)) this.firstActiveIndex++;
+                else break;
+            }
+
+            // Sync notes on the highway: continuous arithmetic update with early-break
+            for (let i = this.firstActiveIndex || 0; i < this.notes.length; i++) {
                 const note = this.notes[i];
+                if (note.time > maxLookAheadTime) break;
                 if (!this.isCountdownActive && !note.oppProcessed && curTime >= note.time) {
                     note.oppProcessed = true;
                     if (window.game && window.game.combat && window.game.combat.isPvPMode && window.game.combat.pvpSystem && !this.pvpFinaleMode) {
@@ -659,23 +677,20 @@ class RhythmSystem {
         }
 
         // 4.1. Draw Sustain / Hold Ribbons (behind note heads)
-        for (let idx = 0; idx < this.notes.length; idx++) {
+        for (let idx = this.firstActiveIndex || 0; idx < this.notes.length; idx++) {
             const note = this.notes[idx];
+            if (this.isCustomSongPlaying && note.time > curTime + 2.8) break;
             if (!note.active && !note.holding) continue;
             if (!note.duration || note.duration < 0.2) continue;
 
             const col = note.colorInfo || this.colors[note.track];
             const x = note.track * trackW + trackW / 2;
 
-            let headY = note.y;
-            if (note.holding) headY = hitZoneY;
+            let headY = note.holding ? hitZoneY : note.y;
+            let tailY = this.isCustomSongPlaying
+                ? (hitZoneY - ((note.time + note.duration) - this.customSongTime) * this.noteSpeed)
+                : (headY - (note.duration * this.noteSpeed));
 
-            let tailY = headY;
-            if (this.isCustomSongPlaying) {
-                tailY = hitZoneY - ((note.time + note.duration) - this.customSongTime) * this.noteSpeed;
-            } else {
-                tailY = headY - (note.duration * this.noteSpeed);
-            }
             if (tailY > ch + 40 || headY < -60) continue;
             const ribTop = Math.min(tailY, headY), ribBottom = Math.max(tailY, headY);
             const ribHeight = ribBottom - ribTop;
@@ -697,12 +712,14 @@ class RhythmSystem {
             this.ctx.lineWidth = note.holding ? 3.5 : 2.0;
             this.ctx.beginPath(); this.ctx.moveTo(x, ribTop + 4); this.ctx.lineTo(x, ribBottom - 4); this.ctx.stroke();
 
-            // Animated chevrons / energy pulses along sustain trail
+            // Animated chevrons along sustain trail (Batched into 1 stroke call)
             const pulseOffset = (performance.now() * 0.25) % 24;
             this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; this.ctx.lineWidth = 1.5;
+            this.ctx.beginPath();
             for (let py = ribTop + pulseOffset; py < ribBottom - 6; py += 24) {
-                this.ctx.beginPath(); this.ctx.moveTo(x - 5, py); this.ctx.lineTo(x, py + 4); this.ctx.lineTo(x + 5, py); this.ctx.stroke();
+                this.ctx.moveTo(x - 5, py); this.ctx.lineTo(x, py + 4); this.ctx.lineTo(x + 5, py);
             }
+            this.ctx.stroke();
 
             // End cap (stopper gem at the tail)
             this.ctx.fillStyle = col.main; this.ctx.beginPath(); this.ctx.arc(x, ribTop, 6, 0, Math.PI * 2); this.ctx.fill();
@@ -717,43 +734,29 @@ class RhythmSystem {
             this.ctx.restore();
         }
 
-        // 4.2. Draw Falling Notes (Neon Guitar Picks)
-        for (let idx = 0; idx < this.notes.length; idx++) {
+        // 4.2. Draw Falling Notes (Hardware-Blitted Neon Guitar Picks)
+        if (!this.noteSprites) this.buildNoteSpriteCache();
+        for (let idx = this.firstActiveIndex || 0; idx < this.notes.length; idx++) {
             const note = this.notes[idx];
+            if (this.isCustomSongPlaying && note.time > curTime + 2.8) break;
             if (!note.active && !note.holding) continue;
             if (note.hit && !note.holding) continue;
 
-            let drawY = note.y;
-            if (note.holding) drawY = hitZoneY;
+            let drawY = note.holding ? hitZoneY : note.y;
             if (drawY < -50 || drawY > ch + 50) continue;
 
             const x = note.track * trackW + trackW / 2;
-            const col = note.colorInfo || this.colors[note.track];
 
             // PvP Defeat Finale: notes turning into skulls as they reach hit line
             if (this.pvpFinaleMode === 'defeat' && drawY >= hitZoneY - 35) {
-                this.ctx.save();
-                this.ctx.translate(x, drawY);
-                this.ctx.font = "24px 'Segoe UI Emoji', sans-serif";
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText('💀', 0, 0);
-                this.ctx.restore();
+                if (this.skullSprite) this.ctx.drawImage(this.skullSprite, Math.round(x - 24), Math.round(drawY - 24));
                 continue;
             }
 
-            this.ctx.save();
-            this.ctx.translate(x, drawY);
-            this.ctx.strokeStyle = col.main + (note.holding ? '88' : '44');
-            this.ctx.lineWidth = note.holding ? 6 : 4;
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, -18);
-            this.ctx.bezierCurveTo(20, -18, 18, 12, 0, 20);
-            this.ctx.bezierCurveTo(-18, 12, -20, -18, 0, -18);
-            this.ctx.stroke();
-            this.ctx.fillStyle = col.main; this.ctx.fill();
-            this.ctx.fillStyle = col.core; this.ctx.beginPath(); this.ctx.arc(0, -2, 6.5, 0, Math.PI * 2); this.ctx.fill();
-            this.ctx.restore();
+            const sprite = (note.holding ? this.holdNoteSprites : this.noteSprites)[note.track];
+            if (sprite) {
+                this.ctx.drawImage(sprite, Math.round(x - 24), Math.round(drawY - 24));
+            }
         }
 
         // 5. Hit Sparks (Fast GPU rect batch)
@@ -825,6 +828,7 @@ class RhythmSystem {
 
         this.currentSong = song;
         this.isCustomSongPlaying = true;
+        this.firstActiveIndex = 0;
         this.streak = 0;
         this.multiplier = 1;
         this.customSongTime = 0;
@@ -890,6 +894,7 @@ class RhythmSystem {
         this.isCustomSongPlaying = false;
         this.currentSong = null;
         this.notes = [];
+        this.firstActiveIndex = 0;
         this.activeHoldNotes = [null, null, null, null];
         this.laneHolding = [false, false, false, false];
         this.customSongTime = 0;

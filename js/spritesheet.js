@@ -89,15 +89,38 @@ class SpriteSheet {
         const col = f % this.cols;
         const row = Math.floor(f / this.cols);
 
-        ctx.save();
-        ctx.translate(Math.round(x), Math.round(y));
-        if (alpha < 1.0) ctx.globalAlpha = Math.max(0, alpha);
-        if (flip) ctx.scale(-1, 1);
-
         const dw = this.frameWidth * scale;
         const dh = this.frameHeight * scale;
         const dx = -dw / 2;
         const dy = -dh / 2;
+
+        if (!flip && alpha >= 1.0) {
+            // Fast direct hardware draw (Zero save/restore, zero matrix translation)
+            const rx = Math.round(x + dx);
+            const ry = Math.round(y + dy);
+            ctx.drawImage(
+                this.cleanImage,
+                col * this.frameWidth, row * this.frameHeight, this.frameWidth, this.frameHeight,
+                rx, ry, dw, dh
+            );
+
+            if (flashWhite && this.whiteImage) {
+                const prevAlpha = ctx.globalAlpha;
+                ctx.globalAlpha = 0.85;
+                ctx.drawImage(
+                    this.whiteImage,
+                    col * this.frameWidth, row * this.frameHeight, this.frameWidth, this.frameHeight,
+                    rx, ry, dw, dh
+                );
+                ctx.globalAlpha = prevAlpha;
+            }
+            return;
+        }
+
+        ctx.save();
+        ctx.translate(Math.round(x), Math.round(y));
+        if (alpha < 1.0) ctx.globalAlpha = Math.max(0, alpha);
+        if (flip) ctx.scale(-1, 1);
 
         // Draw regular character sprite
         ctx.drawImage(
@@ -108,14 +131,12 @@ class SpriteSheet {
 
         // Flash white silhouette overlay
         if (flashWhite && this.whiteImage) {
-            ctx.save();
             ctx.globalAlpha = 0.85;
             ctx.drawImage(
                 this.whiteImage,
                 col * this.frameWidth, row * this.frameHeight, this.frameWidth, this.frameHeight,
                 dx, dy, dw, dh
             );
-            ctx.restore();
         }
 
         ctx.restore();
