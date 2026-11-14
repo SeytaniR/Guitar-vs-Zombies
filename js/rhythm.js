@@ -565,14 +565,12 @@ class RhythmSystem {
             if (this.canvas.width <= 10 || this.canvas.height <= 10) return;
         }
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         const cw = this.canvas.width;
         const ch = this.canvas.height;
         const trackW = cw / this.tracks;
         const hitZoneY = this.getHitZoneY();
 
-        // 1. Draw Fretboard Background & Strings
+        // 1. Draw Fretboard Background & Strings (Stable solid fill without buffer-clear flash)
         this.ctx.fillStyle = '#0f0f18';
         this.ctx.fillRect(0, 0, cw, ch);
 
@@ -585,15 +583,6 @@ class RhythmSystem {
 
         for (let i = 0; i < this.tracks; i++) {
             const tx = i * trackW;
-
-            if (this.laneFlashes[i] > 0) {
-                const flashH = Math.min(90, ch - hitZoneY + 50);
-                const flashY = Math.max(0, hitZoneY - 45);
-                this.ctx.fillStyle = this.colors[i].glow;
-                this.ctx.globalAlpha = Math.min(0.24, this.laneFlashes[i] * 0.20);
-                this.ctx.fillRect(tx, flashY, trackW, flashH);
-                this.ctx.globalAlpha = 1.0;
-            }
 
             this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
             this.ctx.lineWidth = 1.5;
@@ -680,10 +669,10 @@ class RhythmSystem {
             } else {
                 tailY = headY - (note.duration * this.noteSpeed);
             }
-            if (tailY > ch + 40 || headY < -60) return;
+            if (tailY > ch + 40 || headY < -60) continue;
             const ribTop = Math.min(tailY, headY), ribBottom = Math.max(tailY, headY);
             const ribHeight = ribBottom - ribTop;
-            if (ribHeight <= 2) return;
+            if (ribHeight <= 2) continue;
 
             const ribWidth = 14;
             this.ctx.save();
@@ -729,10 +718,10 @@ class RhythmSystem {
 
             let drawY = note.y;
             if (note.holding) drawY = hitZoneY;
-            if (drawY < -50 || drawY > ch + 50) return;
+            if (drawY < -50 || drawY > ch + 50) continue;
 
             const x = note.track * trackW + trackW / 2;
-            const col = note.colorInfo;
+            const col = note.colorInfo || this.colors[note.track];
 
             // PvP Defeat Finale: notes turning into skulls as they reach hit line
             if (this.pvpFinaleMode === 'defeat' && drawY >= hitZoneY - 35) {
@@ -743,7 +732,7 @@ class RhythmSystem {
                 this.ctx.textBaseline = 'middle';
                 this.ctx.fillText('💀', 0, 0);
                 this.ctx.restore();
-                return;
+                continue;
             }
 
             this.ctx.save();

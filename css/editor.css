@@ -217,8 +217,6 @@
     display: block;
     touch-action: none;
     cursor: crosshair;
-    will-change: transform;
-    image-rendering: -webkit-optimize-contrast;
 }
 
 /* Scrubber Row */

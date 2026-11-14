@@ -896,7 +896,7 @@ class CombatSystem {
             if (!this.canvas || this.canvas.width <= 10 || this.canvas.height <= 10) return;
         }
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#0a0a14'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.save();
 
         if (this.fx.shakePower > 0) {
