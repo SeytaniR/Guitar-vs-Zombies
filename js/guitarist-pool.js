@@ -643,6 +643,91 @@ class GuitaristPoolSystem {
     getAllGuitarists() {
         return this.guitarists;
     }
+
+    renderShop() {
+        if (typeof document === 'undefined') return;
+        const grid = document.getElementById('shop-heroes-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        const activeHero = this.getActiveGuitarist();
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
+
+        this.guitarists.forEach(h => {
+            const isUnlocked = this.isHeroUnlocked(h.id);
+            const isEquipped = (h.id === activeHero.id);
+            const stats = this.getHeroStats(h.id);
+            const lvlData = this.getHeroLevelData(h.id);
+            const card = document.createElement('div');
+            card.className = `shop-hero-card ${isEquipped ? 'active' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+            card.innerHTML = `
+                <div class="shop-hero-card-top">
+                    <div class="shop-hero-thumb-wrap" style="border-color: ${h.accentColor || '#ffaa00'};">
+                        <img src="${h.icon}" alt="${h.name}" class="shop-hero-thumb">
+                        <span class="hero-rarity-badge ${h.badgeClass || 'badge-common'}">${h.rarity}</span>
+                    </div>
+                    <div class="shop-hero-meta">
+                        <h4 class="shop-hero-name">${h.name}</h4>
+                        <span class="shop-hero-title">${h.title}</span>
+                        <div class="shop-hero-inst">🎸 ${h.instrument} • ⚡ 1.0/s</div>
+                        <div class="shop-hero-special-chip">🔥 Especial: ${stats.specialDuration}s (teto ${stats.specialDurationMax}s)</div>
+                    </div>
+                </div>
+                <div class="shop-hero-passive">
+                    <strong>PASSIVA: ${h.passiveName}</strong>
+                    <p>${h.passiveDesc}</p>
+                </div>
+                <div class="shop-hero-footer">
+                    <div class="shop-hero-level-info">⭐ Nv. ${lvlData.level}/100</div>
+                    <div class="shop-hero-action">
+                        ${isEquipped 
+                            ? `<button type="button" class="shop-hero-btn active" disabled>🎸 ${tr('shopEquipped', 'EQUIPADO')}</button>`
+                            : isUnlocked 
+                                ? `<button type="button" class="shop-hero-btn equip" data-id="${h.id}">✓ ${tr('shopEquip', 'EQUIPAR')}</button>`
+                                : `<button type="button" class="shop-hero-btn buy" data-id="${h.id}">💰 ${tr('shopBuy', 'COMPRAR')} (🪙 ${(h.unlockCost || 0).toLocaleString()})</button>`
+                        }
+                    </div>
+                </div>
+            `;
+
+            const equipBtn = card.querySelector('.shop-hero-btn.equip');
+            if (equipBtn) {
+                equipBtn.onclick = () => {
+                    this.setSelectedGuitarist(h.id);
+                    if (window.soundEngine) window.soundEngine.playGuitarChord(2);
+                    this.renderShop();
+                    if (window.game) {
+                        window.game.renderHeroRoster();
+                        window.game.renderLaneSkills();
+                    }
+                };
+            }
+
+            const buyBtn = card.querySelector('.shop-hero-btn.buy');
+            if (buyBtn) {
+                buyBtn.onclick = () => {
+                    const res = this.unlockHeroWithGold(h.id);
+                    if (res.success) {
+                        if (window.soundEngine) window.soundEngine.playPowerChord();
+                        if (window.game && typeof window.game.showToast === 'function') {
+                            window.game.showToast(`🎸 ${h.name} recrutado com sucesso!`);
+                        }
+                        this.renderShop();
+                        if (window.game) {
+                            window.game.updateShopCurrencies();
+                            window.game.updateMenuCurrencies();
+                            window.game.renderHeroRoster();
+                            window.game.renderLaneSkills();
+                        }
+                    } else {
+                        alert(res.reason || 'Ouro insuficiente!');
+                    }
+                };
+            }
+
+            grid.appendChild(card);
+        });
+    }
 }
 
 window.guitaristPool = new GuitaristPoolSystem();

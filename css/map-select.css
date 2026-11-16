@@ -98,9 +98,9 @@
     box-sizing: border-box;
 }
 
-.map-section-card {
-    background: rgba(18, 14, 28, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.map-section-card, .pve-hud-card {
+    background: rgba(18, 14, 28, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     padding: 10px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
@@ -109,6 +109,93 @@
     box-sizing: border-box;
     overflow: hidden;
     flex-shrink: 0;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pve-hud-card:hover { border-color: rgba(255, 204, 0, 0.3); }
+
+.pve-card-main-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    width: 100%;
+}
+.pve-card-icon-wrap {
+    position: relative;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    background: #000;
+}
+.pve-card-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pve-card-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pve-card-meta-row { display: flex; align-items: center; justify-content: space-between; }
+.pve-card-label { font-size: 9px; font-weight: 800; color: #00d4ff; letter-spacing: 0.5px; text-transform: uppercase; }
+.pve-dropdown-arrow { font-size: 10px; color: #ffcc00; transition: transform 0.2s ease; }
+.pve-card-main-row.open .pve-dropdown-arrow { transform: rotate(180deg); }
+.pve-card-subname { font-size: 9.5px; color: #8899aa; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pve-hero-title { font-size: 13.5px; font-weight: 900; color: #fff; margin: 0; }
+.pve-card-simple-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.pve-card-simple-header h3 { font-size: 12.5px; font-weight: 900; color: #fff; margin: 0; }
+
+/* Dropdown Drawer System */
+.pve-dropdown-drawer {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    max-height: 240px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.pve-dropdown-drawer.open {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: pveDrawerDown 0.2s ease-out;
+}
+@keyframes pveDrawerDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.pve-stage-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(25, 20, 38, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 8px 10px;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.pve-stage-dropdown-item:hover, .pve-stage-dropdown-item.active {
+    border-color: #ffcc00;
+    background: rgba(255, 204, 0, 0.1);
+}
+.stage-item-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.stage-item-title { font-size: 11.5px; font-weight: 800; color: #fff; }
+.stage-item-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.stage-item-btn.active {
+    background: linear-gradient(135deg, #00b050, #00ff66);
+    color: #000;
+    border-color: #00ff66;
 }
 
 .section-card-header {
@@ -210,72 +297,15 @@
 .badge-cosmic { background: linear-gradient(135deg, #00f0ff, #ffee00); color: #000; box-shadow: 0 0 12px rgba(0, 240, 255, 0.85); font-weight: 800; }
 .badge-divine { background: linear-gradient(135deg, #ffd700, #fff275, #ff8800); color: #000; box-shadow: 0 0 16px rgba(255, 215, 0, 0.95); font-weight: 900; }
 
-.hero-showcase-details {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.showcase-hero-header {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.showcase-hero-header h4 {
-    font-size: 14px;
-    font-weight: 900;
-    color: #fff;
-    margin: 0;
-    line-height: 1.2;
-}
-
-.showcase-hero-title {
-    font-size: 9.5px;
-    font-weight: 700;
-    color: #ffaa00;
-}
-
-.showcase-hero-instrument {
-    font-size: 10px;
-    color: #00d4ff;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 2px;
-}
-
-.showcase-hero-passive-box {
-    background: rgba(0, 0, 0, 0.45);
-    border-left: 3px solid #00ff66;
-    padding: 6px 8px;
-    border-radius: 6px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.passive-tag {
-    font-size: 9px;
-    font-weight: 900;
-    color: #00ff66;
-    display: block;
-    margin-bottom: 2px;
-}
-
-.passive-desc {
-    font-size: 9.5px;
-    color: #ccd6e8;
-    margin: 0;
-    line-height: 1.35;
-    word-break: break-word;
-}
-
-.hero-roster-title {
-    font-size: 10.5px;
-    font-weight: 800;
+.hero-showcase-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.showcase-hero-header { display: flex; flex-direction: column; gap: 1px; }
+.showcase-hero-header h4 { font-size: 14px; font-weight: 900; color: #fff; margin: 0; line-height: 1.2; }
+.showcase-hero-title { font-size: 9.5px; font-weight: 700; color: #ffaa00; }
+.showcase-hero-instrument { font-size: 10px; color: #00d4ff; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.showcase-hero-passive-box { background: rgba(0, 0, 0, 0.45); border-left: 3px solid #00ff66; padding: 6px 8px; border-radius: 6px; width: 100%; box-sizing: border-box; }
+.passive-tag { font-size: 9px; font-weight: 900; color: #00ff66; display: block; margin-bottom: 2px; }
+.passive-desc { font-size: 9.5px; color: #ccd6e8; margin: 0; line-height: 1.35; word-break: break-word; }
+.hero-roster-title { font-size: 10.5px; font-weight: 800; color: #8899aa; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     color: #8899aa;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -321,63 +351,14 @@
     background: rgba(40, 30, 60, 0.85);
 }
 
-.hero-roster-card.active {
-    border-color: #00ff66;
-    box-shadow: 0 0 12px rgba(0, 255, 102, 0.5);
-    background: rgba(0, 255, 102, 0.12);
-}
-
-.hero-roster-card.active .hero-roster-name {
-    color: #00ff66;
-}
-
-.hero-roster-art {
-    position: relative;
-    width: 44px;
-    height: 44px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: #000;
-}
-
-.hero-roster-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.hero-roster-name {
-    font-size: 8.5px;
-    font-weight: 800;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.hero-roster-mini-badge {
-    font-size: 6.5px;
-    font-weight: 900;
-    padding: 1px 4px;
-    border-radius: 3px;
-    letter-spacing: 0.3px;
-}
-
-.section-card-header h3 {
-    font-size: 13px;
-    font-weight: 900;
-    color: #fff;
-    margin: 2px 0;
-}
-
-.section-subtext {
-    font-size: 10px;
-    color: #8899aa;
-    line-height: 1.3;
-}
+.hero-roster-card.active { border-color: #00ff66; box-shadow: 0 0 12px rgba(0, 255, 102, 0.5); background: rgba(0, 255, 102, 0.12); }
+.hero-roster-card.active .hero-roster-name { color: #00ff66; }
+.hero-roster-art { position: relative; width: 44px; height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.2); background: #000; }
+.hero-roster-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-roster-name { font-size: 8.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.hero-roster-mini-badge { font-size: 6.5px; font-weight: 900; padding: 1px 4px; border-radius: 3px; letter-spacing: 0.3px; }
+.section-card-header h3 { font-size: 13px; font-weight: 900; color: #fff; margin: 2px 0; }
+.section-subtext { font-size: 10px; color: #8899aa; line-height: 1.3; }
 
 /* 5 Zombies Preview Grid */
 .map-zombies-grid {

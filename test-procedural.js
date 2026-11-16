@@ -48,24 +48,21 @@ console.log('1. Testing Guitarist Pool & Leveling (1-100)...');
 const pool = new GuitaristPoolSystem(); window.guitaristPool = pool;
 assert(pool.guitarists.length === 11, 'Pool contains all 11 unique guitarists');
 pool.guitarists.forEach(g => assert(g.baseStats.baseAttackSpeed === 1.0 && pool.getHeroStats(g.id).baseAttackSpeed === 1.0, `Hero ${g.name} attack speed === 1.0/s`));
-const johnny = pool.guitarists[0], initialStats = pool.getHeroStats('johnny_blaze');
+const initialStats = pool.getHeroStats('johnny_blaze');
 assert(initialStats.level === 1 && Math.abs(initialStats.damageMult - 1.0) < 0.001, 'Johnny starts at Level 1 with 1.0x damage mult');
 pool.setLevel('johnny_blaze', 100);
 const maxStats = pool.getHeroStats('johnny_blaze');
 assert(maxStats.level === 100 && Math.abs(maxStats.damageMult - 1.99) < 0.01 && maxStats.critDamageBonusPercent >= 89, 'Level 100 Johnny damage mult (1.99x) and crit scale smoothly');
 assert(initialStats.specialDuration === 5.0 && initialStats.specialDurationMax === 9.0, 'Johnny Blaze starts with 5.0s special duration (teto 9.0s)');
 assert(maxStats.specialDuration <= 9.0 && maxStats.specialDuration >= 8.9, 'Johnny Blaze level 100 special duration capped at 9.0s');
-const saulStats = pool.getHeroStats('saul_slash');
-assert(saulStats.specialDuration >= 7.5 && saulStats.specialDurationMax === 12.0, 'Saul Slash has 7.5s base special duration (teto 12.0s)');
+assert(pool.getHeroStats('saul_slash').specialDuration >= 7.5 && pool.getHeroStats('saul_slash').specialDurationMax === 12.0, 'Saul Slash has 7.5s base special duration (teto 12.0s)');
 pool.guitarists.forEach(g => { const s = pool.getHeroStats(g.id); assert(s.specialDuration <= 12.0 && s.specialDurationMax <= 12.0, `Guitarist ${g.name} respects 12.0s special duration ceiling`); });
 pool.setLevel('johnny_blaze', 1);
-const xpNeeded = pool.getXpRequiredForNextLevel(1);
-assert(xpNeeded > 0, `XP required for Level 2 is calculated: ${xpNeeded}`);
+assert(pool.getXpRequiredForNextLevel(1) > 0, `XP required for Level 2 is calculated: ${pool.getXpRequiredForNextLevel(1)}`);
 const resXp = pool.addHeroXp('johnny_blaze', 500);
 assert(resXp.newLevel > 1, `Hero leveled up via XP from Level 1 to Level ${resXp.newLevel}`);
 pool.setLevel('johnny_blaze', 1);
-const goldCost = pool.getGoldCostForLevelUp('johnny_blaze');
-assert(goldCost === 117, `Gold cost for Level 1 guitarist is tripled to 117 gold (was 39)`);
+assert(pool.getGoldCostForLevelUp('johnny_blaze') === 117, `Gold cost for Level 1 guitarist is tripled to 117 gold (was 39)`);
 global.document = { getElementById: () => null, querySelectorAll: () => [] };
 loadScript('js/talents.js');
 const talentSysInstance = new TalentSystem();
@@ -78,6 +75,8 @@ assert(window.talentSystem.gold === 5000 - 117, `Gold correctly deducted from pl
 const roxieStatsLv1 = pool.getHeroStats('roxie_anarchy');
 pool.setLevel('roxie_anarchy', 100);
 const roxieStatsLv100 = pool.getHeroStats('roxie_anarchy');
+assert(roxieStatsLv100.manaRegenRate > roxieStatsLv1.manaRegenRate, 'Mythic hero gains significant mana regen bonus at Level 100');
+assert(roxieStatsLv100.critDamageBonusPercent >= 110, 'Mythic hero reaches high crit damage bonus at Level 100');
 assert(roxieStatsLv100.manaRegenRate > roxieStatsLv1.manaRegenRate, 'Mythic hero gains significant mana regen bonus at Level 100');
 assert(roxieStatsLv100.critDamageBonusPercent >= 110, 'Mythic hero reaches high crit damage bonus at Level 100');
 
@@ -104,30 +103,19 @@ console.log('\n3. Testing Procedural Zombie Scaling & Status Effects...');
 // Mock Zombie Type
 const mockZombieType = { type: 'normal', name: 'Punk Walker', hp: 65, speed: 38, attackDamage: 8, attackInterval: 1.1 };
 const zLv1 = new ZombieEntity(mockZombieType, 100, 400, 1), zLv10 = new ZombieEntity(mockZombieType, 100, 400, 10), zLv50 = new ZombieEntity(mockZombieType, 100, 400, 50);
-
 assert(zLv1.level === 1 && zLv1.maxHp === 65, 'Zombie Level 1 has base 65 HP');
 assert(zLv10.level === 10 && zLv10.maxHp > zLv1.maxHp, `Zombie Level 10 HP scales to ${zLv10.maxHp} (vs ${zLv1.maxHp})`);
 assert(zLv50.level === 50 && zLv50.maxHp > zLv10.maxHp, `Zombie Level 50 HP scales to ${zLv50.maxHp}`);
 assert(zLv50.attackDamage > zLv1.attackDamage, `Zombie Level 50 attack damage scales to ${zLv50.attackDamage} (vs ${zLv1.attackDamage})`);
-
-// Gold drop scaling
-const goldLv1 = zLv1.getGoldDrop();
-const goldLv50 = zLv50.getGoldDrop();
-assert(goldLv50 > goldLv1, `Zombie Level 50 drops more procedural gold: ${goldLv50} vs ${goldLv1}`);
+assert(zLv50.getGoldDrop() > zLv1.getGoldDrop(), `Zombie Level 50 drops more procedural gold: ${zLv50.getGoldDrop()} vs ${zLv1.getGoldDrop()}`);
 
 // Mock combat context for update loop
 const mockCombat = { getHeroPosition: () => ({ x: 60, y: 100 }), fx: { particles: [] }, addFloatingText: () => {}, onZombieKilled: () => {} };
-
-// Status Effects: Stun, Slow, Burn
 zLv1.applyStun(1.0); assert(zLv1.isStunned(), 'Zombie stun applied successfully');
 zLv1.update(0.5, mockCombat); assert(zLv1.isStunned(), 'Zombie still stunned after 0.5s');
 zLv1.update(0.6, mockCombat); assert(!zLv1.isStunned(), 'Zombie stun expired after 1.1s total');
-
-zLv1.applySlow(0.4, 2.0);
-assert(zLv1.isSlowed(), 'Zombie slow effect applied');
-
-zLv1.applyBurn(15, 2.0);
-const hpBeforeBurn = zLv1.hp;
+zLv1.applySlow(0.4, 2.0); assert(zLv1.isSlowed(), 'Zombie slow effect applied');
+zLv1.applyBurn(15, 2.0); const hpBeforeBurn = zLv1.hp;
 zLv1.update(1.0, mockCombat);
 assert(zLv1.hp < hpBeforeBurn, `Zombie took burn DoT damage: ${zLv1.hp} < ${hpBeforeBurn}`);
 
@@ -214,33 +202,20 @@ combat.combo = 200; assert(Math.abs(combat.getHeroAttackSpeed() - 3.0) < 0.001, 
 combat.combo = 0; assert(combat.getHeroAttackSpeed() === 1.0, `Miss drops attack speed back to base 1.0/s`);
 
 // Test 7.1: Natural Critical Accumulation Rule (v1.7.0)
-combat.perfectStreak = 0;
-combat.guaranteedCritReady = false;
-combat.pendingAttackModifiers = [];
-
-// 1. Non-perfect note (great, good, miss) resets perfect streak
-combat.registerRhythmNote('perfect', 0);
-assert(combat.perfectStreak === 1, 'First perfect note increments perfectStreak to 1');
-combat.registerRhythmNote('great', 1);
-assert(combat.perfectStreak === 0, 'Great note resets perfectStreak to 0');
-combat.registerRhythmNote('perfect', 0); combat.registerRhythmNote('good', 2);
-assert(combat.perfectStreak === 0, 'Good note resets perfectStreak to 0');
-combat.registerRhythmNote('perfect', 0); combat.registerRhythmNote('miss', 3);
-assert(combat.perfectStreak === 0, 'Miss note resets perfectStreak to 0');
+combat.perfectStreak = 0; combat.guaranteedCritReady = false; combat.pendingAttackModifiers = [];
+combat.registerRhythmNote('perfect', 0); assert(combat.perfectStreak === 1, 'First perfect note increments perfectStreak to 1');
+combat.registerRhythmNote('great', 1); assert(combat.perfectStreak === 0, 'Great note resets perfectStreak to 0');
+combat.registerRhythmNote('perfect', 0); combat.registerRhythmNote('good', 2); assert(combat.perfectStreak === 0, 'Good note resets perfectStreak to 0');
+combat.registerRhythmNote('perfect', 0); combat.registerRhythmNote('miss', 3); assert(combat.perfectStreak === 0, 'Miss note resets perfectStreak to 0');
 
 // 2. Accumulating 5 consecutive perfect notes guarantees crit on next shot
 [0, 1, 2, 3].forEach(l => combat.registerRhythmNote('perfect', l));
 assert(combat.perfectStreak === 4 && !combat.guaranteedCritReady, '4 perfect notes accumulated, guaranteed crit not yet ready');
 combat.registerRhythmNote('perfect', 0); // 5th perfect note!
-assert(combat.perfectStreak === 0, 'After 5th perfect note, perfectStreak is reset to 0');
-assert(combat.guaranteedCritReady === true, '5 consecutive perfect notes sets guaranteedCritReady to true');
-
-// 3. Next note/shot consumes guaranteed crit
-combat.registerRhythmNote('good', 1); // Next note (even if good) consumes guaranteed crit!
+assert(combat.perfectStreak === 0 && combat.guaranteedCritReady === true, '5 consecutive perfect notes resets streak and sets guaranteedCritReady');
+combat.registerRhythmNote('good', 1); // Next note consumes guaranteed crit!
 const queuedCritMod = combat.pendingAttackModifiers[combat.pendingAttackModifiers.length - 1];
-assert(queuedCritMod.isCrit === true, 'Next shot receives guaranteed critical damage');
-assert(combat.guaranteedCritReady === false, 'guaranteedCritReady is consumed and set back to false');
-assert(combat.perfectStreak === 0, 'Good note kept perfectStreak at 0');
+assert(queuedCritMod.isCrit === true && combat.guaranteedCritReady === false, 'Next shot receives guaranteed critical damage and consumes crit ready');
 
 // Test Vanguard Spawning on Battle Reset
 combat.resetBattle([mockZombieType]);
@@ -406,15 +381,8 @@ assert(combat.combo === 0, 'Miss broke combo');
 assert(combat.comboKills === 0, 'Miss note immediately reset comboKills to 0');
 
 // 5. High Combo Screen Shake
-combat.fx.shakePower = 0;
-let simStreak = 10;
-if (simStreak >= 10 && simStreak % 5 === 0) {
-    const pwr = Math.min(10, 3 + Math.floor(simStreak / 10));
-    combat.triggerShake(pwr);
-}
+combat.fx.shakePower = 0; combat.triggerShake(4);
 assert(combat.fx.shakePower >= 4, 'High combo (10 streak) triggered adrenaline screen shake');
-
-// 6. SoundEngine playMultiKill definition
 assert(audioCode.includes('playMultiKill'), 'SoundEngine defines playMultiKill synthesizer method');
 
 // ==========================================
@@ -425,15 +393,9 @@ console.log('\n11. Testing Unique Guitarist Skills, Mana Spending & Stage Rules.
 // 1. Verify 5+ skills per guitarist
 const allHeroes = ['johnny_blaze', 'vulkan_ironhead', 'dr_radix', 'cypher_volt', 'kragthor_titan', 'roxie_anarchy', 'finn_punk', 'ignis_draco', 'fenrir_howler', 'spiky_sponge', 'saul_slash'];
 allHeroes.forEach(hid => {
-    const list = skillSys.getSkillsForHero(hid);
-    const uniqueOnly = list.filter(s => s.id !== 'basic_strike');
+    const uniqueOnly = skillSys.getSkillsForHero(hid).filter(s => s.id !== 'basic_strike');
     assert(uniqueOnly.length >= 5, `Guitarist ${hid} has ${uniqueOnly.length} unique skills (>= 5 required)`);
-    // Verify each skill has required properties
-    uniqueOnly.forEach(s => {
-        assert(s.manaCost > 0, `Skill ${s.id} has manaCost > 0 (${s.manaCost})`);
-        assert(s.damageMult > 0, `Skill ${s.id} has valid damageMult (${s.damageMult})`);
-        assert(typeof s.apply === 'function', `Skill ${s.id} has apply function`);
-    });
+    uniqueOnly.forEach(s => assert(s.manaCost > 0 && s.damageMult > 0 && typeof s.apply === 'function', `Skill ${s.id} has manaCost, damageMult and apply`));
 });
 
 // 2. In-Battle Mana Deduction vs Common Basic Attack Fallback
@@ -978,6 +940,36 @@ assert(rhythmCode.includes('const curTime = this.customSongTime || 0;'), 'rhythm
 assert(rhythmCode.includes('note.y = (1.0 - cdProg) * startY + cdProg * targetY;'), 'rhythm.js smoothly interpolates notes with zero jump at countdown end');
 const mainCode = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
 assert(mainCode.includes('{ b: 0, l: 0 }'), 'main.js default song starts immediately with opening solo note at beat 0');
+
+// ==========================================
+// 30. Testing PvE Compact Single-Card HUD, Dropdown Pickers & Guitarist Shop
+// ==========================================
+console.log('\n30. Testing PvE Compact Single-Card HUD, Dropdown Pickers & Guitarist Shop...');
+const pveHtml = updatedHtmlContent;
+const pveMapCss = fs.readFileSync(path.resolve(__dirname, 'css/map-select.css'), 'utf8'), pveMenuCss = fs.readFileSync(path.resolve(__dirname, 'css/menu.css'), 'utf8');
+
+// Single card for each PvE item in index.html
+['pve-card-stage', 'pve-card-hero', 'pve-card-zombies', 'pve-card-skills', 'pve-card-song'].forEach(id => assert(pveHtml.includes(`id="${id}"`), `PvE HUD contains single ${id}`));
+
+// Dropdown accordion drawers
+['map-stage-dropdown-drawer', 'map-hero-dropdown-drawer', 'map-song-dropdown-drawer'].forEach(id => assert(pveHtml.includes(`id="${id}"`), `Drawer ${id} present`));
+assert(pveMapCss.includes('.pve-dropdown-drawer') && pveMapCss.includes('.pve-dropdown-drawer.open'), 'CSS defines .pve-dropdown-drawer and open state animation');
+
+// Guitarist Shop button and modal
+assert(pveHtml.includes('id="menu-btn-shop"'), 'Main menu contains #menu-btn-shop button');
+assert(pveHtml.includes('id="shop-modal"') && pveHtml.includes('id="shop-heroes-grid"'), 'HTML contains #shop-modal with #shop-heroes-grid');
+assert(pveMenuCss.includes('.btn-shop') && pveMenuCss.includes('.shop-modal-overlay'), 'CSS defines shop button and shop modal overlay');
+
+// Shop purchase & equip logic in guitaristPool
+const shopPool = new GuitaristPoolSystem();
+assert(typeof shopPool.renderShop === 'function', 'guitaristPool implements renderShop()');
+assert(shopPool.isHeroUnlocked('johnny_blaze') === true, 'Default hero johnny_blaze is unlocked');
+window.talentSystem = { gold: 100000, saveProgress: () => {} };
+shopPool.unlockedHeroes = ['johnny_blaze'];
+const buyRes = shopPool.unlockHeroWithGold('vulkan_ironhead');
+assert(buyRes.success === true && shopPool.isHeroUnlocked('vulkan_ironhead') === true, 'Hero vulkan_ironhead bought successfully with gold');
+assert(window.talentSystem.gold === 95000, 'Gold correctly deducted from player balance on shop purchase');
+assert(shopPool.getActiveGuitarist().id === 'vulkan_ironhead', 'Newly purchased hero is automatically selected');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {

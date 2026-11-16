@@ -80,6 +80,10 @@
                     <span class="btn-icon">⚔️</span>
                     <span class="btn-text" data-i18n="btnPvP">⚔️ DUELO ONLINE PVP</span>
                 </button>
+                <button id="menu-btn-shop" class="menu-action-btn btn-shop">
+                    <span class="btn-icon">🛒</span>
+                    <span class="btn-text" data-i18n="btnShop">LOJA DE GUITARRISTAS</span>
+                </button>
                 <button id="menu-btn-talents" class="menu-action-btn btn-talents">
                     <span class="btn-icon">🌳</span>
                     <span class="btn-text" data-i18n="btnTalents">ÁRVORE DE TALENTOS</span>
@@ -116,79 +120,65 @@
             </div>
 
             <div class="map-screen-scroll">
-                <!-- Section 0: Infinite Procedural Stage Selection -->
-                <div class="map-section-card stage-select-card">
-                    <div class="section-card-header">
-                        <div class="section-header-row">
-                            <h3 data-i18n="sectionStage">🗺️ Fase Atual</h3>
-                            <div class="cycle-nav-group">
-                                <button type="button" id="map-stage-prev-btn" class="cycle-nav-btn" title="Fase Anterior" data-i18n-title="btnPrevStage">◀️</button>
-                                <button type="button" id="map-stage-next-btn" class="cycle-nav-btn" title="Próxima Fase" data-i18n-title="btnNextStage">▶️</button>
+                <!-- 1. MAPA E FASE ATUAL -->
+                <div class="pve-hud-card stage-select-card" id="pve-card-stage">
+                    <div class="pve-card-main-row" id="pve-stage-toggle-btn" title="Toque para alternar seleção de fase">
+                        <div class="pve-card-icon-wrap" id="map-selected-arena-showcase">
+                            <img id="showcase-arena-img" src="assets/maps/thumb_void.jpg" alt="Arena" class="pve-card-thumb">
+                            <span id="showcase-arena-badge" class="arena-theme-badge badge-urban">URBANO</span>
+                        </div>
+                        <div class="pve-card-details">
+                            <div class="pve-card-meta-row">
+                                <span class="pve-card-label" data-i18n="sectionStage">🗺️ FASE ATUAL & ARENA</span>
+                                <span class="pve-dropdown-arrow">▼</span>
+                            </div>
+                            <h4 id="map-stage-title-text" class="stage-name-highlight">Fase 1: Subúrbio Desolado</h4>
+                            <span id="showcase-arena-name" class="pve-card-subname">The Void Club</span>
+                            <div id="map-stage-info-text" class="stage-info-chips">
+                                <span class="stage-chip chip-diff">💀 Nv. 1-2</span>
+                                <span class="stage-chip chip-target">🎯 14 Alvos</span>
+                                <span class="stage-chip chip-gold">🪙 +70</span>
+                                <span class="stage-chip chip-xp">⭐ +80 XP</span>
                             </div>
                         </div>
-                        <h4 id="map-stage-title-text" class="stage-name-highlight">Fase 1: Subúrbio Desolado</h4>
-                        <div id="map-stage-info-text" class="stage-info-chips">
-                            <span class="stage-chip chip-diff">💀 Nv. 1-2</span>
-                            <span class="stage-chip chip-target">🎯 14 Alvos</span>
-                            <span class="stage-chip chip-gold">🪙 +70</span>
-                            <span class="stage-chip chip-xp">⭐ +80 XP</span>
+                        <div class="cycle-nav-group" onclick="event.stopPropagation()">
+                            <button type="button" id="map-stage-prev-btn" class="cycle-nav-btn" title="Fase Anterior" data-i18n-title="btnPrevStage">◀️</button>
+                            <button type="button" id="map-stage-next-btn" class="cycle-nav-btn" title="Próxima Fase" data-i18n-title="btnNextStage">▶️</button>
                         </div>
+                    </div>
+                    <!-- Dropdown Drawer for Stages -->
+                    <div id="map-stage-dropdown-drawer" class="pve-dropdown-drawer">
+                        <!-- Populated dynamically by window.game.renderStageDropdown() -->
                     </div>
                 </div>
 
-                <!-- Section 0.5: Battle Map / Arena Showcase (Randomized Per Stage) -->
-                <div class="map-section-card arena-select-card">
-                    <div class="section-card-header">
-                        <div class="section-header-row">
-                            <h3 data-i18n="sectionArena">🏟️ Arena do Show</h3>
-                            <span class="arena-random-badge" data-i18n="badgeRandom">🎲 Sorteada</span>
+                <!-- 2. PERSONAGEM E NÍVEL -->
+                <div class="pve-hud-card hero-select-card" id="pve-card-hero">
+                    <div class="pve-card-main-row" id="pve-hero-toggle-btn" title="Toque para alternar guitarrista">
+                        <div class="hero-showcase-portrait-wrap pve-card-icon-wrap">
+                            <img id="showcase-hero-img" src="assets/heroes/johnny_blaze.jpg" alt="Hero" class="showcase-hero-img pve-card-thumb">
+                            <span id="showcase-hero-rarity-badge" class="hero-rarity-badge badge-common">COMUM</span>
                         </div>
-                    </div>
-
-                    <!-- Active Arena Showcase Card -->
-                    <div id="map-selected-arena-showcase" class="selected-arena-showcase">
-                        <div class="arena-showcase-cover-wrap">
-                            <img id="showcase-arena-img" src="assets/maps/thumb_void.jpg" alt="Arena" class="showcase-arena-img">
-                            <span id="showcase-arena-badge" class="arena-theme-badge badge-urban">URBANO • ALEATÓRIO</span>
-                        </div>
-                        <div class="arena-showcase-details">
-                            <h4 id="showcase-arena-name">The Void Club</h4>
-                            <span id="showcase-arena-sub" class="showcase-arena-sub">Clube Subterrâneo & Escombros Urbanos</span>
-                            <p id="showcase-arena-desc" class="showcase-arena-desc">Fachada do lendário pub underground "The Void", barricadas e ônibus abandonado.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 1: Playable Guitarist Selection (Hero Pool) -->
-                <div class="map-section-card hero-select-card">
-                    <div class="section-card-header">
-                        <div class="section-header-row">
-                            <h3 data-i18n="sectionHero">🎸 Guitarrista</h3>
-                            <div class="cycle-nav-group">
-                                <button type="button" id="map-hero-prev-btn" class="cycle-nav-btn" title="Guitarrista Anterior" data-i18n-title="btnPrevHero">◀️</button>
-                                <button type="button" id="map-hero-next-btn" class="cycle-nav-btn" title="Próximo Guitarrista" data-i18n-title="btnNextHero">▶️</button>
+                        <div class="pve-card-details">
+                            <div class="pve-card-meta-row">
+                                <span class="pve-card-label" data-i18n="sectionHero">🎸 GUITARRISTA & NÍVEL</span>
+                                <span class="pve-dropdown-arrow">▼</span>
+                            </div>
+                            <h4 id="showcase-hero-name" class="pve-hero-title">Johnny "Riff" Blaze</h4>
+                            <span id="showcase-hero-title" class="pve-card-subname">O Punk Rocker Clássico</span>
+                            <div class="showcase-hero-instrument">
+                                <span class="inst-icon">🎸</span> <span id="showcase-hero-instrument-text">Stratocaster "Hellfire" • ⚡ 1.0/s</span>
                             </div>
                         </div>
+                        <div class="cycle-nav-group" onclick="event.stopPropagation()">
+                            <button type="button" id="map-hero-prev-btn" class="cycle-nav-btn" title="Guitarrista Anterior" data-i18n-title="btnPrevHero">◀️</button>
+                            <button type="button" id="map-hero-next-btn" class="cycle-nav-btn" title="Próximo Guitarrista" data-i18n-title="btnNextHero">▶️</button>
+                        </div>
                     </div>
 
-                    <!-- Selected Hero Big Showcase Card -->
+                    <!-- Selected Hero Showcase details (Passive & Level Up actions) -->
                     <div id="map-selected-hero-showcase" class="selected-hero-showcase">
-                        <div class="hero-showcase-top-row">
-                            <div class="hero-showcase-portrait-wrap">
-                                <img id="showcase-hero-img" src="assets/heroes/johnny_blaze.jpg" alt="Hero" class="showcase-hero-img">
-                                <span id="showcase-hero-rarity-badge" class="hero-rarity-badge badge-common">COMUM</span>
-                            </div>
-                            <div class="hero-showcase-details">
-                                <div class="showcase-hero-header">
-                                    <h4 id="showcase-hero-name">Johnny "Riff" Blaze</h4>
-                                    <span id="showcase-hero-title" class="showcase-hero-title">O Punk Rocker Clássico</span>
-                                </div>
-                                <div class="showcase-hero-instrument">
-                                    <span class="inst-icon">🎸</span> <span id="showcase-hero-instrument-text">Stratocaster "Hellfire"</span>
-                                </div>
-                            </div>
-                        </div>
-
+                        <div class="hero-showcase-top-row" style="display: none;"></div>
                         <div class="showcase-hero-passive-box">
                             <span class="passive-tag"><span data-i18n="heroPassiveTag">PASSIVA:</span> <b id="showcase-hero-passive-name">Espírito do Rock</b></span>
                             <p id="showcase-hero-passive-desc" class="passive-desc">+1.0% de Dano e +0.4% de Dano Crítico por nível (chegando a +99% de dano e +89% de crítico no Nv. 100).</p>
@@ -217,57 +207,48 @@
                         </div>
                     </div>
 
-                    <!-- 6 Guitarists Carousel / Thumbnail Strip -->
-                    <div id="map-heroes-roster-grid" class="map-heroes-roster-grid">
-                        <!-- Populated dynamically by window.game.renderHeroRoster() -->
+                    <!-- Dropdown Drawer for Guitarists -->
+                    <div id="map-hero-dropdown-drawer" class="pve-dropdown-drawer">
+                        <div id="map-heroes-roster-grid" class="map-heroes-roster-grid">
+                            <!-- Populated dynamically by window.game.renderHeroRoster() -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- Section 2: Horde Intelligence -->
-                <div class="map-section-card">
-                    <div class="section-card-header">
-                        <div class="section-header-row">
-                            <h3 data-i18n="sectionHorde">🧟 Horda Inimiga</h3>
-                            <span class="horde-count-tag" data-i18n="hordeCountTag">5 Sorteados</span>
-                        </div>
+                <!-- 3. INIMIGOS DA FASE -->
+                <div class="pve-hud-card" id="pve-card-zombies">
+                    <div class="pve-card-simple-header">
+                        <h3 data-i18n="sectionHorde">🧟 INIMIGOS DA FASE</h3>
+                        <span class="horde-count-tag" data-i18n="hordeCountTag">5 Sorteados</span>
                     </div>
                     <div id="map-zombies-grid" class="map-zombies-grid">
                         <!-- Populated dynamically by window.game.renderMapZombies() -->
                     </div>
                 </div>
 
-                <!-- Section 2.5: Equipped Lane Skills (4 Rhythm Tracks) -->
-                <div class="map-section-card skills-select-card">
-                    <div class="section-card-header">
-                        <div class="section-header-row">
-                            <h3 data-i18n="sectionSkills">⚡ Habilidades por Trilho</h3>
-                            <span class="skills-hint-tag" data-i18n="skillsHint">Toque para Equipar</span>
-                        </div>
+                <!-- 4. HABILIDADES POR TRILHO -->
+                <div class="pve-hud-card skills-select-card" id="pve-card-skills">
+                    <div class="pve-card-simple-header">
+                        <h3 data-i18n="sectionSkills">⚡ HABILIDADES POR TRILHO</h3>
+                        <span class="skills-hint-tag" data-i18n="skillsHint">Toque para Equipar</span>
                     </div>
                     <div id="map-lane-skills-grid" class="map-lane-skills-grid">
                         <!-- Populated dynamically by window.game.renderLaneSkills() -->
                     </div>
                 </div>
 
-                <!-- Section 3: Song Track Selection -->
-                <div class="map-section-card song-select-card">
-                    <div class="section-card-header">
-                        <div class="section-header-row">
-                            <h3 data-i18n="sectionSong">🎵 Trilha Sonora</h3>
-                            <div class="cycle-nav-group">
-                                <button type="button" id="map-song-prev-btn" class="cycle-nav-btn" title="Música Anterior" data-i18n-title="btnPrevSong">◀️</button>
-                                <button type="button" id="map-song-next-btn" class="cycle-nav-btn" title="Próxima Música" data-i18n-title="btnNextSong">▶️</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Selected Active Song Showcase -->
-                    <div class="map-selected-song-preview" id="map-active-song-preview-card">
-                        <div class="map-song-cover-wrap">
-                            <img id="map-selected-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="map-song-cover-img">
+                <!-- 5. MÚSICA & TRILHA SONORA -->
+                <div class="pve-hud-card song-select-card" id="pve-card-song">
+                    <div class="pve-card-main-row" id="pve-song-toggle-btn" title="Toque para alternar música">
+                        <div class="map-song-cover-wrap pve-card-icon-wrap">
+                            <img id="map-selected-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="map-song-cover-img pve-card-thumb">
                             <span class="map-song-active-pill" data-i18n="songActivePill">EM REPRODUÇÃO</span>
                         </div>
-                        <div class="map-selected-song-info">
+                        <div class="pve-card-details">
+                            <div class="pve-card-meta-row">
+                                <span class="pve-card-label" data-i18n="sectionSong">🎵 TRILHA SONORA</span>
+                                <span class="pve-dropdown-arrow">▼</span>
+                            </div>
                             <h4 id="map-selected-song-title" class="map-song-current-title">Thunder Strike</h4>
                             <span id="map-song-artist" class="map-song-meta-text">Autoria: Cyber Shock</span>
                             <div class="map-song-tags">
@@ -275,11 +256,17 @@
                                 <span id="map-song-notes-count" class="map-song-meta-text">53 notas mapeadas</span>
                             </div>
                         </div>
+                        <div class="cycle-nav-group" onclick="event.stopPropagation()">
+                            <button type="button" id="map-song-prev-btn" class="cycle-nav-btn" title="Música Anterior" data-i18n-title="btnPrevSong">◀️</button>
+                            <button type="button" id="map-song-next-btn" class="cycle-nav-btn" title="Próxima Música" data-i18n-title="btnNextSong">▶️</button>
+                        </div>
                     </div>
 
-                    <!-- Interactive List of Songs with Select Buttons -->
-                    <div id="map-songs-roster-list" class="map-songs-roster-list">
-                        <!-- Populated dynamically by window.game.renderSongRoster() -->
+                    <!-- Dropdown Drawer for Songs -->
+                    <div id="map-song-dropdown-drawer" class="pve-dropdown-drawer">
+                        <div id="map-songs-roster-list" class="map-songs-roster-list">
+                            <!-- Populated dynamically by window.game.renderSongRoster() -->
+                        </div>
                     </div>
 
                     <!-- Synced Dropdown (Hidden/Fallback) -->
@@ -406,6 +393,26 @@
                     <div id="countdown-number" class="countdown-number">5</div>
                     <div id="countdown-subtitle" class="countdown-subtitle">POSICIONE OS DEDOS!</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guitarist Shop Modal -->
+    <div id="shop-modal" class="shop-modal-overlay">
+        <div class="shop-modal-dialog">
+            <div class="shop-modal-header">
+                <div class="shop-modal-title-group">
+                    <h2 data-i18n="shopTitle">🛒 LOJA DE GUITARRISTAS</h2>
+                    <span class="shop-modal-sub" data-i18n="shopSub">CONTRATE AS MAIORES LENDAS DO ROCK PARA DETONAR A HORDA!</span>
+                </div>
+                <div class="shop-currencies-bar">
+                    <span class="shop-currency-chip gold-chip">🪙 <strong id="shop-gold-count">0</strong></span>
+                    <span class="shop-currency-chip xp-chip">✨ <strong id="shop-xp-count">0</strong> XP</span>
+                </div>
+                <button id="shop-close-btn" class="shop-modal-close" aria-label="Fechar">✕</button>
+            </div>
+            <div class="shop-modal-body">
+                <div id="shop-heroes-grid" class="shop-heroes-grid"></div>
             </div>
         </div>
     </div>
