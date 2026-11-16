@@ -49,16 +49,9 @@
                         <span id="menu-total-kills" class="stat-val">0</span>
                     </div>
                 </div>
-                <div class="menu-quick-tools">
-                    <button id="menu-sound-toggle" class="menu-tool-btn" title="Alternar Som" data-i18n-title="menuSoundToggleTitle">🔊</button>
-                    <div class="menu-lang-group">
-                        <button class="lang-btn active" onclick="i18n.setLanguage('pt')">PT</button>
-                        <button class="lang-btn" onclick="i18n.setLanguage('en')">EN</button>
-                    </div>
-                    <button id="menu-btn-settings" class="menu-tool-btn menu-settings-icon-btn btn-settings" title="Configurações" data-i18n-title="btnSettings">
-                        <img src="assets/ui/icon_settings.svg" alt="Configurações" class="tool-btn-icon">
-                    </button>
-                </div>
+                <button id="menu-btn-settings" class="menu-tool-btn menu-settings-icon-btn btn-settings" title="Configurações" data-i18n-title="btnSettings">
+                    <img src="assets/ui/icon_settings.svg" alt="Configurações" class="tool-btn-icon">
+                </button>
             </div>
 
             <div class="menu-hero-showcase">
@@ -73,14 +66,13 @@
                     <p class="stage-desc" data-i18n="menuStageDesc">Arme sua guitarra distorcida, destrua hordas de zumbis em tempo real e domine o palco com seus riffs mortais!</p>
                 </div>
 
-                <!-- Clash Royale Center Heroic Battle Button -->
+                <!-- Clash Royale Center Heroic Campaign Button -->
                 <div class="menu-battle-center-wrap">
                     <button id="menu-btn-play" class="menu-clash-battle-btn btn-play-battle">
                         <div class="clash-battle-glow"></div>
-                        <img src="assets/ui/icon_battle.svg" alt="Batalha" class="clash-battle-icon">
+                        <img src="assets/ui/icon_battle.svg" alt="Campanha" class="clash-battle-icon">
                         <div class="clash-battle-info">
-                            <span class="clash-battle-title" data-i18n="btnPlay">JOGAR / INICIAR BATALHA</span>
-                            <span class="clash-battle-sub" data-i18n="dockCampaign">CAMPANHA PvE</span>
+                            <span class="clash-battle-title" data-i18n="btnPlay">CAMPANHA</span>
                         </div>
                     </button>
                 </div>
@@ -895,14 +887,14 @@
             <div class="gear-modal-body">
                 <div class="gear-option-row">
                     <span class="gear-option-label" data-i18n="gearLangLabel">Idioma / Language:</span>
-                    <div class="gear-lang-group">
-                        <button class="gear-btn-choice" onclick="i18n.setLanguage('pt')">Português (PT)</button>
-                        <button class="gear-btn-choice" onclick="i18n.setLanguage('en')">English (EN)</button>
+                    <div class="gear-lang-group menu-lang-group">
+                        <button class="gear-btn-choice lang-btn active" onclick="i18n.setLanguage('pt')">Português (PT)</button>
+                        <button class="gear-btn-choice lang-btn" onclick="i18n.setLanguage('en')">English (EN)</button>
                     </div>
                 </div>
                 <div class="gear-option-row">
                     <span class="gear-option-label" data-i18n="gearSoundLabel">Som do Jogo:</span>
-                    <button class="gear-btn-choice" data-i18n="gearToggleSound" onclick="if(window.soundEngine){ const m = window.soundEngine.toggleMute(); this.innerText = m ? 'Mutado 🔇' : 'Ativo 🔊'; }">Alternar Som</button>
+                    <button id="menu-sound-toggle" class="gear-btn-choice menu-tool-btn" data-i18n="gearToggleSound" onclick="if(window.soundEngine){ const m = window.soundEngine.toggleMute(); this.innerText = m ? 'Mutado 🔇' : 'Ativo 🔊'; }">Alternar Som 🔊</button>
                 </div>
 
                 <div id="gear-danger-zone-wrap" class="gear-danger-zone">

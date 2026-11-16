@@ -29,14 +29,14 @@
 
 /* Hero Level Progression */
 .hero-level-progression-box {
-    margin-top: 0;
-    padding: 8px 10px;
+    margin-top: 2px;
+    padding: 3px 6px;
     background: rgba(0, 0, 0, 0.45);
     border: 1px solid rgba(255, 204, 0, 0.3);
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 2px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -48,24 +48,24 @@
 }
 
 .hero-level-badge {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 900;
     color: #ffd700;
     text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
 }
 
 .hero-xp-text {
-    font-size: 10px;
+    font-size: 8.5px;
     font-weight: 700;
     color: #aaccff;
 }
 
 .hero-xp-bar-track {
     width: 100%;
-    height: 7px;
+    height: 4px;
     background: rgba(20, 25, 40, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
+    border-radius: 2px;
     overflow: hidden;
 }
 
@@ -80,39 +80,43 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 3px 6px;
+    padding: 1px 4px;
     background: rgba(0, 240, 255, 0.08);
     border: 1px dashed rgba(0, 240, 255, 0.35);
-    border-radius: 6px;
-    font-size: 10.5px;
+    border-radius: 4px;
+    font-size: 8px;
     color: #bbf7d0;
 }
 
 .hero-inventory-xp-row strong {
     color: #00ffff;
-    font-size: 11.5px;
+    font-size: 9px;
     font-weight: 800;
 }
 
 .hero-level-actions {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
 }
 
 .hero-inject-xp-action {
     flex: 1;
-    padding: 9px 8px;
+    padding: 3px 6px;
+    height: 22px;
     background: linear-gradient(135deg, #00c6ff, #0072ff);
     border: 1px solid #70e1ff;
-    border-radius: 6px;
+    border-radius: 4px;
     color: #fff;
-    font-size: 11px;
-    font-weight: 900;
+    font-size: 8px;
+    font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 3px 10px rgba(0, 198, 255, 0.35);
+    box-shadow: 0 2px 6px rgba(0, 198, 255, 0.35);
     transition: all 0.12s ease;
     touch-action: pan-y;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero-inject-xp-action:disabled {
@@ -129,17 +133,21 @@
 
 .hero-level-up-action {
     flex: 1;
-    padding: 9px 12px;
+    padding: 3px 6px;
+    height: 22px;
     background: linear-gradient(135deg, #ffd700, #ff8800);
     border: 1px solid #ffe680;
-    border-radius: 6px;
+    border-radius: 4px;
     color: #1a0800;
-    font-size: 12px;
+    font-size: 8px;
     font-weight: 900;
     cursor: pointer;
-    box-shadow: 0 3px 10px rgba(255, 215, 0, 0.35);
+    box-shadow: 0 2px 6px rgba(255, 215, 0, 0.35);
     transition: all 0.12s ease;
     touch-action: pan-y;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero-level-up-action:active {
@@ -155,29 +163,29 @@
 
 .map-lane-skills-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 2px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
 }
 
-@media (min-width: 480px) {
+@media (max-width: 280px) {
     .map-lane-skills-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 .lane-skill-slot {
     background: rgba(18, 14, 32, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 8px;
-    padding: 10px 8px;
+    border-radius: 6px;
+    padding: 3px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 1px;
     cursor: pointer;
     transition: all 0.15s ease;
     text-align: center;
@@ -191,51 +199,48 @@
 
 .lane-skill-slot:hover {
     border-color: #00d4ff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25);
 }
 
-.lane-skill-slot.lane-0 { border-top: 3px solid #00ff66; }
-.lane-skill-slot.lane-1 { border-top: 3px solid #ff0055; }
-.lane-skill-slot.lane-2 { border-top: 3px solid #ffcc00; }
-.lane-skill-slot.lane-3 { border-top: 3px solid #00d4ff; }
+.lane-skill-slot.lane-0 { border-top: 2px solid #00ff66; }
+.lane-skill-slot.lane-1 { border-top: 2px solid #ff0055; }
+.lane-skill-slot.lane-2 { border-top: 2px solid #ffcc00; }
+.lane-skill-slot.lane-3 { border-top: 2px solid #00d4ff; }
 
 .lane-tag-num {
-    font-size: 9px;
+    font-size: 7px;
     font-weight: 800;
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 .lane-skill-icon {
-    font-size: 22px;
-    margin: 1px 0;
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+    font-size: 13px;
+    margin: 0;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
     flex-shrink: 0;
 }
 
 .lane-skill-title {
-    font-size: 11px;
+    font-size: 7.5px;
     font-weight: 800;
     color: #fff;
-    line-height: 1.2;
+    line-height: 1.1;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     max-width: 100%;
-    word-break: break-word;
 }
 
 .lane-skill-type-pill {
-    font-size: 8px;
+    font-size: 6.5px;
     font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
-    letter-spacing: 0.2px;
+    padding: 0 2px;
+    border-radius: 2px;
+    letter-spacing: 0.1px;
     text-transform: uppercase;
-    margin: 1px 0;
+    margin: 0;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -245,7 +250,7 @@
 }
 
 .lane-skill-cost {
-    font-size: 9.5px;
+    font-size: 6.5px;
     font-weight: 800;
     color: #00d4ff;
     white-space: nowrap;

@@ -23,35 +23,55 @@
 
 .menu-top-bar {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow: hidden;
 }
 
 .menu-hud-stats {
     display: flex;
-    gap: 8px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 4px;
     align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .menu-stat-badge {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 3px;
     background: rgba(20, 15, 35, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: clamp(9px, 2.5vw, 11px);
     font-weight: 800;
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .menu-stat-badge .stat-icon {
-    font-size: 12px;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.menu-stat-badge .stat-val {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .gold-badge .stat-val {

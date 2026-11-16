@@ -713,16 +713,16 @@ assert(htmlContent.includes('data-cat="pvp"') && cssContent.includes('.pvp-missi
 console.log('\n22. Testing Complete i18n Localization (PT-BR & EN)...');
 assert(typeof i18n !== 'undefined' && i18n.currentLang, 'i18n engine is initialized');
 i18n.setLanguage('pt');
-assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'JOGAR / INICIAR BATALHA', 'i18n PT translation matches');
+assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'CAMPANHA', 'i18n PT translation matches');
 assert(i18n.t('requiresPrereq', '', { name: 'Power Chord', level: 3 }) === '🔒 Requer: Power Chord Nv. 3', 'i18n parametric interpolation works');
 let callbackLang = null;
 i18n.onLanguageChange((lang) => { callbackLang = lang; });
 i18n.setLanguage('en');
-assert(i18n.currentLang === 'en' && callbackLang === 'en' && i18n.t('btnPlay') === 'PLAY / START BATTLE', 'i18n language switches to en and notifies listeners');
+assert(i18n.currentLang === 'en' && callbackLang === 'en' && i18n.t('btnPlay') === 'CAMPAIGN', 'i18n language switches to en and notifies listeners');
 assert(i18n.t('heroMaxLevel') === '⭐ MAX LEVEL (100)' && localStorage.getItem('gvs_language') === 'en', 'i18n EN heroMaxLevel matches & persisted');
 assert(htmlContent.includes('data-i18n="btnPlay"') && htmlContent.includes('data-i18n-placeholder="phSearchMissions"'), 'index.html contains data-i18n and data-i18n-placeholder attributes');
 i18n.setLanguage('pt');
-assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'JOGAR / INICIAR BATALHA', 'i18n switches back to PT smoothly');
+assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'CAMPANHA', 'i18n switches back to PT smoothly');
 
 // ==========================================
 // 23. Testing Player XP Bank & Inventory Injection (v1.9.1 Build 55)

@@ -24,7 +24,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px;
     background: rgba(15, 10, 25, 0.95);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 10;
@@ -39,9 +39,9 @@
     background: rgba(30, 25, 45, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #eee;
-    padding: 5px 8px;
-    border-radius: 6px;
-    font-size: 10.5px;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-size: 10px;
     font-weight: 800;
     cursor: pointer;
     flex-shrink: 0;
@@ -49,7 +49,7 @@
 }
 
 .map-header-spacer {
-    width: 65px;
+    width: 55px;
     flex-shrink: 0;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .map-header-title h2 {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 900;
     color: #ffcc00;
     letter-spacing: 0.5px;
@@ -71,14 +71,7 @@
 }
 
 .map-header-title .map-sub {
-    font-size: 7.5px;
-    color: #8899aa;
-    letter-spacing: 0.5px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
+    display: none;
 }
 
 .map-screen-scroll {
@@ -89,21 +82,21 @@
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y !important;
     overscroll-behavior-y: contain;
-    padding: 10px 10px 36px;
+    padding: 4px 6px 4px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 4px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
 }
 
 .map-section-card, .pve-hud-card {
-    background: rgba(18, 14, 28, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    padding: 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    background: rgba(18, 14, 28, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5px 7px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -116,7 +109,7 @@
 .pve-card-main-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -124,21 +117,21 @@
 }
 .pve-card-icon-wrap {
     position: relative;
-    width: 54px;
-    height: 54px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     border: 1.5px solid rgba(255, 255, 255, 0.25);
     background: #000;
 }
 .pve-card-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pve-card-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pve-card-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .pve-card-meta-row { display: flex; align-items: center; justify-content: space-between; }
-.pve-card-label { font-size: 9px; font-weight: 800; color: #00d4ff; letter-spacing: 0.5px; text-transform: uppercase; }
-.pve-dropdown-arrow { font-size: 10px; color: #ffcc00; transition: transform 0.2s ease; }
+.pve-card-label { font-size: 8px; font-weight: 800; color: #00d4ff; letter-spacing: 0.4px; text-transform: uppercase; }
+.pve-dropdown-arrow { font-size: 9px; color: #ffcc00; transition: transform 0.2s ease; }
 .pve-card-main-row.open .pve-dropdown-arrow { transform: rotate(180deg); }
-.pve-card-subname { font-size: 9.5px; color: #8899aa; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pve-card-subname { font-size: 8.5px; color: #8899aa; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pve-hero-title { font-size: 13.5px; font-weight: 900; color: #fff; margin: 0; }
 .pve-card-simple-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .pve-card-simple-header h3 { font-size: 12.5px; font-weight: 900; color: #fff; margin: 0; }
@@ -300,22 +293,17 @@
 .hero-showcase-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .showcase-hero-header { display: flex; flex-direction: column; gap: 1px; }
 .showcase-hero-header h4 { font-size: 14px; font-weight: 900; color: #fff; margin: 0; line-height: 1.2; }
-.showcase-hero-title { font-size: 9.5px; font-weight: 700; color: #ffaa00; }
-.showcase-hero-instrument { font-size: 10px; color: #00d4ff; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
-.showcase-hero-passive-box { background: rgba(0, 0, 0, 0.45); border-left: 3px solid #00ff66; padding: 6px 8px; border-radius: 6px; width: 100%; box-sizing: border-box; }
-.passive-tag { font-size: 9px; font-weight: 900; color: #00ff66; display: block; margin-bottom: 2px; }
-.passive-desc { font-size: 9.5px; color: #ccd6e8; margin: 0; line-height: 1.35; word-break: break-word; }
-.hero-roster-title { font-size: 10.5px; font-weight: 800; color: #8899aa; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    color: #8899aa;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
+.showcase-hero-title { font-size: 8.5px; font-weight: 700; color: #ffaa00; }
+.showcase-hero-instrument { font-size: 8.5px; color: #00d4ff; font-weight: 700; display: flex; align-items: center; gap: 3px; margin-top: 1px; }
+.showcase-hero-passive-box { background: rgba(0, 0, 0, 0.4); border-left: 2px solid #00ff66; padding: 2px 6px; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 3px; }
+.passive-tag { font-size: 8px; font-weight: 900; color: #00ff66; display: inline-block; margin-right: 4px; }
+.passive-desc { font-size: 8px; color: #ccd6e8; margin: 0; line-height: 1.2; word-break: break-word; display: inline; }
+.hero-roster-title { font-size: 9.5px; font-weight: 800; color: #8899aa; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 .map-heroes-roster-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 4px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -330,15 +318,15 @@
     position: relative;
     background: rgba(25, 20, 38, 0.7);
     border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 8px 4px;
+    border-radius: 6px;
+    padding: 6px 3px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 4px;
-    min-height: 84px;
+    gap: 3px;
+    min-height: 70px;
     transition: all 0.15s ease;
     touch-action: pan-y;
     width: 100%;
@@ -351,44 +339,55 @@
     background: rgba(40, 30, 60, 0.85);
 }
 
-.hero-roster-card.active { border-color: #00ff66; box-shadow: 0 0 12px rgba(0, 255, 102, 0.5); background: rgba(0, 255, 102, 0.12); }
+.hero-roster-card.active { border-color: #00ff66; box-shadow: 0 0 10px rgba(0, 255, 102, 0.5); background: rgba(0, 255, 102, 0.12); }
 .hero-roster-card.active .hero-roster-name { color: #00ff66; }
-.hero-roster-art { position: relative; width: 44px; height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.2); background: #000; }
+.hero-roster-art { position: relative; width: 36px; height: 36px; border-radius: 5px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.2); background: #000; }
 .hero-roster-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.hero-roster-name { font-size: 8.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.hero-roster-mini-badge { font-size: 6.5px; font-weight: 900; padding: 1px 4px; border-radius: 3px; letter-spacing: 0.3px; }
-.section-card-header h3 { font-size: 13px; font-weight: 900; color: #fff; margin: 2px 0; }
-.section-subtext { font-size: 10px; color: #8899aa; line-height: 1.3; }
+.hero-roster-name { font-size: 8px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.hero-roster-mini-badge { font-size: 6px; font-weight: 900; padding: 1px 3px; border-radius: 2px; letter-spacing: 0.3px; }
+.section-card-header h3 { font-size: 11px; font-weight: 900; color: #fff; margin: 1px 0; }
+.section-subtext { font-size: 9px; color: #8899aa; line-height: 1.2; }
 
-/* 5 Zombies Preview Grid */
+/* 5 Zombies Preview Grid (Compact Horizontal Carousel) */
 .map-zombies-grid {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    padding: 1px 0;
 }
+.map-zombies-grid::-webkit-scrollbar { display: none; }
 
 .zombie-preview-card {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    background: rgba(22, 17, 34, 0.6);
+    text-align: center;
+    gap: 1px;
+    background: rgba(22, 17, 34, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 4px 8px;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    border-radius: 6px;
+    padding: 3px 2px;
+    width: 58px;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .zombie-preview-card:hover {
     border-color: rgba(255, 51, 102, 0.35);
-    background: rgba(30, 22, 45, 0.75);
+    background: rgba(30, 22, 45, 0.85);
 }
 
 .zombie-card-art {
     position: relative;
-    width: 42px;
-    height: 42px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
-    border-radius: 7px;
+    border-radius: 5px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: #000;
@@ -406,19 +405,16 @@
     bottom: 0;
     left: 0;
     right: 0;
-    font-size: 6.5px;
+    font-size: 6px;
     font-weight: 900;
     text-align: center;
     background: rgba(0, 0, 0, 0.78);
     color: #ffaa00;
-    padding: 1px 2px;
-    line-height: 10px;
-    letter-spacing: 0.4px;
+    padding: 0 1px;
+    line-height: 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
 }
 
 .badge-danger { color: #ff3366 !important; }
@@ -429,55 +425,51 @@
 .badge-common { color: #a0aab8 !important; }
 
 .zombie-card-info {
-    flex: 1;
+    width: 100%;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .zombie-card-top-row {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 2px;
+    width: 100%;
 }
 
 .zombie-card-name {
-    font-size: 12px;
+    font-size: 7.5px;
     font-weight: 800;
     color: #ffdd44;
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 52px;
 }
 
 .zombie-card-type-tag {
-    font-size: 8px;
-    font-weight: 800;
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    white-space: nowrap;
-    letter-spacing: 0.3px;
-    flex-shrink: 0;
+    display: none;
 }
 
 .zombie-card-stats-row {
     display: flex;
-    gap: 5px;
-    align-items: center;
-    margin-top: 2px;
+    gap: 2px;
+    justify-content: center;
+    margin-top: 1px;
 }
 
 .zombie-stat-chip {
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 700;
     color: #94a3b8;
     background: rgba(255, 255, 255, 0.05);
-    padding: 1px 5px;
-    border-radius: 3px;
+    padding: 0 2px;
+    border-radius: 2px;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
 }
 
 /* Song Selection Section */
@@ -761,7 +753,7 @@ button.hero-roster-card {
 }
 
 .map-bottom-bar {
-    padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 4px 8px calc(6px + env(safe-area-inset-bottom, 0px));
     background: rgba(15, 10, 25, 0.95);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
@@ -775,17 +767,21 @@ button.hero-roster-card {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    padding: 14px;
+    padding: 8px 12px;
+    height: 40px;
     background: linear-gradient(135deg, #ff1744 0%, #ff9100 100%);
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     color: #fff;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 900;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     cursor: pointer;
-    box-shadow: 0 0 20px rgba(255, 23, 68, 0.6);
+    box-shadow: 0 0 16px rgba(255, 23, 68, 0.55);
     transition: transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .map-start-battle-action:active {
