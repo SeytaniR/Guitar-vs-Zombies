@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="treeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00e676" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#00b050" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1de9b6"/>
+      <stop offset="50%" stop-color="#00b050"/>
+      <stop offset="100%" stop-color="#004d20"/>
+    </linearGradient>
+    <linearGradient id="orbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b9f6ca"/>
+      <stop offset="50%" stop-color="#00e676"/>
+      <stop offset="100%" stop-color="#009624"/>
+    </linearGradient>
+    <linearGradient id="goldNode" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff59d"/>
+      <stop offset="100%" stop-color="#fbc02d"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Glow -->
+  <circle cx="32" cy="32" r="30" fill="url(#treeGlow)"/>
+  <!-- Base Pedestal Shield -->
+  <circle cx="32" cy="32" r="26" fill="#0c1812" stroke="url(#trunkGrad)" stroke-width="2.5"/>
+  <!-- Energy Branch Pathways -->
+  <g stroke="#00e676" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M32 50 L32 30"/>
+    <path d="M32 32 L19 21"/>
+    <path d="M32 32 L45 21"/>
+    <path d="M32 30 L32 14"/>
+    <path d="M19 21 L16 11"/>
+    <path d="M45 21 L48 11"/>
+  </g>
+  <!-- Circuit Nodes (Power Crystals) -->
+  <circle cx="32" cy="50" r="5" fill="url(#orbGrad)" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="32" cy="31" r="5.5" fill="url(#orbGrad)" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="19" cy="21" r="4.5" fill="url(#goldNode)" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="45" cy="21" r="4.5" fill="url(#goldNode)" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="16" cy="11" r="4" fill="url(#orbGrad)" stroke="#fff" stroke-width="1.2"/>
+  <circle cx="48" cy="11" r="4" fill="url(#orbGrad)" stroke="#fff" stroke-width="1.2"/>
+  <circle cx="32" cy="13" r="6" fill="url(#goldNode)" stroke="#fff" stroke-width="2"/>
+  <!-- Guitar Pick Icon in Main Top Node -->
+  <polygon points="32,9 28,14 36,14" fill="#004d20"/>
+  <!-- Glowing Pulse Rings -->
+  <circle cx="32" cy="13" r="8" fill="none" stroke="#69f0ae" stroke-width="1" opacity="0.6"/>
+</svg>

@@ -826,15 +826,6 @@ class Game {
         setVal('ss-time-elapsed', `${mins}:${secs < 10 ? '0' : ''}${secs}`);
     }
 
-        setVal('ss-total-damage', Math.round(s.damageDealt).toLocaleString());
-        setVal('ss-hero-hp', `${Math.round(this.combat.heroHp)} / ${this.combat.heroMaxHp}`);
-        setVal('ss-zombies-killed', s.zombiesKilled); setVal('ss-max-streak', `${r.maxStreak || this.rhythm.streak || 0} 🔥`);
-        setVal('ss-current-multiplier', `x${this.rhythm.multiplier}`); setVal('ss-current-score', this.combat.score.toLocaleString());
-        setVal('ss-match-coins', `+${s.coinsEarned} 🪙`);
-        setVal('ss-accuracy-rate', `${accPct}% (${r.perfects || 0}P / ${r.greats || 0}G / ${r.misses || 0}M)`);
-        setVal('ss-time-elapsed', `${mins}:${secs < 10 ? '0' : ''}${secs}`);
-    }
-
     triggerVictoryFinale(song, stats = {}) {
         if (this.combat && typeof this.combat.triggerVictoryFinale === 'function') this.combat.triggerVictoryFinale(song, stats);
         else this.showVictoryModal(song, stats);

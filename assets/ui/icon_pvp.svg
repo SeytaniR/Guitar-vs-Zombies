@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="pvpGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff0055" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#7928ca" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bladeL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#0040ff"/>
+    </linearGradient>
+    <linearGradient id="bladeR" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f"/>
+      <stop offset="100%" stop-color="#ff0000"/>
+    </linearGradient>
+    <linearGradient id="duelGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff176"/>
+      <stop offset="50%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Glow -->
+  <circle cx="32" cy="32" r="30" fill="url(#pvpGlow)"/>
+  <!-- Circular Dark Arena Base -->
+  <circle cx="32" cy="32" r="26" fill="#150a24" stroke="url(#duelGold)" stroke-width="2.5"/>
+  <!-- Crossed Swords / Guitar Necks -->
+  <!-- Left Sword (Blue/Cyan Neon) -->
+  <g transform="rotate(45 32 32)">
+    <rect x="30" y="8" width="4" height="42" rx="2" fill="url(#bladeL)" stroke="#fff" stroke-width="0.8"/>
+    <rect x="24" y="42" width="16" height="4" rx="2" fill="url(#duelGold)" stroke="#333" stroke-width="0.8"/>
+    <circle cx="32" cy="52" r="3.5" fill="url(#duelGold)"/>
+  </g>
+  <!-- Right Sword (Red/Pink Neon) -->
+  <g transform="rotate(-45 32 32)">
+    <rect x="30" y="8" width="4" height="42" rx="2" fill="url(#bladeR)" stroke="#fff" stroke-width="0.8"/>
+    <rect x="24" y="42" width="16" height="4" rx="2" fill="url(#duelGold)" stroke="#333" stroke-width="0.8"/>
+    <circle cx="32" cy="52" r="3.5" fill="url(#duelGold)"/>
+  </g>
+  <!-- Center Energy Clash / Sparks -->
+  <polygon points="32,20 34,29 43,32 34,35 32,44 30,35 21,32 30,29" fill="#ffffff" filter="drop-shadow(0 0 4px #ffd700)"/>
+  <!-- Sparks -->
+  <circle cx="24" cy="24" r="1.5" fill="#00ffff"/>
+  <circle cx="40" cy="24" r="1.5" fill="#ff0055"/>
+  <circle cx="25" cy="40" r="1.5" fill="#ffea00"/>
+  <circle cx="39" cy="40" r="1.5" fill="#ffffff"/>
+  <!-- VS Emblem Badge in center bottom -->
+  <circle cx="32" cy="32" r="6" fill="#1b0c2e" stroke="url(#duelGold)" stroke-width="1.5"/>
+  <text x="32" y="35" font-size="8" font-weight="900" font-family="'Impact', sans-serif" fill="#ffd700" text-anchor="middle">VS</text>
+</svg>

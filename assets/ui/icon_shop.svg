@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="shopGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd700" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ff8800" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="chestGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d5b1e"/>
+      <stop offset="50%" stop-color="#5a3710"/>
+      <stop offset="100%" stop-color="#321c05"/>
+    </linearGradient>
+    <linearGradient id="goldPlate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff885"/>
+      <stop offset="50%" stop-color="#ffc107"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="100%" stop-color="#0077b6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Glow -->
+  <circle cx="32" cy="32" r="30" fill="url(#shopGlow)"/>
+  <!-- Chest Body -->
+  <rect x="10" y="27" width="44" height="26" rx="4" fill="url(#chestGrad)" stroke="url(#goldPlate)" stroke-width="2.5"/>
+  <!-- Chest Lid (Curved Arch) -->
+  <path d="M9 27 C9 14 55 14 55 27 Z" fill="url(#chestGrad)" stroke="url(#goldPlate)" stroke-width="2.5"/>
+  <!-- Gold Bands -->
+  <rect x="18" y="18" width="6" height="35" fill="url(#goldPlate)" opacity="0.9"/>
+  <rect x="40" y="18" width="6" height="35" fill="url(#goldPlate)" opacity="0.9"/>
+  <!-- Gold Rivets -->
+  <circle cx="21" cy="22" r="1.5" fill="#321c05"/>
+  <circle cx="21" cy="33" r="1.5" fill="#321c05"/>
+  <circle cx="21" cy="46" r="1.5" fill="#321c05"/>
+  <circle cx="43" cy="22" r="1.5" fill="#321c05"/>
+  <circle cx="43" cy="33" r="1.5" fill="#321c05"/>
+  <circle cx="43" cy="46" r="1.5" fill="#321c05"/>
+  <!-- Chest Lock Plate -->
+  <rect x="27" y="24" width="10" height="12" rx="2" fill="url(#goldPlate)" stroke="#5a3710" stroke-width="1.2"/>
+  <!-- Keyhole / Gem -->
+  <circle cx="32" cy="29" r="3" fill="url(#gemGrad)"/>
+  <polygon points="31,29 33,29 34,34 30,34" fill="#000"/>
+  <!-- Gold Coins Bursting from Top -->
+  <circle cx="22" cy="13" r="5" fill="url(#goldPlate)" stroke="#fff" stroke-width="1"/>
+  <circle cx="34" cy="9" r="6" fill="url(#goldPlate)" stroke="#fff" stroke-width="1"/>
+  <circle cx="44" cy="14" r="4.5" fill="url(#goldPlate)" stroke="#fff" stroke-width="1"/>
+  <!-- Musical note in coin -->
+  <text x="31" y="12" font-size="7" font-weight="900" fill="#7a4100" text-anchor="middle">♪</text>
+  <!-- Sparkles -->
+  <polygon points="12,14 14,10 16,14 20,16 16,18 14,22 12,18 8,16" fill="#fff"/>
+  <polygon points="50,11 51,8 52,11 55,12 52,13 51,16 50,13 47,12" fill="#fff"/>
+</svg>

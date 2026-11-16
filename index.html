@@ -55,6 +55,9 @@
                         <button class="lang-btn active" onclick="i18n.setLanguage('pt')">PT</button>
                         <button class="lang-btn" onclick="i18n.setLanguage('en')">EN</button>
                     </div>
+                    <button id="menu-btn-settings" class="menu-tool-btn menu-settings-icon-btn btn-settings" title="Configurações" data-i18n-title="btnSettings">
+                        <img src="assets/ui/icon_settings.svg" alt="Configurações" class="tool-btn-icon">
+                    </button>
                 </div>
             </div>
 
@@ -69,39 +72,54 @@
                     <div class="stage-tag" data-i18n="menuStageTag">🎸 TURNÊ MUNDIAL DOS CONDENADOS</div>
                     <p class="stage-desc" data-i18n="menuStageDesc">Arme sua guitarra distorcida, destrua hordas de zumbis em tempo real e domine o palco com seus riffs mortais!</p>
                 </div>
+
+                <!-- Clash Royale Center Heroic Battle Button -->
+                <div class="menu-battle-center-wrap">
+                    <button id="menu-btn-play" class="menu-clash-battle-btn btn-play-battle">
+                        <div class="clash-battle-glow"></div>
+                        <img src="assets/ui/icon_battle.svg" alt="Batalha" class="clash-battle-icon">
+                        <div class="clash-battle-info">
+                            <span class="clash-battle-title" data-i18n="btnPlay">JOGAR / INICIAR BATALHA</span>
+                            <span class="clash-battle-sub" data-i18n="dockCampaign">CAMPANHA PvE</span>
+                        </div>
+                    </button>
+                </div>
             </div>
 
-            <div class="menu-actions-stack">
-                <button id="menu-btn-play" class="menu-action-btn btn-play-battle">
-                    <span class="btn-icon">⚡</span>
-                    <span class="btn-text" data-i18n="btnPlay">JOGAR / INICIAR BATALHA</span>
+            <!-- Clash Royale Bottom Navigation Dock -->
+            <nav id="menu-bottom-dock" class="menu-bottom-dock">
+                <button id="menu-btn-shop" class="dock-tab btn-shop" title="Loja">
+                    <div class="dock-icon-wrap">
+                        <img src="assets/ui/icon_shop.svg" alt="Loja" class="dock-tab-icon">
+                    </div>
+                    <span class="dock-tab-label" data-i18n="dockShop">Loja</span>
                 </button>
-                <button id="menu-btn-pvp" class="menu-action-btn btn-pvp-duel">
-                    <span class="btn-icon">⚔️</span>
-                    <span class="btn-text" data-i18n="btnPvP">⚔️ DUELO ONLINE PVP</span>
+                <button id="menu-btn-talents" class="dock-tab btn-talents" title="Talentos">
+                    <div class="dock-icon-wrap">
+                        <img src="assets/ui/icon_talents.svg" alt="Talentos" class="dock-tab-icon">
+                    </div>
+                    <span class="dock-tab-label" data-i18n="dockTalents">Talentos</span>
                 </button>
-                <button id="menu-btn-shop" class="menu-action-btn btn-shop">
-                    <span class="btn-icon">🛒</span>
-                    <span class="btn-text" data-i18n="btnShop">LOJA DE GUITARRISTAS</span>
+                <button id="menu-btn-pvp" class="dock-tab btn-pvp btn-pvp-duel" title="Duelo PvP">
+                    <div class="dock-icon-wrap">
+                        <img src="assets/ui/icon_pvp.svg" alt="PvP" class="dock-tab-icon">
+                    </div>
+                    <span class="dock-tab-label" data-i18n="dockPvp">PvP</span>
                 </button>
-                <button id="menu-btn-talents" class="menu-action-btn btn-talents">
-                    <span class="btn-icon">🌳</span>
-                    <span class="btn-text" data-i18n="btnTalents">ÁRVORE DE TALENTOS</span>
+                <button id="menu-btn-missions" class="dock-tab btn-missions" title="Missões">
+                    <div class="dock-icon-wrap">
+                        <img src="assets/ui/icon_missions.svg" alt="Missões" class="dock-tab-icon">
+                        <span id="menu-missions-badge" class="missions-badge-counter hidden">0</span>
+                    </div>
+                    <span class="dock-tab-label" data-i18n="dockMissions">Missões</span>
                 </button>
-                <button id="menu-btn-missions" class="menu-action-btn btn-missions">
-                    <span class="btn-icon">🎯</span>
-                    <span class="btn-text" data-i18n="btnMissions">MISSÕES & CAÇADA DE ZUMBIS</span>
-                    <span id="menu-missions-badge" class="missions-badge-counter hidden">0</span>
+                <button id="menu-btn-studio" class="dock-tab btn-studio" title="Estúdio">
+                    <div class="dock-icon-wrap">
+                        <img src="assets/ui/icon_studio.svg" alt="Estúdio" class="dock-tab-icon">
+                    </div>
+                    <span class="dock-tab-label" data-i18n="dockStudio">Estúdio</span>
                 </button>
-                <button id="menu-btn-studio" class="menu-action-btn btn-studio">
-                    <span class="btn-icon">🎵</span>
-                    <span class="btn-text" data-i18n="btnStudio">ESTÚDIO DE MÚSICA & RITMO</span>
-                </button>
-                <button id="menu-btn-settings" class="menu-action-btn btn-settings">
-                    <span class="btn-icon">⚙️</span>
-                    <span class="btn-text" data-i18n="btnSettings">CONFIGURAÇÕES</span>
-                </button>
-            </div>
+            </nav>
 
             <div class="menu-footer">
                 <span data-i18n="menuFooter">Guitar vs Zombies v1.9.8 (Build 62) • AAA Audio & Action Experience</span>

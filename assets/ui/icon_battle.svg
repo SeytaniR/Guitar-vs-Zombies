@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="battleGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff9100" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ff1744" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5252"/>
+      <stop offset="50%" stop-color="#d50000"/>
+      <stop offset="100%" stop-color="#5f0910"/>
+    </linearGradient>
+    <linearGradient id="goldRim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff275"/>
+      <stop offset="50%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffff00"/>
+      <stop offset="100%" stop-color="#ff6d00"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Glow -->
+  <circle cx="32" cy="32" r="30" fill="url(#battleGlow)"/>
+  <!-- Crest Shield -->
+  <path d="M32 4 L54 13 C54 36 32 58 32 58 C32 58 10 36 10 13 Z" fill="url(#shieldGrad)" stroke="url(#goldRim)" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Inner Shield Accent -->
+  <path d="M32 9 L49 17 C49 35 32 52 32 52 C32 52 15 35 15 17 Z" fill="#7a0d17" opacity="0.6"/>
+  <!-- Crossed Flying-V Guitars / Swords -->
+  <g stroke="#ffffff" stroke-width="1.5" stroke-linecap="round">
+    <line x1="16" y1="46" x2="48" y2="14" stroke="#ffeb3b" stroke-width="3"/>
+    <line x1="48" y1="46" x2="16" y2="14" stroke="#ffeb3b" stroke-width="3"/>
+  </g>
+  <!-- Central Electric Guitar Silhouette -->
+  <path d="M32 10 L34 26 L39 28 C41 29 42 32 41 35 L37 42 C35 46 29 46 27 42 L23 35 C22 32 23 29 25 28 L30 26 Z" fill="url(#goldRim)" stroke="#ffffff" stroke-width="1.2"/>
+  <!-- Center Lightning Bolt -->
+  <polygon points="34,16 26,30 33,30 29,46 41,28 33,28" fill="url(#boltGrad)" stroke="#ffffff" stroke-width="0.8" filter="drop-shadow(0 0 3px #ffea00)"/>
+  <!-- Fiery Stars -->
+  <circle cx="15" cy="18" r="2" fill="#ffd700"/>
+  <circle cx="49" cy="18" r="2" fill="#ffd700"/>
+  <circle cx="32" cy="54" r="2.5" fill="#ffd700"/>
+</svg>
