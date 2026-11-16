@@ -21,24 +21,10 @@ class RhythmSystem {
             { main: '#00d4ff', glow: 'rgba(0, 212, 255, 0.45)', core: '#e6faff' }  // Blue
         ];
 
-        this.time = 0;
-        this.noteSpeed = 340; // Balanced readable speed
-        this.spawnTimer = 0;
-        this.spawnInterval = 0.58; // Beat cadence
-
-        // Pure manual play only
-        this.streak = 0;
-        this.multiplier = 1;
-        this.onHitCallback = null;
-
-        // Custom Song Engine state
-        this.currentSong = null;
-        this.songAudio = null;
-        this.isCustomSongPlaying = false;
-        this.isCountdownActive = false;
-        this.audioNeedsUnlock = false;
-        this.songStats = null;
-        this.firstActiveIndex = 0;
+        this.time = 0; this.noteSpeed = 340; this.spawnTimer = 0; this.spawnInterval = 0.58;
+        this.streak = 0; this.multiplier = 1; this.onHitCallback = null;
+        this.currentSong = null; this.songAudio = null; this.isCustomSongPlaying = false;
+        this.isCountdownActive = false; this.audioNeedsUnlock = false; this.songStats = null; this.firstActiveIndex = 0;
 
         this.buildNoteSpriteCache();
         this.resize();
@@ -50,23 +36,18 @@ class RhythmSystem {
         if (typeof document === 'undefined') return;
         this.noteSprites = []; this.holdNoteSprites = [];
         const size = 48, center = 24;
+        const makePick = (col, strokeAlpha, lw) => {
+            const c = document.createElement('canvas'); c.width = size; c.height = size;
+            const ctx = c.getContext('2d'); ctx.translate(center, center);
+            ctx.strokeStyle = col.main + strokeAlpha; ctx.lineWidth = lw;
+            ctx.beginPath(); ctx.moveTo(0, -18); ctx.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx.bezierCurveTo(-18, 12, -20, -18, 0, -18);
+            ctx.stroke(); ctx.fillStyle = col.main; ctx.fill();
+            ctx.fillStyle = col.core; ctx.beginPath(); ctx.arc(0, -2, 6.5, 0, Math.PI * 2); ctx.fill();
+            return c;
+        };
         for (let i = 0; i < 4; i++) {
-            const col = this.colors[i];
-            const c1 = document.createElement('canvas'); c1.width = size; c1.height = size;
-            const ctx1 = c1.getContext('2d'); ctx1.translate(center, center);
-            ctx1.strokeStyle = col.main + '44'; ctx1.lineWidth = 4;
-            ctx1.beginPath(); ctx1.moveTo(0, -18); ctx1.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx1.bezierCurveTo(-18, 12, -20, -18, 0, -18);
-            ctx1.stroke(); ctx1.fillStyle = col.main; ctx1.fill();
-            ctx1.fillStyle = col.core; ctx1.beginPath(); ctx1.arc(0, -2, 6.5, 0, Math.PI * 2); ctx1.fill();
-            this.noteSprites[i] = c1;
-
-            const c2 = document.createElement('canvas'); c2.width = size; c2.height = size;
-            const ctx2 = c2.getContext('2d'); ctx2.translate(center, center);
-            ctx2.strokeStyle = col.main + '88'; ctx2.lineWidth = 6;
-            ctx2.beginPath(); ctx2.moveTo(0, -18); ctx2.bezierCurveTo(20, -18, 18, 12, 0, 20); ctx2.bezierCurveTo(-18, 12, -20, -18, 0, -18);
-            ctx2.stroke(); ctx2.fillStyle = col.main; ctx2.fill();
-            ctx2.fillStyle = col.core; ctx2.beginPath(); ctx2.arc(0, -2, 6.5, 0, Math.PI * 2); ctx2.fill();
-            this.holdNoteSprites[i] = c2;
+            this.noteSprites[i] = makePick(this.colors[i], '44', 4);
+            this.holdNoteSprites[i] = makePick(this.colors[i], '88', 6);
         }
         const sc = document.createElement('canvas'); sc.width = size; sc.height = size;
         const sctx = sc.getContext('2d'); sctx.translate(center, center);
@@ -172,7 +153,11 @@ class RhythmSystem {
     triggerLaneHit(lane) { this.triggerLaneDown(lane); setTimeout(() => this.triggerLaneUp(lane), 60); }
 
     triggerLaneDown(lane) {
-        if (this.isCountdownActive || (typeof window !== 'undefined' && window.countdownSystem && window.countdownSystem.isActive)) return;
+        if (this.isCountdownActive || (typeof window !== 'undefined' && window.countdownSystem && window.countdownSystem.isActive)) {
+            const cd = (typeof window !== 'undefined') ? window.countdownSystem : null;
+            if (cd && cd.isActive && cd.timer <= 0.15) cd.finishCountdown();
+            else return;
+        }
         this.laneFlashes[lane] = 1.0;
         this.laneHolding[lane] = true;
         this.lanePresses[lane] = true;
@@ -447,7 +432,8 @@ class RhythmSystem {
             const isStartCd = this.isCountdownActive && window.countdownSystem && window.countdownSystem.mode === 'start';
             const cdProg = isStartCd ? Math.min(1.0, Math.max(0, (curTime - (-2.0)) / 2.0)) : 0;
             const firstActiveNote = isStartCd ? (this.notes.find(n => n.active) || this.notes[0]) : null;
-            const firstT = firstActiveNote ? firstActiveNote.time : 0.44;
+            const firstT = firstActiveNote ? firstActiveNote.time : 0.0;
+            const targetT = (window.countdownSystem && typeof window.countdownSystem.targetSongTime === 'number') ? window.countdownSystem.targetSongTime : 0.0;
 
             for (let i = this.firstActiveIndex || 0; i < this.notes.length; i++) {
                 const note = this.notes[i];
@@ -458,9 +444,15 @@ class RhythmSystem {
                         window.game.combat.pvpSystem.onSongNotePassed(note, 'perfect', curTime, window.game.combat);
                     }
                 }
-                if (note.holding) note.y = hitZoneY;
-                else if (isStartCd) note.y = (30 + cdProg * (hitZoneY - 45)) - (note.time - firstT) * 160;
-                else note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
+                if (note.holding) {
+                    note.y = hitZoneY;
+                } else if (isStartCd) {
+                    const startY = 28 - (note.time - firstT) * 160;
+                    const targetY = hitZoneY - (note.time - targetT) * this.noteSpeed;
+                    note.y = (1.0 - cdProg) * startY + cdProg * targetY;
+                } else {
+                    note.y = hitZoneY - (note.time - curTime) * this.noteSpeed;
+                }
 
                 // PvP Finale Auto-Hit (Victory) or Skull (Defeat)
                 if (this.pvpFinaleMode && note.active && !note.autoDone && note.y >= hitZoneY - 14) {
@@ -601,6 +593,8 @@ class RhythmSystem {
         const trackW = cw / this.tracks;
         const hitZoneY = this.getHitZoneY();
         const curTime = this.customSongTime || 0;
+        const isStartCd = this.isCountdownActive && window.countdownSystem && window.countdownSystem.mode === 'start';
+        const cdProg = isStartCd ? Math.min(1.0, Math.max(0, (curTime - (-2.0)) / 2.0)) : 0;
 
         // 1. Draw Fretboard Background & Strings (Stable solid fill without buffer-clear flash)
         this.ctx.fillStyle = '#0f0f18';
@@ -695,7 +689,7 @@ class RhythmSystem {
 
             let headY = note.holding ? hitZoneY : note.y;
             let tailY = this.isCustomSongPlaying
-                ? (hitZoneY - ((note.time + note.duration) - this.customSongTime) * this.noteSpeed)
+                ? (isStartCd ? (headY - note.duration * ((1.0 - cdProg) * 160 + cdProg * this.noteSpeed)) : (hitZoneY - ((note.time + note.duration) - this.customSongTime) * this.noteSpeed))
                 : (headY - (note.duration * this.noteSpeed));
 
             if (tailY > ch + 40 || headY < -60) continue;

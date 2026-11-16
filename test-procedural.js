@@ -975,6 +975,9 @@ assert(updatedBattleCss.includes('.battle-countdown-overlay') && updatedBattleCs
 assert(updatedBattleCss.includes('background: transparent;'), 'battle.css keeps countdown overlay transparent so highway is fully visible');
 const rhythmCode = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8');
 assert(rhythmCode.includes('const curTime = this.customSongTime || 0;'), 'rhythm.js draw() safely defines curTime without ReferenceError');
+assert(rhythmCode.includes('note.y = (1.0 - cdProg) * startY + cdProg * targetY;'), 'rhythm.js smoothly interpolates notes with zero jump at countdown end');
+const mainCode = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
+assert(mainCode.includes('{ b: 0, l: 0 }'), 'main.js default song starts immediately with opening solo note at beat 0');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
