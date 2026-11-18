@@ -115,7 +115,8 @@ class SpecialSystem {
                 combat.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y, radius: 6, maxRadius: 55, color: '#ffd700', lineWidth: 4, alpha: 1.0 });
             }
             combat.triggerShake(9);
-            combat.addFloatingText('🔥 SOLO ESPECIAL 2X ATIVADO! ⚡', combat.canvas.width / 2, combat.canvas.height * 0.42, '#ffd700', true);
+            const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+            combat.addFloatingText(tr('specialActivatedToast', '🔥 SOLO ESPECIAL 2X ATIVADO! ⚡'), combat.canvas.width / 2, combat.canvas.height * 0.42, '#ffd700', true);
         }
 
         this.updateUI();

@@ -28,6 +28,8 @@ class Game {
         this.start();
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     getBuiltinDefaultSong() {
         const bpm = 136;
         const beatSec = 60 / bpm;
@@ -112,9 +114,8 @@ class Game {
         bind('menu-sound-toggle', () => {
             if (window.soundEngine) {
                 const isMuted = window.soundEngine.toggleMute();
-                const icon = isMuted ? '🔇' : '🔊';
-                const b1 = document.getElementById('menu-sound-toggle'); if (b1) b1.innerText = icon;
-                const b2 = document.getElementById('battle-sound-toggle'); if (b2) b2.innerText = icon;
+                const b1 = document.getElementById('menu-sound-toggle'); if (b1) b1.innerText = this.tr(isMuted ? 'soundMuted' : 'soundActive', isMuted ? 'Mutado 🔇' : 'Ativo 🔊');
+                const b2 = document.getElementById('battle-sound-toggle'); if (b2) b2.innerText = isMuted ? '🔇' : '🔊';
             }
         });
         bind('map-back-btn', () => this.switchScreen('menu'));
@@ -170,6 +171,7 @@ class Game {
         if (!drawer || !window.stageSystem) return;
         const current = window.stageSystem.selectedStage, highest = window.stageSystem.highestUnlockedStage || 1;
         drawer.innerHTML = '';
+        const curLbl = this.tr('btnCurrentStage', '✅ ATUAL'), chooseLbl = this.tr('btnChoose', '▶️ ESCOLHER'), lvlPfx = this.tr('levelShort', 'Nv.');
         for (let s = 1; s <= highest; s++) {
             const isSelected = (s === current), isBoss = window.stageSystem.isBossStage && window.stageSystem.isBossStage(s);
             const range = window.stageSystem.getZombieLevelRange(s), kills = window.stageSystem.getTargetKills(s), rewards = window.stageSystem.getStageRewards(s);
@@ -179,9 +181,9 @@ class Game {
             item.innerHTML = `
                 <div class="stage-item-info">
                     <span class="stage-item-title">${name} ${isBoss ? '👑' : ''}</span>
-                    <div class="stage-info-chips"><span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span><span class="stage-chip chip-target">🎯 ${kills}</span><span class="stage-chip chip-gold">🪙 +${rewards.coins}</span></div>
+                    <div class="stage-info-chips"><span class="stage-chip chip-diff">💀 ${lvlPfx} ${range.min}-${range.max}</span><span class="stage-chip chip-target">🎯 ${kills}</span><span class="stage-chip chip-gold">🪙 +${rewards.coins}</span></div>
                 </div>
-                <button type="button" class="stage-item-btn ${isSelected ? 'active' : ''}">${isSelected ? '✅ ATUAL' : '▶️ ESCOLHER'}</button>
+                <button type="button" class="stage-item-btn ${isSelected ? 'active' : ''}">${isSelected ? curLbl : chooseLbl}</button>
             `;
             item.onclick = (e) => {
                 if (e) e.stopPropagation();
@@ -249,7 +251,7 @@ class Game {
             const isBoss = window.stageSystem.isBossStage && window.stageSystem.isBossStage(stage);
             const range = window.stageSystem.getZombieLevelRange(stage), kills = window.stageSystem.getTargetKills(stage), rewards = window.stageSystem.getStageRewards(stage);
             const bossChip = isBoss ? `<span class="stage-chip chip-boss">${tr('bossBadge', '👑 CHEFE (2x OURO/XP)')}</span>` : '';
-            stageInfo.innerHTML = `${bossChip}<span class="stage-chip chip-diff">💀 Nv. ${range.min}-${range.max}</span><span class="stage-chip chip-target">🎯 ${kills} ${tr('targetsUnit', 'Alvos')}</span><span class="stage-chip chip-gold">🪙 +${rewards.coins}</span><span class="stage-chip chip-xp">⭐ +${rewards.xp} XP</span>`;
+            stageInfo.innerHTML = `${bossChip}<span class="stage-chip chip-diff">💀 ${tr('levelShort', 'Nv.')} ${range.min}-${range.max}</span><span class="stage-chip chip-target">🎯 ${kills} ${tr('targetsUnit', 'Alvos')}</span><span class="stage-chip chip-gold">🪙 +${rewards.coins}</span><span class="stage-chip chip-xp">⭐ +${rewards.xp} XP</span>`;
         }
     }
 
@@ -276,9 +278,10 @@ class Game {
         if (tEl) tEl.innerText = tr('hero_' + currentHero.id + '_title', currentHero.title);
         const hStats = pool.getHeroStats(currentHero.id);
         const hInst = tr('hero_' + currentHero.id + '_inst', currentHero.instrument);
+        const spChip = tr('specialActiveChip', `🔥 Especial: ${hStats.specialDuration}s`, { duration: hStats.specialDuration });
         const unlockPrompt = tr('heroUnlockCostPrompt', `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`, { cost: (currentHero.unlockCost || 5000).toLocaleString() });
-        if (iEl) iEl.innerText = isUnlocked ? `${hInst} • ⚡ 1.0/s • 🔥 Especial: ${hStats.specialDuration}s` : unlockPrompt;
-        if (pnEl) pnEl.innerText = tr('hero_' + currentHero.id + '_pass_name', (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva');
+        if (iEl) iEl.innerText = isUnlocked ? `${hInst} • ⚡ 1.0/s • ${spChip}` : unlockPrompt;
+        if (pnEl) pnEl.innerText = tr('hero_' + currentHero.id + '_pass_name', (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || tr('passiveFallback', 'Passiva'));
         if (pdEl) pdEl.innerText = tr('hero_' + currentHero.id + '_pass_desc', (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '');
         if (sBox) {
             const color = isUnlocked ? (currentHero.accentColor || currentHero.themeColor || '#ffaa00') : '#666677';
@@ -360,10 +363,11 @@ class Game {
         allHeroes.forEach(hero => {
             const isUnl = pool.isHeroUnlocked(hero.id);
             const isSelected = (hero.id === currentHero.id);
+            const rTxt = tr('rarity_' + (hero.rarityKey || 'common'), hero.rarity || 'COMUM');
             const card = document.createElement('button');
             card.type = 'button';
             card.className = `hero-roster-card ${isSelected ? 'active' : ''} ${isUnl ? '' : 'locked'}`;
-            card.title = isUnl ? `${hero.name} (${hero.rarity})` : `🔒 ${hero.name} (🪙 ${hero.unlockCost})`;
+            card.title = isUnl ? `${hero.name} (${rTxt})` : `🔒 ${hero.name} (🪙 ${hero.unlockCost})`;
 
             const color = isUnl ? (hero.accentColor || hero.themeColor || '#ffaa00') : '#555566';
             const badgeClass = isUnl ? (hero.rarityClass || hero.badgeClass || 'badge-common') : 'badge-locked';
@@ -373,7 +377,7 @@ class Game {
                     <img src="${hero.icon}" alt="${hero.name}" class="hero-roster-img" style="pointer-events: none; ${isUnl ? '' : 'filter: grayscale(0.85);'}">
                 </div>
                 <div class="hero-roster-name" style="pointer-events: none;">${hero.name.split(' ')[0]}</div>
-                <span class="hero-roster-mini-badge ${badgeClass}" style="pointer-events: none;">${isUnl ? hero.rarity : `🔒 ${hero.unlockCost}`}</span>
+                <span class="hero-roster-mini-badge ${badgeClass}" style="pointer-events: none;">${isUnl ? rTxt : `🔒 ${hero.unlockCost}`}</span>
                 ${(isSelected && isUnl) ? '<span class="hero-card-check">✓</span>' : ''}
             `;
 
@@ -413,24 +417,25 @@ class Game {
         if (!grid) return;
 
         grid.innerHTML = '';
+        const hpU = this.tr('unitHp', 'HP'), spdU = this.tr('unitSpeed', 'Vel'), dmgU = this.tr('unitDmg', 'Dano');
         this.currentMapZombies.forEach(z => {
+            const zName = this.tr('zombie_' + z.id, z.name), zShort = this.tr('zombie_short_' + z.id, z.badge), zFull = this.tr('zombie_full_' + z.id, z.fullBadge || z.badge);
             const card = document.createElement('div');
             card.className = 'zombie-preview-card';
-
             card.innerHTML = `
                 <div class="zombie-card-art">
-                    <img src="${z.icon}" alt="${z.name}" class="zombie-card-img">
-                    <span class="zombie-card-badge ${z.badgeClass || ''}">${z.badge}</span>
+                    <img src="${z.icon}" alt="${zName}" class="zombie-card-img">
+                    <span class="zombie-card-badge ${z.badgeClass || ''}">${zShort}</span>
                 </div>
                 <div class="zombie-card-info">
                     <div class="zombie-card-top-row">
-                        <h4 class="zombie-card-name">${z.name}</h4>
-                        <span class="zombie-card-type-tag ${z.badgeClass || ''}">${z.fullBadge || z.badge}</span>
+                        <h4 class="zombie-card-name">${zName}</h4>
+                        <span class="zombie-card-type-tag ${z.badgeClass || ''}">${zFull}</span>
                     </div>
                     <div class="zombie-card-stats-row">
-                        <span class="zombie-stat-chip">❤️ ${z.hp} HP</span>
-                        <span class="zombie-stat-chip">⚡ ${z.speed} Vel</span>
-                        <span class="zombie-stat-chip">💥 ${z.attackDamage} Dano</span>
+                        <span class="zombie-stat-chip">❤️ ${z.hp} ${hpU}</span>
+                        <span class="zombie-stat-chip">⚡ ${z.speed} ${spdU}</span>
+                        <span class="zombie-stat-chip">💥 ${z.attackDamage} ${dmgU}</span>
                     </div>
                 </div>
             `;
@@ -448,6 +453,7 @@ class Game {
         const hero = window.guitaristPool ? window.guitaristPool.getActiveGuitarist() : null;
         const hid = hero ? hero.id : null;
 
+        const basicTxt = this.tr('laneBasicMana', 'BÁSICO (0 MP)');
         for (let l = 0; l < 4; l++) {
             const skill = window.skillSystem.getEquippedSkill(l, hid);
             const badge = window.skillSystem.getSkillTypeBadge ? window.skillSystem.getSkillTypeBadge(skill) : { label: 'SKILL', color: '#00d4ff', bg: 'rgba(0,0,0,0.3)' };
@@ -455,11 +461,11 @@ class Game {
             const slot = document.createElement('div');
             slot.className = `lane-skill-slot lane-${l}`;
             slot.innerHTML = `
-                <span class="lane-tag-num" style="color: ${laneColors[l]};">Trilho ${l + 1}</span>
+                <span class="lane-tag-num" style="color: ${laneColors[l]};">${this.tr('laneShortTag', 'Trilho {num}', { num: l + 1 })}</span>
                 <span class="lane-skill-icon">${skill.icon}</span>
-                <span class="lane-skill-title">${skill.name}</span>
+                <span class="lane-skill-title">${this.tr('skill_' + skill.id + '_name', skill.name)}</span>
                 <span class="lane-skill-type-pill" style="color: ${badge.color}; background: ${badge.bg};">${badge.label} (${dmgText})</span>
-                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} MP` : 'BÁSICO (0 MP)'}</span>
+                <span class="lane-skill-cost">${skill.manaCost > 0 ? `⚡ ${skill.manaCost} MP` : basicTxt}</span>
             `;
 
             slot.onclick = () => this.openSkillPickerModal(l);
@@ -476,16 +482,16 @@ class Game {
         const resetBtn = document.getElementById('skill-restore-default-btn');
         if (!modal || !listEl) return;
 
-        const laneNames = ['Trilho 1 (Verde)', 'Trilho 2 (Vermelho)', 'Trilho 3 (Amarelo)', 'Trilho 4 (Azul)'];
+        const laneFull = this.tr(`laneFull_${laneIndex}`, this.tr('laneShortTag', `Trilho ${laneIndex + 1}`, { num: laneIndex + 1 }));
         const hero = window.guitaristPool ? window.guitaristPool.getActiveGuitarist() : null;
         const hid = hero ? hero.id : null;
-        const heroName = hero ? hero.name : 'Guitarrista';
-        if (titleEl) titleEl.innerText = `⚡ ${laneNames[laneIndex] || `Trilho ${laneIndex + 1}`} • ${heroName}`;
+        const heroName = hero ? hero.name : this.tr('heroFallback', 'Guitarrista');
+        if (titleEl) titleEl.innerText = `⚡ ${laneFull} • ${heroName}`;
 
         if (resetBtn) {
             resetBtn.onclick = () => {
                 window.skillSystem.resetHeroLoadout(hid);
-                this.showToast('Loadout padrão restaurado!');
+                this.showToast(this.tr('toastLoadoutRestored', 'Loadout padrão restaurado!'));
                 if (window.soundEngine) window.soundEngine.playPowerChord();
                 this.openSkillPickerModal(laneIndex);
                 this.renderLaneSkills();
@@ -495,6 +501,7 @@ class Game {
 
         const currentSkill = window.skillSystem.getEquippedSkill(laneIndex, hid);
         const heroSkills = window.skillSystem.getSkillsForHero(hid);
+        const eqTag = this.tr('skillEquippedTag', '✅ Equipada neste trilho'), blkTag = this.tr('skillBlockedTag', '🔒 Bloqueado: Mantenha ≥ 1 Ataque Básico');
 
         listEl.innerHTML = '';
         heroSkills.forEach(s => {
@@ -502,7 +509,8 @@ class Game {
             const check = window.skillSystem.canEquipSkill(laneIndex, s.id, hid);
             const isBlocked = !check.allowed;
             const badge = window.skillSystem.getSkillTypeBadge ? window.skillSystem.getSkillTypeBadge(s) : { label: 'SKILL', color: '#00d4ff', bg: 'rgba(0,0,0,0.3)' };
-            const dmgText = s.damageMult ? `${Math.round(s.damageMult * 100)}% Dano` : '100% Dano';
+            const dmgText = this.tr('skillDmgPct', '{pct}% Dano', { pct: Math.round((s.damageMult || 1) * 100) });
+            const costTxt = s.manaCost > 0 ? this.tr('skillRockManaUnit', '{mp} Rock Mana', { mp: s.manaCost }) : this.tr('skillFreeBasic', '0 MP (Básico)');
 
             const card = document.createElement('div');
             card.className = `skill-card-choice ${isEquipped ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
@@ -510,16 +518,16 @@ class Game {
                 <div class="skill-choice-icon">${s.icon}</div>
                 <div class="skill-choice-info">
                     <div class="skill-choice-header">
-                        <span class="skill-choice-name">${s.name}</span>
+                        <span class="skill-choice-name">${this.tr('skill_' + s.id + '_name', s.name)}</span>
                         <span class="skill-type-pill" style="color: ${badge.color}; background: ${badge.bg};">${badge.label}</span>
                     </div>
                     <div class="skill-choice-stats">
                         <span class="skill-dmg-tag">💥 ${dmgText}</span>
-                        <span class="skill-cost-tag" style="color: ${s.manaCost > 0 ? '#00d4ff' : '#00ff66'};">⚡ ${s.manaCost > 0 ? `${s.manaCost} Rock Mana` : '0 MP (Básico)'}</span>
+                        <span class="skill-cost-tag" style="color: ${s.manaCost > 0 ? '#00d4ff' : '#00ff66'};">⚡ ${costTxt}</span>
                     </div>
-                    <div class="skill-choice-desc">${s.desc}</div>
-                    ${isEquipped ? '<span class="skill-status-tag equipped">✅ Equipada neste trilho</span>' : ''}
-                    ${isBlocked ? '<span class="skill-status-tag blocked">🔒 Bloqueado: Mantenha ≥ 1 Ataque Básico</span>' : ''}
+                    <div class="skill-choice-desc">${this.tr('skill_' + s.id + '_desc', s.desc)}</div>
+                    ${isEquipped ? `<span class="skill-status-tag equipped">${eqTag}</span>` : ''}
+                    ${isBlocked ? `<span class="skill-status-tag blocked">${blkTag}</span>` : ''}
                 </div>
             `;
 
@@ -587,9 +595,11 @@ class Game {
         const list = document.getElementById('map-songs-roster-list');
         if (!list) return;
         const songs = this.availableSongs || (this.selectedSong ? [this.selectedSong] : []);
+        const selBtn = this.tr('btnSelectedSong', '✅ SELECIONADA'), chBtn = this.tr('btnChoose', '▶️ ESCOLHER'), defArt = this.tr('songUnknownArtist', 'Desconhecido');
         list.innerHTML = '';
         songs.forEach(s => {
             const isSelected = this.selectedSong && (this.selectedSong.id === s.id);
+            const notesTxt = this.tr('songNotesShort', '{count} notas', { count: (s.notes || []).length });
             const card = document.createElement('div');
             card.className = `map-song-card ${isSelected ? 'active' : ''}`;
             card.innerHTML = `
@@ -597,12 +607,10 @@ class Game {
                     <img src="${s.cover || 'assets/covers/default_cover.jpg'}" alt="${s.title}" class="map-song-card-thumb">
                     <div class="map-song-card-text">
                         <span class="map-song-card-title">${s.title}</span>
-                        <span class="map-song-card-meta">${s.artist || 'Cyber Shock'} • ${s.bpm || 120} BPM • ${(s.notes || []).length} notas</span>
+                        <span class="map-song-card-meta">${s.artist || defArt} • ${s.bpm || 120} BPM • ${notesTxt}</span>
                     </div>
                 </div>
-                <button type="button" class="song-card-action-btn ${isSelected ? 'active' : ''}">
-                    ${isSelected ? '✅ SELECIONADA' : '▶️ ESCOLHER'}
-                </button>
+                <button type="button" class="song-card-action-btn ${isSelected ? 'active' : ''}">${isSelected ? selBtn : chBtn}</button>
             `;
             const chooseHandler = (e) => { if (e) e.stopPropagation(); this.selectSong(s); };
             card.onclick = chooseHandler;
@@ -647,10 +655,10 @@ class Game {
         const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
         const coverImg = document.getElementById('map-selected-song-cover');
         if (coverImg) coverImg.src = song.cover || 'assets/covers/default_cover.jpg';
-        setTxt('map-selected-song-title', song.title || 'Música');
+        setTxt('map-selected-song-title', song.title || this.tr('songDefaultTitle', 'Música'));
         setTxt('selected-song-bpm-tag', `${song.bpm || 120} BPM`);
-        setTxt('map-song-artist', `Autoria: ${song.artist || 'Desconhecido'}`);
-        setTxt('map-song-notes-count', `${(song.notes || []).length} notas mapeadas`);
+        setTxt('map-song-artist', this.tr('songArtistLine', 'Autoria: {artist}', { artist: song.artist || this.tr('songUnknownArtist', 'Desconhecido') }));
+        setTxt('map-song-notes-count', this.tr('songNotesMapped', '{count} notas mapeadas', { count: (song.notes || []).length }));
     }
 
     startMatchWithSong(song) {
@@ -758,22 +766,25 @@ class Game {
         this.lastTime = performance.now(); this.lastRenderTime = performance.now();
     }
 
+    refreshGearModalText() {
+        const title = document.getElementById('gear-modal-title'), dangerZone = document.getElementById('gear-danger-zone-wrap'), footerBtn = document.getElementById('gear-footer-action-btn');
+        if (this.isGearFromMenu) {
+            if (title) title.innerText = this.tr('btnSettings', '⚙️ CONFIGURAÇÕES');
+            if (dangerZone) dangerZone.style.display = 'none';
+            if (footerBtn) footerBtn.innerText = this.tr('gearCloseSettings', '✕ FECHAR CONFIGURAÇÕES');
+        } else {
+            if (title) title.innerText = this.tr('gearTitle', '⚙️ OPÇÕES & PAUSA');
+            if (dangerZone) dangerZone.style.display = 'block';
+            if (footerBtn) footerBtn.innerText = this.tr('gearResume', '▶️ CONTINUAR PARTIDA');
+        }
+    }
+
     openGearModal(isFromMainMenu = false) {
         this.isGearFromMenu = isFromMainMenu;
         const modal = document.getElementById('battle-gear-modal');
         if (!modal) return;
-        const title = document.getElementById('gear-modal-title'), dangerZone = document.getElementById('gear-danger-zone-wrap'), footerBtn = document.getElementById('gear-footer-action-btn');
-        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
-        if (isFromMainMenu) {
-            if (title) title.innerText = tr('btnSettings', '⚙️ CONFIGURAÇÕES');
-            if (dangerZone) dangerZone.style.display = 'none';
-            if (footerBtn) footerBtn.innerText = tr('gearCloseSettings', '✕ FECHAR CONFIGURAÇÕES');
-        } else {
-            if (title) title.innerText = tr('gearTitle', '⚙️ OPÇÕES & PAUSA');
-            if (dangerZone) dangerZone.style.display = 'block';
-            if (footerBtn) footerBtn.innerText = tr('gearResume', '▶️ CONTINUAR PARTIDA');
-            this.pauseBattle();
-        }
+        this.refreshGearModalText();
+        if (!isFromMainMenu) this.pauseBattle();
         modal.classList.add('open');
     }
 
@@ -806,7 +817,7 @@ class Game {
             const thumbEl = document.getElementById('ss-hero-thumb'), nameTxt = document.getElementById('ss-hero-name'), rarityTxt = document.getElementById('ss-hero-rarity');
             if (thumbEl && h) thumbEl.src = h.icon;
             if (nameTxt && h) nameTxt.innerText = h.name;
-            if (rarityTxt && h) { rarityTxt.innerText = h.rarity.toUpperCase(); rarityTxt.className = `hero-rarity-badge ${h.rarityClass} ss-hero-rarity-badge`; }
+            if (rarityTxt && h) { rarityTxt.innerText = this.tr('rarity_' + (h.rarityKey || 'common'), h.rarity).toUpperCase(); rarityTxt.className = `hero-rarity-badge ${h.rarityClass} ss-hero-rarity-badge`; }
         }
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
         const elapsedSec = Math.floor((performance.now() - (s.matchStartTime || performance.now())) / 1000);
@@ -835,8 +846,8 @@ class Game {
         if (!modal) return;
         const coverEl = document.getElementById('result-song-cover'), titleEl = document.getElementById('result-song-title'), artistEl = document.getElementById('result-song-artist');
         if (coverEl) coverEl.src = (song && song.cover) || 'assets/covers/default_cover.jpg';
-        if (titleEl) titleEl.innerText = (song && song.title) || 'Show Concluído';
-        if (artistEl) artistEl.innerText = (song && song.artist) || 'Solo de Guitarra';
+        if (titleEl) titleEl.innerText = (song && song.title) || this.tr('victoryFallbackTitle', 'Show Concluído');
+        if (artistEl) artistEl.innerText = (song && song.artist) || this.tr('victoryFallbackArtist', 'Solo de Guitarra');
         const totalNotes = stats.totalNotes || (song && song.notes ? song.notes.length : 1), hitNotes = stats.hitNotes || (totalNotes - (stats.misses || 0)), accPct = Math.round((hitNotes / Math.max(1, totalNotes)) * 100);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
         setVal('result-accuracy', `${accPct}%`); setVal('result-hits', `${hitNotes} / ${totalNotes}`);
@@ -940,8 +951,8 @@ class Game {
         if (h.comboEl) {
             const streak = this.rhythm.streak || 0, pStreak = (this.combat && this.combat.perfectStreak) || 0;
             const critReady = (this.combat && this.combat.guaranteedCritReady);
-            const critTag = critReady ? (typeof i18n !== 'undefined' ? i18n.t('critReadyTag', ' • 💥 CRÍTICO PRONTO!') : ' • 💥 CRÍTICO PRONTO!') : (pStreak > 0 ? ` • 🎯 ${pStreak}/5 PERF` : '');
-            const t = `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} SPD)${critTag}`;
+            const critTag = critReady ? this.tr('critReadyTag', ' • 💥 CRÍTICO PRONTO!') : (pStreak > 0 ? ` • 🎯 ${pStreak}/5 PERF` : '');
+            const t = this.tr('comboHudFormat', `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} VEL)${critTag}`, { streak, spd: Math.min(2.0, streak * 0.01).toFixed(2), crit: critTag });
             if (t !== h.lastCombo) { h.lastCombo = t; h.comboEl.innerText = t; }
         }
         if (h.multEl) { const t = `x${this.rhythm.multiplier || 1}`; if (t !== h.lastMult) { h.lastMult = t; h.multEl.innerText = t; } }

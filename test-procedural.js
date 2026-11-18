@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
+['js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -542,7 +542,8 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'missions.js', 'main.js', 'pvp.css', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=62`), `index.html links ${f} with v=62`));
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=62`), `index.html links ${f} with v=62`));
+['i18n.js', 'i18n-content.js', 'i18n-modes.js', 'missions.js', 'main.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=64`), `index.html links ${f} with v=64`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -712,11 +713,13 @@ assert(htmlContent.includes('data-cat="pvp"') && cssContent.includes('.pvp-missi
 // ==========================================
 console.log('\n22. Testing Multilingual i18n Localization (PT, EN, ES, FR)...');
 assert(typeof i18n !== 'undefined' && i18n.currentLang, 'i18n engine is initialized');
-const ptKeys = Object.keys(i18n.translations.pt), enKeys = Object.keys(i18n.translations.en);
-const esKeys = Object.keys(i18n.translations.es), frKeys = Object.keys(i18n.translations.fr);
-assert(ptKeys.length === 448 && enKeys.length === 448 && esKeys.length === 448 && frKeys.length === 448, `All 4 languages have full key coverage (448 keys each)`);
-const symCheck = (target, name) => ptKeys.filter(k => !(k in target));
+const ptKeys = Object.keys(i18n.translations.pt), enKeys = Object.keys(i18n.translations.en), esKeys = Object.keys(i18n.translations.es), frKeys = Object.keys(i18n.translations.fr);
+assert(ptKeys.length === 1071 && enKeys.length === 1071 && esKeys.length === 1071 && frKeys.length === 1071, 'All 4 languages have full 1071-key coverage');
+const symCheck = (t) => ptKeys.filter(k => !(k in t));
 assert(symCheck(i18n.translations.en).length === 0 && symCheck(i18n.translations.es).length === 0 && symCheck(i18n.translations.fr).length === 0, '100% key symmetry across pt, en, es, fr');
+const getP = (s) => (s.match(/\{[a-zA-Z0-9_]+\}/g) || []).sort().join(',');
+const pMismatch = ptKeys.filter(k => ['en', 'es', 'fr'].some(l => getP(i18n.translations.pt[k]) !== getP(i18n.translations[l][k])));
+assert(pMismatch.length === 0, '100% placeholder parameter symmetry across all 4 languages');
 const currentHtml = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
 const domKeys = [...currentHtml.matchAll(/data-i18n(?:-title|-placeholder)?="([^"]+)"/g)].map(m => m[1]);
 assert([...new Set(domKeys)].filter(k => !(k in i18n.translations.pt)).length === 0, `All ${new Set(domKeys).size} DOM i18n keys exist in dictionary`);
@@ -727,9 +730,10 @@ let callbackLang = null; i18n.onLanguageChange((lang) => { callbackLang = lang; 
 i18n.setLanguage('en');
 assert(i18n.currentLang === 'en' && callbackLang === 'en' && i18n.t('btnPlay') === 'CAMPAIGN' && i18n.t('heroMaxLevel') === '⭐ MAX LEVEL (100)', 'i18n EN matches');
 i18n.setLanguage('es');
-assert(i18n.currentLang === 'es' && callbackLang === 'es' && i18n.t('btnPlay') === 'CAMPAÑA' && i18n.t('countdownGetReady') === '🎸 PREPARACIÓN', 'i18n ES matches');
+assert(i18n.currentLang === 'es' && callbackLang === 'es' && i18n.t('btnPlay') === 'CAMPAÑA' && i18n.t('laneShortTag', '', { num: 2 }) === 'Pista 2' && i18n.t('rank_master') === 'Maestro del Rock', 'i18n ES matches');
 i18n.setLanguage('fr');
-assert(i18n.currentLang === 'fr' && callbackLang === 'fr' && i18n.t('btnPlay') === 'CAMPAGNE' && i18n.t('countdownGetReady') === '🎸 PRÉPARATION', 'i18n FR matches');
+assert(i18n.currentLang === 'fr' && callbackLang === 'fr' && i18n.t('skill_basic_strike_name') === 'Médiator Sonique' && i18n.t('zombie_short_toxic_hazmat') === 'TOXIQUE' && i18n.t('stage_name_1') === 'Rue des Garages' && i18n.t('songNotesMapped', '', { count: 71 }) === '71 notes mappées', 'i18n FR full content matches');
+assert(i18n.t('bossShowdown', '', { stage: 20, name: i18n.t('zombie_chained_gladiator').toUpperCase() }).includes('GLADIATEUR DU BITUME') && stageSys.getStageName(5).includes(i18n.t('zombie_' + stageSys.getBossZombieDef(5).id).toUpperCase()), 'Boss Showdown translates boss name in French');
 i18n.setLanguage('pt');
 assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'CAMPANHA', 'i18n switches back to PT smoothly');
 

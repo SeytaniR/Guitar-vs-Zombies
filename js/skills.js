@@ -1,4 +1,5 @@
 // SkillSystem - Modular 4-Lane Skill Loadout, Unique Guitarist Skill Catalogues (5+ per Hero), Mana Cost & Stage Rules
+const _trS = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
 class SkillSystem {
     constructor() {
         this.skills = [
@@ -19,7 +20,7 @@ class SkillSystem {
                 icon: '⚡', color: '#ff5500',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.2); if (target) target.x += 25; combat.triggerShake(4);
-                    return { damage: dmg, label: '⚡ POWER CHORD!', color: '#ff5500' };
+                    return { damage: dmg, label: _trS('sk_lbl_power_chord', '⚡ POWER CHORD!'), color: '#ff5500' };
                 }
             },
             {
@@ -29,8 +30,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.4);
                     combat.heroAttackSpeedBuffTimer = 3.5; combat.heroAttackSpeedBuffMult = 1.35;
-                    combat.addFloatingText('🚀 VELOCIDADE +35%!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffaa00', true);
-                    return { damage: dmg, label: '🎸 SOLO PUNK!', color: '#ffaa00' };
+                    combat.addFloatingText(_trS('sk_fx_speed35', '🚀 VELOCIDADE +35%!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffaa00', true);
+                    return { damage: dmg, label: _trS('sk_lbl_punk_solo', '🎸 SOLO PUNK!'), color: '#ffaa00' };
                 }
             },
             {
@@ -47,7 +48,7 @@ class SkillSystem {
                             }
                         });
                     }
-                    return { damage: dmg, label: '💥 STAGE DIVE!', color: '#ff3300' };
+                    return { damage: dmg, label: _trS('sk_lbl_stage_dive', '💥 STAGE DIVE!'), color: '#ff3300' };
                 }
             },
             {
@@ -56,8 +57,8 @@ class SkillSystem {
                 icon: '🔊', color: '#ffcc00',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.25);
-                    if (target) { target.stunTimer = 2.0; combat.addFloatingText('🔊 ENSURDECIDO!', target.x, target.y - 48, '#ffcc00', true); }
-                    return { damage: dmg, label: '🔊 MICROFONIA!', color: '#ffcc00' };
+                    if (target) { target.stunTimer = 2.0; combat.addFloatingText(_trS('sk_fx_deafened', '🔊 ENSURDECIDO!'), target.x, target.y - 48, '#ffcc00', true); }
+                    return { damage: dmg, label: _trS('sk_lbl_feedback', '🔊 MICROFONIA!'), color: '#ffcc00' };
                 }
             },
             {
@@ -68,7 +69,7 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 1.1);
                     const healBonus = window.talentSystem ? window.talentSystem.getStat('rhythmic_heal') * 3 : 0;
                     combat.healHero(22 + healBonus);
-                    return { damage: dmg, label: '💚 +22 HP ROCK!', color: '#00ff66' };
+                    return { damage: dmg, label: _trS('sk_lbl_heal22', '💚 +22 HP ROCK!'), color: '#00ff66' };
                 }
             },
 
@@ -81,8 +82,8 @@ class SkillSystem {
                 icon: '🔥', color: '#ff3300',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.35);
-                    if (target) { target.burnTimer = 4.0; target.burnDps = 26; combat.addFloatingText('🔥 EM CHAMAS!', target.x, target.y - 48, '#ff3300', true); }
-                    return { damage: dmg, label: '🔥 PIROTECNIA!', color: '#ff3300' };
+                    if (target) { target.burnTimer = 4.0; target.burnDps = 26; combat.addFloatingText(_trS('sk_fx_in_flames', '🔥 EM CHAMAS!'), target.x, target.y - 48, '#ff3300', true); }
+                    return { damage: dmg, label: _trS('sk_lbl_pyro', '🔥 PIROTECNIA!'), color: '#ff3300' };
                 }
             },
             {
@@ -91,7 +92,7 @@ class SkillSystem {
                 icon: '🏎️', color: '#ff6600',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.15); if (target) target.x += 35; combat.triggerShake(5);
-                    return { damage: dmg, label: '💥 V8 BACKFIRE!', color: '#ff6600' };
+                    return { damage: dmg, label: _trS('sk_lbl_v8', '💥 V8 BACKFIRE!'), color: '#ff6600' };
                 }
             },
             {
@@ -101,8 +102,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.5);
                     combat.entities.zombies.forEach(z => { if (z.active) { z.burnTimer = 3.5; z.burnDps = 16; } });
-                    combat.addFloatingText('🌋 SHOW DE FOGO!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ff1100', true);
-                    return { damage: dmg, label: '🌋 PIROTECNIA!', color: '#ff1100' };
+                    combat.addFloatingText(_trS('sk_fx_fire_show', '🌋 SHOW DE FOGO!'), combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ff1100', true);
+                    return { damage: dmg, label: _trS('sk_lbl_napalm', '🌋 PIROTECNIA!'), color: '#ff1100' };
                 }
             },
             {
@@ -111,7 +112,7 @@ class SkillSystem {
                 icon: '🎸', color: '#ff9900',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.85); combat.triggerShake(3);
-                    return { damage: dmg, label: '🎸 PALHETA EM BRASA!', color: '#ff9900' };
+                    return { damage: dmg, label: _trS('sk_lbl_molten_pick', '🎸 PALHETA EM BRASA!'), color: '#ff9900' };
                 }
             },
             {
@@ -121,8 +122,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.85);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 42; combat.heroShieldTimer = 4.5;
-                    combat.addFloatingText('🔊 PAREDÃO VALVULADO (+42)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#cc3300', true);
-                    return { damage: dmg, label: '🔊 PAREDÃO VALVULADO!', color: '#cc3300' };
+                    combat.addFloatingText(_trS('sk_fx_tube_wall', '🔊 PAREDÃO VALVULADO (+42)'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#cc3300', true);
+                    return { damage: dmg, label: _trS('sk_lbl_tube_wall', '🔊 PAREDÃO VALVULADO!'), color: '#cc3300' };
                 }
             },
 
@@ -135,8 +136,8 @@ class SkillSystem {
                 icon: '🧪', color: '#39ff14',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.6);
-                    if (target) { target.hp -= 20; combat.addFloatingText('🧪 CORROSÃO SÔNICA (-20)', target.x, target.y - 45, '#39ff14', false); }
-                    return { damage: dmg, label: '🧪 RIFF CÁUSTICO!', color: '#39ff14' };
+                    if (target) { target.hp -= 20; combat.addFloatingText(_trS('sk_fx_acid_corr', '🧪 CORROSÃO SÔNICA (-20)'), target.x, target.y - 45, '#39ff14', false); }
+                    return { damage: dmg, label: _trS('sk_lbl_caustic', '🧪 RIFF CÁUSTICO!'), color: '#39ff14' };
                 }
             },
             {
@@ -145,7 +146,7 @@ class SkillSystem {
                 icon: '☢️', color: '#00ff66',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.35); combat.triggerShake(5);
-                    return { damage: dmg, label: '☢️ SOLO RADIOATIVO!', color: '#00ff66' };
+                    return { damage: dmg, label: _trS('sk_lbl_uranium', '☢️ SOLO RADIOATIVO!'), color: '#00ff66' };
                 }
             },
             {
@@ -155,8 +156,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.0);
                     combat.entities.zombies.forEach(z => { if (z.active) { z.slowTimer = 4.0; z.slowFactor = 0.50; } });
-                    combat.addFloatingText('☣️ MARCHA DESACELERADA!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#33cc33', true);
-                    return { damage: dmg, label: '☣️ DISTORÇÃO TÓXICA!', color: '#33cc33' };
+                    combat.addFloatingText(_trS('sk_fx_horde_slow', '☣️ MARCHA DESACELERADA!'), combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#33cc33', true);
+                    return { damage: dmg, label: _trS('sk_lbl_toxic_fuzz', '☣️ DISTORÇÃO TÓXICA!'), color: '#33cc33' };
                 }
             },
             {
@@ -172,7 +173,7 @@ class SkillSystem {
                             }
                         });
                     }
-                    return { damage: dmg, label: '💥 ACORDE DISSONANTE!', color: '#76ff03' };
+                    return { damage: dmg, label: _trS('sk_lbl_dissonant', '💥 ACORDE DISSONANTE!'), color: '#76ff03' };
                 }
             },
             {
@@ -181,7 +182,7 @@ class SkillSystem {
                 icon: '🧬', color: '#00e676',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.85); combat.healHero(26);
-                    return { damage: dmg, label: '🧬 +26 HP BIO-ROCK!', color: '#00e676' };
+                    return { damage: dmg, label: _trS('sk_lbl_bio_heal', '🧬 +26 HP BIO-ROCK!'), color: '#00e676' };
                 }
             },
 
@@ -197,7 +198,7 @@ class SkillSystem {
                     if (target && typeof combat.triggerChainLightning === 'function') {
                         combat.triggerChainLightning(target, 2, Math.round(dmg * 0.5));
                     }
-                    return { damage: dmg, label: '⚡ ARPEJO TESLA!', color: '#00f0ff' };
+                    return { damage: dmg, label: _trS('sk_lbl_tesla', '⚡ ARPEJO TESLA!'), color: '#00f0ff' };
                 }
             },
             {
@@ -206,8 +207,8 @@ class SkillSystem {
                 icon: '⚡', color: '#00a2ff',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.3);
-                    if (target) { target.stunTimer = 2.4; combat.addFloatingText('⚡ PEM PARALISANTE!', target.x, target.y - 48, '#00a2ff', true); }
-                    return { damage: dmg, label: '⚡ PEM PARALISANTE!', color: '#00a2ff' };
+                    if (target) { target.stunTimer = 2.4; combat.addFloatingText(_trS('sk_fx_emp', '⚡ PEM PARALISANTE!'), target.x, target.y - 48, '#00a2ff', true); }
+                    return { damage: dmg, label: _trS('sk_fx_emp', '⚡ PEM PARALISANTE!'), color: '#00a2ff' };
                 }
             },
             {
@@ -217,8 +218,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.35);
                     combat.heroAttackSpeedBuffTimer = 4.0; combat.heroAttackSpeedBuffMult = 1.55;
-                    combat.addFloatingText('🚀 OVERCLOCK +55%!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#b000ff', true);
-                    return { damage: dmg, label: '🚀 OVERCLOCK SHRED!', color: '#b000ff' };
+                    combat.addFloatingText(_trS('sk_fx_overclock', '🚀 OVERCLOCK +55%!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#b000ff', true);
+                    return { damage: dmg, label: _trS('sk_lbl_overclock', '🚀 OVERCLOCK SHRED!'), color: '#b000ff' };
                 }
             },
             {
@@ -227,7 +228,7 @@ class SkillSystem {
                 icon: '🔮', color: '#00ffff',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.4); combat.triggerShake(5);
-                    return { damage: dmg, label: '🔮 LASER-CASTER CRÍTICO!', color: '#00ffff' };
+                    return { damage: dmg, label: _trS('sk_lbl_laser_crit', '🔮 LASER-CASTER CRÍTICO!'), color: '#00ffff' };
                 }
             },
             {
@@ -237,8 +238,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.9);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 45; combat.heroShieldTimer = 4.5;
-                    combat.addFloatingText('🛡️ BARREIRA ACÚSTICA (+45)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#0080ff', true);
-                    return { damage: dmg, label: '🛡️ BARREIRA ACÚSTICA!', color: '#0080ff' };
+                    combat.addFloatingText(_trS('sk_fx_hex_barrier', '🛡️ BARREIRA ACÚSTICA (+45)'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#0080ff', true);
+                    return { damage: dmg, label: _trS('sk_lbl_hex_barrier', '🛡️ BARREIRA ACÚSTICA!'), color: '#0080ff' };
                 }
             },
 
@@ -252,7 +253,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.75); combat.triggerShake(7);
                     if (target) target.stunTimer = 2.2;
-                    return { damage: dmg, label: '🌋 RIFF SÍSMICO!', color: '#ffaa00' };
+                    return { damage: dmg, label: _trS('sk_lbl_seismic', '🌋 RIFF SÍSMICO!'), color: '#ffaa00' };
                 }
             },
             {
@@ -261,7 +262,7 @@ class SkillSystem {
                 icon: '🎸', color: '#ff5500',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.6); if (target) target.x += 42; combat.triggerShake(7.5);
-                    return { damage: dmg, label: '🎸 SLAM DE FLYING-V!', color: '#ff5500' };
+                    return { damage: dmg, label: _trS('sk_lbl_flying_slam', '🎸 SLAM DE FLYING-V!'), color: '#ff5500' };
                 }
             },
             {
@@ -271,8 +272,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.25);
                     combat.entities.zombies.forEach(z => { if (z.active) { z.slowTimer = 3.5; z.slowFactor = 0.45; } });
-                    combat.addFloatingText('🎙️ GUTURAL METAL!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ffd700', true);
-                    return { damage: dmg, label: '🎙️ GUTURAL METAL!', color: '#ffd700' };
+                    combat.addFloatingText(_trS('sk_fx_death_roar', '🎙️ GUTURAL METAL!'), combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ffd700', true);
+                    return { damage: dmg, label: _trS('sk_fx_death_roar', '🎙️ GUTURAL METAL!'), color: '#ffd700' };
                 }
             },
             {
@@ -282,8 +283,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 0.8);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 60; combat.heroShieldTimer = 5.0;
-                    combat.addFloatingText('🔊 MURALHA DE SOM (+60)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffd700', true);
-                    return { damage: dmg, label: '🔊 MURALHA DE SOM!', color: '#ffd700' };
+                    combat.addFloatingText(_trS('sk_fx_amp_fortress', '🔊 MURALHA DE SOM (+60)'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffd700', true);
+                    return { damage: dmg, label: _trS('sk_lbl_amp_fortress', '🔊 MURALHA DE SOM!'), color: '#ffd700' };
                 }
             },
             {
@@ -299,7 +300,7 @@ class SkillSystem {
                             }
                         });
                     }
-                    return { damage: dmg, label: '⚡ SOLO TROVEJANTE!', color: '#ffcc00' };
+                    return { damage: dmg, label: _trS('sk_lbl_valhalla_thunder', '⚡ SOLO TROVEJANTE!'), color: '#ffcc00' };
                 }
             },
 
@@ -312,7 +313,7 @@ class SkillSystem {
                 icon: '🎸', color: '#ff00a0',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.85); combat.triggerShake(4.5);
-                    return { damage: dmg, label: '🎸 RIFF REBELDE!', color: '#ff00a0' };
+                    return { damage: dmg, label: _trS('sk_lbl_riot_riff', '🎸 RIFF REBELDE!'), color: '#ff00a0' };
                 }
             },
             {
@@ -321,9 +322,9 @@ class SkillSystem {
                 icon: '🎸', color: '#ff0055',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.45);
-                    if (target) { target.burnTimer = 3.0; target.burnDps = 24; combat.addFloatingText('🩸 SANGRAMENTO SÔNICO!', target.x, target.y - 48, '#ff0055', true); }
+                    if (target) { target.burnTimer = 3.0; target.burnDps = 24; combat.addFloatingText(_trS('sk_fx_sonic_bleed', '🩸 SANGRAMENTO SÔNICO!'), target.x, target.y - 48, '#ff0055', true); }
                     combat.triggerShake(5);
-                    return { damage: dmg, label: '🎸 PALHETADA LACERANTE!', color: '#ff0055' };
+                    return { damage: dmg, label: _trS('sk_lbl_lacerate', '🎸 PALHETADA LACERANTE!'), color: '#ff0055' };
                 }
             },
             {
@@ -333,7 +334,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.5); const lifesteal = Math.max(15, Math.round(dmg * 0.5));
                     combat.healHero(lifesteal);
-                    return { damage: dmg, label: `🩸 SOLO VAMPÍRICO (+${lifesteal})`, color: '#e6004c' };
+                    return { damage: dmg, label: _trS('sk_lbl_vampiric_drain', `🩸 SOLO VAMPÍRICO (+${lifesteal})`, { heal: lifesteal }), color: '#e6004c' };
                 }
             },
             {
@@ -344,8 +345,8 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 1.45);
                     combat.heroAttackSpeedBuffTimer = 4.0; combat.heroAttackSpeedBuffMult = 1.50;
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 10);
-                    combat.addFloatingText('🤘 MOSH PIT (+50% VELOCIDADE)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff1493', true);
-                    return { damage: dmg, label: '🤘 MOSH PIT!', color: '#ff1493' };
+                    combat.addFloatingText(_trS('sk_fx_mosh_pit', '🤘 MOSH PIT (+50% VELOCIDADE)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff1493', true);
+                    return { damage: dmg, label: _trS('sk_lbl_mosh_pit', '🤘 MOSH PIT!'), color: '#ff1493' };
                 }
             },
             {
@@ -356,7 +357,7 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 2.8); combat.triggerShake(10);
                     if (target) target.x += 35;
                     combat.entities.zombies.forEach(z => { if (z.active && z !== target) { z.hp -= Math.round(baseDmg * 0.75); z.x += 18; z.flashTime = 0.2; } });
-                    return { damage: dmg, label: '💥 SOLO CATACLÍSMICO!', color: '#ff00aa' };
+                    return { damage: dmg, label: _trS('sk_lbl_chaos_cat', '💥 SOLO CATACLÍSMICO!'), color: '#ff00aa' };
                 }
             },
 
@@ -370,7 +371,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.2); combat.triggerShake(5);
                     if (target) target.x += 28;
-                    return { damage: dmg, label: '🎸 LÂMINA DIMENSIONAL!', color: '#00e5ff' };
+                    return { damage: dmg, label: _trS('sk_lbl_dim_blade', '🎸 LÂMINA DIMENSIONAL!'), color: '#00e5ff' };
                 }
             },
             {
@@ -381,8 +382,8 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 1.4);
                     combat.heroAttackSpeedBuffTimer = 3.8; combat.heroAttackSpeedBuffMult = 1.45;
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 8);
-                    combat.addFloatingText('⭐ HORA DO ROCK (+45% VEL)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#00ffaa', true);
-                    return { damage: dmg, label: '⭐ HORA DE AVENTURA!', color: '#00ffaa' };
+                    combat.addFloatingText(_trS('sk_fx_adv_rush', '⭐ HORA DO ROCK (+45% VEL)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#00ffaa', true);
+                    return { damage: dmg, label: _trS('sk_lbl_adv_rush', '⭐ HORA DE AVENTURA!'), color: '#00ffaa' };
                 }
             },
             {
@@ -391,8 +392,8 @@ class SkillSystem {
                 icon: '⚡', color: '#33ffff',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.85);
-                    if (target) { target.stunTimer = 2.2; combat.addFloatingText('⚡ PARALISIA DE OOO!', target.x, target.y - 48, '#33ffff', true); }
-                    return { damage: dmg, label: '⚡ RELÂMPAGO DE OOO!', color: '#33ffff' };
+                    if (target) { target.stunTimer = 2.2; combat.addFloatingText(_trS('sk_fx_ooo_para', '⚡ PARALISIA DE OOO!'), target.x, target.y - 48, '#33ffff', true); }
+                    return { damage: dmg, label: _trS('sk_lbl_ooo_thunder', '⚡ RELÂMPAGO DE OOO!'), color: '#33ffff' };
                 }
             },
             {
@@ -402,8 +403,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.15);
                     combat.heroShieldHp = (combat.heroShieldHp || 0) + 52; combat.heroShieldTimer = 4.5;
-                    combat.addFloatingText('🛡️ APARADA ACÚSTICA (+52)', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#00ccff', true);
-                    return { damage: dmg, label: '🛡️ GUARDA DE ESPADA!', color: '#00ccff' };
+                    combat.addFloatingText(_trS('sk_fx_sword_parry', '🛡️ APARADA ACÚSTICA (+52)'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#00ccff', true);
+                    return { damage: dmg, label: _trS('sk_lbl_sword_parry', '🛡️ GUARDA DE ESPADA!'), color: '#00ccff' };
                 }
             },
             {
@@ -414,7 +415,7 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 2.85); combat.triggerShake(8.5);
                     if (target) target.x += 30;
                     combat.entities.zombies.forEach(z => { if (z.active && z !== target) { z.hp -= Math.round(baseDmg * 0.8); z.x += 15; z.flashTime = 0.2; } });
-                    return { damage: dmg, label: '👑 SOLO MATEMÁTICO!', color: '#00ffcc' };
+                    return { damage: dmg, label: _trS('sk_lbl_math_solo', '👑 SOLO MATEMÁTICO!'), color: '#00ffcc' };
                 }
             },
 
@@ -427,8 +428,8 @@ class SkillSystem {
                 icon: '🔥', color: '#ff3300',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.1);
-                    if (target) { target.burnTimer = 4.0; target.burnDps = 30; combat.addFloatingText('🔥 CHAMA DRACÔNICA!', target.x, target.y - 48, '#ff3300', true); }
-                    return { damage: dmg, label: '🔥 SOPRO DRACÔNICO!', color: '#ff3300' };
+                    if (target) { target.burnTimer = 4.0; target.burnDps = 30; combat.addFloatingText(_trS('sk_fx_draco_flame', '🔥 CHAMA DRACÔNICA!'), target.x, target.y - 48, '#ff3300', true); }
+                    return { damage: dmg, label: _trS('sk_lbl_draco_breath', '🔥 SOPRO DRACÔNICO!'), color: '#ff3300' };
                 }
             },
             {
@@ -438,7 +439,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.45); combat.triggerShake(8);
                     if (target) { target.x += 40; target.stunTimer = 1.6; }
-                    return { damage: dmg, label: '🌋 SLAM VULCÂNICO!', color: '#ff4500' };
+                    return { damage: dmg, label: _trS('sk_lbl_volc_slam', '🌋 SLAM VULCÂNICO!'), color: '#ff4500' };
                 }
             },
             {
@@ -448,8 +449,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.5);
                     combat.heroAttackSpeedBuffTimer = 4.0; combat.heroAttackSpeedBuffMult = 1.55;
-                    combat.addFloatingText('💥 FÚRIA DRACÔNICA (+55% SPD)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff6600', true);
-                    return { damage: dmg, label: '💥 AURA INFERNAL!', color: '#ff6600' };
+                    combat.addFloatingText(_trS('sk_fx_draco_fury', '💥 FÚRIA DRACÔNICA (+55% SPD)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff6600', true);
+                    return { damage: dmg, label: _trS('sk_lbl_inf_aura', '💥 AURA INFERNAL!'), color: '#ff6600' };
                 }
             },
             {
@@ -459,7 +460,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.3); combat.triggerShake(7);
                     combat.entities.zombies.forEach(z => { if (z.active) { z.burnTimer = 3.5; z.burnDps = 22; } });
-                    return { damage: dmg, label: '☄️ ACORDE METEÓRICO!', color: '#ff2200' };
+                    return { damage: dmg, label: _trS('sk_lbl_meteor_chord', '☄️ ACORDE METEÓRICO!'), color: '#ff2200' };
                 }
             },
             {
@@ -470,7 +471,7 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 3.0); combat.triggerShake(11);
                     if (target) target.x += 45;
                     combat.entities.zombies.forEach(z => { if (z.active && z !== target) { z.hp -= Math.round(baseDmg * 0.85); z.x += 20; z.flashTime = 0.2; } });
-                    return { damage: dmg, label: '👑 RUGIDO CATACLÍSMICO!', color: '#ff1100' };
+                    return { damage: dmg, label: _trS('sk_lbl_draco_roar', '👑 RUGIDO CATACLÍSMICO!'), color: '#ff1100' };
                 }
             },
 
@@ -484,8 +485,8 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.8);
                     combat.entities.zombies.forEach(z => { if (z.active) { z.slowTimer = 3.8; z.slowFactor = 0.40; } });
-                    combat.addFloatingText('🐺 HORROR DO UIVO!', combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ff0033', true);
-                    return { damage: dmg, label: '🐺 UIVO DE SANGUE!', color: '#ff0033' };
+                    combat.addFloatingText(_trS('sk_fx_howl_horror', '🐺 HORROR DO UIVO!'), combat.getHeroPosition().x + 80, combat.getHeroPosition().y - 55, '#ff0033', true);
+                    return { damage: dmg, label: _trS('sk_lbl_blood_howl', '🐺 UIVO DE SANGUE!'), color: '#ff0033' };
                 }
             },
             {
@@ -494,9 +495,9 @@ class SkillSystem {
                 icon: '🩸', color: '#cc0029',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.55);
-                    if (target) { target.burnTimer = 3.5; target.burnDps = 32; combat.addFloatingText('🩸 HEMORRAGIA SÔNICA!', target.x, target.y - 48, '#cc0029', true); }
+                    if (target) { target.burnTimer = 3.5; target.burnDps = 32; combat.addFloatingText(_trS('sk_fx_hemorrhage', '🩸 HEMORRAGIA SÔNICA!'), target.x, target.y - 48, '#cc0029', true); }
                     combat.triggerShake(5.5);
-                    return { damage: dmg, label: '🩸 GARRA DILACERANTE!', color: '#cc0029' };
+                    return { damage: dmg, label: _trS('sk_lbl_claw_shred', '🩸 GARRA DILACERANTE!'), color: '#cc0029' };
                 }
             },
             {
@@ -507,8 +508,8 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 1.55);
                     combat.heroAttackSpeedBuffTimer = 4.2; combat.heroAttackSpeedBuffMult = 1.60;
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 12);
-                    combat.addFloatingText('🌕 FRENESI LUPINO (+60% VEL)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff1a40', true);
-                    return { damage: dmg, label: '🌕 FRENESI LUPINO!', color: '#ff1a40' };
+                    combat.addFloatingText(_trS('sk_fx_lupine', '🌕 FRENESI LUPINO (+60% VEL)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ff1a40', true);
+                    return { damage: dmg, label: _trS('sk_lbl_lupine', '🌕 FRENESI LUPINO!'), color: '#ff1a40' };
                 }
             },
             {
@@ -518,7 +519,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.1);
                     const heal = Math.max(20, Math.round(dmg * 0.55)); combat.healHero(heal);
-                    return { damage: dmg, label: `🦇 BANQUETE LUPINO (+${heal})`, color: '#e60039' };
+                    return { damage: dmg, label: _trS('sk_lbl_vamp_feast', `🦇 BANQUETE LUPINO (+${heal})`, { heal }), color: '#e60039' };
                 }
             },
             {
@@ -529,7 +530,7 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 3.1); combat.triggerShake(11);
                     if (target) target.x += 42;
                     combat.entities.zombies.forEach(z => { if (z.active && z !== target) { z.hp -= Math.round(baseDmg * 0.9); z.x += 24; z.flashTime = 0.2; } });
-                    return { damage: dmg, label: '👑 MASSACRE ANCESTRAL!', color: '#ff0055' };
+                    return { damage: dmg, label: _trS('sk_lbl_pack_annih', '👑 MASSACRE ANCESTRAL!'), color: '#ff0055' };
                 }
             },
 
@@ -542,7 +543,7 @@ class SkillSystem {
                 icon: '🚀', color: '#ffd700',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.25); if (target) target.x += 32; combat.triggerShake(5);
-                    return { damage: dmg, label: '🚀 TURBINAS A JATO!', color: '#ffd700' };
+                    return { damage: dmg, label: _trS('sk_lbl_jet_turbo', '🚀 TURBINAS A JATO!'), color: '#ffd700' };
                 }
             },
             {
@@ -553,8 +554,8 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 1.5);
                     combat.heroAttackSpeedBuffTimer = 4.0; combat.heroAttackSpeedBuffMult = 1.55;
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 10);
-                    combat.addFloatingText('🫧 HIPERSÔNICO (+55% VEL)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#00ffff', true);
-                    return { damage: dmg, label: '🫧 RAJADA HIPERSÔNICA!', color: '#00ffff' };
+                    combat.addFloatingText(_trS('sk_fx_hypersonic', '🫧 HIPERSÔNICO (+55% VEL)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#00ffff', true);
+                    return { damage: dmg, label: _trS('sk_lbl_hypersonic', '🫧 RAJADA HIPERSÔNICA!'), color: '#00ffff' };
                 }
             },
             {
@@ -563,7 +564,7 @@ class SkillSystem {
                 icon: '🎸', color: '#ffea00',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.6); combat.triggerShake(6);
-                    return { damage: dmg, label: '🎸 ANARQUIA COM TACHAS!', color: '#ffea00' };
+                    return { damage: dmg, label: _trS('sk_lbl_anarchy_stud', '🎸 ANARQUIA COM TACHAS!'), color: '#ffea00' };
                 }
             },
             {
@@ -572,8 +573,8 @@ class SkillSystem {
                 icon: '⭐', color: '#ffff00',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 1.7); combat.healHero(36);
-                    combat.addFloatingText('⭐ DOCE VITÓRIA (+36 HP)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffff00', true);
-                    return { damage: dmg, label: '⭐ DOCE VITÓRIA!', color: '#ffff00' };
+                    combat.addFloatingText(_trS('sk_fx_sweet_vic', '⭐ DOCE VITÓRIA (+36 HP)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffff00', true);
+                    return { damage: dmg, label: _trS('sk_lbl_sweet_vic', '⭐ DOCE VITÓRIA!'), color: '#ffff00' };
                 }
             },
             {
@@ -584,7 +585,7 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 3.2); combat.triggerShake(12);
                     if (target) target.x += 45;
                     combat.entities.zombies.forEach(z => { if (z.active && z !== target) { z.hp -= Math.round(baseDmg * 0.95); z.x += 25; z.flashTime = 0.2; } });
-                    return { damage: dmg, label: '👑 SUPERNOVA OCEÂNICA!', color: '#00f0ff' };
+                    return { damage: dmg, label: _trS('sk_lbl_supernova', '👑 SUPERNOVA OCEÂNICA!'), color: '#00f0ff' };
                 }
             },
 
@@ -598,7 +599,7 @@ class SkillSystem {
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.45); combat.triggerShake(6.5);
                     if (target) target.x += 34;
-                    return { damage: dmg, label: '🎸 RIFF DE LES PAUL!', color: '#e6b800' };
+                    return { damage: dmg, label: _trS('sk_lbl_les_paul', '🎸 RIFF DE LES PAUL!'), color: '#e6b800' };
                 }
             },
             {
@@ -607,8 +608,8 @@ class SkillSystem {
                 icon: '🎩', color: '#ffd700',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.15);
-                    if (target) { target.stunTimer = 2.6; combat.addFloatingText('🎩 WAH-PEDAL PARALISANTE!', target.x, target.y - 48, '#ffd700', true); }
-                    return { damage: dmg, label: '🎩 GRITO DO WAH-PEDAL!', color: '#ffd700' };
+                    if (target) { target.stunTimer = 2.6; combat.addFloatingText(_trS('sk_fx_wah_para', '🎩 WAH-PEDAL PARALISANTE!'), target.x, target.y - 48, '#ffd700', true); }
+                    return { damage: dmg, label: _trS('sk_lbl_wah_cry', '🎩 GRITO DO WAH-PEDAL!'), color: '#ffd700' };
                 }
             },
             {
@@ -619,8 +620,8 @@ class SkillSystem {
                     const dmg = Math.round(baseDmg * 1.75);
                     combat.heroAttackSpeedBuffTimer = 5.0; combat.heroAttackSpeedBuffMult = 1.65;
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 15);
-                    combat.addFloatingText('✨ DEUS DO ROCK (+65% SPD, +15 MP)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffcc00', true);
-                    return { damage: dmg, label: '✨ TEMA IMORTAL!', color: '#ffcc00' };
+                    combat.addFloatingText(_trS('sk_fx_godfather', '✨ DEUS DO ROCK (+65% SPD, +15 MP)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffcc00', true);
+                    return { damage: dmg, label: _trS('sk_lbl_godfather', '✨ TEMA IMORTAL!'), color: '#ffcc00' };
                 }
             },
             {
@@ -629,8 +630,8 @@ class SkillSystem {
                 icon: '⚡', color: '#ffa500',
                 apply: (combat, target, baseDmg) => {
                     const dmg = Math.round(baseDmg * 2.9); combat.triggerShake(7.5);
-                    if (target) { target.burnTimer = 3.5; target.burnDps = 38; combat.addFloatingText('🩸 APETITE DESTRUIDOR!', target.x, target.y - 48, '#ffa500', true); }
-                    return { damage: dmg, label: '⚡ APETITE DESTRUIDOR!', color: '#ffa500' };
+                    if (target) { target.burnTimer = 3.5; target.burnDps = 38; combat.addFloatingText(_trS('sk_fx_appetite', '🩸 APETITE DESTRUIDOR!'), target.x, target.y - 48, '#ffa500', true); }
+                    return { damage: dmg, label: _trS('sk_lbl_appetite', '⚡ APETITE DESTRUIDOR!'), color: '#ffa500' };
                 }
             },
             {
@@ -642,8 +643,8 @@ class SkillSystem {
                     combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + 25);
                     if (target) target.x += 50;
                     combat.entities.zombies.forEach(z => { if (z.active && z !== target) { z.hp -= Math.round(baseDmg * 1.1); z.x += 30; z.flashTime = 0.25; } });
-                    combat.addFloatingText('👑 APOTEOSE DO DEUS DO ROCK (+25 MP)!', combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffd700', true);
-                    return { damage: dmg, label: '👑 APOTEOSE DO DEUS DO ROCK!', color: '#ffd700' };
+                    combat.addFloatingText(_trS('sk_fx_golden_god', '👑 APOTEOSE DO DEUS DO ROCK (+25 MP)!'), combat.getHeroPosition().x, combat.getHeroPosition().y - 50, '#ffd700', true);
+                    return { damage: dmg, label: _trS('sk_lbl_golden_god', '👑 APOTEOSE DO DEUS DO ROCK!'), color: '#ffd700' };
                 }
             }
         ];
@@ -661,6 +662,9 @@ class SkillSystem {
 
         this.heroLoadouts = {};
     }
+
+    getSkillName(skill) { return skill ? _trS(`skill_${skill.id}_name`, skill.name) : ''; }
+    getSkillDesc(skill) { return skill ? _trS(`skill_${skill.id}_desc`, skill.desc) : ''; }
 
     getActiveHeroId() {
         if (window.guitaristPool && typeof window.guitaristPool.getActiveGuitarist === 'function') {
@@ -725,7 +729,7 @@ class SkillSystem {
     }
 
     canEquipSkill(laneIndex, newSkillId, heroId = null) {
-        if (laneIndex < 0 || laneIndex >= 4) return { allowed: false, reason: 'Trilho inválido.' };
+        if (laneIndex < 0 || laneIndex >= 4) return { allowed: false, reason: _trS('invalidLane', 'Trilho inválido.') };
         const hid = heroId || this.getActiveHeroId();
         const currentLoadout = [...this.loadEquipped(hid)];
 

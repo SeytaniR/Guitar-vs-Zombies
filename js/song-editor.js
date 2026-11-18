@@ -33,6 +33,9 @@ class SongEditor {
         // Hold / Sustain Note creation & resizing state
         this.noteMode = 'tap'; // 'tap' or 'hold'
         this.holdDuration = 1.0; // default hold duration in seconds
+    }
+
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
         this.isResizingNote = false;
         this.resizingTarget = null;
         this.resizeStartX = 0;
@@ -604,14 +607,14 @@ class SongEditor {
             if (p !== undefined) p.catch(e => console.warn("Audio autoplay blocked by mobile policy; using software clock", e));
         }
         const btn = document.getElementById('editor-play-btn');
-        if (btn) btn.innerText = '⏸️ PAUSAR';
+        if (btn) btn.innerText = this.tr('editorPauseBtn', '⏸️ PAUSAR');
     }
 
     pause() {
         this.isPlaying = false;
         if (this.audio) { try { this.audio.pause(); } catch (e) {} }
         const btn = document.getElementById('editor-play-btn');
-        if (btn) btn.innerText = '▶️ TOCAR';
+        if (btn) btn.innerText = this.tr('editorPlay', '▶️ TOCAR');
         if (this.isRecording) this.toggleRecord();
         this.updateTimeDisplay();
         this.updateScrubber(true);
@@ -623,7 +626,7 @@ class SongEditor {
         const btn = document.getElementById('editor-rec-btn');
         if (btn) {
             btn.classList.toggle('recording', this.isRecording);
-            btn.innerText = this.isRecording ? '⏹️ PARAR REC' : '⏺️ GRAVAR (REC)';
+            btn.innerText = this.tr(this.isRecording ? 'editorStopRecBtn' : 'editorRec', this.isRecording ? '⏹️ PARAR REC' : '⏺️ GRAVAR (REC)');
         }
         if (this.isRecording && !this.isPlaying) this.play();
     }
@@ -656,7 +659,7 @@ class SongEditor {
         this.song.notes = JSON.parse(previous);
         this.updateStatsDisplay();
         this.drawTimeline();
-        this.showToast("↩️ Ação desfeita!");
+        this.showToast(this.tr('editorToastUndo', "↩️ Ação desfeita!"));
     }
 
     autoGenerateBasicChart() {
@@ -674,7 +677,7 @@ class SongEditor {
         this.song.notes.sort((a, b) => a.time - b.time);
         this.updateStatsDisplay();
         this.drawTimeline();
-        this.showToast(`⚡ Ritmo de ${this.song.notes.length} notas gerado com sucesso!`);
+        this.showToast(this.tr('editorToastAutoGen', `⚡ Ritmo de ${this.song.notes.length} notas gerado com sucesso!`, { count: this.song.notes.length }));
     }
 
     clearAllNotes() {
@@ -682,7 +685,7 @@ class SongEditor {
         this.song.notes = [];
         this.updateStatsDisplay();
         this.drawTimeline();
-        this.showToast("🗑️ Todas as notas foram removidas. (Clique em Desfazer para restaurar)");
+        this.showToast(this.tr('editorToastClear', "🗑️ Todas as notas foram removidas. (Clique em Desfazer para restaurar)"));
     }
 
     async saveSongToDB() {
@@ -691,11 +694,11 @@ class SongEditor {
             this.song.duration = Math.max(15, this.duration || this.song.duration || 30);
             this.song.updatedAt = Date.now();
             await window.songDB.saveSong(this.song);
-            this.showToast("💾 Ritmo salvo com sucesso!");
+            this.showToast(this.tr('editorToastSaved', "💾 Ritmo salvo com sucesso!"));
             if (window.songStudio) window.songStudio.renderLibrary();
             return true;
         } catch (e) {
-            alert("Erro ao salvar música: " + e.message);
+            alert(this.tr('editorAlertSaveErr', "Erro ao salvar música: " + e.message, { err: e.message }));
             return false;
         }
     }
@@ -734,7 +737,7 @@ class SongEditor {
             // Colored track indicator on left
             ctx.fillStyle = this.colors[i].main;
             ctx.fillRect(0, y, 4, trackHeight);
-            ctx.fillText(`Pista ${i + 1}`, 10, y + 16);
+            ctx.fillText(this.tr('editorTrackLabel', `Pista ${i + 1}`, { num: i + 1 }), 10, y + 16);
         }
 
         // Batched horizontal dividing lines (1 draw call)
@@ -785,7 +788,7 @@ class SongEditor {
                 if (x >= 0 && x <= cw) {
                     ctx.moveTo(x, headerHeight);
                     ctx.lineTo(x, ch);
-                    ctx.fillText(`C.${b / 4 + 1}`, x + 3, headerHeight - 12);
+                    ctx.fillText(this.tr('editorMeasurePrefix', `C.${b / 4 + 1}`, { num: b / 4 + 1 }), x + 3, headerHeight - 12);
                 }
             }
         }
@@ -931,8 +934,8 @@ class SongEditor {
 
     updateHeaderInfo() {
         const t = document.getElementById('editor-song-title'), a = document.getElementById('editor-song-artist');
-        if (t && this.song) t.innerText = this.song.title || 'Sem Título';
-        if (a && this.song) a.innerText = this.song.artist || 'Artista';
+        if (t && this.song) t.innerText = this.song.title || this.tr('editorUntitled', 'Sem Título');
+        if (a && this.song) a.innerText = this.song.artist || this.tr('editorArtistPlaceholder', 'Artista');
     }
 
     updateTimeDisplay() {
@@ -957,7 +960,7 @@ class SongEditor {
 
     updateStatsDisplay() {
         const s = document.getElementById('editor-notes-count');
-        if (s && this.song) s.innerText = `${(this.song.notes || []).length} notas mapeadas`;
+        if (s && this.song) s.innerText = this.tr('songNotesMapped', `${(this.song.notes || []).length} notas mapeadas`, { count: (this.song.notes || []).length });
     }
 
     open(song) {

@@ -32,6 +32,8 @@ class RhythmSystem {
         this.setupInputHandlers();
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     buildNoteSpriteCache() {
         if (typeof document === 'undefined') return;
         this.noteSprites = []; this.holdNoteSprites = [];
@@ -242,7 +244,7 @@ class RhythmSystem {
                 const streakGold = window.talentSystem ? window.talentSystem.getStat('lucrative_streak') : 0;
                 if (streakGold > 0 && window.talentSystem) {
                     window.talentSystem.addGold(streakGold);
-                    this.addFloatingRating(`+${streakGold} 🪙 STREAK!`, noteX, hitZoneY - 50, '#ffd700', true);
+                    this.addFloatingRating(this.tr('rhythmStreakGold', `+${streakGold} 🪙 STREAK!`, { gold: streakGold }), noteX, hitZoneY - 50, '#ffd700', true);
                 }
             }
 
@@ -272,7 +274,7 @@ class RhythmSystem {
                 closestNote.lastTick = 0;
                 closestNote.active = true;
                 this.activeHoldNotes[lane] = closestNote;
-                this.addFloatingRating(rating + ' 〰️ SEGURE!', noteX, hitZoneY - 25, ratingColor, isCrit);
+                this.addFloatingRating(this.tr('rhythmHoldPrompt', rating + ' 〰️ SEGURE!', { rating }), noteX, hitZoneY - 25, ratingColor, isCrit);
             } else {
                 closestNote.active = false;
                 this.addFloatingRating(rating, noteX, hitZoneY - 25, ratingColor, isCrit);
@@ -298,7 +300,7 @@ class RhythmSystem {
             this.streak = 0;
             this.multiplier = 1;
             if (this.songStats) this.songStats.misses++;
-            this.addFloatingRating('ERROU! 💨', noteX, hitZoneY - 25, '#ff4444', false);
+            this.addFloatingRating(this.tr('missLabel', 'ERROU! 💨'), noteX, hitZoneY - 25, '#ff4444', false);
             this.createHitSparks(noteX, hitZoneY, '#555555', false);
             if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
             if (window.game && window.game.combat) {
@@ -324,7 +326,7 @@ class RhythmSystem {
             if (ratio >= 0.75) {
                 note.completed = true;
                 note.active = false;
-                this.addFloatingRating('SUSTAIN OK! ⭐', noteX, hitZoneY - 30, '#00ff66', true);
+                this.addFloatingRating(this.tr('rhythmSustainOk', 'SUSTAIN OK! ⭐'), noteX, hitZoneY - 30, '#00ff66', true);
                 if (window.game && window.game.combat) {
                     const sM = ((window.specialSystem && window.specialSystem.isSpecialActive) || window.game.combat.isSpecialActive) ? 2 : 1;
                     window.game.combat.score += 100 * this.multiplier * sM;
@@ -333,7 +335,7 @@ class RhythmSystem {
             } else {
                 note.dropped = true;
                 note.active = false;
-                this.addFloatingRating('SOLTO CEDO! 💨', noteX, hitZoneY - 20, '#ffaa00', false);
+                this.addFloatingRating(this.tr('rhythmReleasedEarly', 'SOLTO CEDO! 💨'), noteX, hitZoneY - 20, '#ffaa00', false);
             }
             this.activeHoldNotes[lane] = null;
         }
@@ -802,7 +804,7 @@ class RhythmSystem {
         } else if (!this.autoPlay && this.notes.length > 0) {
             this.ctx.font = "bold 11px 'Segoe UI', sans-serif";
             this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-            this.ctx.fillText(`TOQUE NAS PISTAS NO RITMO! 👇`, 12, 40);
+            this.ctx.fillText(this.tr('rhythmHitPrompt', 'TOQUE NAS PISTAS NO RITMO! 👇'), 12, 40);
         }
         this.ctx.restore();
     }
@@ -941,7 +943,7 @@ class RhythmSystem {
             if (a) a.innerText = this.currentSong.artist;
             if (c) c.src = this.currentSong.cover || 'assets/covers/default_cover.jpg';
             const exitBtn = document.getElementById('active-song-exit-btn');
-            if (exitBtn) exitBtn.onclick = () => { if (confirm("⚠️ Encerrar a música e voltar ao menu?")) { this.stopCustomSong(); if (window.game) window.game.switchScreen('menu'); } };
+            if (exitBtn) exitBtn.onclick = () => { if (confirm(this.tr('rhythmConfirmExit', "⚠️ Encerrar a música e voltar ao menu?"))) { this.stopCustomSong(); if (window.game) window.game.switchScreen('menu'); } };
         } else {
             banner.style.display = 'none'; def.style.display = 'block';
         }

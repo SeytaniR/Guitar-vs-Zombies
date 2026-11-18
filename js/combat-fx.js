@@ -11,6 +11,8 @@ class CombatFX {
         this.shakePower = 0;
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     initEmbers(count = 25, width = 800, height = 600, theme = 'map_void') {
         this.ambientEmbers = [];
         const themeHues = {
@@ -46,6 +48,8 @@ class CombatFX {
         this.shakePower = 0;
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     triggerShake(amount = 6) {
         this.shakePower = Math.max(this.shakePower, amount);
     }
@@ -80,7 +84,7 @@ class CombatFX {
         if (count === 3) return { title: 'TRIPLE KILL! ⚡🔥', color: '#ff3300', sub: tr('mk3Sub', 'TRIPLA CHACINA! 💥'), shake: 7 };
         if (count === 4) return { title: 'MULTI KILL! 💥', color: '#ff00aa', sub: tr('mk4Sub', 'MASSACRE NO PALCO! 🎸'), shake: 9 };
         if (count === 5) return { title: 'ULTRA KILL! ⚡💥', color: '#ff0055', sub: tr('mk5Sub', 'ADRENALINA MÁXIMA! ⚡'), shake: 12 };
-        if (count === 6) return { title: 'FANTÁSTICO! 🎸🔥', color: '#9900ff', sub: tr('mk6Sub', 'DEUS DO ROCK AND ROLL! 🤘'), shake: 14 };
+        if (count === 6) return { title: this.tr('fxFantasticTitle', 'FANTÁSTICO! 🎸🔥'), color: '#9900ff', sub: tr('mk6Sub', 'DEUS DO ROCK AND ROLL! 🤘'), shake: 14 };
         return {
             title: count === 7 ? 'UNBELIEVABLE! 👑⚡' : `UNBELIEVABLE x${count}! 👑⚡`,
             color: '#ffd700',
@@ -237,7 +241,7 @@ class CombatFX {
             }
         });
 
-        this.addFloatingText("☢️ MUTANT OVERLOAD! ☢️", x, y - 55, '#39ff14', true);
+        this.addFloatingText(this.tr('fxMutantOverload', "☢️ SOBRECARGA MUTANTE! ☢️"), x, y - 55, '#39ff14', true);
         if (soundEngine) soundEngine.playExplosion();
     }
 
@@ -262,7 +266,7 @@ class CombatFX {
         }
 
         if (heroPos && Math.abs(heroPos.x - x) < 130 && onHeroDamage) {
-            onHeroDamage(12, false, "-12 VENENO! 🍄", '#ff9900');
+            onHeroDamage(12, false, this.tr('fxSporePoison', "-{dmg} VENENO! 🍄", { dmg: 12 }), '#ff9900');
         }
     }
 
@@ -339,12 +343,12 @@ class CombatFX {
             }
         });
         if (deflected > 0) {
-            this.addFloatingText(`💥 ANULOU ${deflected} NOTAS!`, z.x, z.y - 45, '#ffcc00', true);
+            this.addFloatingText(this.tr('fxBloaterBlocked', `💥 ANULOU ${deflected} NOTAS!`, { count: deflected }), z.x, z.y - 45, '#ffcc00', true);
         }
 
         // If hero is within earthquake range
         if (heroPos && Math.abs(heroPos.x - z.x) < 170 && onHeroDamage) {
-            onHeroDamage(14, true, "-14 SISMO! 💥", '#ffaa00');
+            onHeroDamage(14, true, this.tr('fxBloaterQuake', "-{dmg} SISMO! 💥", { dmg: 14 }), '#ffaa00');
         }
     }
 
@@ -680,11 +684,11 @@ class CombatFX {
         ctx.font = "bold 24px 'Impact', sans-serif";
         ctx.fillStyle = '#ff2222';
         ctx.textAlign = 'center';
-        ctx.fillText("ROCK OVER! ☠️", cw / 2, ch / 2 - 15);
+        ctx.fillText(this.tr('fxRockOverTitle', "ROCK OVER! ☠️"), cw / 2, ch / 2 - 15);
 
         ctx.font = "bold 13px 'Segoe UI', sans-serif";
         ctx.fillStyle = '#ffffff';
-        ctx.fillText("TOQUE PARA REVIVER E CONTINUAR", cw / 2, ch / 2 + 15);
+        ctx.fillText(this.tr('fxRockOverSub', "TOQUE PARA REVIVER E CONTINUAR"), cw / 2, ch / 2 + 15);
 
         ctx.restore();
     }
@@ -710,7 +714,7 @@ class CombatFX {
                     this.spawnBurst(z.x, zy - 15, '#ffd700', 16, 120, 3.5, 0.65);
                     this.spawnBurst(z.x, zy - 15, '#ff3344', 12, 100, 3.0, 0.55);
                     this.explosions.push({ x: z.x, y: zy - 15, frame: 0, maxFrames: 8, scale: 0.35, timer: 0 });
-                    this.addFloatingText('💥 VAPORIZADO!', z.x, zy - 32, '#ffd700', true);
+                    this.addFloatingText(this.tr('fxVaporized', '💥 VAPORIZADO!'), z.x, zy - 32, '#ffd700', true);
                     if (typeof onKilledCb === 'function') onKilledCb(z);
                 }
             }
@@ -729,7 +733,7 @@ class CombatFX {
                 maxLife: 2.6
             });
         }
-        this.addFloatingText('👑 VITÓRIA SUPREMA! 🎸', heroPos.x + 40, heroPos.y - 50, '#ffd700', true);
+        this.addFloatingText(this.tr('fxSupremeVictory', '👑 VITÓRIA SUPREMA! 🎸'), heroPos.x + 40, heroPos.y - 50, '#ffd700', true);
     }
 
     triggerDefeat(heroPos) {
@@ -746,7 +750,7 @@ class CombatFX {
             { x: ampX, y: ampY, radius: 5, maxRadius: 85, color: '#ff2222', lineWidth: 4, alpha: 1.0 },
             { x: ampX, y: ampY, radius: 2, maxRadius: 55, color: '#ffaa00', lineWidth: 2.5, alpha: 0.9 }
         );
-        this.addFloatingText("☠️ AMPLIFICADOR QUEBRADO! ☠️", heroPos.x + 10, heroPos.y - 45, '#ff2222', true);
+        this.addFloatingText(this.tr('fxAmpDestroyed', "☠️ AMPLIFICADOR QUEBRADO! ☠️"), heroPos.x + 10, heroPos.y - 45, '#ff2222', true);
     }
 
     drawVictoryFinaleOverlay(ctx, cw, ch, timer, total = 2.4) {

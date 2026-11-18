@@ -1,6 +1,7 @@
 // MetaMissionSystem - Procedural Zombie, Guitarist & Performance Progression (v1.7.9 Build 51)
 // Procedural scaling: Zombie & Guitarist (10 -> 100 -> 1k -> 10k -> 100k)
 // Performance: Unbelievable, Critical Hits, 90%+ Accuracy, 100% Full Combo, Max Streak, Tour Shows
+const _trM = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
 
 class MetaMissionSystem {
     constructor() {
@@ -150,144 +151,92 @@ class MetaMissionSystem {
     }
 
     getTierReward(tierIndex, zombieDef) {
-        const baseGold = [25, 150, 1200, 10000, 100000];
-        const baseXP = [10, 60, 400, 3000, 25000];
+        const baseGold = [25, 150, 1200, 10000, 100000], baseXP = [10, 60, 400, 3000, 25000];
         const titles = ['Iniciante 🥉', 'Veterano 🥈', 'Carrasco 🥇', 'Mestre Lendário 💎', 'DEUS DA CAÇADA 👑⚡'];
         const t = Math.max(0, Math.min(this.MAX_TIER - 1, tierIndex));
         let diffMult = 1.0;
         if (zombieDef) {
-            if (zombieDef.hp >= 300) diffMult = 1.45;
-            else if (zombieDef.hp >= 200) diffMult = 1.25;
-            else if (zombieDef.hp >= 150) diffMult = 1.15;
+            if (zombieDef.hp >= 300) diffMult = 1.45; else if (zombieDef.hp >= 200) diffMult = 1.25; else if (zombieDef.hp >= 150) diffMult = 1.15;
             if (zombieDef.badgeClass === 'badge-tank' || zombieDef.badgeClass === 'badge-danger') diffMult = Math.max(diffMult, 1.3);
         }
-        const gold = Math.max(5, Math.round(baseGold[t] * diffMult));
-        const xp = Math.max(2, Math.round(baseXP[t] * diffMult));
-        return { gold, xp, title: titles[t], tier: t + 1, target: this.TIERS[t] };
+        return { gold: Math.max(5, Math.round(baseGold[t] * diffMult)), xp: Math.max(2, Math.round(baseXP[t] * diffMult)), title: _trM(`ztier_${t}`, titles[t]), tier: t + 1, target: this.TIERS[t] };
     }
 
     getGuitaristTierReward(tierIndex, heroDef) {
-        const baseGold = [25, 150, 1200, 10000, 100000];
-        const baseXP = [10, 60, 400, 3000, 25000];
+        const baseGold = [25, 150, 1200, 10000, 100000], baseXP = [10, 60, 400, 3000, 25000];
         const titles = ['Rocker Iniciante 🥉', 'Rocker Veterano 🥈', 'Virtuoso do Palco 🥇', 'Lenda da Guitarra 💎', 'DEUS DO ROCK 👑⚡'];
         const t = Math.max(0, Math.min(this.MAX_TIER - 1, tierIndex));
         let rarityMult = 1.0;
         if (heroDef) {
-            if (heroDef.rarityKey === 'legendary') rarityMult = 1.35;
-            else if (heroDef.rarityKey === 'epic') rarityMult = 1.20;
-            else if (heroDef.rarityKey === 'rare') rarityMult = 1.10;
+            if (heroDef.rarityKey === 'legendary') rarityMult = 1.35; else if (heroDef.rarityKey === 'epic') rarityMult = 1.20; else if (heroDef.rarityKey === 'rare') rarityMult = 1.10;
         }
-        const gold = Math.max(5, Math.round(baseGold[t] * rarityMult));
-        const xp = Math.max(2, Math.round(baseXP[t] * rarityMult));
-        return { gold, xp, title: titles[t], tier: t + 1, target: this.TIERS[t] };
+        return { gold: Math.max(5, Math.round(baseGold[t] * rarityMult)), xp: Math.max(2, Math.round(baseXP[t] * rarityMult)), title: _trM(`htier_${t}`, titles[t]), tier: t + 1, target: this.TIERS[t] };
     }
 
     getZombieMission(zombieIdOrDef) {
         let zombieDef = null, zombieId = null;
-        if (typeof zombieIdOrDef === 'string') {
-            zombieId = zombieIdOrDef;
-            zombieDef = this.getAllZombies().find(z => z.id === zombieId || z.type === zombieId);
-        } else if (zombieIdOrDef && typeof zombieIdOrDef === 'object') {
-            zombieDef = zombieIdOrDef;
-            zombieId = zombieDef.id || zombieDef.type;
-        }
+        if (typeof zombieIdOrDef === 'string') { zombieId = zombieIdOrDef; zombieDef = this.getAllZombies().find(z => z.id === zombieId || z.type === zombieId); }
+        else if (zombieIdOrDef && typeof zombieIdOrDef === 'object') { zombieDef = zombieIdOrDef; zombieId = zombieDef.id || zombieDef.type; }
         if (!zombieId) return null;
 
-        const totalKills = this.state.kills[zombieId] || 0;
-        const claimedTier = this.state.claimedTiers[zombieId] || 0;
-        const isMaxCompleted = claimedTier >= this.MAX_TIER;
-        const currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
-        const targetKills = this.TIERS[currentTierIndex];
-        const prevTarget = currentTierIndex > 0 ? this.TIERS[currentTierIndex - 1] : 0;
-        const isReadyToClaim = !isMaxCompleted && totalKills >= targetKills;
-        const progressPercent = isMaxCompleted ? 100 : Math.min(100, Math.floor((totalKills / targetKills) * 100));
+        const totalKills = this.state.kills[zombieId] || 0, claimedTier = this.state.claimedTiers[zombieId] || 0;
+        const isMaxCompleted = claimedTier >= this.MAX_TIER, currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
+        const targetKills = this.TIERS[currentTierIndex], prevTarget = currentTierIndex > 0 ? this.TIERS[currentTierIndex - 1] : 0;
+        const isReadyToClaim = !isMaxCompleted && totalKills >= targetKills, progressPercent = isMaxCompleted ? 100 : Math.min(100, Math.floor((totalKills / targetKills) * 100));
         const currentReward = this.getTierReward(currentTierIndex, zombieDef);
-
-        const zObj = zombieDef || {
-            id: zombieId,
-            name: zombieId.replace('_', ' ').toUpperCase(),
-            icon: 'assets/zombies/punk_walker.jpg',
-            badge: 'ZUMBI', badgeClass: 'badge-common',
-            desc: 'Alvo de caçada procedural.'
-        };
+        const zObj = zombieDef || { id: zombieId, name: zombieId.replace('_', ' ').toUpperCase(), icon: 'assets/zombies/punk_walker.jpg', badge: 'ZUMBI', badgeClass: 'badge-common', desc: _trM('zombieDefaultDesc', 'Alvo de caçada procedural.') };
 
         return {
             category: 'zombies', id: zombieId, zombieId, zombie: zObj,
-            name: zObj.name, icon: zObj.icon || 'assets/zombies/punk_walker.jpg',
-            badgeText: zObj.badge || 'ZUMBI', badgeClass: zObj.badgeClass || 'badge-common',
-            desc: zObj.desc || 'Eliminação da horda zumbi.', unitLabel: 'Kills',
-            currentVal: totalKills, targetVal: targetKills, kills: totalKills,
-            claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1,
-            targetKills, prevTarget, progressPercent, isReadyToClaim, isMaxCompleted,
-            reward: currentReward, allTiers: this.TIERS
+            name: _trM(`zombie_${zObj.id}`, zObj.name), icon: zObj.icon || 'assets/zombies/punk_walker.jpg',
+            badgeText: _trM(`zombie_short_${zObj.id}`, zObj.badge || 'ZUMBI'), badgeClass: zObj.badgeClass || 'badge-common',
+            desc: _trM(`zombie_desc_${zObj.id}`, zObj.desc || _trM('zMissionFallbackDesc', 'Eliminação da horda zumbi.')), unitLabel: _trM('unitKills', 'Kills'),
+            currentVal: totalKills, targetVal: targetKills, kills: totalKills, claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1,
+            targetKills, prevTarget, progressPercent, isReadyToClaim, isMaxCompleted, reward: currentReward, allTiers: this.TIERS
         };
     }
 
     getGuitaristMission(heroIdOrDef) {
         let heroDef = null, heroId = null;
-        if (typeof heroIdOrDef === 'string') {
-            heroId = heroIdOrDef;
-            heroDef = this.getAllGuitarists().find(h => h.id === heroId);
-        } else if (heroIdOrDef && typeof heroIdOrDef === 'object') {
-            heroDef = heroIdOrDef;
-            heroId = heroDef.id;
-        }
+        if (typeof heroIdOrDef === 'string') { heroId = heroIdOrDef; heroDef = this.getAllGuitarists().find(h => h.id === heroId); }
+        else if (heroIdOrDef && typeof heroIdOrDef === 'object') { heroDef = heroIdOrDef; heroId = heroDef.id; }
         if (!heroId) return null;
 
-        const totalKills = this.state.heroKills[heroId] || 0;
-        const claimedTier = this.state.heroClaimedTiers[heroId] || 0;
-        const isMaxCompleted = claimedTier >= this.MAX_TIER;
-        const currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
-        const targetKills = this.TIERS[currentTierIndex];
-        const prevTarget = currentTierIndex > 0 ? this.TIERS[currentTierIndex - 1] : 0;
-        const isReadyToClaim = !isMaxCompleted && totalKills >= targetKills;
-        const progressPercent = isMaxCompleted ? 100 : Math.min(100, Math.floor((totalKills / targetKills) * 100));
+        const totalKills = this.state.heroKills[heroId] || 0, claimedTier = this.state.heroClaimedTiers[heroId] || 0;
+        const isMaxCompleted = claimedTier >= this.MAX_TIER, currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
+        const targetKills = this.TIERS[currentTierIndex], prevTarget = currentTierIndex > 0 ? this.TIERS[currentTierIndex - 1] : 0;
+        const isReadyToClaim = !isMaxCompleted && totalKills >= targetKills, progressPercent = isMaxCompleted ? 100 : Math.min(100, Math.floor((totalKills / targetKills) * 100));
         const currentReward = this.getGuitaristTierReward(currentTierIndex, heroDef);
-
-        const hObj = heroDef || {
-            id: heroId,
-            name: heroId.replace('_', ' ').toUpperCase(),
-            icon: 'assets/heroes/johnny_blaze.jpg',
-            rarity: 'COMUM', badgeClass: 'badge-common', instrument: 'Guitarra Elétrica'
-        };
+        const hObj = heroDef || { id: heroId, name: heroId.replace('_', ' ').toUpperCase(), icon: 'assets/heroes/johnny_blaze.jpg', rarity: 'COMUM', rarityKey: 'common', badgeClass: 'badge-common', instrument: _trM('electricGuitarFallback', 'Guitarra Elétrica') };
 
         return {
             category: 'guitarists', id: heroId, heroId, hero: hObj,
             name: hObj.name, icon: hObj.icon || 'assets/heroes/johnny_blaze.jpg',
-            badgeText: hObj.rarity || 'HERÓI', badgeClass: hObj.badgeClass || 'badge-common',
-            desc: hObj.instrument || 'Guitarra Elétrica', unitLabel: 'Kills',
-            currentVal: totalKills, targetVal: targetKills, kills: totalKills,
-            claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1,
-            targetKills, prevTarget, progressPercent, isReadyToClaim, isMaxCompleted,
-            reward: currentReward, allTiers: this.TIERS
+            badgeText: _trM(`rarity_${hObj.rarityKey || 'common'}`, hObj.rarity || 'HERÓI'), badgeClass: hObj.badgeClass || 'badge-common',
+            desc: _trM(`hero_${hObj.id}_inst`, hObj.instrument || _trM('electricGuitarFallback', 'Guitarra Elétrica')), unitLabel: _trM('unitKills', 'Kills'),
+            currentVal: totalKills, targetVal: targetKills, kills: totalKills, claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1,
+            targetKills, prevTarget, progressPercent, isReadyToClaim, isMaxCompleted, reward: currentReward, allTiers: this.TIERS
         };
     }
 
     getPerformanceMission(statIdOrDef) {
         let def = null;
-        if (typeof statIdOrDef === 'string') {
-            def = this.getPerformanceDefinitions().find(d => d.id === statIdOrDef) || this.getPvPDefinitions().find(d => d.id === statIdOrDef);
-        } else if (statIdOrDef && typeof statIdOrDef === 'object') {
-            def = statIdOrDef;
-        }
+        if (typeof statIdOrDef === 'string') def = this.getPerformanceDefinitions().find(d => d.id === statIdOrDef) || this.getPvPDefinitions().find(d => d.id === statIdOrDef);
+        else if (statIdOrDef && typeof statIdOrDef === 'object') def = statIdOrDef;
         if (!def) return null;
 
-        const currentVal = this.state.performanceStats[def.id] || 0;
-        const claimedTier = this.state.performanceClaimedTiers[def.id] || 0;
-        const isMaxCompleted = claimedTier >= this.MAX_TIER;
-        const currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
-        const targetVal = def.tiers[currentTierIndex];
-        const isReadyToClaim = !isMaxCompleted && currentVal >= targetVal;
+        const currentVal = this.state.performanceStats[def.id] || 0, claimedTier = this.state.performanceClaimedTiers[def.id] || 0;
+        const isMaxCompleted = claimedTier >= this.MAX_TIER, currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
+        const targetVal = def.tiers[currentTierIndex], isReadyToClaim = !isMaxCompleted && currentVal >= targetVal;
         const progressPercent = isMaxCompleted ? 100 : Math.min(100, Math.floor((currentVal / targetVal) * 100));
-        const rew = def.rewards[currentTierIndex];
-        const reward = { gold: rew.gold, xp: rew.xp, title: rew.title, tier: currentTierIndex + 1, target: targetVal };
+        const isPvp = def.id && def.id.startsWith('pvp_'), pfx = isPvp ? 'pvpm' : 'perf', rew = def.rewards[currentTierIndex];
+        const reward = { gold: rew.gold, xp: rew.xp, title: _trM(`${pfx}_tier_${def.id}_${currentTierIndex}`, rew.title), tier: currentTierIndex + 1, target: targetVal };
 
         return {
-            category: (def.id && def.id.startsWith('pvp_')) ? 'pvp' : 'performance', id: def.id, statId: def.id,
-            name: def.name, icon: def.icon, badgeText: def.badge, badgeClass: def.badgeClass,
-            desc: def.desc, unitLabel: def.unitLabel, currentVal, targetVal,
-            claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1,
-            progressPercent, isReadyToClaim, isMaxCompleted, reward, allTiers: def.tiers
+            category: isPvp ? 'pvp' : 'performance', id: def.id, statId: def.id,
+            name: _trM(`${pfx}_name_${def.id}`, def.name), icon: def.icon, badgeText: _trM(`${pfx}_badge_${def.id}`, def.badge), badgeClass: def.badgeClass,
+            desc: _trM(`${pfx}_desc_${def.id}`, def.desc), unitLabel: _trM(`${pfx}_unit_${def.id}`, def.unitLabel), currentVal, targetVal,
+            claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1, progressPercent, isReadyToClaim, isMaxCompleted, reward, allTiers: def.tiers
         };
     }
 
@@ -412,15 +361,15 @@ class MetaMissionSystem {
     }
 
     onMilestoneReached(entityId, entityName, val, type = 'zombie') {
-        const name = entityName || entityId;
+        const rawName = entityName || entityId;
+        const name = type === 'zombie' ? _trM(`zombie_${entityId}`, rawName) : (type === 'pvp' ? _trM(`pvpm_name_${entityId}`, rawName) : (type === 'performance' ? _trM(`perf_name_${entityId}`, rawName) : rawName));
         if (window.combat && typeof window.combat.addFloatingText === 'function') {
             const cx = window.combat.canvas ? window.combat.canvas.width / 2 : 200;
             const cy = window.combat.canvas ? window.combat.canvas.height * 0.28 : 120;
-            let label = `🎯 META CONCLUÍDA: ${name} (${val.toLocaleString()})!`;
-            if (type === 'guitarist') label = `🎸 MESTRIA: ${name} (${val.toLocaleString()} Kills)!`;
-            else if (type === 'pvp') label = `⚔️ MARCO PVP: ${name} (${val.toLocaleString()})!`;
-            else if (type === 'performance') label = `⚡ MARCO DE RITMO: ${name} (${val.toLocaleString()})!`;
-
+            let label = _trM('milestoneHitZombie', `🎯 META CONCLUÍDA: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
+            if (type === 'guitarist') label = _trM('milestoneHitHero', `🎸 MESTRIA: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
+            else if (type === 'pvp') label = _trM('milestoneHitPvp', `⚔️ MARCO PVP: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
+            else if (type === 'performance') label = _trM('milestoneHitPerf', `⚡ MARCO DE RITMO: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
             window.combat.addFloatingText(label, cx, cy, '#ffd700', true);
             if (window.soundEngine && typeof window.soundEngine.playLevelUp === 'function') window.soundEngine.playLevelUp();
         }
@@ -565,8 +514,8 @@ class MetaMissionSystem {
         toast.innerHTML = `
             ${titleHtml}
             <div class="toast-chips-row">
-                <span class="toast-chip gold">+🪙 ${gold.toLocaleString()} Ouro</span>
-                <span class="toast-chip xp">+✨ ${xp.toLocaleString()} XP no Inventário</span>
+                <span class="toast-chip gold">${_trM('toastClaimGold', `+🪙 ${gold.toLocaleString()} Ouro`, { gold: gold.toLocaleString() })}</span>
+                <span class="toast-chip xp">${_trM('toastClaimXpInv', `+✨ ${xp.toLocaleString()} XP no Inventário`, { xp: xp.toLocaleString() })}</span>
             </div>
         `;
         toast.classList.remove('show');
@@ -612,7 +561,7 @@ class MetaMissionSystem {
         });
 
         this.playClaimSfx();
-        this.showClaimToast(totalGold, totalXp, `${missionsToClaim.length} Missões Reivindicadas!`);
+        this.showClaimToast(totalGold, totalXp, _trM('toastAllClaimed', `${missionsToClaim.length} Missões Reivindicadas!`, { count: missionsToClaim.length }));
         this.updateBadgeCounter();
         this.render();
         if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
@@ -862,7 +811,7 @@ class MetaMissionSystem {
         if (isMax) {
             let masterTitle = tr('masterHunter', 'MESTRE CAÇADOR');
             if (m.category === 'guitarists') masterTitle = tr('rockLegend', 'LENDA DO ROCK');
-            else if (m.category === 'pvp') masterTitle = 'LENDA DO PVP';
+            else if (m.category === 'pvp') masterTitle = tr('pvpMasterTitle', 'LENDA DO PVP');
             else if (m.category === 'performance') masterTitle = tr('supremeMastery', 'MESTRIA SUPREMA');
 
             const completedText = tr('completedUnits', `${m.targetVal.toLocaleString()} ${m.unitLabel} Concluídas!`, { target: m.targetVal.toLocaleString(), unit: m.unitLabel });
@@ -893,7 +842,7 @@ class MetaMissionSystem {
 
         let sectionTag = tr('milestoneReward', 'RECOMPENSA DO MARCO:');
         if (m.category === 'guitarists') sectionTag = tr('heroMastery', 'MESTRIA DO GUITARRISTA:');
-        else if (m.category === 'pvp') sectionTag = 'MARCO DO DUELO PVP:';
+        else if (m.category === 'pvp') sectionTag = tr('pvpMilestoneTag', 'MARCO DO DUELO PVP:');
         else if (m.category === 'performance') sectionTag = tr('perfMilestone', 'MARCO DE PERFORMANCE:');
 
         const goldLabel = tr('goldUnit', 'Ouro');
@@ -912,7 +861,7 @@ class MetaMissionSystem {
                             <span class="mission-lifetime-kills ${m.category === 'guitarists' ? 'hero-kills' : ''}">${m.category === 'guitarists' ? '🎸' : (m.category === 'pvp' ? '⚔️' : (m.category === 'performance' ? '⚡' : '💀'))} ${m.currentVal.toLocaleString()} ${m.unitLabel}</span>
                         </div>
                         <div class="mission-tier-indicator">
-                            <span class="tier-pill ${tierPillClass}">Tier ${isMax ? '5/5' : `${m.currentTierNum}/5`}</span>
+                            <span class="tier-pill ${tierPillClass}">${tr('tierPillFmt', `Nível ${isMax ? 5 : m.currentTierNum}/5`, { cur: isMax ? 5 : m.currentTierNum })}</span>
                             <span class="tier-target-label">${targetLabel} <strong>${m.targetVal.toLocaleString()}</strong> ${m.unitLabel.toLowerCase()}</span>
                         </div>
                     </div>
@@ -923,7 +872,7 @@ class MetaMissionSystem {
                         <div class="mission-progress-fill ${fillClass} ${isReady ? 'fill-ready' : ''}" style="width: ${m.progressPercent}%;"></div>
                     </div>
                     <div class="mission-progress-labels">
-                        <span>${m.desc || 'Progresso'}</span>
+                        <span>${m.desc || tr('defaultProgressLabel', 'Progresso')}</span>
                         <span>${m.currentVal.toLocaleString()} / ${m.targetVal.toLocaleString()} (${m.progressPercent}%)</span>
                     </div>
                 </div>

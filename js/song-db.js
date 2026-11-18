@@ -521,11 +521,12 @@ class SongDB {
                         const bpm = 128;
                         const notes = this.generateFallbackChart(duration, bpm);
 
+                        const _tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
                         const newSong = {
                             id: 'song_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-                            title: title || 'Faixa Importada',
-                            artist: artist || 'Artista Desconhecido',
-                            description: `Música importada diretamente de arquivo de áudio (${file.name}).`,
+                            title: title || _tr('studioDefaultTitle', 'Faixa Importada'),
+                            artist: artist || _tr('studioDefaultArtist', 'Artista Desconhecido'),
+                            description: _tr('songDbImportAudioDesc', `Música importada diretamente de arquivo de áudio (${file.name}).`, { file: file.name }),
                             bpm: bpm,
                             duration: Math.max(15, duration),
                             cover: 'assets/covers/default_cover.jpg',
@@ -608,9 +609,10 @@ class SongDB {
                         throw new Error("Formato de arquivo inválido. Deve ser um pacote .gvsong ou .json válido.");
                     }
 
+                    const _tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
                     // Sanitize & normalize fields
-                    const rawTitle = (songData.title || file.name.replace(/\.[^/.]+$/, "") || 'Música Importada').trim();
-                    const rawArtist = (songData.artist || 'Artista Desconhecido').trim();
+                    const rawTitle = (songData.title || file.name.replace(/\.[^/.]+$/, "") || _tr('studioDefaultTitle', 'Música Importada')).trim();
+                    const rawArtist = (songData.artist || _tr('studioDefaultArtist', 'Artista Desconhecido')).trim();
                     const bpm = Math.max(40, Math.min(280, parseInt(songData.bpm, 10) || 120));
                     const duration = Math.max(15, parseFloat(songData.duration) || 30);
                     const cover = (typeof songData.cover === 'string' && songData.cover.length > 5)
@@ -643,7 +645,7 @@ class SongDB {
                         id: 'song_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
                         title: rawTitle,
                         artist: rawArtist,
-                        description: songData.description || 'Música importada com sucesso no Estúdio de Ritmo.',
+                        description: songData.description || (typeof i18n !== 'undefined' ? i18n.t('songDbImportPkgDesc', 'Música importada com sucesso no Estúdio de Ritmo.') : 'Música importada com sucesso no Estúdio de Ritmo.'),
                         bpm: bpm,
                         duration: duration,
                         cover: cover,

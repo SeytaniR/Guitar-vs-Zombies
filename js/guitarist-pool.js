@@ -393,16 +393,17 @@ class GuitaristPoolSystem {
     }
 
     injectXpIntoHero(heroId, amount = null) {
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         const data = this.getHeroLevelData(heroId);
-        if (data.level >= this.maxLevel) return { success: false, reason: 'Nível Máximo Atingido (100)' };
-        if ((this.playerXp || 0) <= 0) return { success: false, reason: 'Sem XP no inventário!' };
+        if (data.level >= this.maxLevel) return { success: false, reason: tr('xpHeroMaxReason', 'Nível Máximo Atingido (100)') };
+        if ((this.playerXp || 0) <= 0) return { success: false, reason: tr('xpInvEmptyReason', 'Sem XP no inventário!') };
 
         const reqXp = this.getXpRequiredForNextLevel(data.level);
         const neededForLevel = Math.max(1, reqXp - data.xp);
 
         let toInject = (amount !== null && amount > 0) ? Math.min(amount, this.playerXp) : Math.min(neededForLevel, this.playerXp);
         toInject = Math.max(0, toInject);
-        if (toInject <= 0) return { success: false, reason: 'XP insuficiente!' };
+        if (toInject <= 0) return { success: false, reason: tr('xpInsufficientReason', 'XP insuficiente!') };
 
         this.playerXp -= toInject;
         this.savePlayerXp();
@@ -493,12 +494,13 @@ class GuitaristPoolSystem {
     }
 
     levelUpWithGold(heroId) {
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         const data = this.getHeroLevelData(heroId);
-        if (data.level >= this.maxLevel) return { success: false, reason: 'Nível Máximo Atingido' };
+        if (data.level >= this.maxLevel) return { success: false, reason: tr('maxLevelReached', 'Nível Máximo Atingido') };
 
         const cost = this.getGoldCostForLevelUp(data.level);
         if (!window.talentSystem || window.talentSystem.gold < cost) {
-            return { success: false, reason: `Ouro insuficiente (necessário: 🪙 ${cost})` };
+            return { success: false, reason: tr('goldRequiredReason', `Ouro insuficiente (necessário: 🪙 ${cost})`, { cost }) };
         }
 
         window.talentSystem.gold -= cost;
@@ -585,12 +587,13 @@ class GuitaristPoolSystem {
     }
 
     unlockHeroWithGold(heroId) {
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         if (this.isHeroUnlocked(heroId)) {
-            return { success: false, reason: 'Guitarrista já desbloqueado!' };
+            return { success: false, reason: tr('heroAlreadyUnlocked', 'Guitarrista já desbloqueado!') };
         }
         const cost = this.getHeroUnlockCost(heroId);
         if (!window.talentSystem || window.talentSystem.gold < cost) {
-            return { success: false, reason: `Ouro insuficiente (necessário: 🪙 ${cost})` };
+            return { success: false, reason: tr('goldRequiredReason', `Ouro insuficiente (necessário: 🪙 ${cost})`, { cost }) };
         }
 
         window.talentSystem.gold -= cost;

@@ -11,6 +11,8 @@ class SongStudio {
         this.detectedBpm = 120;
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     init() {
         this.setupDOM();
         this.renderLibrary();
@@ -63,7 +65,7 @@ class SongStudio {
                 if (!file) return;
 
                 if (audioStatus) {
-                    audioStatus.innerHTML = `<span style="color:#00d4ff;">⏳ Lendo: <b>${file.name}</b>...</span>`;
+                    audioStatus.innerHTML = `<span style="color:#00d4ff;">${this.tr('studioReadingFile', '⏳ Lendo: <b>{file}</b>...', { file: file.name })}</span>`;
                     audioStatus.classList.remove('success');
                 }
 
@@ -134,7 +136,7 @@ class SongStudio {
                         cleanup();
                         this.uploadedAudioDuration = Math.max(20, Math.min(300, Math.round(file.size / 16000))) || 35;
                         if (audioStatus) {
-                            audioStatus.innerHTML = `✅ <b>${file.name}</b> (Áudio Pronto)`;
+                            audioStatus.innerHTML = `✅ <b>${file.name}</b> ${this.tr('studioAudioReady', '(Áudio Pronto)')}`;
                             audioStatus.classList.add('success');
                         }
                     };
@@ -155,9 +157,9 @@ class SongStudio {
                 };
 
                 reader.onerror = () => {
-                    const errMsg = reader.error ? (reader.error.message || reader.error.name) : "Erro ao carregar";
+                    const errMsg = reader.error ? (reader.error.message || reader.error.name) : this.tr('studioReadFileErr', 'Erro ao carregar');
                     if (audioStatus) {
-                        audioStatus.innerHTML = `⚠️ <span style="color:#ff4444;">Erro na leitura (${errMsg}). Uma trilha de rock será sintetizada automaticamente.</span>`;
+                        audioStatus.innerHTML = `⚠️ <span style="color:#ff4444;">${this.tr('studioReadErr', `Erro na leitura (${errMsg}). Uma trilha de rock será sintetizada automaticamente.`, { err: errMsg })}</span>`;
                     }
                     this.uploadedAudioData = null;
                 };
@@ -224,17 +226,17 @@ class SongStudio {
                 const file = e.target.files[0];
                 if (!file) return;
 
-                this.showToast(`⏳ Importando "${file.name}"...`);
+                this.showToast(this.tr('studioImporting', `⏳ Importando "${file.name}"...`, { file: file.name }));
 
                 try {
                     const imported = await window.songDB.importSongFile(file);
-                    this.showToast(`✅ Música "${imported.title}" importada com sucesso!`);
+                    this.showToast(this.tr('studioImportSuccess', `✅ Música "${imported.title}" importada com sucesso!`, { title: imported.title }));
                     this.renderLibrary();
                     // Switch to library tab
                     const libTab = document.querySelector('.studio-tab[data-tab="library"]');
                     if (libTab) libTab.click();
                 } catch (err) {
-                    alert("Erro ao importar arquivo: " + err.message);
+                    alert(this.tr('studioImportErr', 'Erro ao importar arquivo: {err}', { err: err.message }));
                 }
                 importInput.value = '';
             };
@@ -256,15 +258,15 @@ class SongStudio {
                 studioModal.classList.remove('drag-active');
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                     const droppedFile = e.dataTransfer.files[0];
-                    this.showToast(`⏳ Processando arquivo solto "${droppedFile.name}"...`);
+                    this.showToast(this.tr('studioDroppingFile', `⏳ Processando arquivo "${droppedFile.name}"...`, { file: droppedFile.name }));
                     try {
                         const imported = await window.songDB.importSongFile(droppedFile);
-                        this.showToast(`✅ Música "${imported.title}" importada com sucesso!`);
+                        this.showToast(this.tr('studioImportSuccess', `✅ Música "${imported.title}" importada com sucesso!`, { title: imported.title }));
                         this.renderLibrary();
                         const libTab = document.querySelector('.studio-tab[data-tab="library"]');
                         if (libTab) libTab.click();
                     } catch (err) {
-                        alert("Erro ao processar arquivo: " + err.message);
+                        alert(this.tr('studioProcessErr', 'Erro ao processar arquivo: {err}', { err: err.message }));
                     }
                 }
             });
@@ -278,14 +280,14 @@ class SongStudio {
         const bpmInput = document.getElementById('new-song-bpm');
         const genOption = document.querySelector('input[name="new-song-pattern"]:checked');
 
-        const title = (titleInput && titleInput.value.trim()) || 'Minha Música Rock';
-        const artist = (artistInput && artistInput.value.trim()) || 'Artista Desconhecido';
-        const description = (descInput && descInput.value.trim()) || 'Faixa personalizada criada no Estúdio de Ritmo.';
+        const title = (titleInput && titleInput.value.trim()) || this.tr('studioDefaultTitle', 'Minha Música Rock');
+        const artist = (artistInput && artistInput.value.trim()) || this.tr('studioDefaultArtist', 'Artista Desconhecido');
+        const description = (descInput && descInput.value.trim()) || this.tr('studioDefaultDesc', 'Faixa personalizada criada no Estúdio de Ritmo.');
         const bpm = (bpmInput && parseInt(bpmInput.value)) || 120;
 
         if (!this.uploadedAudioData) {
             // Automatically synthesize a 30s heavy rock backing track if none uploaded
-            this.showToast("⚡ Sintetizando trilha de rock de alta qualidade...");
+            this.showToast(this.tr('studioSynthTrack', '⚡ Sintetizando trilha de rock de alta qualidade...'));
             this.uploadedAudioData = await window.songDB.synthesizeRockAudioWav(30, bpm);
             this.uploadedAudioDuration = 30;
         }
@@ -334,7 +336,7 @@ class SongStudio {
 
         try {
             await window.songDB.saveSong(newSong);
-            this.showToast("🚀 Música criada! Abrindo o editor de ritmo...");
+            this.showToast(this.tr('studioCreatedOpening', '🚀 Música criada! Abrindo o editor de ritmo...'));
 
             // Reset form
             if (titleInput) titleInput.value = '';
@@ -342,7 +344,7 @@ class SongStudio {
             if (descInput) descInput.value = '';
             this.uploadedAudioData = null;
             const audioStatus = document.getElementById('new-song-audio-status');
-            if (audioStatus) audioStatus.innerText = 'Nenhum áudio selecionado';
+            if (audioStatus) audioStatus.innerText = this.tr('noAudioSelected', 'Nenhum áudio selecionado');
 
             // Close studio and open editor
             const modal = document.getElementById('song-studio-modal');
@@ -352,7 +354,7 @@ class SongStudio {
                 window.songEditor.open(newSong);
             }
         } catch (err) {
-            alert("Erro ao criar música: " + err.message);
+            alert(this.tr('studioCreateErr', 'Erro ao criar música: {err}', { err: err.message }));
         }
     }
 
@@ -391,20 +393,20 @@ class SongStudio {
                     <div class="song-card-details">
                         <div class="song-card-title">${song.title}</div>
                         <div class="song-card-artist">${song.artist}</div>
-                        <div class="song-card-desc">${song.description || ''}</div>
+                        <div class="song-card-desc">${this.tr('song_desc_' + song.id, song.description || '')}</div>
                         <div class="song-card-meta">
                             <span class="meta-tag">⏱️ ${durationStr}</span>
-                            <span class="meta-tag">🎸 ${notesCount} notas</span>
+                            <span class="meta-tag">🎸 ${this.tr('songNotesShort', '{count} notas', { count: notesCount })}</span>
                             <span class="meta-tag">⚡ ${song.bpm || 120} BPM</span>
-                            ${song.isDefault ? '<span class="meta-badge-starter">OFICIAL</span>' : ''}
+                            ${song.isDefault ? `<span class="meta-badge-starter">${this.tr('studioOfficialBadge', 'OFICIAL')}</span>` : ''}
                         </div>
                     </div>
                     <div class="song-card-actions">
-                        <button class="song-btn-play" title="Jogar Música">${tr('studioPlay', '▶️ JOGAR')}</button>
-                        <button class="song-btn-edit" title="Editar Ritmo">${tr('studioEdit', '✏️ EDITAR')}</button>
-                        <button class="song-btn-export" title="Exportar (.gvsong)">${tr('studioExport', '💾 EXPORTAR')}</button>
-                        <button class="song-btn-sync" title="Exportar Diretamente para o Servidor">${tr('studioSync', '⚡ P/ SERVIDOR')}</button>
-                        ${!song.isDefault ? '<button class="song-btn-delete" title="Excluir">🗑️</button>' : ''}
+                        <button class="song-btn-play" title="${this.tr('studioBtnPlayTitle', 'Jogar Música')}">${tr('studioPlay', '▶️ JOGAR')}</button>
+                        <button class="song-btn-edit" title="${this.tr('studioBtnEditTitle', 'Editar Ritmo')}">${tr('studioEdit', '✏️ EDITAR')}</button>
+                        <button class="song-btn-export" title="${this.tr('studioBtnExportTitle', 'Exportar (.gvsong)')}">${tr('studioExport', '💾 EXPORTAR')}</button>
+                        <button class="song-btn-sync" title="${this.tr('studioBtnSyncTitle', 'Exportar Diretamente para o Servidor')}">${tr('studioSync', '⚡ P/ SERVIDOR')}</button>
+                        ${!song.isDefault ? `<button class="song-btn-delete" title="${this.tr('studioBtnDeleteTitle', 'Excluir')}">🗑️</button>` : ''}
                     </div>
                 `;
 
@@ -441,9 +443,9 @@ class SongStudio {
                     exportBtn.onclick = async () => {
                         try {
                             const filename = await window.songDB.exportSong(song.id);
-                            this.showToast(`💾 Música baixada: ${filename}`);
+                            this.showToast(this.tr('studioToastExported', `💾 Música baixada: ${filename}`, { file: filename }));
                         } catch (err) {
-                            alert("Erro ao exportar música: " + err.message);
+                            alert(this.tr('studioExportErr', 'Erro ao exportar música: {err}', { err: err.message }));
                         }
                     };
                 }
@@ -452,7 +454,7 @@ class SongStudio {
                 if (syncBtn) {
                     syncBtn.onclick = async () => {
                         try {
-                            this.showToast(`⚡ Enviando "${song.title}" para o servidor...`);
+                            this.showToast(this.tr('studioToastSyncing', `⚡ Enviando "${song.title}" para o servidor...`, { title: song.title }));
                             const res = await fetch('/api/sync-song', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -460,12 +462,12 @@ class SongStudio {
                             });
                             const data = await res.json();
                             if (data && data.success) {
-                                this.showToast(`🎉 Música "${song.title}" salva no jogo!`);
+                                this.showToast(this.tr('studioToastSynced', `🎉 Música "${song.title}" salva no jogo!`, { title: song.title }));
                             } else {
-                                this.showToast(`⚠️ Não foi possível salvar no servidor.`);
+                                this.showToast(this.tr('studioToastSyncFail', '⚠️ Não foi possível salvar no servidor.'));
                             }
                         } catch(e) {
-                            this.showToast(`⚠️ Falha ao conectar ao servidor.`);
+                            this.showToast(this.tr('studioToastServerFail', '⚠️ Falha ao conectar ao servidor.'));
                         }
                     };
                 }
@@ -473,9 +475,9 @@ class SongStudio {
                 const delBtn = card.querySelector('.song-btn-delete');
                 if (delBtn) {
                     delBtn.onclick = async () => {
-                        if (confirm(`Deseja excluir permanentemente a música "${song.title}"?`)) {
+                        if (confirm(this.tr('studioConfirmDelete', `Deseja excluir permanentemente a música "${song.title}"?`, { title: song.title }))) {
                             await window.songDB.deleteSong(song.id);
-                            this.showToast("Música excluída com sucesso.");
+                            this.showToast(this.tr('studioToastDeleted', 'Música excluída com sucesso.'));
                             this.renderLibrary();
                         }
                     };
@@ -484,7 +486,7 @@ class SongStudio {
                 container.appendChild(card);
             });
         } catch (e) {
-            container.innerHTML = `<div class="studio-error">Erro ao carregar músicas: ${e.message}</div>`;
+            container.innerHTML = `<div class="studio-error">${this.tr('studioErrorLoad', 'Erro ao carregar músicas: {err}', { err: e.message })}</div>`;
         }
     }
 

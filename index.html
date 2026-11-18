@@ -80,32 +80,32 @@
 
             <!-- Clash Royale Bottom Navigation Dock -->
             <nav id="menu-bottom-dock" class="menu-bottom-dock">
-                <button id="menu-btn-shop" class="dock-tab btn-shop" title="Loja">
+                <button id="menu-btn-shop" class="dock-tab btn-shop" title="Loja" data-i18n-title="dockShop">
                     <div class="dock-icon-wrap">
                         <img src="assets/ui/icon_shop.svg" alt="Loja" class="dock-tab-icon">
                     </div>
                     <span class="dock-tab-label" data-i18n="dockShop">Loja</span>
                 </button>
-                <button id="menu-btn-talents" class="dock-tab btn-talents" title="Talentos">
+                <button id="menu-btn-talents" class="dock-tab btn-talents" title="Talentos" data-i18n-title="dockTalents">
                     <div class="dock-icon-wrap">
                         <img src="assets/ui/icon_talents.svg" alt="Talentos" class="dock-tab-icon">
                     </div>
                     <span class="dock-tab-label" data-i18n="dockTalents">Talentos</span>
                 </button>
-                <button id="menu-btn-pvp" class="dock-tab btn-pvp btn-pvp-duel" title="Duelo PvP">
+                <button id="menu-btn-pvp" class="dock-tab btn-pvp btn-pvp-duel" title="Duelo PvP" data-i18n-title="pvpPreBattleTitle">
                     <div class="dock-icon-wrap">
                         <img src="assets/ui/icon_pvp.svg" alt="PvP" class="dock-tab-icon">
                     </div>
                     <span class="dock-tab-label" data-i18n="dockPvp">PvP</span>
                 </button>
-                <button id="menu-btn-missions" class="dock-tab btn-missions" title="Missões">
+                <button id="menu-btn-missions" class="dock-tab btn-missions" title="Missões" data-i18n-title="dockMissions">
                     <div class="dock-icon-wrap">
                         <img src="assets/ui/icon_missions.svg" alt="Missões" class="dock-tab-icon">
                         <span id="menu-missions-badge" class="missions-badge-counter hidden">0</span>
                     </div>
                     <span class="dock-tab-label" data-i18n="dockMissions">Missões</span>
                 </button>
-                <button id="menu-btn-studio" class="dock-tab btn-studio" title="Estúdio">
+                <button id="menu-btn-studio" class="dock-tab btn-studio" title="Estúdio" data-i18n-title="dockStudio">
                     <div class="dock-icon-wrap">
                         <img src="assets/ui/icon_studio.svg" alt="Estúdio" class="dock-tab-icon">
                     </div>
@@ -132,7 +132,7 @@
             <div class="map-screen-scroll">
                 <!-- 1. MAPA E FASE ATUAL -->
                 <div class="pve-hud-card stage-select-card" id="pve-card-stage">
-                    <div class="pve-card-main-row" id="pve-stage-toggle-btn" title="Toque para alternar seleção de fase">
+                    <div class="pve-card-main-row" id="pve-stage-toggle-btn" title="Toque para alternar seleção de fase" data-i18n-title="toggleStageTitle">
                         <div class="pve-card-icon-wrap" id="map-selected-arena-showcase">
                             <img id="showcase-arena-img" src="assets/maps/thumb_void.jpg" alt="Arena" class="pve-card-thumb">
                             <span id="showcase-arena-badge" class="arena-theme-badge badge-urban">URBANO</span>
@@ -164,7 +164,7 @@
 
                 <!-- 2. PERSONAGEM E NÍVEL -->
                 <div class="pve-hud-card hero-select-card" id="pve-card-hero">
-                    <div class="pve-card-main-row" id="pve-hero-toggle-btn" title="Toque para alternar guitarrista">
+                    <div class="pve-card-main-row" id="pve-hero-toggle-btn" title="Toque para alternar guitarrista" data-i18n-title="toggleHeroTitle">
                         <div class="hero-showcase-portrait-wrap pve-card-icon-wrap">
                             <img id="showcase-hero-img" src="assets/heroes/johnny_blaze.jpg" alt="Hero" class="showcase-hero-img pve-card-thumb">
                             <span id="showcase-hero-rarity-badge" class="hero-rarity-badge badge-common">COMUM</span>
@@ -249,7 +249,7 @@
 
                 <!-- 5. MÚSICA & TRILHA SONORA -->
                 <div class="pve-hud-card song-select-card" id="pve-card-song">
-                    <div class="pve-card-main-row" id="pve-song-toggle-btn" title="Toque para alternar música">
+                    <div class="pve-card-main-row" id="pve-song-toggle-btn" title="Toque para alternar música" data-i18n-title="toggleSongTitle">
                         <div class="map-song-cover-wrap pve-card-icon-wrap">
                             <img id="map-selected-song-cover" src="assets/covers/default_cover.jpg" alt="Cover" class="map-song-cover-img pve-card-thumb">
                             <span class="map-song-active-pill" data-i18n="songActivePill">EM REPRODUÇÃO</span>
@@ -439,7 +439,7 @@
                         <span class="modal-upgrades-tag"><span data-i18n="talentUpgrades">Upgrades:</span> <span id="modal-total-upgrades">0 / 188</span></span>
                     </div>
                 </div>
-                <button id="talent-close-btn" class="talent-modal-close" aria-label="Fechar">✕</button>
+                <button id="talent-close-btn" class="talent-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
 
             <!-- Tabs: Branches -->
@@ -502,7 +502,7 @@
                     <h2 data-i18n="studioTitle">🎵 ESTÚDIO DE MÚSICAS & RITMO</h2>
                     <span class="studio-subtitle" data-i18n="studioSubtitle">Crie, edite e compartilhe suas próprias faixas no jogo!</span>
                 </div>
-                <button id="studio-close-btn" class="studio-modal-close" aria-label="Fechar">✕</button>
+                <button id="studio-close-btn" class="studio-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
 
             <!-- Studio Tabs Bar -->
@@ -621,30 +621,30 @@
                 </div>
                 <div class="editor-header-center">
                     <span id="editor-time-display" class="editor-clock">00:00.0 / 00:30.0</span>
-                    <span id="editor-notes-count" class="editor-notes-badge">0 notas mapeadas</span>
+                    <span id="editor-notes-count" class="editor-notes-badge" data-i18n="songNotesMapped">0 notas mapeadas</span>
                 </div>
-                <button id="editor-close-btn" class="editor-btn-close" aria-label="Fechar">✕</button>
+                <button id="editor-close-btn" class="editor-btn-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
 
             <!-- Editor Transport & Toolbar -->
             <div class="editor-toolbar">
                 <div class="tool-group">
-                    <button id="editor-rew-btn" class="tool-btn" title="Voltar 3s">⏪ -3s</button>
-                    <button id="editor-step-prev" class="tool-btn" title="Voltar 1 Beat">⏮️ -1B</button>
-                    <button id="editor-play-btn" class="tool-btn btn-play" title="Tocar / Pausar">▶️ TOCAR</button>
-                    <button id="editor-step-next" class="tool-btn" title="Avançar 1 Beat">⏭️ +1B</button>
-                    <button id="editor-fwd-btn" class="tool-btn" title="Avançar 3s">⏩ +3s</button>
-                    <button id="editor-rec-btn" class="tool-btn btn-rec" title="Gravação em Tempo Real">⏺️ GRAVAR (REC)</button>
+                    <button id="editor-rew-btn" class="tool-btn" title="Voltar 3s" data-i18n-title="editorRewTitle">⏪ -3s</button>
+                    <button id="editor-step-prev" class="tool-btn" title="Voltar 1 Beat" data-i18n-title="editorStepPrevTitle">⏮️ -1B</button>
+                    <button id="editor-play-btn" class="tool-btn btn-play" title="Tocar / Pausar" data-i18n-title="editorPlayTitle" data-i18n="editorPlay">▶️ TOCAR</button>
+                    <button id="editor-step-next" class="tool-btn" title="Avançar 1 Beat" data-i18n-title="editorStepNextTitle">⏭️ +1B</button>
+                    <button id="editor-fwd-btn" class="tool-btn" title="Avançar 3s" data-i18n-title="editorFwdTitle">⏩ +3s</button>
+                    <button id="editor-rec-btn" class="tool-btn btn-rec" title="Gravação em Tempo Real" data-i18n-title="editorRecTitle" data-i18n="editorRec">⏺️ GRAVAR (REC)</button>
                 </div>
 
                 <div class="tool-group">
                     <label class="tool-select-label"><span data-i18n="editorSnap">Grade:</span>
                         <select id="editor-snap-select" class="tool-select">
-                            <option value="none">Livre</option>
-                            <option value="1/2">1/2 Tempo</option>
-                            <option value="1/4" selected>1/4 Tempo</option>
-                            <option value="1/8">1/8 Tempo</option>
-                            <option value="1/16">1/16 Tempo</option>
+                            <option value="none" data-i18n="snapFree">Livre</option>
+                            <option value="1/2" data-i18n="snapHalf">1/2 Tempo</option>
+                            <option value="1/4" selected data-i18n="snapQuarter">1/4 Tempo</option>
+                            <option value="1/8" data-i18n="snapEighth">1/8 Tempo</option>
+                            <option value="1/16" data-i18n="snapSixteenth">1/16 Tempo</option>
                         </select>
                     </label>
 
@@ -658,8 +658,8 @@
                 </div>
 
                 <div class="tool-group note-type-group">
-                    <button id="editor-mode-tap" class="tool-btn mode-btn active" title="Toque Normal (Tap)" data-i18n="editorNormal">🎵 Normal</button>
-                    <button id="editor-mode-hold" class="tool-btn mode-btn" title="Toque Arrastado (Sustain / Hold)" data-i18n="editorHold">〰️ Arrastado</button>
+                    <button id="editor-mode-tap" class="tool-btn mode-btn active" title="Toque Normal (Tap)" data-i18n-title="editorTapTitle" data-i18n="editorNormal">🎵 Normal</button>
+                    <button id="editor-mode-hold" class="tool-btn mode-btn" title="Toque Arrastado (Sustain / Hold)" data-i18n-title="editorHoldTitle" data-i18n="editorHold">〰️ Arrastado</button>
                     <label class="tool-select-label" id="editor-hold-len-wrap" style="display: none;"><span data-i18n="editorHoldDuration">Duração:</span>
                         <select id="editor-hold-len-select" class="tool-select">
                             <option value="0.5">0.5s</option>
@@ -672,11 +672,11 @@
                 </div>
 
                 <div class="tool-group">
-                    <button id="editor-zoom-out" class="tool-btn" title="Diminuir Zoom">🔍 -</button>
-                    <button id="editor-zoom-in" class="tool-btn" title="Aumentar Zoom">🔍 +</button>
-                    <button id="editor-undo-btn" class="tool-btn" title="Desfazer" data-i18n="editorUndo">↩️ Desfazer</button>
-                    <button id="editor-autogen-btn" class="tool-btn" title="Gerar ritmo base por BPM" data-i18n="editorAutoBpm">⚡ Auto-BPM</button>
-                    <button id="editor-clear-btn" class="tool-btn btn-danger" title="Limpar todas as notas" data-i18n="editorClear">🗑️ Limpar</button>
+                    <button id="editor-zoom-out" class="tool-btn" title="Diminuir Zoom" data-i18n-title="editorZoomOutTitle">🔍 -</button>
+                    <button id="editor-zoom-in" class="tool-btn" title="Aumentar Zoom" data-i18n-title="editorZoomInTitle">🔍 +</button>
+                    <button id="editor-undo-btn" class="tool-btn" title="Desfazer" data-i18n-title="editorUndoTitle" data-i18n="editorUndo">↩️ Desfazer</button>
+                    <button id="editor-autogen-btn" class="tool-btn" title="Gerar ritmo base por BPM" data-i18n-title="editorAutoBpmTitle" data-i18n="editorAutoBpm">⚡ Auto-BPM</button>
+                    <button id="editor-clear-btn" class="tool-btn btn-danger" title="Limpar todas as notas" data-i18n-title="editorClearTitle" data-i18n="editorClear">🗑️ Limpar</button>
                 </div>
 
                 <div class="tool-group save-group">
@@ -698,7 +698,7 @@
 
             <!-- Fretboard Tap Pads (On-screen mobile buttons + keyboard A, S, D, F) -->
             <div class="editor-pads-section">
-                <div class="pads-instructions" data-i18n="editorInstructions">Toque nas pistas para adicionar/remover notas na linha do tempo, ou use <b>REC</b> para gravar no ritmo enquanto a música toca!</div>
+                <div class="pads-instructions" data-i18n="editorInstructions" data-i18n-html="true">Toque nas pistas para adicionar/remover notas na linha do tempo, ou use <b>REC</b> para gravar no ritmo enquanto a música toca!</div>
                 <div class="editor-pads-bar">
                     <button id="editor-pad-0" class="editor-fret-pad pad-green">
                         <span class="pad-num">1</span>
@@ -896,7 +896,7 @@
                 </div>
                 <div class="gear-option-row">
                     <span class="gear-option-label" data-i18n="gearSoundLabel">Som do Jogo:</span>
-                    <button id="menu-sound-toggle" class="gear-btn-choice menu-tool-btn" data-i18n="gearToggleSound" onclick="if(window.soundEngine){ const m = window.soundEngine.toggleMute(); this.innerText = m ? 'Mutado 🔇' : 'Ativo 🔊'; }">Alternar Som 🔊</button>
+                    <button id="menu-sound-toggle" class="gear-btn-choice menu-tool-btn" data-i18n="gearToggleSound">Alternar Som 🔊</button>
                 </div>
 
                 <div id="gear-danger-zone-wrap" class="gear-danger-zone">
@@ -918,7 +918,7 @@
             <div class="game-modal-header">
                 <h3 id="skill-picker-title">⚡ Equipar no Trilho 1</h3>
                 <div class="skill-modal-actions-top">
-                    <button type="button" id="skill-restore-default-btn" class="skill-restore-btn" title="Restaurar Loadout Padrão" data-i18n="btnRestoreDefault">↺ Padrão</button>
+                    <button type="button" id="skill-restore-default-btn" class="skill-restore-btn" title="Restaurar Loadout Padrão" data-i18n-title="restoreDefaultTitle" data-i18n="btnRestoreDefault">↺ Padrão</button>
                     <button id="skill-picker-close-btn" class="gear-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
                 </div>
             </div>
@@ -973,11 +973,11 @@
                         <span id="missions-stat-kills-label" data-i18n="missionsStatKillsLabel">💀 Kills Hordas:</span>
                         <strong id="missions-stat-kills">0</strong>
                     </div>
-                    <div class="missions-stat-chip" title="Saldo atual na carteira">
+                    <div class="missions-stat-chip" title="Saldo atual na carteira" data-i18n-title="missionsWalletTitle">
                         <span data-i18n="statWalletGold">💰 Carteira:</span>
                         <strong id="missions-stat-wallet-gold">0</strong>
                     </div>
-                    <div class="missions-stat-chip" title="XP acumulado no inventário do jogador">
+                    <div class="missions-stat-chip" title="XP acumulado no inventário do jogador" data-i18n-title="missionsXpInvTitle">
                         <span data-i18n="statInventoryXp">✨ XP Guardado:</span>
                         <strong id="missions-stat-inventory-xp">0</strong>
                     </div>
@@ -1166,26 +1166,28 @@
         </div>
     </div>
 
-    <!-- Scripts with Cache Busting v=62 -->
-    <script src="js/audio.js?v=62"></script>
-    <script src="js/i18n.js?v=62"></script>
-    <script src="js/spritesheet.js?v=62"></script>
-    <script src="js/combat-fx.js?v=62"></script>
-    <script src="js/zombie-entity.js?v=62"></script>
-    <script src="js/enemy-pool.js?v=62"></script>
-    <script src="js/guitarist-pool.js?v=62"></script>
-    <script src="js/talents.js?v=62"></script>
-    <script src="js/skills.js?v=62"></script>
-    <script src="js/stage-system.js?v=62"></script>
-    <script src="js/song-db.js?v=62"></script>
-    <script src="js/song-editor.js?v=62"></script>
-    <script src="js/song-studio.js?v=63"></script>
-    <script src="js/special-system.js?v=63"></script>
-    <script src="js/combat.js?v=63"></script>
-    <script src="js/rhythm.js?v=62"></script>
-    <script src="js/missions.js?v=62"></script>
-    <script src="js/pvp-system.js?v=62"></script>
-    <script src="js/countdown-system.js?v=62"></script>
-    <script src="js/main.js?v=62"></script>
+    <!-- Scripts with Cache Busting v=64 -->
+    <script src="js/audio.js?v=64"></script>
+    <script src="js/i18n.js?v=64"></script>
+    <script src="js/i18n-content.js?v=64"></script>
+    <script src="js/i18n-modes.js?v=64"></script>
+    <script src="js/spritesheet.js?v=64"></script>
+    <script src="js/combat-fx.js?v=64"></script>
+    <script src="js/zombie-entity.js?v=64"></script>
+    <script src="js/enemy-pool.js?v=64"></script>
+    <script src="js/guitarist-pool.js?v=64"></script>
+    <script src="js/talents.js?v=64"></script>
+    <script src="js/skills.js?v=64"></script>
+    <script src="js/stage-system.js?v=64"></script>
+    <script src="js/song-db.js?v=64"></script>
+    <script src="js/song-editor.js?v=64"></script>
+    <script src="js/song-studio.js?v=64"></script>
+    <script src="js/special-system.js?v=64"></script>
+    <script src="js/combat.js?v=64"></script>
+    <script src="js/rhythm.js?v=64"></script>
+    <script src="js/missions.js?v=64"></script>
+    <script src="js/pvp-system.js?v=64"></script>
+    <script src="js/countdown-system.js?v=64"></script>
+    <script src="js/main.js?v=64"></script>
 </body>
 </html>

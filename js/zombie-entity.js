@@ -18,13 +18,14 @@ const ZOMBIE_META_MAP = {
 };
 
 class ZombieEntity {
+    tr(k, f, p) { return (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f); }
     constructor(enemyDef, laneY, canvasWidth, level = 1, initialX = null) {
         this.level = Math.max(1, Math.round(level || 1));
         this.enemyId = (enemyDef && (enemyDef.id || enemyDef.type)) || 'normal';
         this.id = this.enemyId;
         this.type = (enemyDef && enemyDef.type) || 'normal';
-        this.baseName = (enemyDef && enemyDef.name) || 'Zumbi';
-        this.name = `[Nv.${this.level}] ${this.baseName}`;
+        this.baseName = this.tr('zombie_' + this.enemyId, (enemyDef && enemyDef.name) || this.tr('zombieFallback', 'Zumbi'));
+        this.name = `[${this.tr('levelShort', 'Nv.')}${this.level}] ${this.baseName}`;
         this.side = (enemyDef && enemyDef.side) || 'player';
         this.direction = (this.side === 'opponent') ? 1 : -1;
         this.badge = enemyDef.badge || '';
@@ -190,7 +191,7 @@ class ZombieEntity {
 
                 if (this.hp <= 0 && this.active) {
                     this.active = false;
-                    combat.onZombieKilled(this, 100, "+BURN KILL! 🔥", '#ff5500');
+                    combat.onZombieKilled(this, 100, this.tr('zBurnKill', "+QUEIMADURA! 🔥"), '#ff5500');
                     return;
                 }
             }
@@ -354,7 +355,7 @@ class ZombieEntity {
 
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} SLASH!`, '#ff9900');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkSlash', `-${this.attackDamage} SLASH!`, { dmg: this.attackDamage }), '#ff9900');
             }
         }
     }
@@ -363,7 +364,7 @@ class ZombieEntity {
         if (!this.armorBroken && this.hp < this.maxHp * 0.5 && !this.isRushing) {
             this.isRushing = true;
             this.speed = this.rushSpeed;
-            combat.addFloatingText("⚡ CARGA TÁTICA!", this.x, this.y - 35, '#ff3344', true);
+            combat.addFloatingText(this.tr('zAtkCharge', "⚡ CARGA TÁTICA!"), this.x, this.y - 35, '#ff3344', true);
             combat.triggerShake(3);
         }
 
@@ -385,7 +386,7 @@ class ZombieEntity {
             this.frame = 4 + (Math.floor(this.attackTimer * 6) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} CORONHADA!`, '#ff3344');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkButtstroke', `-${this.attackDamage} CORONHADA!`, { dmg: this.attackDamage }), '#ff3344');
             }
         }
     }
@@ -423,7 +424,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 6) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} ESPOROS!`, '#ffaa00');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkSpores', `-${this.attackDamage} ESPOROS!`, { dmg: this.attackDamage }), '#ffaa00');
             }
         }
     }
@@ -464,7 +465,7 @@ class ZombieEntity {
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
                 combat.triggerShake(5);
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} ESMAGAR!`, '#ffaa00');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkSmash', `-${this.attackDamage} ESMAGAR!`, { dmg: this.attackDamage }), '#ffaa00');
             }
         }
     }
@@ -484,7 +485,7 @@ class ZombieEntity {
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
                 combat.triggerShake(4);
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} SOCO DE AÇO!`, '#ff3333');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkSteelPunch', `-${this.attackDamage} SOCO DE AÇO!`, { dmg: this.attackDamage }), '#ff3333');
             }
         }
     }
@@ -516,7 +517,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 6.0) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} RADIAÇÃO!`, '#39ff14');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkRadiation', `-${this.attackDamage} RADIAÇÃO!`, { dmg: this.attackDamage }), '#39ff14');
             }
         }
     }
@@ -544,7 +545,7 @@ class ZombieEntity {
                         radius: 3, maxRadius: 28,
                         color: '#39ff14', lineWidth: 3, alpha: 1.0
                     });
-                    combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} CRUSH!`, '#ff3300');
+                    combat.takeDamage(this.attackDamage, true, this.tr('zAtkCrush', `-${this.attackDamage} CRUSH!`, { dmg: this.attackDamage }), '#ff3300');
                 } else {
                     combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} HP`, '#ff2222');
                 }
@@ -573,7 +574,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 7.5) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} LACERAÇÃO! 🤡`, '#ff0077');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkLacerate', `-${this.attackDamage} LACERAÇÃO! 🤡`, { dmg: this.attackDamage }), '#ff0077');
                 combat.fx.spawnBurst(this.x - 10, this.y - 14, '#ff0055', 4, 35, 1.8, 0.25);
             }
         }
@@ -593,7 +594,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 5.2) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} DEMOLIÇÃO! 🔨`, '#ffaa00');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkDemolish', `-${this.attackDamage} DEMOLIÇÃO! 🔨`, { dmg: this.attackDamage }), '#ffaa00');
                 combat.triggerShake(4);
             }
         }
@@ -613,7 +614,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 6.5) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} VÍRUS! 🧪`, '#00ffcc');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkVirus', `-${this.attackDamage} VÍRUS! 🧪`, { dmg: this.attackDamage }), '#00ffcc');
                 combat.fx.spawnBurst(this.x - 8, this.y - 16, '#00ffcc', 5, 30, 1.6, 0.25);
             }
         }
@@ -633,7 +634,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 5.0) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} IMPACTO! 🧯`, '#ff4400');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkImpact', `-${this.attackDamage} IMPACTO! 🧯`, { dmg: this.attackDamage }), '#ff4400');
                 combat.triggerShake(5);
             }
         }
@@ -653,7 +654,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 6.5) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} MACHADADA! 🪓`, '#ff3300');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkAxe', `-${this.attackDamage} MACHADADA! 🪓`, { dmg: this.attackDamage }), '#ff3300');
                 combat.fx.spawnBurst(this.x - 8, this.y - 14, '#bb0000', 4, 30, 1.8, 0.25);
             }
         }
@@ -665,7 +666,7 @@ class ZombieEntity {
             if (this.rallyTimer <= 0) {
                 this.rallyTimer = 3.6;
                 combat.fx.spawnBurst(this.x, this.y - 20, '#00ff66', 3, 20, 1.4, 0.25);
-                combat.addFloatingText("DISCURSO! 📜", this.x, this.y - 36, '#00ff66', false);
+                combat.addFloatingText(this.tr('zAtkSpeech', "DISCURSO! 📜"), this.x, this.y - 36, '#00ff66', false);
             }
             this.x -= this.speed * dt;
             this.walkTimer += dt * (this.speed / 32) * 6.8;
@@ -679,7 +680,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 6.0) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, false, `-${this.attackDamage} COMÍCIO! 📜`, '#00ff66');
+                combat.takeDamage(this.attackDamage, false, this.tr('zAtkRally', `-${this.attackDamage} COMÍCIO! 📜`, { dmg: this.attackDamage }), '#00ff66');
                 combat.fx.spawnBurst(this.x - 8, this.y - 14, '#ffdd00', 3, 25, 1.5, 0.2);
             }
         }
@@ -699,7 +700,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 7.5) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} MORCEGO! 🦇`, '#aa00ff');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkBat', `-${this.attackDamage} MORCEGO! 🦇`, { dmg: this.attackDamage }), '#aa00ff');
                 combat.fx.spawnBurst(this.x - 10, this.y - 16, '#aa00ff', 5, 35, 1.8, 0.25);
             }
         }
@@ -710,7 +711,7 @@ class ZombieEntity {
             if (!this.rageTriggered) {
                 this.rageTriggered = true;
                 this.speed *= 1.4;
-                combat.addFloatingText("FÚRIA ESPARTANA! 🔥", this.x, this.y - 42, '#ff2200', true);
+                combat.addFloatingText(this.tr('zAtkSpartanRage', "FÚRIA ESPARTANA! 🔥"), this.x, this.y - 42, '#ff2200', true);
                 combat.triggerShake(6);
             }
             if (Math.random() < 0.25) combat.fx.spawnBurst(this.x, this.y - 16, '#ff2200', 2, 20, 1.3, 0.2);
@@ -729,7 +730,7 @@ class ZombieEntity {
             this.frame = 8 + (Math.floor(this.attackTimer * 5.5) % 4);
             if (this.attackCooldown <= 0 && !combat.isGameOver) {
                 this.attackCooldown = this.attackInterval;
-                combat.takeDamage(this.attackDamage, true, `-${this.attackDamage} LÂMINAS DO CAOS! ⚔️`, '#ff2200');
+                combat.takeDamage(this.attackDamage, true, this.tr('zAtkChaosBlades', `-${this.attackDamage} LÂMINAS DO CAOS! ⚔️`, { dmg: this.attackDamage }), '#ff2200');
                 combat.triggerShake(5);
             }
         }
@@ -793,7 +794,7 @@ class ZombieEntity {
             ctx.font = "bold 8px 'Segoe UI', sans-serif";
             ctx.fillStyle = (meta && meta.name) ? meta.name : '#ffffff';
             ctx.textAlign = 'center';
-            ctx.fillText(this.name || "ZUMBI", this.x, by - 2);
+            ctx.fillText(this.name || this.tr('zombieFallback', "ZUMBI").toUpperCase(), this.x, by - 2);
         }
     }
 

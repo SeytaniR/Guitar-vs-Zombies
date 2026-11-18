@@ -1,4 +1,5 @@
 // AAA Talent Tree System for Guitar vs Zombies
+const _trT = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
 class TalentSystem {
     constructor() {
         this.gold = 0;
@@ -19,8 +20,8 @@ class TalentSystem {
                 baseCost: 80,
                 costMult: 1.55,
                 prereq: null,
-                getBenefit: (lvl) => `+${lvl * 5} Dano Base`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 5} Dano Base`,
+                getBenefit: (lvl) => _trT('talentDmgBase', `+${lvl * 5} Dano Base`, { amount: lvl * 5 }),
+                getNextBenefit: (lvl) => _trT('talentDmgBase', `+${(lvl + 1) * 5} Dano Base`, { amount: (lvl + 1) * 5 }),
                 getValue: (lvl) => lvl * 5
             },
             'ferocious_solo': {
@@ -34,8 +35,8 @@ class TalentSystem {
                 baseCost: 200,
                 costMult: 1.60,
                 prereq: { id: 'power_chord', level: 3 },
-                getBenefit: (lvl) => `+${lvl * 12}% Dano Crítico`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 12}% Dano Crítico`,
+                getBenefit: (lvl) => _trT('talentCritDmg', `+${lvl * 12}% Dano Crítico`, { amount: lvl * 12 }),
+                getNextBenefit: (lvl) => _trT('talentCritDmg', `+${(lvl + 1) * 12}% Dano Crítico`, { amount: (lvl + 1) * 12 }),
                 getValue: (lvl) => lvl * 0.12
             },
             'fuzz_lightning': {
@@ -49,8 +50,8 @@ class TalentSystem {
                 baseCost: 500,
                 costMult: 1.65,
                 prereq: { id: 'ferocious_solo', level: 4 },
-                getBenefit: (lvl) => lvl > 0 ? `Raios atingem até ${lvl} zumbis adjacentes` : 'Sem raios em cadeia',
-                getNextBenefit: (lvl) => `Raios atingem até ${lvl + 1} zumbis adjacentes`,
+                getBenefit: (lvl) => lvl > 0 ? _trT('talentChainLightning', `Raios atingem até ${lvl} zumbis adjacentes`, { amount: lvl }) : _trT('talentNoChain', 'Sem raios em cadeia'),
+                getNextBenefit: (lvl) => _trT('talentChainLightning', `Raios atingem até ${lvl + 1} zumbis adjacentes`, { amount: lvl + 1 }),
                 getValue: (lvl) => lvl // number of chain targets
             },
             'sonic_knockback': {
@@ -64,8 +65,8 @@ class TalentSystem {
                 baseCost: 240,
                 costMult: 1.60,
                 prereq: { id: 'power_chord', level: 4 },
-                getBenefit: (lvl) => `+${lvl * 15}% Força de Empurrão`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 15}% Força de Empurrão`,
+                getBenefit: (lvl) => _trT('talentKnockback', `+${lvl * 15}% Força de Empurrão`, { amount: lvl * 15 }),
+                getNextBenefit: (lvl) => _trT('talentKnockback', `+${(lvl + 1) * 15}% Força de Empurrão`, { amount: (lvl + 1) * 15 }),
                 getValue: (lvl) => lvl * 0.15
             },
             'air_sniper': {
@@ -79,8 +80,8 @@ class TalentSystem {
                 baseCost: 700,
                 costMult: 1.70,
                 prereq: { id: 'fuzz_lightning', level: 2 },
-                getBenefit: (lvl) => `+${lvl * 25}% Dano em Air Shots`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 25}% Dano em Air Shots`,
+                getBenefit: (lvl) => _trT('tb_air_sniper', `+${lvl * 25}% Dano em Air Shots`, { amount: lvl * 25 }),
+                getNextBenefit: (lvl) => _trT('tb_air_sniper', `+${(lvl + 1) * 25}% Dano em Air Shots`, { amount: (lvl + 1) * 25 }),
                 getValue: (lvl) => lvl * 0.25
             },
 
@@ -96,8 +97,8 @@ class TalentSystem {
                 baseCost: 90,
                 costMult: 1.55,
                 prereq: null,
-                getBenefit: (lvl) => `+${lvl * 15} Vida Máxima`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 15} Vida Máxima`,
+                getBenefit: (lvl) => _trT('talentMaxHp', `+${lvl * 15} Vida Máxima`, { amount: lvl * 15 }),
+                getNextBenefit: (lvl) => _trT('talentMaxHp', `+${(lvl + 1) * 15} Vida Máxima`, { amount: (lvl + 1) * 15 }),
                 getValue: (lvl) => lvl * 15
             },
             'armored_amp': {
@@ -111,8 +112,8 @@ class TalentSystem {
                 baseCost: 220,
                 costMult: 1.60,
                 prereq: { id: 'punk_toughness', level: 3 },
-                getBenefit: (lvl) => `Reduz todo dano em -${lvl} HP`,
-                getNextBenefit: (lvl) => `Reduz todo dano em -${lvl + 1} HP`,
+                getBenefit: (lvl) => _trT('tb_armored_amp', `Reduz todo dano em -${lvl} HP`, { amount: lvl }),
+                getNextBenefit: (lvl) => _trT('tb_armored_amp', `Reduz todo dano em -${lvl + 1} HP`, { amount: lvl + 1 }),
                 getValue: (lvl) => lvl
             },
             'shock_barrier': {
@@ -126,8 +127,8 @@ class TalentSystem {
                 baseCost: 560,
                 costMult: 1.68,
                 prereq: { id: 'armored_amp', level: 4 },
-                getBenefit: (lvl) => lvl > 0 ? `Escudo recarrega a cada ${Math.max(8, 22 - lvl)}s` : 'Sem escudo ativo',
-                getNextBenefit: (lvl) => `Escudo recarrega a cada ${Math.max(8, 22 - (lvl + 1))}s`,
+                getBenefit: (lvl) => lvl > 0 ? _trT('tb_shock_barrier', `Escudo recarrega a cada ${Math.max(8, 22 - lvl)}s`, { sec: Math.max(8, 22 - lvl) }) : _trT('tb_shock_none', 'Sem escudo ativo'),
+                getNextBenefit: (lvl) => _trT('tb_shock_barrier', `Escudo recarrega a cada ${Math.max(8, 22 - (lvl + 1))}s`, { sec: Math.max(8, 22 - (lvl + 1)) }),
                 getValue: (lvl) => lvl > 0 ? Math.max(8, 22 - lvl) : 0
             },
             'rhythmic_heal': {
@@ -141,8 +142,8 @@ class TalentSystem {
                 baseCost: 360,
                 costMult: 1.62,
                 prereq: { id: 'punk_toughness', level: 5 },
-                getBenefit: (lvl) => `+${lvl * 1} HP curado a cada 10 notas`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 1} HP curado a cada 10 notas`,
+                getBenefit: (lvl) => _trT('tb_rhythmic_heal', `+${lvl * 1} HP curado a cada 10 notas`, { amount: lvl }),
+                getNextBenefit: (lvl) => _trT('tb_rhythmic_heal', `+${(lvl + 1) * 1} HP curado a cada 10 notas`, { amount: lvl + 1 }),
                 getValue: (lvl) => lvl * 1
             },
             'rock_never_dies': {
@@ -156,8 +157,8 @@ class TalentSystem {
                 baseCost: 1000,
                 costMult: 1.85,
                 prereq: { id: 'shock_barrier', level: 3 },
-                getBenefit: (lvl) => lvl > 0 ? `Revive com ${lvl}s de imunidade e repulsão` : 'Revive padrão',
-                getNextBenefit: (lvl) => `Revive com ${lvl + 1}s de imunidade e repulsão`,
+                getBenefit: (lvl) => lvl > 0 ? _trT('tb_rock_never_dies', `Revive com ${lvl}s de imunidade e repulsão`, { sec: lvl }) : _trT('tb_rock_none', 'Revive padrão'),
+                getNextBenefit: (lvl) => _trT('tb_rock_never_dies', `Revive com ${lvl + 1}s de imunidade e repulsão`, { sec: lvl + 1 }),
                 getValue: (lvl) => lvl
             },
 
@@ -173,8 +174,8 @@ class TalentSystem {
                 baseCost: 80,
                 costMult: 1.52,
                 prereq: null,
-                getBenefit: (lvl) => `+${lvl * 1} Moeda extra por zumbi`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 1} Moeda extra por zumbi`,
+                getBenefit: (lvl) => _trT('tb_golden_pick', `+${lvl * 1} Moeda extra por zumbi`, { amount: lvl }),
+                getNextBenefit: (lvl) => _trT('tb_golden_pick', `+${(lvl + 1) * 1} Moeda extra por zumbi`, { amount: lvl + 1 }),
                 getValue: (lvl) => lvl
             },
             'fine_sync': {
@@ -188,8 +189,8 @@ class TalentSystem {
                 baseCost: 220,
                 costMult: 1.60,
                 prereq: { id: 'golden_pick', level: 3 },
-                getBenefit: (lvl) => `+${lvl * 4}% Janela de PERFECT!`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 4}% Janela de PERFECT!`,
+                getBenefit: (lvl) => _trT('tb_fine_sync', `+${lvl * 4}% Janela de PERFECT!`, { amount: lvl * 4 }),
+                getNextBenefit: (lvl) => _trT('tb_fine_sync', `+${(lvl + 1) * 4}% Janela de PERFECT!`, { amount: (lvl + 1) * 4 }),
                 getValue: (lvl) => lvl * 0.04
             },
             'hyper_overdrive': {
@@ -203,8 +204,8 @@ class TalentSystem {
                 baseCost: 380,
                 costMult: 1.65,
                 prereq: { id: 'fine_sync', level: 3 },
-                getBenefit: (lvl) => `+${lvl * 10}% Ganho de Rock Meter`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 10}% Ganho de Rock Meter`,
+                getBenefit: (lvl) => _trT('tb_hyper_overdrive', `+${lvl * 10}% Ganho de Rock Meter`, { amount: lvl * 10 }),
+                getNextBenefit: (lvl) => _trT('tb_hyper_overdrive', `+${(lvl + 1) * 10}% Ganho de Rock Meter`, { amount: (lvl + 1) * 10 }),
                 getValue: (lvl) => lvl * 0.10
             },
             'lucrative_streak': {
@@ -218,8 +219,8 @@ class TalentSystem {
                 baseCost: 520,
                 costMult: 1.68,
                 prereq: { id: 'golden_pick', level: 5 },
-                getBenefit: (lvl) => `+${lvl * 8} Moedas por 15-Streak`,
-                getNextBenefit: (lvl) => `+${(lvl + 1) * 8} Moedas por 15-Streak`,
+                getBenefit: (lvl) => _trT('tb_lucrative_streak', `+${lvl * 8} Moedas por 15-Streak`, { amount: lvl * 8 }),
+                getNextBenefit: (lvl) => _trT('tb_lucrative_streak', `+${(lvl + 1) * 8} Moedas por 15-Streak`, { amount: (lvl + 1) * 8 }),
                 getValue: (lvl) => lvl * 8
             },
             'solo_mastery': {
@@ -233,8 +234,8 @@ class TalentSystem {
                 baseCost: 1100,
                 costMult: 1.85,
                 prereq: { id: 'hyper_overdrive', level: 4 },
-                getBenefit: (lvl) => `Multiplicador máximo: x${4 + lvl}`,
-                getNextBenefit: (lvl) => `Multiplicador máximo: x${4 + lvl + 1}`,
+                getBenefit: (lvl) => _trT('tb_solo_mastery', `Multiplicador máximo: x${4 + lvl}`, { mult: 4 + lvl }),
+                getNextBenefit: (lvl) => _trT('tb_solo_mastery', `Multiplicador máximo: x${4 + lvl + 1}`, { mult: 4 + lvl + 1 }),
                 getValue: (lvl) => 4 + lvl
             }
         };
@@ -435,15 +436,16 @@ class TalentSystem {
                     this.updateUI();
                 };
 
+                const tName = _trT(`talent_${t.id}_name`, t.name);
                 node.innerHTML = `
                     <div class="node-icon-wrap">
-                        <img src="${t.icon}" alt="${t.name}" class="node-icon">
+                        <img src="${t.icon}" alt="${tName}" class="node-icon">
                         ${!unlocked ? '<div class="node-lock-badge">🔒</div>' : ''}
                         ${isMax ? '<div class="node-max-badge">MAX</div>' : ''}
                     </div>
                     <div class="node-info">
-                        <div class="node-name">${t.name}</div>
-                        <div class="node-level">Nv. ${t.level}/${t.maxLevel}</div>
+                        <div class="node-name">${tName}</div>
+                        <div class="node-level">${_trT('levelShort', 'Nv.')} ${t.level}/${t.maxLevel}</div>
                     </div>
                     <div class="node-benefit-preview">${t.getBenefit(t.level)}</div>
                 `;
@@ -491,7 +493,8 @@ class TalentSystem {
         if (reqEl) {
             if (!unlocked && talent.prereq) {
                 const reqTalent = this.talents[talent.prereq.id];
-                reqEl.innerText = tr('requiresPrereq', `🔒 Requer: ${reqTalent.name} Nv. ${talent.prereq.level}`, { name: reqTalent.name, level: talent.prereq.level });
+                const reqName = tr(`talent_${reqTalent.id}_name`, reqTalent.name);
+                reqEl.innerText = tr('requiresPrereq', `🔒 Requer: ${reqName} Nv. ${talent.prereq.level}`, { name: reqName, level: talent.prereq.level });
                 reqEl.style.display = 'block';
             } else {
                 reqEl.style.display = 'none';

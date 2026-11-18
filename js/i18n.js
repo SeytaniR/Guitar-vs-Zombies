@@ -127,24 +127,24 @@ class I18n {
                 "hero_vulkan_ironhead_pass_name": "Pirotecnia Brutal",
                 "hero_vulkan_ironhead_pass_desc": "+1.0% de Dano, +0.3% de Mana Regen e chance de queimadura contínua que cresce a cada nível.",
                 "hero_dr_radix_title": "O Solista Bioquímico", "hero_dr_radix_inst": "Guitarratox \"Uranium-235\"", "hero_dr_radix_pass_name": "Radiação Acústica",
-                "hero_dr_radix_pass_desc": "+1.0% de Dano, +15% de Dano Crítico base e chance de envenenamento radioativo que corrói os zumbis.",
+                "hero_dr_radix_pass_desc": "+1.0% de Dano, +0.35% de Perfuração de Armadura e +0.12% de lentidão contínua da marcha zumbi por nível.",
                 "hero_cypher_volt_title": "O Virtuoso Cibernético", "hero_cypher_volt_inst": "Laser-Caster Bionica Neon", "hero_cypher_volt_pass_name": "Overdrive Bionico",
-                "hero_cypher_volt_pass_desc": "+1.0% de Dano, velocidade de ataque acelerada e choque elétrico em cadeia.", "hero_kragthor_titan_title": "O Titã do Heavy Metal",
+                "hero_cypher_volt_pass_desc": "+1.1% de Dano e +0.6% de Dano Crítico por nível, com arcos elétricos devastadores em notas PERFECT.", "hero_kragthor_titan_title": "O Titã do Heavy Metal",
                 "hero_kragthor_titan_inst": "Flying-V \"Magma Fury\"", "hero_kragthor_titan_pass_name": "Fúria dos Titãs",
-                "hero_kragthor_titan_pass_desc": "+1.0% de Dano, grande repulsão sônica nos zumbis e ondas de choque terrestres brutais.",
+                "hero_kragthor_titan_pass_desc": "+1.15% de Dano, +0.85% de Dano Crítico por nível e repelência brutal contra zumbis pesados.",
                 "hero_roxie_anarchy_title": "A Valquíria do Punk Mítico", "hero_roxie_anarchy_inst": "Guitarra Custom \"Riot Slash\"", "hero_roxie_anarchy_pass_name": "Anarquia Absoluta",
-                "hero_roxie_anarchy_pass_desc": "+1.0% de Dano, chance de acerto crítico duplicada e bônus de dano de dispersão ao acertar notas perfeitas.",
+                "hero_roxie_anarchy_pass_desc": "+1.20% de Dano, +0.70% de Dano Crítico, +0.25% de Ouro Extra e +0.50% de Mana Regen por nível!",
                 "hero_finn_punk_title": "O Campeão Multiversal do Som", "hero_finn_punk_inst": "Espada-Guitarra Sonora de Ooo", "hero_finn_punk_pass_name": "Hora do Rock Multiversal",
                 "hero_finn_punk_pass_desc": "+1.22% de Dano, +0.75% de Dano Crítico e +0.3% de velocidade de projéteis sónicos por nível.",
                 "hero_ignis_draco_title": "O Dragão Devorador de Riffs", "hero_ignis_draco_inst": "Guitarra Dracônica \"Inferno\"", "hero_ignis_draco_pass_name": "Sopro Ígneo Acústico",
                 "hero_ignis_draco_pass_desc": "+1.26% de Dano, +0.82% de Dano Crítico e +0.35% de chance de queimadura contínua dracônica por nível.",
                 "hero_fenrir_howler_title": "A Fera da Lua Cheia do Metal", "hero_fenrir_howler_inst": "Axe-Star \"Lobo da Noite\"",
-                "hero_fenrir_howler_pass_name": "Frenesi da Lua de Sangue", "hero_fenrir_howler_pass_desc": "+1.30% de Dano, +0.90% de Dano Crítico e vampirismo de vida ao abater zumbis.",
+                "hero_fenrir_howler_pass_name": "Frenesi da Lua de Sangue", "hero_fenrir_howler_pass_desc": "+1.30% de Dano, +0.90% de Dano Crítico e drenagem contínua de essência vital dos zumbis por nível.",
                 "hero_spiky_sponge_title": "A Anarquia Amarela das Fossas", "hero_spiky_sponge_inst": "Flying-V a Jato \"Fenda do Biquíni\"",
-                "hero_spiky_sponge_pass_name": "Propulsão Hipersônica", "hero_spiky_sponge_pass_desc": "+1.35% de Dano, +0.95% de Dano Crítico e rajadas sónicas aquáticas de alto impacto.",
+                "hero_spiky_sponge_pass_name": "Propulsão Hipersônica", "hero_spiky_sponge_pass_desc": "+1.35% de Dano, +0.95% de Dano Crítico, +0.35% de Ouro Extra e +0.60% de Mana Regen por nível!",
                 "hero_saul_slash_title": "O Deus Imortal da Cartola & Les Paul", "hero_saul_slash_inst": "Gibson Les Paul Goldtop Sagrada \"1959\"",
                 "hero_saul_slash_pass_name": "Apetite Pela Destruição",
-                "hero_saul_slash_pass_desc": "+1.40% de Dano, +1.10% de Dano Crítico, +0.6% de regeneração de mana por nível e especial divino estendido.",
+                "hero_saul_slash_pass_desc": "+1.45% de Dano, +1.10% de Dano Crítico, +0.45% de Ouro Extra e +0.70% de Mana Regen por nível! O ápice do poder musical.",
                 "zombie_punk_walker": "Zumbi Punk Rocker", "zombie_feral_leaper": "Corredor Saltador", "zombie_toxic_mutant": "Mutante Radioativo",
                 "zombie_armored_soldier": "Sargento Blindado", "zombie_fungal_spore": "Infectado Esporo", "zombie_bloater_pounder": "Gordo Devorador",
                 "zombie_chained_gladiator": "Gladiador do Asfalto", "zombie_toxic_hazmat": "Operário Hazmat", "zombie_clown_jester": "Palhaço Sinistro",
@@ -267,23 +267,23 @@ class I18n {
                 "hero_vulkan_ironhead_title": "Wasteland Pyromaniac", "hero_vulkan_ironhead_inst": "Flaming V8 Scrap-Metal", "hero_vulkan_ironhead_pass_name": "Brutal Pyrotechnics",
                 "hero_vulkan_ironhead_pass_desc": "+1.0% Damage, +0.3% Mana Regen and continuous burn chance scaling per level.", "hero_dr_radix_title": "Biochemical Soloist",
                 "hero_dr_radix_inst": "Guitarratox \"Uranium-235\"", "hero_dr_radix_pass_name": "Acoustic Radiation",
-                "hero_dr_radix_pass_desc": "+1.0% Damage, +15% base Crit Damage and radioactive poison chance eroding zombies.", "hero_cypher_volt_title": "Cybernetic Virtuoso",
+                "hero_dr_radix_pass_desc": "+1.0% Damage, +0.35% Armor Penetration and +0.12% continuous zombie slow per level.", "hero_cypher_volt_title": "Cybernetic Virtuoso",
                 "hero_cypher_volt_inst": "Neon Bionic Laser-Caster", "hero_cypher_volt_pass_name": "Bionic Overdrive",
-                "hero_cypher_volt_pass_desc": "+1.0% Damage, accelerated attack speed and chain lightning shock.", "hero_kragthor_titan_title": "Heavy Metal Titan",
+                "hero_cypher_volt_pass_desc": "+1.1% Damage and +0.6% Crit Damage per level, with devastating lightning arcs on PERFECT notes.", "hero_kragthor_titan_title": "Heavy Metal Titan",
                 "hero_kragthor_titan_inst": "Flying-V \"Magma Fury\"", "hero_kragthor_titan_pass_name": "Fury of the Titans",
-                "hero_kragthor_titan_pass_desc": "+1.0% Damage, high sonic knockback on zombies and brutal ground shockwaves.", "hero_roxie_anarchy_title": "Mythic Punk Valkyrie",
+                "hero_kragthor_titan_pass_desc": "+1.15% Damage, +0.85% Crit Damage per level and brutal knockback against heavy zombies.", "hero_roxie_anarchy_title": "Mythic Punk Valkyrie",
                 "hero_roxie_anarchy_inst": "Custom \"Riot Slash\" Guitar", "hero_roxie_anarchy_pass_name": "Absolute Anarchy",
-                "hero_roxie_anarchy_pass_desc": "+1.0% Damage, doubled critical strike chance and spread damage bonus on perfect notes.",
+                "hero_roxie_anarchy_pass_desc": "+1.20% Damage, +0.70% Crit Damage, +0.25% Extra Gold and +0.50% Mana Regen per level!",
                 "hero_finn_punk_title": "Multiversal Sound Champion", "hero_finn_punk_inst": "Sonic Sword-Guitar of Ooo", "hero_finn_punk_pass_name": "Multiverse Rock Time",
                 "hero_finn_punk_pass_desc": "+1.22% Damage, +0.75% Crit Damage and +0.3% sonic projectile speed per level.", "hero_ignis_draco_title": "Riff-Devouring Dragon",
                 "hero_ignis_draco_inst": "Draconic Guitar \"Inferno\"", "hero_ignis_draco_pass_name": "Acoustic Fiery Breath",
                 "hero_ignis_draco_pass_desc": "+1.26% Damage, +0.82% Crit Damage and +0.35% draconic burn chance per level.", "hero_fenrir_howler_title": "Full Moon Metal Beast",
                 "hero_fenrir_howler_inst": "Axe-Star \"Night Wolf\"", "hero_fenrir_howler_pass_name": "Blood Moon Frenzy",
-                "hero_fenrir_howler_pass_desc": "+1.30% Damage, +0.90% Crit Damage and life drain upon defeating zombies.", "hero_spiky_sponge_title": "Yellow Anarchy of the Depths",
+                "hero_fenrir_howler_pass_desc": "+1.30% Damage, +0.90% Crit Damage and continuous vital essence drain from zombies per level.", "hero_spiky_sponge_title": "Yellow Anarchy of the Depths",
                 "hero_spiky_sponge_inst": "Jet Flying-V \"Bikini Bottom\"", "hero_spiky_sponge_pass_name": "Hypersonic Propulsion",
-                "hero_spiky_sponge_pass_desc": "+1.35% Damage, +0.95% Crit Damage and high-impact aquatic sonic bursts.", "hero_saul_slash_title": "Immortal God of Top Hat & Les Paul",
+                "hero_spiky_sponge_pass_desc": "+1.35% Damage, +0.95% Crit Damage, +0.35% Extra Gold and +0.60% Mana Regen per level!", "hero_saul_slash_title": "Immortal God of Top Hat & Les Paul",
                 "hero_saul_slash_inst": "Sacred Gibson Les Paul Goldtop \"1959\"", "hero_saul_slash_pass_name": "Appetite For Destruction",
-                "hero_saul_slash_pass_desc": "+1.40% Damage, +1.10% Crit Damage, +0.6% mana regen per level and extended divine special.", "zombie_punk_walker": "Punk Rocker Zombie",
+                "hero_saul_slash_pass_desc": "+1.45% Damage, +1.10% Crit Damage, +0.45% Extra Gold and +0.70% Mana Regen per level! The apex of musical power.", "zombie_punk_walker": "Punk Rocker Zombie",
                 "zombie_feral_leaper": "Feral Leaper", "zombie_toxic_mutant": "Radioactive Mutant", "zombie_armored_soldier": "Armored Sergeant", "zombie_fungal_spore": "Spore Infected",
                 "zombie_bloater_pounder": "Bloated Devourer", "zombie_chained_gladiator": "Asphalt Gladiator", "zombie_toxic_hazmat": "Hazmat Worker",
                 "zombie_clown_jester": "Sinister Clown", "zombie_builder_demolisher": "Demolisher Builder", "zombie_mad_scientist": "Mad Scientist",
@@ -417,26 +417,26 @@ class I18n {
                 "hero_vulkan_ironhead_pass_name": "Pirotecnia Brutal",
                 "hero_vulkan_ironhead_pass_desc": "+1.0% de Daño, +0.3% de Regeneración de Maná y probabilidad de quemadura continua que crece con cada nivel.",
                 "hero_dr_radix_title": "El Solista Bioquímico", "hero_dr_radix_inst": "Guitarratox \"Uranium-235\"", "hero_dr_radix_pass_name": "Radiación Acústica",
-                "hero_dr_radix_pass_desc": "+1.0% de Daño, +15% de Daño Crítico base y probabilidad de veneno radiactivo que corroe a los zombis.",
+                "hero_dr_radix_pass_desc": "+1.0% de Daño, +0.35% de Perforación de Armadura y +0.12% de ralentización continua por nivel.",
                 "hero_cypher_volt_title": "El Virtuoso Cibernético", "hero_cypher_volt_inst": "Laser-Caster Biónica Neón", "hero_cypher_volt_pass_name": "Overdrive Biónico",
-                "hero_cypher_volt_pass_desc": "+1.0% de Daño, velocidad de ataque acelerada y descargas eléctricas en cadena.", "hero_kragthor_titan_title": "El Titán del Heavy Metal",
+                "hero_cypher_volt_pass_desc": "+1.1% de Daño y +0.6% de Daño Crítico por nivel, con arcos eléctricos devastadores en notas PERFECT.", "hero_kragthor_titan_title": "El Titán del Heavy Metal",
                 "hero_kragthor_titan_inst": "Flying-V \"Magma Fury\"", "hero_kragthor_titan_pass_name": "Furia de los Titanes",
-                "hero_kragthor_titan_pass_desc": "+1.0% de Daño, gran retroceso sónico en los zombis y brutales ondas de choque terrestres.",
+                "hero_kragthor_titan_pass_desc": "+1.15% de Daño, +0.85% de Daño Crítico por nivel y retroceso brutal contra zombis pesados.",
                 "hero_roxie_anarchy_title": "La Valquiria del Punk Mítico", "hero_roxie_anarchy_inst": "Guitarra Custom \"Riot Slash\"", "hero_roxie_anarchy_pass_name": "Anarquía Absoluta",
-                "hero_roxie_anarchy_pass_desc": "+1.0% de Daño, probabilidad de golpe crítico duplicada y daño en dispersión al acertar notas perfectas.",
+                "hero_roxie_anarchy_pass_desc": "+1.20% de Daño, +0.70% de Daño Crítico, +0.25% de Oro Extra y +0.50% de Regen de Maná por nivel!",
                 "hero_finn_punk_title": "El Campeón Multiversal del Sonido", "hero_finn_punk_inst": "Espada-Guitarra Sonora de Ooo", "hero_finn_punk_pass_name": "Hora del Rock Multiversal",
                 "hero_finn_punk_pass_desc": "+1.22% de Daño, +0.75% de Daño Crítico y +0.3% de velocidad de proyectiles sónicos por nivel.",
                 "hero_ignis_draco_title": "El Dragón Devorador de Riffs", "hero_ignis_draco_inst": "Guitarra Dracónica \"Inferno\"", "hero_ignis_draco_pass_name": "Aliento Ígneo Acústico",
                 "hero_ignis_draco_pass_desc": "+1.26% de Daño, +0.82% de Daño Crítico y +0.35% de probabilidad de quemadura dracónica por nivel.",
                 "hero_fenrir_howler_title": "La Bestia de Luna Llena del Metal", "hero_fenrir_howler_inst": "Axe-Star \"Lobo Nocturno\"",
                 "hero_fenrir_howler_pass_name": "Frenesí de Luna de Sangre",
-                "hero_fenrir_howler_pass_desc": "+1.30% de Daño, +0.90% de Daño Crítico y vampirismo de salud al eliminar zombis.",
+                "hero_fenrir_howler_pass_desc": "+1.30% de Daño, +0.90% de Daño Crítico y drenaje continuo de esencia vital zumbi por nivel.",
                 "hero_spiky_sponge_title": "La Anarquía Amarilla de las Fosas", "hero_spiky_sponge_inst": "Flying-V a Reacción \"Fondo de Bikini\"",
                 "hero_spiky_sponge_pass_name": "Propulsión Hipersónica",
-                "hero_spiky_sponge_pass_desc": "+1.35% de Daño, +0.95% de Daño Crítico y ráfagas sónicas acuáticas de alto impacto.",
+                "hero_spiky_sponge_pass_desc": "+1.35% de Daño, +0.95% de Daño Crítico, +0.35% de Oro Extra y +0.60% de Regen de Maná por nivel!",
                 "hero_saul_slash_title": "El Dios Inmortal del Sombrero & Les Paul", "hero_saul_slash_inst": "Gibson Les Paul Goldtop Sagrada \"1959\"",
                 "hero_saul_slash_pass_name": "Apetito por la Destrucción",
-                "hero_saul_slash_pass_desc": "+1.40% de Daño, +1.10% de Daño Crítico, +0.6% de regeneración de maná por nivel y especial divino extendido.",
+                "hero_saul_slash_pass_desc": "+1.45% de Daño, +1.10% de Daño Crítico, +0.45% de Oro Extra y +0.70% de Regen de Maná por nivel! El ápice del poder musical.",
                 "zombie_punk_walker": "Zombi Punk Rocker", "zombie_feral_leaper": "Corredor Saltador", "zombie_toxic_mutant": "Mutante Radiactivo",
                 "zombie_armored_soldier": "Sargento Blindado", "zombie_fungal_spore": "Infectado Espora", "zombie_bloater_pounder": "Gordo Devorador",
                 "zombie_chained_gladiator": "Gladiador del Asfalto", "zombie_toxic_hazmat": "Operario Hazmat", "zombie_clown_jester": "Payaso Siniestro",
@@ -570,26 +570,26 @@ class I18n {
                 "hero_vulkan_ironhead_title": "Le Pyromane des Wastelands", "hero_vulkan_ironhead_inst": "Scrap-Metal V8 Enflammé", "hero_vulkan_ironhead_pass_name": "Pyrotechnie Brutale",
                 "hero_vulkan_ironhead_pass_desc": "+1.0% de Dégâts, +0.3% Régénération Mana et chance de brûlure continue augmentant par niveau.",
                 "hero_dr_radix_title": "Le Soliste Biochimique", "hero_dr_radix_inst": "Guitarratox \"Uranium-235\"", "hero_dr_radix_pass_name": "Radiation Acoustique",
-                "hero_dr_radix_pass_desc": "+1.0% de Dégâts, +15% Dégâts Critiques de base et chance de poison radioactif corrosif sur les zombies.",
+                "hero_dr_radix_pass_desc": "+1.0% de Dégâts, +0.35% de Pénétration d'Armure et +0.12% de ralentissement continu par niveau.",
                 "hero_cypher_volt_title": "Le Virtuose Cybernétique", "hero_cypher_volt_inst": "Laser-Caster Bionique Néon", "hero_cypher_volt_pass_name": "Overdrive Bionique",
-                "hero_cypher_volt_pass_desc": "+1.0% de Dégâts, vitesse d'attaque accrue et décharges électriques en chaîne.", "hero_kragthor_titan_title": "Le Titan du Heavy Metal",
+                "hero_cypher_volt_pass_desc": "+1.1% de Dégâts et +0.6% de Dégâts Critiques par niveau, avec des arcs électriques sur notes PERFECT.", "hero_kragthor_titan_title": "Le Titan du Heavy Metal",
                 "hero_kragthor_titan_inst": "Flying-V \"Magma Fury\"", "hero_kragthor_titan_pass_name": "Fureur des Titans",
-                "hero_kragthor_titan_pass_desc": "+1.0% de Dégâts, puissant recul sonique sur les zombies et ondes de choc sismiques brutales.",
+                "hero_kragthor_titan_pass_desc": "+1.15% de Dégâts, +0.85% de Dégâts Critiques par niveau et recul brutal contre les zombies lourds.",
                 "hero_roxie_anarchy_title": "La Walkyrie du Punk Mythique", "hero_roxie_anarchy_inst": "Guitare Custom \"Riot Slash\"", "hero_roxie_anarchy_pass_name": "Anarchie Absolue",
-                "hero_roxie_anarchy_pass_desc": "+1.0% de Dégâts, chances de coup critique doublées et dégâts de dispersion sur notes parfaites.",
+                "hero_roxie_anarchy_pass_desc": "+1.20% de Dégâts, +0.70% Dégâts Critiques, +0.25% d'Or Bonus et +0.50% Régén Mana par niveau !",
                 "hero_finn_punk_title": "Le Champion Multiversel du Son", "hero_finn_punk_inst": "Épée-Guitare Sonore d'Ooo", "hero_finn_punk_pass_name": "L'Heure du Rock Multiversel",
                 "hero_finn_punk_pass_desc": "+1.22% de Dégâts, +0.75% Dégâts Critiques et +0.3% de vitesse des projectiles soniques par niveau.",
                 "hero_ignis_draco_title": "Le Dragon Dévoreur de Riffs", "hero_ignis_draco_inst": "Guitare Draconique \"Inferno\"", "hero_ignis_draco_pass_name": "Souffle Igné Acoustique",
                 "hero_ignis_draco_pass_desc": "+1.26% de Dégâts, +0.82% Dégâts Critiques et +0.35% de chance de brûlure draconique par niveau.",
                 "hero_fenrir_howler_title": "La Bête de Pleine Lune du Metal", "hero_fenrir_howler_inst": "Axe-Star \"Loup de la Nuit\"",
                 "hero_fenrir_howler_pass_name": "Frénésie de Lune de Sang",
-                "hero_fenrir_howler_pass_desc": "+1.30% de Dégâts, +0.90% Dégâts Critiques et vol de vie en éliminant des zombies.",
+                "hero_fenrir_howler_pass_desc": "+1.30% de Dégâts, +0.90% Dégâts Critiques et drainage continu d'essence vitale par niveau.",
                 "hero_spiky_sponge_title": "L'Anarchie Jaune des Abysses", "hero_spiky_sponge_inst": "Flying-V à Réaction \"Bikini Bottom\"",
                 "hero_spiky_sponge_pass_name": "Propulsion Hypersonique",
-                "hero_spiky_sponge_pass_desc": "+1.35% de Dégâts, +0.95% Dégâts Critiques et rafales soniques aquatiques percutantes.",
+                "hero_spiky_sponge_pass_desc": "+1.35% de Dégâts, +0.95% Dégâts Critiques, +0.35% d'Or Bonus et +0.60% Régén Mana par niveau !",
                 "hero_saul_slash_title": "Le Dieu Immortel au Haut-de-Forme & Les Paul", "hero_saul_slash_inst": "Gibson Les Paul Goldtop Sacrée \"1959\"",
                 "hero_saul_slash_pass_name": "Appétit pour la Destruction",
-                "hero_saul_slash_pass_desc": "+1.40% de Dégâts, +1.10% Dégâts Critiques, +0.6% de régénération de mana par niveau et spécial divin prolongé.",
+                "hero_saul_slash_pass_desc": "+1.45% de Dégâts, +1.10% Dégâts Critiques, +0.45% d'Or Bonus et +0.70% Régén Mana par niveau ! Le summum musical.",
                 "zombie_punk_walker": "Zombie Punk Rocker", "zombie_feral_leaper": "Coureur Sauteur", "zombie_toxic_mutant": "Mutant Radioactif", "zombie_armored_soldier": "Sergent Blindé",
                 "zombie_fungal_spore": "Infecté par Spores", "zombie_bloater_pounder": "Gros Dévoreur", "zombie_chained_gladiator": "Gladiateur du Bitume",
                 "zombie_toxic_hazmat": "Ouvrier Hazmat", "zombie_clown_jester": "Clown Sinistre", "zombie_builder_demolisher": "Ouvrier Démolisseur", "zombie_mad_scientist": "Savant Fou",
@@ -637,34 +637,57 @@ class I18n {
         this.notifyListeners();
     }
 
+    registerPack(pack) {
+        if (!pack || typeof pack !== 'object') return;
+        Object.keys(pack).forEach(lang => {
+            if (this.translations[lang] && pack[lang]) Object.assign(this.translations[lang], pack[lang]);
+        });
+    }
+
     onLanguageChange(fn) {
-        if (typeof fn === 'function') {
-            this.listeners.push(fn);
-        }
+        if (typeof fn === 'function') this.listeners.push(fn);
     }
 
     notifyListeners() {
         this.listeners.forEach(fn => {
             try { fn(this.currentLang); } catch(e) { console.warn('i18n listener error:', e); }
         });
-
-        // Trigger dynamic game view re-renders if available
-        if (typeof window !== 'undefined' && window.game) {
+        if (typeof window === 'undefined') return;
+        const g = window.game;
+        if (g) {
             try {
-                if (typeof window.game.updateStageUI === 'function') window.game.updateStageUI();
-                if (typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
-                if (typeof window.game.renderArenaRoster === 'function') window.game.renderArenaRoster();
-                if (typeof window.game.renderMapZombies === 'function') window.game.renderMapZombies();
-                if (typeof window.game.renderLaneSkills === 'function') window.game.renderLaneSkills();
-                if (typeof window.game.renderSongRoster === 'function') window.game.renderSongRoster();
+                if (typeof g.updateStageUI === 'function') g.updateStageUI();
+                if (typeof g.renderStageDropdown === 'function') g.renderStageDropdown();
+                if (typeof g.renderHeroRoster === 'function') g.renderHeroRoster();
+                if (typeof g.renderArenaRoster === 'function') g.renderArenaRoster();
+                if (typeof g.renderMapZombies === 'function') g.renderMapZombies();
+                if (typeof g.renderLaneSkills === 'function') g.renderLaneSkills();
+                if (typeof g.renderSongRoster === 'function') g.renderSongRoster();
+                if (typeof g.updateMapSongDetailsUI === 'function' && g.selectedSong) g.updateMapSongDetailsUI(g.selectedSong);
+                if (typeof g.updateBattleStatsModal === 'function') g.updateBattleStatsModal();
+                const gear = document.getElementById('battle-gear-modal');
+                if (gear && gear.classList && gear.classList.contains('open') && typeof g.refreshGearModalText === 'function') g.refreshGearModalText();
+                if (g.pvpSystem) {
+                    if (typeof g.pvpSystem.populateHeroDropdown === 'function') g.pvpSystem.populateHeroDropdown();
+                    if (typeof g.pvpSystem.updateHeroCardPreview === 'function') g.pvpSystem.updateHeroCardPreview();
+                    if (typeof g.pvpSystem.updateSongCardPreview === 'function' && g.pvpSystem.selectedSong) g.pvpSystem.updateSongCardPreview(g.pvpSystem.selectedSong);
+                    if (typeof g.pvpSystem.renderPvPLaneSkills === 'function') g.pvpSystem.renderPvPLaneSkills();
+                }
             } catch(e) { console.warn('Game i18n re-render error:', e); }
         }
-        if (typeof window !== 'undefined' && window.metaMissionSystem && typeof window.metaMissionSystem.render === 'function') {
-            try { window.metaMissionSystem.render(); } catch(e) {}
-        }
-        if (typeof window !== 'undefined' && window.talentSystem && typeof window.talentSystem.updateUI === 'function') {
-            try { window.talentSystem.updateUI(); } catch(e) {}
-        }
+        try {
+            if (window.guitaristPool && typeof window.guitaristPool.renderShop === 'function') window.guitaristPool.renderShop();
+            if (window.metaMissionSystem && typeof window.metaMissionSystem.render === 'function') window.metaMissionSystem.render();
+            if (window.talentSystem && typeof window.talentSystem.updateUI === 'function') window.talentSystem.updateUI();
+            if (window.songStudio && typeof window.songStudio.renderLibrary === 'function') window.songStudio.renderLibrary();
+            if (window.songEditor && window.songEditor.song) {
+                if (typeof window.songEditor.updateHeaderInfo === 'function') window.songEditor.updateHeaderInfo();
+                if (typeof window.songEditor.updateStatsDisplay === 'function') window.songEditor.updateStatsDisplay();
+                if (typeof window.songEditor.drawTimeline === 'function') window.songEditor.drawTimeline();
+            }
+            if (window.specialSystem && typeof window.specialSystem.updateUI === 'function') window.specialSystem.updateUI();
+            if (window.countdownSystem && window.countdownSystem.isActive) window.countdownSystem.updateSecondUI(window.countdownSystem.currentSecond);
+        } catch(e) {}
     }
 
     updateDOM() {
@@ -707,6 +730,13 @@ class I18n {
                 el.setAttribute('title', val);
             }
         });
+
+        // Sync audio toggle text inside Gear Modal
+        const soundBtn = document.getElementById('menu-sound-toggle');
+        if (soundBtn) {
+            const muted = (typeof window !== 'undefined' && window.soundEngine && window.soundEngine.isMuted);
+            soundBtn.innerText = muted ? this.t('soundMuted', 'Mutado 🔇') : this.t('soundActive', 'Ativo 🔊');
+        }
     }
 
     updateButtonsUI() {
@@ -737,6 +767,11 @@ class I18n {
 }
 
 const i18n = new I18n();
+if (typeof require !== 'undefined') {
+    ['./i18n-content.js', './i18n-modes.js'].forEach(mod => {
+        try { i18n.registerPack(require(mod)); } catch(e) {}
+    });
+}
 if (typeof window !== 'undefined') {
     window.i18n = i18n;
     if (typeof window.addEventListener === 'function') {

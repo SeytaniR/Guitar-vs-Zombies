@@ -198,7 +198,7 @@ class CombatSystem {
 
         if (rating === 'miss') {
             this.pendingAttackModifiers.push({ mult: 0.5, isCrit: false, skill: null, isMiss: false });
-            this.addFloatingText('MISS (-50%)', heroPos.x, heroPos.y - 45, '#ff3333', false);
+            this.addFloatingText(this.tr('missHalfDmg', 'MISS (-50%)'), heroPos.x, heroPos.y - 45, '#ff3333', false);
             this.combo = 0;
             this.comboKills = 0;
             this.perfectStreak = 0;
@@ -257,7 +257,7 @@ class CombatSystem {
         if (skill && skill.manaCost > 0) {
             if (this.rockMana >= skill.manaCost) {
                 this.rockMana -= skill.manaCost;
-                this.addFloatingText(`${skill.icon} ${skill.name} (-${skill.manaCost} MP)`, heroPos.x + 20, heroPos.y - 50, skill.color || '#ff00ff', true);
+                this.addFloatingText(`${skill.icon} ${this.tr('skill_' + skill.id + '_name', skill.name)} (-${skill.manaCost} MP)`, heroPos.x + 20, heroPos.y - 50, skill.color || '#ff00ff', true);
             } else {
                 // Insufficient Mana: note becomes a common basic attack (no skill applied, normal basic damage, 0 MP spent)
                 skillToApply = null;
@@ -383,7 +383,7 @@ class CombatSystem {
 
             if (target.hp <= 0 && target.active) {
                 target.active = false;
-                this.onZombieKilled(target, 150, "+KILL! ⚡", tickColor);
+                this.onZombieKilled(target, 150, this.tr('killToast', '+KILL! ⚡'), tickColor);
             }
         } else {
             this.fx.spawnBurst(heroPos.x + 22, heroPos.y - 18, tickColor, 1, 40, 2, 0.15);
@@ -450,18 +450,18 @@ class CombatSystem {
         }
 
         if (z.type === 'mutant') {
-            this.fx.triggerMutantBlast(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, '+KILL! ☢️', '#39ff14'));
+            this.fx.triggerMutantBlast(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, this.tr('killToast', '+KILL! ⚡').replace('⚡', '☢️'), '#39ff14'));
             this.rockMana = Math.min(this.maxRockMana, this.rockMana + 25);
         } else if (z.type === 'spore') {
             this.fx.triggerSporeBurst(z.x, z.y, this.getHeroPosition(), (dmg, isHvy, lbl, col) => this.takeDamage(dmg, isHvy, lbl, col));
             this.rockMana = Math.min(this.maxRockMana, this.rockMana + 10);
-            this.addFloatingText("+KILL! 🍄", textX, currentY - 42, '#ffaa00', true);
+            this.addFloatingText(this.tr('killToast', '+KILL! ⚡').replace('⚡', '🍄'), textX, currentY - 42, '#ffaa00', true);
         } else if (z.type === 'hazmat') {
-            this.fx.triggerHazmatMeltdown(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, '+KILL! 🧪', '#39ff14'));
+            this.fx.triggerHazmatMeltdown(z.x, z.y, this.entities.zombies, window.soundEngine, (other, sc) => this.onZombieKilled(other, sc, this.tr('killToast', '+KILL! ⚡').replace('⚡', '🧪'), '#39ff14'));
             this.rockMana = Math.min(this.maxRockMana, this.rockMana + 12);
-            this.addFloatingText("+KILL! ☢️", textX, currentY - 42, '#39ff14', true);
+            this.addFloatingText(this.tr('killToast', '+KILL! ⚡').replace('⚡', '☢️'), textX, currentY - 42, '#39ff14', true);
         } else {
-            this.addFloatingText(label, textX, currentY - 42, color, true);
+            this.addFloatingText(label === '+KILL!' ? this.tr('killToast', '+KILL! ⚡') : label, textX, currentY - 42, color, true);
         }
     }
 
@@ -479,7 +479,7 @@ class CombatSystem {
             x: this.canvas.width / 2, y: this.canvas.height / 2,
             radius: 8, maxRadius: isBoss ? 200 : 150, color: '#ffd700', lineWidth: 5.5, alpha: 1.0
         });
-        const titleText = isBoss ? `👑 CHEFE DERROTADO! FASE ${stage}!` : this.tr('stageCompletedToast', `🏆 FASE ${stage} CONCLUÍDA!`, { stage });
+        const titleText = isBoss ? this.tr('bossDefeatedBanner', `👑 CHEFE DERROTADO! FASE ${stage}!`, { stage }) : this.tr('stageCompletedToast', `🏆 FASE ${stage} CONCLUÍDA!`, { stage });
         this.addFloatingText(titleText, this.canvas.width / 2, this.canvas.height / 2 - 35, '#ffd700', true);
         this.addFloatingText(`+${rewards.coins} 🪙  +${rewards.xp} XP`, this.canvas.width / 2, this.canvas.height / 2 + 10, '#00ff66', true);
         if (window.soundEngine) window.soundEngine.playExplosion();
@@ -521,7 +521,7 @@ class CombatSystem {
         if (this.heroShieldHp > 0) {
             if (this.heroShieldHp >= finalDamage) {
                 this.heroShieldHp -= finalDamage;
-                this.addFloatingText(`🛡️ ESCUDO (-${finalDamage})`, heroPos.x, heroPos.y - 35, '#00a2ff', true);
+                this.addFloatingText(this.tr('shieldAbsorbFx', `🛡️ ESCUDO (-${finalDamage})`, { dmg: finalDamage }), heroPos.x, heroPos.y - 35, '#00a2ff', true);
                 this.triggerShake(2);
                 return;
             } else {
@@ -566,7 +566,7 @@ class CombatSystem {
         this.victorySequenceTimer = 2.4;
         this.pendingVictoryData = { song, stats };
         this.matchActive = false;
-        this.fx.triggerVictory(this.getHeroPosition(), this.entities.zombies, (z) => this.onZombieKilled(z, 200, '👑 SHOW CLEARED! ⚡', '#ffd700'), this.canvas.width, this.canvas.height);
+        this.fx.triggerVictory(this.getHeroPosition(), this.entities.zombies, (z) => this.onZombieKilled(z, 200, this.tr('showClearedFx', '👑 SHOW CONCLUÍDO! ⚡'), '#ffd700'), this.canvas.width, this.canvas.height);
     }
 
     triggerChainLightning(sourceZombie, targetCount, damage) {
@@ -581,7 +581,7 @@ class CombatSystem {
 
                 if (other.hp <= 0 && other.active) {
                     other.active = false;
-                    this.onZombieKilled(other, 100, '+CHAIN KILL! ⚡', '#00ffff');
+                    this.onZombieKilled(other, 100, this.tr('chainKillToast', '+RAIO KILL! ⚡'), '#00ffff');
                 }
 
                 if (++hit >= targetCount) break;
@@ -736,7 +736,7 @@ class CombatSystem {
                     if (this.isPvPMode && this.pvpSystem && this.pvpSystem.handleCollision(p, z, this)) break;
                     if (z.type === 'gladiator' && !p.isCrit && Math.random() < z.deflectChance) {
                         p.active = false;
-                        this.addFloatingText("🛡️ CORRENTE DEFLETIU!", z.x, currentY - 34, '#ff3333', true);
+                        this.addFloatingText(this.tr('chainDeflected', "🛡️ CORRENTE DEFLETIU!"), z.x, currentY - 34, '#ff3333', true);
                         this.triggerShake(2);
                         this.fx.spawnBurst(p.x, p.y, '#ffffaa', 6, 50, 2, 0.25);
                         continue;
@@ -772,26 +772,26 @@ class CombatSystem {
                     if (z.type === 'soldier' && !z.armorBroken) {
                         if (p.isCrit) {
                             z.armorBroken = true;
-                            this.addFloatingText("🛡️ CAPACETE QUEBRADO! STUN!", z.x, currentY - 45, '#ffff00', true);
+                            this.addFloatingText(this.tr('helmetBroken', "🛡️ CAPACETE QUEBRADO! STUN!"), z.x, currentY - 45, '#ffff00', true);
                             this.triggerShake(6);
                             this.fx.spawnBurst(z.x, currentY - 20, '#8899aa', 7, 50, 2.5, 0.35);
                         } else {
                             const pen = heroStats.armorPen || (heroId === 'dr_radix' ? 0.50 : 0);
                             const armorReduction = 0.55 * (1 - pen);
                             p.damage = Math.round(p.damage * (1 - armorReduction));
-                            this.addFloatingText(pen > 0 ? "BLINDADO PENETRADO! ☢️" : "BLINDADO! -45%", z.x, currentY - 34, '#88aacc', false);
+                            this.addFloatingText(this.tr(pen > 0 ? 'armorPenetratedFx' : 'armoredReducedFx', pen > 0 ? "BLINDADO PENETRADO! ☢️" : "BLINDADO! -45%"), z.x, currentY - 34, '#88aacc', false);
                         }
                     } else if (z.type === 'builder' && !p.isCrit) {
                         p.damage = Math.round(p.damage * 0.75);
-                        this.addFloatingText("CAPACETE! -25%", z.x, currentY - 34, '#ffaa00', false);
+                        this.addFloatingText(this.tr('helmetReducedFx', "CAPACETE! -25%"), z.x, currentY - 34, '#ffaa00', false);
                     } else if (z.type === 'batman' && !p.isCrit && Math.random() < 0.20) {
-                        this.addFloatingText("ESQUIVA CAPA! 🦇", z.x, currentY - 34, '#aa00ff', false);
+                        this.addFloatingText(this.tr('capeDodgeFx', "ESQUIVA CAPA! 🦇"), z.x, currentY - 34, '#aa00ff', false);
                         continue;
                     }
 
                     if (heroStats.burnChance && Math.random() < heroStats.burnChance) {
                         if (z.isBurnImmune || z.type === 'firefighter') {
-                            this.addFloatingText("IMUNE 🔥", z.x, currentY - 48, '#ffaa00', false);
+                            this.addFloatingText(this.tr('immuneStatus', "⚡ IMUNE!"), z.x, currentY - 48, '#ffaa00', false);
                         } else {
                             z.burnTimer = 3.2;
                             z.burnDps = 16;
@@ -817,7 +817,7 @@ class CombatSystem {
                         p.isCrit = true;
                         const airBonus = window.talentSystem ? window.talentSystem.getStat('air_sniper') : 0;
                         p.damage = Math.round(p.damage * (1.8 + airBonus));
-                        this.addFloatingText("🎯 AIR SHOT! CRIT!", z.x, currentY - 45, '#ffcc00', true);
+                        this.addFloatingText(this.tr('airShotCritFx', "🎯 TIRO AÉREO! CRIT!"), z.x, currentY - 45, '#ffcc00', true);
                         this.triggerShake(7);
                     } else if (z.type === 'bloater' || z.type === 'firefighter' || z.type === 'kratos') {
                         knockDist = (z.type === 'bloater' ? 2 : (z.type === 'kratos' ? 4 : 3.5)) * knockMult;

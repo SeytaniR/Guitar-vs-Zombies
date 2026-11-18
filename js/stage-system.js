@@ -222,11 +222,12 @@ class StageSystem {
         const bossId = bossPoolIds[cycle % bossPoolIds.length];
         const master = (window.enemyPool && window.enemyPool.masterPool) ? window.enemyPool.masterPool : [];
         const baseDef = master.find(z => z.id === bossId) || master[0] || { id: 'toxic_mutant', name: 'Mutante Radioativo', type: 'mutant', hp: 299 };
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         return {
             ...baseDef,
             isBoss: true,
             hpMultiplier: 3.5,
-            badge: 'CHEFE',
+            badge: tr('bossShortBadge', 'CHEFE'),
             badgeClass: 'badge-boss',
             name: baseDef.name
         };
@@ -236,36 +237,26 @@ class StageSystem {
         const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         if (this.isBossStage(stage)) {
             const bossDef = this.getBossZombieDef(stage);
-            return tr('bossShowdown', `Fase ${stage}: 👑 CONFRONTO DE CHEFE: ${bossDef.name.toUpperCase()}!`, { stage, name: bossDef.name.toUpperCase() });
+            const tBoss = tr('zombie_' + bossDef.id, bossDef.name).toUpperCase();
+            return tr('bossShowdown', `Fase ${stage}: 👑 CONFRONTO DE CHEFE: ${tBoss}!`, { stage, name: tBoss });
         }
 
         const namedPrefixes = [
-            'Rua das Garagens',
-            'Subúrbio Desolado',
-            'Avenida Neon',
-            'Ponto de Ônibus Sombrio',
-            'Distrito Industrial',
-            'Pátio Ferroviário',
-            'Viaduto dos Infectados',
-            'Centro Metropolitano',
-            'Praça das Chamas',
-            'Boulevard Radioativo',
-            'Beco dos Desesperados',
-            'Autoestrada Infernal',
-            'Zona de Contenção',
-            'Complexo Quarentena',
-            'Wasteland Nuclear'
+            'Rua das Garagens', 'Subúrbio Desolado', 'Avenida Neon', 'Ponto de Ônibus Sombrio',
+            'Distrito Industrial', 'Pátio Ferroviário', 'Viaduto dos Infectados', 'Centro Metropolitano',
+            'Praça das Chamas', 'Boulevard Radioativo', 'Beco dos Desesperados', 'Autoestrada Infernal',
+            'Zona de Contenção', 'Complexo Quarentena', 'Wasteland Nuclear'
         ];
 
         const stageLabel = tr('stagePrefix', `Fase ${stage}`, { stage });
         if (stage <= namedPrefixes.length) {
-            return `${stageLabel}: ${namedPrefixes[stage - 1]}`;
+            return `${stageLabel}: ${tr('stage_name_' + stage, namedPrefixes[stage - 1])}`;
         }
 
         const sectors = ['Setor Alfa', 'Setor Ômega', 'Zona Tóxica', 'Abismo Sônico', 'Wasteland', 'Pilar do Heavy Metal'];
         const sectorIndex = (stage - 1) % sectors.length;
         const cycle = Math.floor((stage - 1) / sectors.length) + 1;
-        return `${stageLabel}: ${sectors[sectorIndex]} MK-${cycle}`;
+        return `${stageLabel}: ${tr('sector_' + sectorIndex, sectors[sectorIndex])} MK-${cycle}`;
     }
 
     getZombieBaseLevel(stage = this.selectedStage) {

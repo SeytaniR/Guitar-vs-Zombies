@@ -44,13 +44,15 @@ class PvPSystem {
         return this.playerTrophies;
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     getRank(trophies = this.playerTrophies) {
-        if (trophies >= 2500) return { name: 'Mestre do Rock', tier: 'master', badge: '👑 Mestre', color: '#ffd700' };
-        if (trophies >= 1800) return { name: 'Diamante', tier: 'diamond', badge: '💠 Diamante', color: '#00ffff' };
-        if (trophies >= 1200) return { name: 'Platina', tier: 'platinum', badge: '💎 Platina', color: '#d44dff' };
-        if (trophies >= 700) return { name: 'Ouro', tier: 'gold', badge: '🥇 Ouro', color: '#ffaa00' };
-        if (trophies >= 300) return { name: 'Prata', tier: 'silver', badge: '🥈 Prata', color: '#c0c0c0' };
-        return { name: 'Bronze', tier: 'bronze', badge: '🥉 Bronze', color: '#cd7f32' };
+        if (trophies >= 2500) return { name: this.tr('rank_master', 'Mestre do Rock'), tier: 'master', badge: this.tr('rank_badge_master', '👑 Mestre'), color: '#ffd700' };
+        if (trophies >= 1800) return { name: this.tr('rank_diamond', 'Diamante'), tier: 'diamond', badge: this.tr('rank_badge_diamond', '💠 Diamante'), color: '#00ffff' };
+        if (trophies >= 1200) return { name: this.tr('rank_platinum', 'Platina'), tier: 'platinum', badge: this.tr('rank_badge_platinum', '💎 Platina'), color: '#d44dff' };
+        if (trophies >= 700) return { name: this.tr('rank_gold', 'Ouro'), tier: 'gold', badge: this.tr('rank_badge_gold', '🥇 Ouro'), color: '#ffaa00' };
+        if (trophies >= 300) return { name: this.tr('rank_silver', 'Prata'), tier: 'silver', badge: this.tr('rank_badge_silver', '🥈 Prata'), color: '#c0c0c0' };
+        return { name: this.tr('rank_bronze', 'Bronze'), tier: 'bronze', badge: this.tr('rank_badge_bronze', '🥉 Bronze'), color: '#cd7f32' };
     }
 
     generateOpponent(playerHeroData = null, playerStats = {}) {
@@ -105,7 +107,7 @@ class PvPSystem {
             this.availableSongs.forEach((s) => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
-                opt.innerText = `${s.title} - ${s.artist || 'Artista'} (${s.bpm || 120} BPM)`;
+                opt.innerText = `${s.title} - ${s.artist || this.tr('songUnknownArtist', 'Artista')} (${s.bpm || 120} BPM)`;
                 if (this.selectedSong && s.id === this.selectedSong.id) opt.selected = true;
                 dropdown.appendChild(opt);
             });
@@ -146,9 +148,9 @@ class PvPSystem {
         const artist = document.getElementById('pvp-song-artist');
         const info = document.getElementById('pvp-song-info');
         if (cover) cover.src = song.cover || 'assets/covers/default_cover.jpg';
-        if (title) title.innerText = song.title || 'Música';
-        if (artist) artist.innerText = song.artist || 'Artista Desconhecido';
-        if (info) info.innerText = `BPM: ${song.bpm || 120} • Duração: ${Math.round(song.duration || 30)}s`;
+        if (title) title.innerText = song.title || this.tr('songDefaultTitle', 'Música');
+        if (artist) artist.innerText = song.artist || this.tr('studioDefaultArtist', 'Artista Desconhecido');
+        if (info) info.innerText = this.tr('pvpSongDurationMeta', `BPM: ${song.bpm || 120} • Duração: ${Math.round(song.duration || 30)}s`, { bpm: song.bpm || 120, dur: Math.round(song.duration || 30) });
     }
 
     populateHeroDropdown() {
@@ -164,7 +166,7 @@ class PvPSystem {
             const opt = document.createElement('option');
             opt.value = h.id;
             const lvl = pool.getHeroLevelData ? pool.getHeroLevelData(h.id).level : (h.level || 1);
-            opt.innerText = `${h.name} (Nv. ${lvl})`;
+            opt.innerText = `${h.name} (${this.tr('levelShort', 'Nv.')} ${lvl})`;
             if (active && h.id === active.id) opt.selected = true;
             dropdown.appendChild(opt);
         });
@@ -192,27 +194,24 @@ class PvPSystem {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
         const avatar = document.getElementById('pvp-hero-avatar');
-        if (avatar) avatar.src = hero.avatar || 'assets/heroes/johnny_blaze.jpg';
+        if (avatar) avatar.src = hero.avatar || hero.icon || 'assets/heroes/johnny_blaze.jpg';
 
-        setVal('pvp-hero-name', hero.name || 'Guitarrista');
-        setVal('pvp-hero-level', `⭐ Nv. ${lvlData.level || 1}`);
+        setVal('pvp-hero-name', hero.name || this.tr('heroFallback', 'Guitarrista'));
+        setVal('pvp-hero-level', `⭐ ${this.tr('levelShort', 'Nv.')} ${lvlData.level || 1}`);
         const hStats = (window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function') ? window.guitaristPool.getHeroStats(hero.id) : null;
-        setVal('pvp-hero-inst', `🎸 ${hero.instrumentName || 'Guitarra Lendária'} • 🔥 Especial: ${(hStats && hStats.specialDuration) || 6}s`);
-        setVal('pvp-hero-passive', hero.passiveDesc || hero.title || 'Poder do Rock');
+        const hInst = this.tr('hero_' + hero.id + '_inst', hero.instrument || this.tr('electricGuitarFallback', 'Guitarra Elétrica'));
+        const spChip = this.tr('specialActiveChip', '🔥 Especial: {duration}s', { duration: (hStats && hStats.specialDuration) || 6 });
+        setVal('pvp-hero-inst', `🎸 ${hInst} • ${spChip}`);
+        const passFb = (hero.passive && hero.passive.desc) || hero.passiveDesc || this.tr('hero_' + hero.id + '_title', hero.title) || this.tr('pvpHeroTitleFallback', 'Poder do Rock');
+        setVal('pvp-hero-passive', this.tr('hero_' + hero.id + '_pass_desc', passFb));
 
         const rarityEl = document.getElementById('pvp-hero-rarity');
         if (rarityEl) {
-            const tierMap = {
-                starter: { label: 'INICIAL', bg: '#888888' },
-                rare: { label: 'RARO', bg: '#00a2ff' },
-                epic: { label: 'ÉPICO', bg: '#b000ff' },
-                legendary: { label: 'LENDÁRIO', bg: '#ffd700', color: '#000' },
-                mythic: { label: 'MÍTICO', bg: '#ff0055' }
-            };
-            const r = tierMap[hero.tier] || { label: 'HERÓI', bg: '#00d4ff' };
-            rarityEl.innerText = r.label;
-            rarityEl.style.backgroundColor = r.bg;
-            rarityEl.style.color = r.color || '#fff';
+            const rk = hero.rarityKey || 'common';
+            const rCols = { common: '#888888', rare: '#00a2ff', epic: '#b000ff', legendary: '#ffd700', mythic: '#ff0055', ancestral: '#ff6600', cosmic: '#00ffcc', divine: '#ffea00' };
+            rarityEl.innerText = this.tr('rarity_' + rk, hero.rarity || 'COMUM').toUpperCase();
+            rarityEl.style.backgroundColor = rCols[rk] || hero.themeColor || '#00d4ff';
+            rarityEl.style.color = (rk === 'legendary' || rk === 'divine' || rk === 'cosmic') ? '#000' : '#fff';
         }
     }
 
@@ -223,21 +222,15 @@ class PvPSystem {
         grid.innerHTML = '';
         const hero = window.guitaristPool ? window.guitaristPool.getSelectedGuitarist() : null;
         const hid = hero ? hero.id : null;
-        const laneNames = ['Pista 1', 'Pista 2', 'Pista 3', 'Pista 4'];
 
         for (let l = 0; l < 4; l++) {
             const skill = window.skillSystem.getEquippedSkill(l, hid);
             const badge = window.skillSystem.getSkillTypeBadge ? window.skillSystem.getSkillTypeBadge(skill) : { label: 'SKILL', color: '#00d4ff', bg: 'rgba(0,0,0,0.3)' };
-            const costText = (skill && skill.manaCost > 0) ? `⚡ ${skill.manaCost} MP` : 'BÁSICO';
-
+            const costText = (skill && skill.manaCost > 0) ? `⚡ ${skill.manaCost} MP` : this.tr('fretBasicBadge', 'BÁSICO');
+            const sName = skill ? this.tr('skill_' + skill.id + '_name', skill.name) : this.tr('pvpSkillFallback', 'Ataque');
             const slot = document.createElement('div');
             slot.className = `pvp-lane-slot lane-${l}`;
-            slot.innerHTML = `
-                <span class="pvp-lane-tag">${laneNames[l]}</span>
-                <span class="pvp-lane-icon">${(skill && skill.icon) || '⚡'}</span>
-                <span class="pvp-lane-skill-name" title="${(skill && skill.name) || 'Ataque'}">${(skill && skill.name) || 'Ataque'}</span>
-                <span class="pvp-lane-cost-badge" style="background: ${badge.bg}; color: ${badge.color};">${costText}</span>
-            `;
+            slot.innerHTML = `<span class="pvp-lane-tag">${this.tr('laneShortTag', 'Trilho {num}', { num: l + 1 })}</span><span class="pvp-lane-icon">${(skill && skill.icon) || '⚡'}</span><span class="pvp-lane-skill-name" title="${sName}">${sName}</span><span class="pvp-lane-cost-badge" style="background: ${badge.bg}; color: ${badge.color};">${costText}</span>`;
             slot.onclick = () => {
                 if (window.game && typeof window.game.openSkillPickerModal === 'function') {
                     window.game.openSkillPickerModal(l);
@@ -325,7 +318,7 @@ class PvPSystem {
                 const countEl = document.getElementById('pvp-countdown-val');
                 const countInterval = setInterval(() => {
                     count--;
-                    if (countEl) countEl.innerText = count > 0 ? count : 'GO! ⚡';
+                    if (countEl) countEl.innerText = count > 0 ? count : this.tr('pvpGo', 'VAI! ⚡');
                     if (count <= 0) {
                         clearInterval(countInterval);
                         if (modal) modal.classList.remove('open');
@@ -437,7 +430,7 @@ class PvPSystem {
             }
         }
         if (typeof combat.addFloatingText === 'function') {
-            combat.addFloatingText('🌀 PORTAL!', centerX, metrics.laneY - 38, '#b336ff', false);
+            combat.addFloatingText(this.tr('pvpPortal', '🌀 PORTAL!'), centerX, metrics.laneY - 38, '#b336ff', false);
         }
 
         // Zombie 1: Player Side (starts at center, moves left towards player)
@@ -487,7 +480,7 @@ class PvPSystem {
             this.oppStreak = 0;
             this.oppMultiplier = 1;
             this.addOpponentRating('MISS', track, '#ff4444');
-            combat.addFloatingText('MISS (OPP)', oppPos.x - 15, oppPos.y - 45, '#ff4444', false);
+            combat.addFloatingText(this.tr('pvpOppMiss', 'MISS (RIVAL)'), oppPos.x - 15, oppPos.y - 45, '#ff4444', false);
             return;
         }
 
@@ -553,7 +546,7 @@ class PvPSystem {
                 p.active = false;
                 // Direct hero hit: damage reduced by 95% (deals only 5% of normal damage)
                 const directDmg = Math.max(1, Math.round(p.damage * 0.05));
-                this.damageOpponent(directDmg, false, `-${directDmg} HP 🎯 (95% DEF)`, '#ffaa00', combat);
+                this.damageOpponent(directDmg, false, this.tr('pvpDirectHitDef', '-{amt} HP 🎯 (95% DEF)', { amt: directDmg }), '#ffaa00', combat);
                 if (combat.fx) {
                     combat.fx.spawnBurst(oppPos.x, oppPos.y - 15, '#ffaa00', 8, 45, 2, 0.3);
                     combat.fx.shockwaves.push({ x: oppPos.x, y: oppPos.y - 15, radius: 4, maxRadius: 30, color: '#ffaa00', lineWidth: 2, alpha: 1.0 });
@@ -566,7 +559,7 @@ class PvPSystem {
                 p.active = false;
                 // Direct hero hit: damage reduced by 95% (deals only 5% of normal damage)
                 const directDmg = Math.max(1, Math.round(p.damage * 0.05));
-                combat.takeDamage(directDmg, false, `-${directDmg} HP 🎯 (95% DEF)`, '#ffaa00');
+                combat.takeDamage(directDmg, false, this.tr('pvpDirectHitDef', '-{amt} HP 🎯 (95% DEF)', { amt: directDmg }), '#ffaa00');
                 if (combat.fx) {
                     combat.fx.spawnBurst(heroPos.x, heroPos.y - 15, '#ffaa00', 8, 45, 2, 0.3);
                     combat.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 4, maxRadius: 30, color: '#ffaa00', lineWidth: 2, alpha: 1.0 });
@@ -593,7 +586,7 @@ class PvPSystem {
                 p.active = false;
                 this.overhealsPlayer++;
 
-                combat.addFloatingText(`+${healAmt} HP 💚 (BUFF!)`, z.x, z.y - 40, '#00ff66', true);
+                combat.addFloatingText(this.tr('pvpBuffHeal', '+{amt} HP 💚 (CURA!)', { amt: healAmt }), z.x, z.y - 40, '#00ff66', true);
                 combat.fx.spawnBurst(z.x, z.y - 15, '#00ff66', 10, 60, 2.5, 0.4);
                 combat.fx.shockwaves.push({ x: z.x, y: z.y - 15, radius: 4, maxRadius: 35, color: '#00ff66', lineWidth: 2.5, alpha: 1.0 });
                 return true;
@@ -616,7 +609,7 @@ class PvPSystem {
                 p.active = false;
                 this.overhealsOpponent++;
 
-                combat.addFloatingText(`+${healAmt} HP 💚 (OPP BUFF!)`, z.x, z.y - 40, '#00ff66', true);
+                combat.addFloatingText(this.tr('pvpOppBuffHeal', '+{amt} HP 💚 (CURA RIVAL!)', { amt: healAmt }), z.x, z.y - 40, '#00ff66', true);
                 combat.fx.spawnBurst(z.x, z.y - 15, '#00ff66', 10, 60, 2.5, 0.4);
                 combat.fx.shockwaves.push({ x: z.x, y: z.y - 15, radius: 4, maxRadius: 35, color: '#00ff66', lineWidth: 2.5, alpha: 1.0 });
                 return true;
@@ -635,7 +628,7 @@ class PvPSystem {
                     z.active = false;
                     this.opponentZombiesKilled++;
                     this.opponent.score += 150;
-                    combat.addFloatingText('OPP KILL! 💀', z.x, z.y - 30, '#ff3344', true);
+                    combat.addFloatingText(this.tr('pvpOppKill', 'ABATE RIVAL! 💀'), z.x, z.y - 30, '#ff3344', true);
                     combat.fx.spawnBurst(z.x, z.y, '#ff3344', 12, 70, 3, 0.4);
                     combat.fx.shockwaves.push({ x: z.x, y: z.y, radius: 4, maxRadius: 35, color: '#ff3344', lineWidth: 2, alpha: 1.0 });
                 }
@@ -801,15 +794,11 @@ class PvPSystem {
             ctx.textAlign = 'center';
             ctx.font = "900 16px 'Impact', 'Segoe UI Black', sans-serif";
             ctx.fillStyle = isWin ? '#55ff99' : '#ff5566';
-            ctx.fillText(
-                isWin ? '⚔️ 🏆 VITÓRIA NO DUELO PVP! 🏆 ⚔️' : '⚔️ ☠️ DERROTA NO DUELO! ☠️ ⚔️',
-                cw / 2,
-                bannerY + 22
-            );
+            ctx.fillText(this.tr(isWin ? 'pvpCanvasWinTitle' : 'pvpCanvasLoseTitle', isWin ? '⚔️ 🏆 VITÓRIA NO DUELO PVP! 🏆 ⚔️' : '⚔️ ☠️ DERROTA NO DUELO! ☠️ ⚔️'), cw / 2, bannerY + 22);
 
             ctx.font = "bold 10px 'Segoe UI', sans-serif";
             ctx.fillStyle = '#ffffff';
-            const sub = isWin ? 'DOMÍNIO TOTAL NO PALCO!' : 'O ADVERSÁRIO SUPEROU O RITMO!';
+            const sub = this.tr(isWin ? 'pvpCanvasWinSub' : 'pvpCanvasLoseSub', isWin ? 'DOMÍNIO TOTAL NO PALCO!' : 'O ADVERSÁRIO SUPEROU O RITMO!');
             ctx.fillText(sub, cw / 2, bannerY + 38);
             ctx.restore();
         }
@@ -910,9 +899,7 @@ class PvPSystem {
         // Update confrontation banner at top of screen
         const banner = document.getElementById('pvp-confront-banner');
         if (banner) {
-            banner.innerText = isPlayerWinner
-                ? '🏆 VITÓRIA NO DUELO PVP! DOMÍNIO TOTAL NO PALCO! 🏆'
-                : '☠️ DERROTA NO DUELO! O ADVERSÁRIO SUPEROU O RITMO! ☠️';
+            banner.innerText = this.tr(isPlayerWinner ? 'pvpBannerWin' : 'pvpBannerLose', isPlayerWinner ? '🏆 VITÓRIA NO DUELO PVP! DOMÍNIO TOTAL NO PALCO! 🏆' : '☠️ DERROTA NO DUELO! O ADVERSÁRIO SUPEROU O RITMO! ☠️');
             banner.style.background = isPlayerWinner ? 'rgba(0, 45, 15, 0.95)' : 'rgba(45, 5, 10, 0.95)';
             banner.style.borderColor = isPlayerWinner ? '#00ff66' : '#ff2233';
             banner.style.color = isPlayerWinner ? '#55ff99' : '#ff5566';
@@ -949,7 +936,7 @@ class PvPSystem {
         const modal = document.getElementById('pvp-results-modal');
         if (!modal) return;
 
-        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+        const tr = (k, f) => this.tr(k, f);
         const dialog = document.getElementById('pvp-results-dialog');
         const header = document.getElementById('pvp-res-header');
         const titleEl = document.getElementById('pvp-res-title');
@@ -958,7 +945,7 @@ class PvPSystem {
         if (dialog) dialog.className = `pvp-results-dialog ${isWin ? 'win' : 'defeat'}`;
         if (header) header.className = `pvp-res-header ${isWin ? 'win' : 'lose'}`;
         if (titleEl) titleEl.innerText = isWin ? tr('pvpWinTitle', '🏆 VITÓRIA NO DUELO PVP!') : tr('pvpDefeatTitle', '☠️ DERROTA NO DUELO PVP!');
-        if (subEl) subEl.innerText = tr(outcomeKey, 'Fim do Duelo!');
+        if (subEl) subEl.innerText = tr(outcomeKey, tr('pvpEndFallback', 'Fim do Duelo!'));
 
         const pScore = (combat ? combat.score : 0).toLocaleString();
         const oScore = (this.opponent ? this.opponent.score : 0).toLocaleString();
