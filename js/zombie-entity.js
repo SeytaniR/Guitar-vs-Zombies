@@ -52,7 +52,7 @@ class ZombieEntity {
             this.hp = Math.round(this.hp * 3.5);
             this.maxHp = this.hp;
             this.attackDamage = Math.round(this.attackDamage * 1.5);
-            this.name = `👑 [CHEFE] ${this.baseName} TITÃ`;
+            this.name = (typeof i18n !== 'undefined') ? i18n.t('bossNameFormat', `👑 [CHEFE] ${this.baseName} TITÃ`, { name: this.baseName }) : `👑 [CHEFE] ${this.baseName} TITÃ`;
         }
         this.isPvP = !!(enemyDef && enemyDef.isPvP);
         if (this.isPvP) {

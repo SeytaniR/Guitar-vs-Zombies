@@ -471,15 +471,15 @@ class TalentSystem {
         const upgradeBtn = document.getElementById('talent-upgrade-action');
         const reqEl = document.getElementById('inspector-requirement');
 
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         if (iconEl) iconEl.src = talent.icon;
-        if (nameEl) nameEl.innerText = talent.name;
-        if (descEl) descEl.innerText = talent.desc;
-        if (levelBadge) levelBadge.innerText = `NÍVEL ${talent.level} / ${talent.maxLevel}`;
+        if (nameEl) nameEl.innerText = tr(`talent_${talent.id}_name`, talent.name);
+        if (descEl) descEl.innerText = tr(`talent_${talent.id}_desc`, talent.desc);
+        if (levelBadge) levelBadge.innerText = tr('inspectorLevel', `NÍVEL ${talent.level} / ${talent.maxLevel}`, { level: talent.level, max: talent.maxLevel });
 
         const pct = Math.round((talent.level / talent.maxLevel) * 100);
         if (barFill) barFill.style.width = `${pct}%`;
 
-        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         if (currentBenefit) currentBenefit.innerText = talent.level > 0 ? talent.getBenefit(talent.level) : tr('noBonus', 'Nenhum bônus');
         if (nextBenefit) nextBenefit.innerText = talent.level < talent.maxLevel ? talent.getNextBenefit(talent.level) : tr('maxLevelReached', 'Nível Máximo Atingido!');
 

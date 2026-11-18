@@ -37,10 +37,7 @@ class PvPSystem {
         ];
     }
 
-    getTrophies() {
-        return this.playerTrophies;
-    }
-
+    getTrophies() { return this.playerTrophies; }
     addTrophies(amount) {
         this.playerTrophies = Math.max(0, this.playerTrophies + amount);
         try { localStorage.setItem('gvs_pvp_trophies', this.playerTrophies.toString()); } catch (e) {}
@@ -279,15 +276,15 @@ class PvPSystem {
         const timerEl = document.getElementById('pvp-timer-display');
         const statusEl = document.getElementById('pvp-status-text');
         const songBadge = document.getElementById('pvp-chosen-song-badge');
+        const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         if (songBadge && this.selectedSong) {
-            songBadge.innerText = `🎵 Música: ${this.selectedSong.title} (${this.selectedSong.bpm || 120} BPM)`;
+            songBadge.innerText = tr('pvpChosenSongBadge', `🎵 Música: ${this.selectedSong.title} (${this.selectedSong.bpm || 120} BPM)`, { song: this.selectedSong.title, bpm: this.selectedSong.bpm || 120 });
         }
 
-        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
         const steps = [
             tr('pvpConnecting', 'Conectando ao servidor SA-East (São Paulo)...'),
             tr('pvpSearching', 'Buscando guitarristas no mesmo tier de troféus...'),
-            'Localizando adversário compatível...'
+            tr('pvpLocating', 'Localizando adversário compatível...')
         ];
 
         let stepIndex = 0;
@@ -359,17 +356,19 @@ class PvPSystem {
     populateVersusView(playerHero, opponent) {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
         const setImg = (id, src) => { const el = document.getElementById(id); if (el) el.src = src; };
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+        const lvlStr = tr('levelShort', 'Nv.');
 
         // Player Side
-        setVal('pvp-player-name', (playerHero && playerHero.name) || 'Você');
-        setVal('pvp-player-level', `Nv. ${(playerHero && playerHero.level) || 1}`);
+        setVal('pvp-player-name', (playerHero && playerHero.name) || tr('pvpYou', 'Você'));
+        setVal('pvp-player-level', `${lvlStr} ${(playerHero && playerHero.level) || 1}`);
         setVal('pvp-player-rank', this.getRank().badge);
         setImg('pvp-player-avatar', (playerHero && playerHero.avatar) || 'assets/covers/default_cover.jpg');
 
         // Opponent Side
         setVal('pvp-opp-versus-name', opponent.name);
         setVal('pvp-opp-versus-hero', opponent.guitarist.name);
-        setVal('pvp-opp-versus-level', `Nv. ${opponent.level}`);
+        setVal('pvp-opp-versus-level', `${lvlStr} ${opponent.level}`);
         setVal('pvp-opp-versus-rank', opponent.rank.badge);
         setImg('pvp-opp-versus-avatar', opponent.guitarist.avatar || 'assets/covers/default_cover.jpg');
     }

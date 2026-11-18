@@ -736,9 +736,10 @@ class SkillSystem {
         simulated[laneIndex] = resolvedNew;
 
         if (!this.hasAtLeastOneBasicStrike(simulated)) {
+            const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
             return {
                 allowed: false,
-                reason: '⚠️ Regra do Palco: Você precisa manter pelo menos 1 slot equipado com Ataque Básico!'
+                reason: tr('stageRuleAtLeastOneBasic', '⚠️ Regra do Palco: Você precisa manter pelo menos 1 slot equipado com Ataque Básico!')
             };
         }
         return { allowed: true };
@@ -784,24 +785,25 @@ class SkillSystem {
     }
 
     getSkillTypeBadge(skill) {
-        if (!skill) return { label: 'BÁSICO', color: '#00ff66', bg: 'rgba(0,255,102,0.15)' };
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+        if (!skill) return { label: tr('fretBasicBadge', 'BÁSICO'), color: '#00ff66', bg: 'rgba(0,255,102,0.15)' };
         switch (skill.type) {
-            case 'basic': return { label: '⚡ BÁSICO', color: '#00ff66', bg: 'rgba(0,255,102,0.18)' };
-            case 'dps': case 'heavy_dps': case 'riot_dps': return { label: '💥 DANO', color: '#ff5500', bg: 'rgba(255,85,0,0.18)' };
-            case 'dps_crit': return { label: '🔮 CRÍTICO', color: '#00ffff', bg: 'rgba(0,255,255,0.18)' };
-            case 'aoe': case 'heavy_aoe': return { label: '💥 ÁREA', color: '#ff3300', bg: 'rgba(255,51,0,0.18)' };
-            case 'stun': case 'earthquake': return { label: '💫 STUN', color: '#ffcc00', bg: 'rgba(255,204,0,0.18)' };
-            case 'burn': case 'aoe_burn': return { label: '🔥 CHAMA', color: '#ff4400', bg: 'rgba(255,68,0,0.18)' };
-            case 'acid': case 'radiation': return { label: '☢️ TÓXICO', color: '#39ff14', bg: 'rgba(57,255,20,0.18)' };
-            case 'chain_lightning': return { label: '⚡ RELÂMPAGO', color: '#00f0ff', bg: 'rgba(0,240,255,0.18)' };
-            case 'buff': return { label: '🚀 BUFF', color: '#b000ff', bg: 'rgba(176,0,255,0.18)' };
-            case 'heal': return { label: '💚 CURA', color: '#00e676', bg: 'rgba(0,230,118,0.18)' };
-            case 'shield': return { label: '🛡️ ESCUDO', color: '#00a2ff', bg: 'rgba(0,162,255,0.18)' };
-            case 'lifesteal': return { label: '🩸 VAMPIRISMO', color: '#e6004c', bg: 'rgba(230,0,76,0.18)' };
-            case 'bleed': return { label: '🩸 SANGRAMENTO', color: '#ff0055', bg: 'rgba(255,0,85,0.18)' };
-            case 'pierce': return { label: '🎸 PERFURAÇÃO', color: '#ffaa00', bg: 'rgba(255,170,0,0.18)' };
-            case 'cataclysm': return { label: '👑 CATACLISMO', color: '#ff00aa', bg: 'rgba(255,0,170,0.22)' };
-            default: return { label: '⚡ ESPECIAL', color: '#ffaa00', bg: 'rgba(255,170,0,0.15)' };
+            case 'basic': return { label: tr('skillBadgeBasic', '⚡ BÁSICO'), color: '#00ff66', bg: 'rgba(0,255,102,0.18)' };
+            case 'dps': case 'heavy_dps': case 'riot_dps': return { label: tr('skillBadgeDamage', '💥 DANO'), color: '#ff5500', bg: 'rgba(255,85,0,0.18)' };
+            case 'dps_crit': return { label: tr('skillBadgeCrit', '🔮 CRÍTICO'), color: '#00ffff', bg: 'rgba(0,255,255,0.18)' };
+            case 'aoe': case 'heavy_aoe': return { label: tr('skillBadgeAoe', '💥 ÁREA'), color: '#ff3300', bg: 'rgba(255,51,0,0.18)' };
+            case 'stun': case 'earthquake': return { label: tr('skillBadgeStun', '💫 STUN'), color: '#ffcc00', bg: 'rgba(255,204,0,0.18)' };
+            case 'burn': case 'aoe_burn': return { label: tr('skillBadgeBurn', '🔥 CHAMA'), color: '#ff4400', bg: 'rgba(255,68,0,0.18)' };
+            case 'acid': case 'radiation': return { label: tr('skillBadgeToxic', '☢️ TÓXICO'), color: '#39ff14', bg: 'rgba(57,255,20,0.18)' };
+            case 'chain_lightning': return { label: tr('skillBadgeLightning', '⚡ RELÂMPAGO'), color: '#00f0ff', bg: 'rgba(0,240,255,0.18)' };
+            case 'buff': return { label: tr('skillBadgeBuff', '🚀 BUFF'), color: '#b000ff', bg: 'rgba(176,0,255,0.18)' };
+            case 'heal': return { label: tr('skillBadgeHeal', '💚 CURA'), color: '#00e676', bg: 'rgba(0,230,118,0.18)' };
+            case 'shield': return { label: tr('skillBadgeShield', '🛡️ ESCUDO'), color: '#00a2ff', bg: 'rgba(0,162,255,0.18)' };
+            case 'lifesteal': return { label: tr('skillBadgeLifesteal', '🩸 VAMPIRISMO'), color: '#e6004c', bg: 'rgba(230,0,76,0.18)' };
+            case 'bleed': return { label: tr('skillBadgeBleed', '🩸 SANGRAMENTO'), color: '#ff0055', bg: 'rgba(255,0,85,0.18)' };
+            case 'pierce': return { label: tr('skillBadgePierce', '🎸 PERFURAÇÃO'), color: '#ffaa00', bg: 'rgba(255,170,0,0.18)' };
+            case 'cataclysm': return { label: tr('skillBadgeCataclysm', '👑 CATACLISMO'), color: '#ff00aa', bg: 'rgba(255,0,170,0.22)' };
+            default: return { label: tr('skillBadgeSpecial', '⚡ ESPECIAL'), color: '#ffaa00', bg: 'rgba(255,170,0,0.15)' };
         }
     }
 
@@ -843,10 +845,11 @@ class SkillSystem {
             ctx.stroke();
         }
 
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
         const badgeY = hitZoneY + 27;
         const badgeText = skill.manaCost > 0 
-            ? (hasMana ? `⚡ ${skill.manaCost} MP` : '⚡ SEM MP')
-            : 'BÁSICO';
+            ? (hasMana ? `⚡ ${skill.manaCost} MP` : tr('fretNoMpBadge', '⚡ SEM MP'))
+            : tr('fretBasicBadge', 'BÁSICO');
         const badgeColor = skill.manaCost > 0 ? (hasMana ? '#00ffff' : '#ff4444') : '#00ff66';
 
         ctx.font = 'bold 8.5px "Segoe UI", sans-serif';

@@ -399,9 +399,9 @@
             <!-- 5-Second Preparation & Resume Countdown Overlay -->
             <div id="battle-countdown-overlay" class="battle-countdown-overlay" style="display: none;">
                 <div id="countdown-badge" class="countdown-badge">
-                    <div id="countdown-mode-pill" class="countdown-mode-pill">🎸 PREPARAÇÃO</div>
+                    <div id="countdown-mode-pill" class="countdown-mode-pill" data-i18n="countdownGetReady">🎸 PREPARAÇÃO</div>
                     <div id="countdown-number" class="countdown-number">5</div>
-                    <div id="countdown-subtitle" class="countdown-subtitle">POSICIONE OS DEDOS!</div>
+                    <div id="countdown-subtitle" class="countdown-subtitle" data-i18n="countdownSubtitle">POSICIONE OS DEDOS!</div>
                 </div>
             </div>
         </div>
@@ -419,7 +419,7 @@
                     <span class="shop-currency-chip gold-chip">🪙 <strong id="shop-gold-count">0</strong></span>
                     <span class="shop-currency-chip xp-chip">✨ <strong id="shop-xp-count">0</strong> XP</span>
                 </div>
-                <button id="shop-close-btn" class="shop-modal-close" aria-label="Fechar">✕</button>
+                <button id="shop-close-btn" class="shop-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
             <div class="shop-modal-body">
                 <div id="shop-heroes-grid" class="shop-heroes-grid"></div>
@@ -812,7 +812,7 @@
                     <h2 data-i18n="ssTitle">📊 ESTATÍSTICAS DE BATALHA</h2>
                     <span class="stats-header-sub" data-i18n="ssSub">Performance em tempo real do confronto</span>
                 </div>
-                <button id="stats-modal-close-btn" class="stats-modal-close" aria-label="Fechar">✕</button>
+                <button id="stats-modal-close-btn" class="stats-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
             <div class="stats-modal-body">
                 <div class="stats-hero-banner">
@@ -882,7 +882,7 @@
         <div class="gear-modal-dialog">
             <div class="gear-modal-header">
                 <h2 id="gear-modal-title" data-i18n="gearTitle">⚙️ OPÇÕES & PAUSA</h2>
-                <button id="gear-modal-close-btn" class="gear-modal-close" aria-label="Fechar">✕</button>
+                <button id="gear-modal-close-btn" class="gear-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
             <div class="gear-modal-body">
                 <div class="gear-option-row">
@@ -917,7 +917,7 @@
                 <h3 id="skill-picker-title">⚡ Equipar no Trilho 1</h3>
                 <div class="skill-modal-actions-top">
                     <button type="button" id="skill-restore-default-btn" class="skill-restore-btn" title="Restaurar Loadout Padrão" data-i18n="btnRestoreDefault">↺ Padrão</button>
-                    <button id="skill-picker-close-btn" class="gear-modal-close" aria-label="Fechar">✕</button>
+                    <button id="skill-picker-close-btn" class="gear-modal-close" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
                 </div>
             </div>
             <div class="game-modal-body">
@@ -941,7 +941,7 @@
                     <h2 data-i18n="missionsTitle">🎯 MISSÕES & METAS DO PALCO</h2>
                     <p class="missions-header-subtitle" data-i18n="missionsSub">Elimine zumbis e domine guitarristas para desbloquear marcos procedurais (10 ➔ 100 ➔ 1k ➔ 10k ➔ 100k)!</p>
                 </div>
-                <button id="missions-modal-close-btn" class="missions-modal-close-btn" aria-label="Fechar">✕</button>
+                <button id="missions-modal-close-btn" class="missions-modal-close-btn" aria-label="Fechar" title="Fechar" data-i18n-title="btnClose">✕</button>
             </div>
 
             <!-- Category Switcher (Zombies vs Guitarists vs Performance) -->
@@ -968,7 +968,7 @@
             <div class="missions-stats-bar">
                 <div class="missions-stats-chips-group">
                     <div class="missions-stat-chip">
-                        <span id="missions-stat-kills-label">💀 Kills Hordas:</span>
+                        <span id="missions-stat-kills-label" data-i18n="missionsStatKillsLabel">💀 Kills Hordas:</span>
                         <strong id="missions-stat-kills">0</strong>
                     </div>
                     <div class="missions-stat-chip" title="Saldo atual na carteira">
@@ -1146,11 +1146,11 @@
             <div class="pvp-rewards-box">
                 <div class="pvp-reward-item">
                     <span id="pvp-rew-gold" class="pvp-rew-val">+45 🪙</span>
-                    <span class="pvp-rew-tag">OURO</span>
+                    <span class="pvp-rew-tag" data-i18n="pvpGoldTag">OURO</span>
                 </div>
                 <div class="pvp-reward-item">
                     <span id="pvp-rew-xp" class="pvp-rew-val" style="color: #00d4ff;">+50 XP</span>
-                    <span class="pvp-rew-tag">XP HERÓI</span>
+                    <span class="pvp-rew-tag" data-i18n="pvpHeroXpTag">XP HERÓI</span>
                 </div>
                 <div class="pvp-reward-item">
                     <span id="pvp-rew-trophies" class="pvp-rew-val" style="color: #ffd700;">+25 🏆</span>
@@ -1158,8 +1158,8 @@
                 </div>
             </div>
             <div style="display: flex; gap: 8px; justify-content: center; margin-top: 4px;">
-                <button id="pvp-res-rematch-btn" class="menu-action-btn" style="flex: 1; padding: 10px; font-size: 11px; background: linear-gradient(135deg, #00d4ff, #0055ff); border: 1px solid #00d4ff; border-radius: 8px; color: #fff; font-weight: 800; cursor: pointer;">⚔️ NOVO DUELO</button>
-                <button id="pvp-res-close-btn" class="menu-action-btn" style="flex: 1; padding: 10px; font-size: 11px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #fff; font-weight: 800; cursor: pointer;">VOLTAR AO MENU</button>
+                <button id="pvp-res-rematch-btn" class="menu-action-btn" data-i18n="btnPvPRematch" style="flex: 1; padding: 10px; font-size: 11px; background: linear-gradient(135deg, #00d4ff, #0055ff); border: 1px solid #00d4ff; border-radius: 8px; color: #fff; font-weight: 800; cursor: pointer;">⚔️ NOVO DUELO</button>
+                <button id="pvp-res-close-btn" class="menu-action-btn" data-i18n="btnPvPClose" style="flex: 1; padding: 10px; font-size: 11px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #fff; font-weight: 800; cursor: pointer;">VOLTAR AO MENU</button>
             </div>
         </div>
     </div>

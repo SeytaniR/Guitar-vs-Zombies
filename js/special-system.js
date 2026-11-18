@@ -132,8 +132,9 @@ class SpecialSystem {
             this.specialMeter = 0;
 
             if (window.game && window.game.combat) {
+                const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
                 window.game.combat.isSpecialActive = false;
-                window.game.combat.addFloatingText('⚡ ESPECIAL ENCERRADO!', window.game.combat.canvas.width / 2, window.game.combat.canvas.height * 0.42, '#aaaaaa', false);
+                window.game.combat.addFloatingText(tr('specialEnded', '⚡ ESPECIAL ENCERRADO!'), window.game.combat.canvas.width / 2, window.game.combat.canvas.height * 0.42, '#aaaaaa', false);
             }
         } else {
             // Visual meter drain while active to show duration remaining
@@ -189,10 +190,11 @@ class SpecialSystem {
 
         // Percentage / Status label
         if (this.pctEl) {
+            const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
             let labelText;
             if (isActive) labelText = `🔥 2X (${this.specialTimeLeft.toFixed(1)}s)`;
-            else if (isExhausted) labelText = 'USADO ✖';
-            else if (isReady) labelText = 'PRONTO! ⚡';
+            else if (isExhausted) labelText = tr('specialUsed', 'USADO ✖');
+            else if (isReady) labelText = tr('specialReady', 'PRONTO! ⚡');
             else labelText = `${meterInt}%`;
 
             if (s.labelText !== labelText) {

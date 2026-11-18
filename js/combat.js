@@ -75,13 +75,10 @@ class CombatSystem {
     get rockPower() { return (this.rockMana / this.maxRockMana) * 100; } set rockPower(v) { this.rockMana = Math.max(0, Math.min(this.maxRockMana, (v / 100) * this.maxRockMana)); }
     get shakePower() { return this.fx.shakePower; } set shakePower(v) { this.fx.shakePower = v; }
     triggerShake(amount = 6) { this.fx.triggerShake(amount); }
+    tr(k, f, p) { return (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f); }
     addFloatingText(text, x, y, color = '#ffff00', isCrit = false) { this.fx.addFloatingText(text, x, y, color, isCrit); }
     createExplosion(x, y, isCrit = false) { this.fx.createExplosion(x, y, isCrit, window.soundEngine); }
-
-    resize() {
-        const p = this.canvas.parentElement, w = (p && p.clientWidth) || window.innerWidth || 360, h = (p && p.clientHeight) || Math.round(window.innerHeight * 0.5) || 300;
-        if (w > 0 && h > 0 && (this.canvas.width !== w || this.canvas.height !== h)) { this.canvas.width = w; this.canvas.height = h; }
-    }
+    resize() { const p = this.canvas.parentElement, w = (p && p.clientWidth) || window.innerWidth || 360, h = (p && p.clientHeight) || Math.round(window.innerHeight * 0.5) || 300; if (w > 0 && h > 0 && (this.canvas.width !== w || this.canvas.height !== h)) { this.canvas.width = w; this.canvas.height = h; } }
 
     getActiveHeroData() {
         return (window.guitaristPool && typeof window.guitaristPool.getSelectedGuitarist === 'function')
@@ -163,7 +160,7 @@ class CombatSystem {
                 this.bossSpawned = true;
                 enemyDef = window.stageSystem.getBossZombieDef(stage);
                 const cw = this.canvas ? this.canvas.width : 360;
-                this.addFloatingText('⚠️ CHEFE TITÃ SURGIU! 👑', cw / 2, metrics.laneY - 45, '#ff0033', true);
+                this.addFloatingText(this.tr('bossSpawned', '⚠️ CHEFE TITÃ SURGIU! 👑'), cw / 2, metrics.laneY - 45, '#ff0033', true);
                 this.triggerShake(10);
                 if (window.soundEngine) window.soundEngine.playPowerChord();
             } else {
@@ -189,7 +186,7 @@ class CombatSystem {
         this.comboKills = 0;
         this.perfectStreak = 0;
         const heroPos = this.getHeroPosition();
-        this.addFloatingText('ERROU! 💨', heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
+        this.addFloatingText(this.tr('missLabel', 'ERROU! 💨'), heroPos.x + 20, heroPos.y - 45, '#ff4444', false);
         this.pendingAttackModifiers.push({ mult: 0, isCrit: false, isMiss: true, skill: null, lane: laneIndex });
         this.heroAttackTimer = 0;
         this.performHeroAutoAttack();
@@ -224,7 +221,7 @@ class CombatSystem {
             this.perfectStreak = (this.perfectStreak || 0) + 1;
             if (this.perfectStreak >= 5) {
                 this.guaranteedCritReady = true; this.perfectStreak = 0;
-                this.addFloatingText('🎯 5x PERFECT! PRÓXIMO CRÍTICO!', heroPos.x, heroPos.y - 50, '#ff00ff', true);
+                this.addFloatingText(this.tr('perfectStreakCrit', '🎯 5x PERFECT! PRÓXIMO CRÍTICO!'), heroPos.x, heroPos.y - 50, '#ff00ff', true);
             } else {
                 this.addFloatingText(`👑 UNBELIEVABLE! (${this.perfectStreak}/5)`, heroPos.x, heroPos.y - 45, '#ffd700', true);
             }
@@ -233,7 +230,7 @@ class CombatSystem {
             this.perfectStreak = (this.perfectStreak || 0) + 1;
             if (this.perfectStreak >= 5) {
                 this.guaranteedCritReady = true; this.perfectStreak = 0;
-                this.addFloatingText('🎯 5x PERFECT! PRÓXIMO CRÍTICO!', heroPos.x, heroPos.y - 50, '#ff00ff', true);
+                this.addFloatingText(this.tr('perfectStreakCrit', '🎯 5x PERFECT! PRÓXIMO CRÍTICO!'), heroPos.x, heroPos.y - 50, '#ff00ff', true);
             } else {
                 this.addFloatingText(`🎯 PERFECT! (${this.perfectStreak}/5)`, heroPos.x, heroPos.y - 45, '#ffcc00', false);
             }
@@ -265,7 +262,7 @@ class CombatSystem {
                 // Insufficient Mana: note becomes a common basic attack (no skill applied, normal basic damage, 0 MP spent)
                 skillToApply = null;
                 manaPenalty = 1.0;
-                this.addFloatingText('⚡ SEM MP! (BÁSICO)', heroPos.x, heroPos.y - 45, '#00d4ff', false);
+                this.addFloatingText(this.tr('noMpBasic', '⚡ SEM MP! (BÁSICO)'), heroPos.x, heroPos.y - 45, '#00d4ff', false);
             }
         }
 
@@ -433,7 +430,7 @@ class CombatSystem {
         if (activeHero && window.guitaristPool) {
             const xpRes = window.guitaristPool.addHeroXp(activeHero.id, earnedXp);
             if (xpRes && xpRes.leveledUp) {
-                this.addFloatingText(`⭐ NÍVEL ${xpRes.newLevel}! UP!`, this.getHeroPosition().x, this.getHeroPosition().y - 65, '#ffd700', true);
+                this.addFloatingText(this.tr('levelUpToast', `⭐ NÍVEL ${xpRes.newLevel}! UP!`, { level: xpRes.newLevel }), this.getHeroPosition().x, this.getHeroPosition().y - 65, '#ffd700', true);
                 this.triggerShake(5);
             }
         }
@@ -482,7 +479,7 @@ class CombatSystem {
             x: this.canvas.width / 2, y: this.canvas.height / 2,
             radius: 8, maxRadius: isBoss ? 200 : 150, color: '#ffd700', lineWidth: 5.5, alpha: 1.0
         });
-        const titleText = isBoss ? `👑 CHEFE DERROTADO! FASE ${stage}!` : `🏆 FASE ${stage} CONCLUÍDA!`;
+        const titleText = isBoss ? `👑 CHEFE DERROTADO! FASE ${stage}!` : this.tr('stageCompletedToast', `🏆 FASE ${stage} CONCLUÍDA!`, { stage });
         this.addFloatingText(titleText, this.canvas.width / 2, this.canvas.height / 2 - 35, '#ffd700', true);
         this.addFloatingText(`+${rewards.coins} 🪙  +${rewards.xp} XP`, this.canvas.width / 2, this.canvas.height / 2 + 10, '#00ff66', true);
         if (window.soundEngine) window.soundEngine.playExplosion();
@@ -504,7 +501,7 @@ class CombatSystem {
         const heroPos = this.getHeroPosition();
 
         if (this.heroImmunityTimer > 0) {
-            this.addFloatingText("⚡ IMUNE!", heroPos.x, heroPos.y - 35, '#ffcc00', false);
+            this.addFloatingText(this.tr('immuneStatus', "⚡ IMUNE!"), heroPos.x, heroPos.y - 35, '#ffcc00', false);
             return;
         }
 
@@ -513,7 +510,7 @@ class CombatSystem {
             this.shockBarrierTimer = window.talentSystem ? window.talentSystem.getStat('shock_barrier') : 18;
             this.triggerShake(5);
             this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 10, maxRadius: 55, color: '#00a2ff', lineWidth: 4, alpha: 1.0 });
-            this.addFloatingText("🛡️ BLOQUEADO!", heroPos.x, heroPos.y - 40, '#00a2ff', true);
+            this.addFloatingText(this.tr('blockedStatus', "🛡️ BLOQUEADO!"), heroPos.x, heroPos.y - 40, '#00a2ff', true);
             return;
         }
 
@@ -598,9 +595,9 @@ class CombatSystem {
         if (rndBonus > 0) {
             this.heroImmunityTimer = rndBonus;
             this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 10, maxRadius: 120, color: '#ffcc00', lineWidth: 6, alpha: 1.0 });
-            this.addFloatingText("⚡ ROCK NEVER DIES! ⚡", heroPos.x + 50, heroPos.y - 40, '#ffcc00', true);
+            this.addFloatingText(this.tr('rockNeverDies', "⚡ ROCK NEVER DIES! ⚡"), heroPos.x + 50, heroPos.y - 40, '#ffcc00', true);
         } else {
-            this.addFloatingText("⚡ REVIVIDO! ⚡", heroPos.x + 50, heroPos.y - 40, '#ffcc00', true);
+            this.addFloatingText(this.tr('heroRevived', "⚡ REVIVIDO! ⚡"), heroPos.x + 50, heroPos.y - 40, '#ffcc00', true);
         }
     }
 
@@ -682,7 +679,7 @@ class CombatSystem {
                     this.shockBarrierTimer = barrierCd;
                     this.triggerShake(3);
                     this.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y - 15, radius: 5, maxRadius: 40, color: '#00a2ff', lineWidth: 3, alpha: 1.0 });
-                    this.addFloatingText("🛡️ BARREIRA PRONTA!", heroPos.x, heroPos.y - 42, '#00a2ff', false);
+                    this.addFloatingText(this.tr('barrierReady', "🛡️ BARREIRA PRONTA!"), heroPos.x, heroPos.y - 42, '#00a2ff', false);
                 }
             }
         } else {
@@ -798,7 +795,7 @@ class CombatSystem {
                         } else {
                             z.burnTimer = 3.2;
                             z.burnDps = 16;
-                            this.addFloatingText("🔥 QUEIMANDO!", z.x, currentY - 48, '#ff5500', true);
+                            this.addFloatingText(this.tr('burningStatus', "🔥 QUEIMANDO!"), z.x, currentY - 48, '#ff5500', true);
                         }
                     }
 

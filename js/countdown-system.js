@@ -150,19 +150,20 @@ class CountdownSystem {
             this.numEl.classList.add('pop');
         }
 
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
         const subtitlesStart = {
-            5: "PREPARE-SE!",
-            4: "POSICIONE OS DEDOS!",
-            3: "AFINE AS CORDAS!",
-            2: "ATENÇÃO!",
-            1: "QUASE LÁ!"
+            5: tr('countdownStart5', "PREPARE-SE!"),
+            4: tr('countdownStart4', "POSICIONE OS DEDOS!"),
+            3: tr('countdownStart3', "AFINE AS CORDAS!"),
+            2: tr('countdownStart2', "ATENÇÃO!"),
+            1: tr('countdownStart1', "QUASE LÁ!")
         };
         const subtitlesResume = {
-            5: "RETOMANDO PARTIDA!",
-            4: "POSICIONE OS DEDOS!",
-            3: "OLHO NA PISTA!",
-            2: "ATENÇÃO!",
-            1: "QUASE LÁ!"
+            5: tr('countdownResume5', "RETOMANDO PARTIDA!"),
+            4: tr('countdownStart4', "POSICIONE OS DEDOS!"),
+            3: tr('countdownResume3', "OLHO NA PISTA!"),
+            2: tr('countdownStart2', "ATENÇÃO!"),
+            1: tr('countdownStart1', "QUASE LÁ!")
         };
         const colors = {
             5: '#00f0ff',
@@ -173,10 +174,10 @@ class CountdownSystem {
         };
 
         const subs = (this.mode === 'resume') ? subtitlesResume : subtitlesStart;
-        this.subEl.innerText = subs[sec] || "PREPARE-SE!";
+        this.subEl.innerText = subs[sec] || tr('countdownStart5', "PREPARE-SE!");
         if (this.numEl.style) this.numEl.style.color = colors[sec] || '#00f0ff';
         if (this.modePillEl) {
-            this.modePillEl.innerText = (this.mode === 'resume') ? "⏸️ RETOMAR" : "🎸 PREPARAÇÃO";
+            this.modePillEl.innerText = (this.mode === 'resume') ? tr('countdownModeResume', "⏸️ RETOMAR") : tr('countdownModePrep', "🎸 PREPARAÇÃO");
         }
     }
 
@@ -222,7 +223,8 @@ class CountdownSystem {
             }
         }
         if (this.subEl) {
-            this.subEl.innerText = "VAI COM TUDO!";
+            const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+            this.subEl.innerText = tr('countdownGo', "VAI COM TUDO!");
             if (this.subEl.style) this.subEl.style.color = "#ffdd00";
         }
 

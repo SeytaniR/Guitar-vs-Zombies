@@ -293,7 +293,50 @@ class I18n {
                 'mk4Sub': 'MASSACRE NO PALCO! 🎸',
                 'mk5Sub': 'ADRENALINA MÁXIMA! ⚡',
                 'mk6Sub': 'DEUS DO ROCK AND ROLL! 🤘',
-                'mk7Sub': 'LENDÁRIO & IMBATÍVEL! 👑'
+                'mk7Sub': 'LENDÁRIO & IMBATÍVEL! 👑',
+
+                'btnClose': 'Fechar', 'btnPvPRematch': '⚔️ NOVO DUELO', 'btnPvPClose': 'VOLTAR AO MENU',
+                'pvpPreBattleTitle': '⚔️ DUELO PVP ONLINE', 'pvpPreBattleSubtitle': 'Personalize seu Guitarrista, Habilidades e Música para o confronto:',
+                'pvpHeroLabel': '🎸 SEU GUITARRISTA', 'pvpSkillsLabel': '⚡ HABILIDADES POR TRILHO', 'pvpSkillsHint': 'Toque para alterar', 'pvpSongLabel': '🎵 MÚSICA DO CONFRONTO',
+                'statPvPActions': 'Ações PvP', 'pvpGoldTag': 'OURO', 'pvpHeroXpTag': 'XP HERÓI',
+                'pvpLocating': 'Localizando adversário compatível...', 'pvpYou': 'Você', 'levelShort': 'Nv.', 'pvpChosenSongBadge': '🎵 Música: {song} ({bpm} BPM)',
+                'countdownGetReady': '🎸 PREPARAÇÃO', 'countdownSubtitle': 'POSICIONE OS DEDOS!',
+                'countdownStart5': 'PREPARE-SE!', 'countdownStart4': 'POSICIONE OS DEDOS!', 'countdownStart3': 'AFINE AS CORDAS!', 'countdownStart2': 'ATENÇÃO!', 'countdownStart1': 'QUASE LÁ!',
+                'countdownResume5': 'RETOMANDO PARTIDA!', 'countdownResume3': 'OLHO NA PISTA!', 'countdownModeResume': '⏸️ RETOMAR', 'countdownModePrep': '🎸 PREPARAÇÃO', 'countdownGo': 'VAI COM TUDO!',
+                'specialUsed': 'USADO ✖', 'specialReady': 'PRONTO! ⚡', 'specialEnded': '⚡ ESPECIAL ENCERRADO!',
+                'bossSpawned': '⚠️ CHEFE TITÃ SURGIU! 👑', 'missLabel': 'ERROU! 💨', 'perfectStreakCrit': '🎯 5x PERFECT! PRÓXIMO CRÍTICO!', 'noMpBasic': '⚡ SEM MP! (BÁSICO)',
+                'levelUpToast': '⭐ NÍVEL {level}! UP!', 'stageCompletedToast': '🏆 FASE {stage} CONCLUÍDA!', 'rockNeverDies': '⚡ ROCK NEVER DIES! ⚡', 'heroRevived': '⚡ REVIVIDO! ⚡',
+                'barrierReady': '🛡️ BARREIRA PRONTA!', 'chainDeflected': '🛡️ CORRENTE DEFLETIU!', 'helmetBroken': '🛡️ CAPACETE QUEBRADO! STUN!', 'burningStatus': '🔥 QUEIMANDO!',
+                'immuneStatus': '⚡ IMUNE!', 'blockedStatus': '🛡️ BLOQUEADO!', 'critReadyTag': ' • 💥 CRÍTICO PRONTO!',
+                'insufficientGold': 'Ouro insuficiente!', 'errorInjectXp': 'Erro ao injetar XP!', 'abandonBattleConfirm': '⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido.',
+                'gearCloseSettings': '✕ FECHAR CONFIGURAÇÕES', 'heroRecruitedToast': '🎸 {name} recrutado com sucesso!', 'heroUnlockCostPrompt': '🔒 Desbloqueie por 🪙 {cost}',
+                'missionsStatKillsLabel': '💀 Kills Hordas:', 'bossNameFormat': '👑 [CHEFE] {name} TITÃ',
+                'stageRuleAtLeastOneBasic': '⚠️ Regra do Palco: Você precisa manter pelo menos 1 slot equipado com Ataque Básico!',
+                'skillBadgeBasic': '⚡ BÁSICO', 'skillBadgeDamage': '💥 DANO', 'skillBadgeCrit': '🔮 CRÍTICO', 'skillBadgeAoe': '💥 ÁREA', 'skillBadgeStun': '💫 STUN', 'skillBadgeBurn': '🔥 CHAMA', 'skillBadgeToxic': '☢️ TÓXICO', 'skillBadgeLightning': '⚡ RELÂMPAGO', 'skillBadgeBuff': '🚀 BUFF', 'skillBadgeHeal': '💚 CURA', 'skillBadgeShield': '🛡️ ESCUDO', 'skillBadgeLifesteal': '🩸 VAMPIRISMO', 'skillBadgeBleed': '🩸 SANGRAMENTO', 'skillBadgePierce': '🎸 PERFURAÇÃO', 'skillBadgeCataclysm': '👑 CATACLISMO', 'skillBadgeSpecial': '⚡ ESPECIAL', 'fretBasicBadge': 'BÁSICO', 'fretNoMpBadge': '⚡ SEM MP',
+                'inspectorLevel': 'NÍVEL {level} / {max}', 'talentDmgBase': '+{amount} Dano Base', 'talentCritDmg': '+{amount}% Dano Crítico', 'talentChainLightning': 'Raios atingem até {amount} zumbis adjacentes', 'talentNoChain': 'Sem raios em cadeia', 'talentKnockback': '+{amount}% Força de Empurrão', 'talentMaxHp': '+{amount} Vida Máxima',
+                'rarity_common': 'COMUM', 'rarity_rare': 'RARO', 'rarity_epic': 'ÉPICO', 'rarity_legendary': 'LENDÁRIO', 'rarity_mythic': 'MÍTICO', 'rarity_ancestral': 'ANCESTRAL', 'rarity_cosmic': 'CÓSMICO', 'rarity_divine': 'DIVINO',
+                // Hero Titles, Instruments & Passives
+                'hero_johnny_blaze_title': 'O Punk Rocker Clássico', 'hero_johnny_blaze_inst': 'Stratocaster "Hellfire"', 'hero_johnny_blaze_pass_name': 'Espírito do Rock', 'hero_johnny_blaze_pass_desc': '+1.0% de Dano e +0.4% de Dano Crítico por nível (chegando a +99% de dano e +89% de crítico no Nv. 100).',
+                'hero_vulkan_ironhead_title': 'O Piromaníaco das Wastelands', 'hero_vulkan_ironhead_inst': 'Scrap-Metal V8 Flamejante', 'hero_vulkan_ironhead_pass_name': 'Pirotecnia Brutal', 'hero_vulkan_ironhead_pass_desc': '+1.0% de Dano, +0.3% de Mana Regen e chance de queimadura contínua que cresce a cada nível.',
+                'hero_dr_radix_title': 'O Solista Bioquímico', 'hero_dr_radix_inst': 'Guitarratox "Uranium-235"', 'hero_dr_radix_pass_name': 'Radiação Acústica', 'hero_dr_radix_pass_desc': '+1.0% de Dano, +15% de Dano Crítico base e chance de envenenamento radioativo que corrói os zumbis.',
+                'hero_cypher_volt_title': 'O Virtuoso Cibernético', 'hero_cypher_volt_inst': 'Laser-Caster Bionica Neon', 'hero_cypher_volt_pass_name': 'Overdrive Bionico', 'hero_cypher_volt_pass_desc': '+1.0% de Dano, velocidade de ataque acelerada e choque elétrico em cadeia.',
+                'hero_kragthor_titan_title': 'O Titã do Heavy Metal', 'hero_kragthor_titan_inst': 'Flying-V "Magma Fury"', 'hero_kragthor_titan_pass_name': 'Fúria dos Titãs', 'hero_kragthor_titan_pass_desc': '+1.0% de Dano, grande repulsão sônica nos zumbis e ondas de choque terrestres brutais.',
+                'hero_roxie_anarchy_title': 'A Valquíria do Punk Mítico', 'hero_roxie_anarchy_inst': 'Guitarra Custom "Riot Slash"', 'hero_roxie_anarchy_pass_name': 'Anarquia Absoluta', 'hero_roxie_anarchy_pass_desc': '+1.0% de Dano, chance de acerto crítico duplicada e bônus de dano de dispersão ao acertar notas perfeitas.',
+                'hero_finn_punk_title': 'O Campeão Multiversal do Som', 'hero_finn_punk_inst': 'Espada-Guitarra Sonora de Ooo', 'hero_finn_punk_pass_name': 'Hora do Rock Multiversal', 'hero_finn_punk_pass_desc': '+1.22% de Dano, +0.75% de Dano Crítico e +0.3% de velocidade de projéteis sónicos por nível.',
+                'hero_ignis_draco_title': 'O Dragão Devorador de Riffs', 'hero_ignis_draco_inst': 'Guitarra Dracônica "Inferno"', 'hero_ignis_draco_pass_name': 'Sopro Ígneo Acústico', 'hero_ignis_draco_pass_desc': '+1.26% de Dano, +0.82% de Dano Crítico e +0.35% de chance de queimadura contínua dracônica por nível.',
+                'hero_fenrir_howler_title': 'A Fera da Lua Cheia do Metal', 'hero_fenrir_howler_inst': 'Axe-Star "Lobo da Noite"', 'hero_fenrir_howler_pass_name': 'Frenesi da Lua de Sangue', 'hero_fenrir_howler_pass_desc': '+1.30% de Dano, +0.90% de Dano Crítico e vampirismo de vida ao abater zumbis.',
+                'hero_spiky_sponge_title': 'A Anarquia Amarela das Fossas', 'hero_spiky_sponge_inst': 'Flying-V a Jato "Fenda do Biquíni"', 'hero_spiky_sponge_pass_name': 'Propulsão Hipersônica', 'hero_spiky_sponge_pass_desc': '+1.35% de Dano, +0.95% de Dano Crítico e rajadas sónicas aquáticas de alto impacto.',
+                'hero_saul_slash_title': 'O Deus Imortal da Cartola & Les Paul', 'hero_saul_slash_inst': 'Gibson Les Paul Goldtop Sagrada "1959"', 'hero_saul_slash_pass_name': 'Apetite Pela Destruição', 'hero_saul_slash_pass_desc': '+1.40% de Dano, +1.10% de Dano Crítico, +0.6% de regeneração de mana por nível e especial divino estendido.',
+                // Zombie Names & Badges
+                'zombie_punk_walker': 'Zumbi Punk Rocker', 'zombie_feral_leaper': 'Corredor Saltador', 'zombie_toxic_mutant': 'Mutante Radioativo', 'zombie_armored_soldier': 'Sargento Blindado',
+                'zombie_fungal_spore': 'Infectado Esporo', 'zombie_bloater_pounder': 'Gordo Devorador', 'zombie_chained_gladiator': 'Gladiador do Asfalto', 'zombie_toxic_hazmat': 'Operário Hazmat',
+                'zombie_clown_jester': 'Palhaço Sinistro', 'zombie_builder_demolisher': 'Operário Demolidor', 'zombie_mad_scientist': 'Cientista Louco', 'zombie_inferno_firefighter': 'Bombeiro Zumbi',
+                'zombie_sheriff_walker': 'Xerife Sobrevivente', 'zombie_presidential_politician': 'Político Presidencial', 'zombie_dark_knight_undead': 'Cavaleiro das Trevas', 'zombie_god_of_war_spartan': 'Fantasma Espartano',
+                'zombie_badge_normal': 'Normal / Punk', 'zombie_badge_agile': 'Ágil / Salto Aéreo', 'zombie_badge_tank': 'Tank / Devastador', 'zombie_badge_armored': 'Blindado / Carga',
+                'zombie_badge_spore': 'Fungo / Regenerativo', 'zombie_badge_colossus': 'Colosso / Sísmico', 'zombie_badge_gladiator': 'Gladiador / Deflexão', 'zombie_badge_toxic': 'Químico / Poça Ácida',
+                'zombie_badge_maniac': 'Maníaco / Garras', 'zombie_badge_demolition': 'Demolição / Pesado', 'zombie_badge_viral': 'Viral / Químico', 'zombie_badge_firefighter': 'Ignífugo / Blindado',
+                'zombie_badge_sheriff': 'Xerife / Machadada', 'zombie_badge_politician': 'Político / Comício', 'zombie_badge_batman': 'Morcego / Capa', 'zombie_badge_spartan': 'Espartano / Fúria',
+                'statSpeedUnit': 'Velocidade: {speed} px/s', 'statDmgUnit': 'Dano: {dmg}', 'specialChip': '🔥 Especial: {duration}s (teto {max}s)', 'specialActiveChip': '🔥 Especial: {duration}s'
             },
             'en': {
                 // Main Menu
@@ -582,7 +625,50 @@ class I18n {
                 'mk4Sub': 'STAGE MASSACRE! 🎸',
                 'mk5Sub': 'MAXIMUM ADRENALINE! ⚡',
                 'mk6Sub': 'ROCK AND ROLL GOD! 🤘',
-                'mk7Sub': 'LEGENDARY & UNBEATABLE! 👑'
+                'mk7Sub': 'LEGENDARY & UNBEATABLE! 👑',
+
+                'btnClose': 'Close', 'btnPvPRematch': '⚔️ REMATCH', 'btnPvPClose': 'BACK TO MENU',
+                'pvpPreBattleTitle': '⚔️ ONLINE PVP DUEL', 'pvpPreBattleSubtitle': 'Customize your Guitarist, Skills, and Song for the clash:',
+                'pvpHeroLabel': '🎸 YOUR GUITARIST', 'pvpSkillsLabel': '⚡ LANE SKILLS', 'pvpSkillsHint': 'Tap to change', 'pvpSongLabel': '🎵 MATCH SONG',
+                'statPvPActions': 'PvP Actions', 'pvpGoldTag': 'GOLD', 'pvpHeroXpTag': 'HERO XP',
+                'pvpLocating': 'Locating compatible opponent...', 'pvpYou': 'You', 'levelShort': 'Lv.', 'pvpChosenSongBadge': '🎵 Song: {song} ({bpm} BPM)',
+                'countdownGetReady': '🎸 GET READY', 'countdownSubtitle': 'PLACE YOUR FINGERS!',
+                'countdownStart5': 'GET READY!', 'countdownStart4': 'PLACE YOUR FINGERS!', 'countdownStart3': 'TUNE THE STRINGS!', 'countdownStart2': 'WATCH OUT!', 'countdownStart1': 'ALMOST THERE!',
+                'countdownResume5': 'RESUMING MATCH!', 'countdownResume3': 'EYES ON THE HIGHWAY!', 'countdownModeResume': '⏸️ RESUME', 'countdownModePrep': '🎸 GET READY', 'countdownGo': 'LET\'S ROCK!',
+                'specialUsed': 'USED ✖', 'specialReady': 'READY! ⚡', 'specialEnded': '⚡ SPECIAL ENDED!',
+                'bossSpawned': '⚠️ TITAN BOSS SPAWNED! 👑', 'missLabel': 'MISS! 💨', 'perfectStreakCrit': '🎯 5x PERFECT! NEXT HIT CRIT!', 'noMpBasic': '⚡ NO MP! (BASIC)',
+                'levelUpToast': '⭐ LEVEL {level}! UP!', 'stageCompletedToast': '🏆 STAGE {stage} COMPLETED!', 'rockNeverDies': '⚡ ROCK NEVER DIES! ⚡', 'heroRevived': '⚡ REVIVED! ⚡',
+                'barrierReady': '🛡️ BARRIER READY!', 'chainDeflected': '🛡️ CHAIN DEFLECTED!', 'helmetBroken': '🛡️ HELMET BROKEN! STUN!', 'burningStatus': '🔥 BURNING!',
+                'immuneStatus': '⚡ IMMUNE!', 'blockedStatus': '🛡️ BLOCKED!', 'critReadyTag': ' • 💥 CRIT READY!',
+                'insufficientGold': 'Not enough gold!', 'errorInjectXp': 'Error injecting XP!', 'abandonBattleConfirm': '⚠️ Are you sure you want to abandon the battle and return to the main menu? Progress will be lost.',
+                'gearCloseSettings': '✕ CLOSE SETTINGS', 'heroRecruitedToast': '🎸 {name} recruited successfully!', 'heroUnlockCostPrompt': '🔒 Unlock for 🪙 {cost}',
+                'missionsStatKillsLabel': '💀 Horde Kills:', 'bossNameFormat': '👑 [BOSS] {name} TITAN',
+                'stageRuleAtLeastOneBasic': '⚠️ Stage Rule: You must keep at least 1 slot equipped with Basic Strike!',
+                'skillBadgeBasic': '⚡ BASIC', 'skillBadgeDamage': '💥 DAMAGE', 'skillBadgeCrit': '🔮 CRIT', 'skillBadgeAoe': '💥 AOE', 'skillBadgeStun': '💫 STUN', 'skillBadgeBurn': '🔥 BURN', 'skillBadgeToxic': '☢️ TOXIC', 'skillBadgeLightning': '⚡ LIGHTNING', 'skillBadgeBuff': '🚀 BUFF', 'skillBadgeHeal': '💚 HEAL', 'skillBadgeShield': '🛡️ SHIELD', 'skillBadgeLifesteal': '🩸 LIFESTEAL', 'skillBadgeBleed': '🩸 BLEED', 'skillBadgePierce': '🎸 PIERCE', 'skillBadgeCataclysm': '👑 CATACLYSM', 'skillBadgeSpecial': '⚡ SPECIAL', 'fretBasicBadge': 'BASIC', 'fretNoMpBadge': '⚡ NO MP',
+                'inspectorLevel': 'LEVEL {level} / {max}', 'talentDmgBase': '+{amount} Base Damage', 'talentCritDmg': '+{amount}% Crit Damage', 'talentChainLightning': 'Lightning arcs hit up to {amount} adjacent zombies', 'talentNoChain': 'No chain lightning', 'talentKnockback': '+{amount}% Knockback Force', 'talentMaxHp': '+{amount} Max HP',
+                'rarity_common': 'COMMON', 'rarity_rare': 'RARE', 'rarity_epic': 'EPIC', 'rarity_legendary': 'LEGENDARY', 'rarity_mythic': 'MYTHIC', 'rarity_ancestral': 'ANCESTRAL', 'rarity_cosmic': 'COSMIC', 'rarity_divine': 'DIVINE',
+                // Hero Titles, Instruments & Passives
+                'hero_johnny_blaze_title': 'The Classic Punk Rocker', 'hero_johnny_blaze_inst': 'Stratocaster "Hellfire"', 'hero_johnny_blaze_pass_name': 'Rock Spirit', 'hero_johnny_blaze_pass_desc': '+1.0% Damage and +0.4% Critical Damage per level (up to +99% damage and +89% crit at Lv. 100).',
+                'hero_vulkan_ironhead_title': 'Wasteland Pyromaniac', 'hero_vulkan_ironhead_inst': 'Flaming V8 Scrap-Metal', 'hero_vulkan_ironhead_pass_name': 'Brutal Pyrotechnics', 'hero_vulkan_ironhead_pass_desc': '+1.0% Damage, +0.3% Mana Regen and continuous burn chance scaling per level.',
+                'hero_dr_radix_title': 'Biochemical Soloist', 'hero_dr_radix_inst': 'Guitarratox "Uranium-235"', 'hero_dr_radix_pass_name': 'Acoustic Radiation', 'hero_dr_radix_pass_desc': '+1.0% Damage, +15% base Crit Damage and radioactive poison chance eroding zombies.',
+                'hero_cypher_volt_title': 'Cybernetic Virtuoso', 'hero_cypher_volt_inst': 'Neon Bionic Laser-Caster', 'hero_cypher_volt_pass_name': 'Bionic Overdrive', 'hero_cypher_volt_pass_desc': '+1.0% Damage, accelerated attack speed and chain lightning shock.',
+                'hero_kragthor_titan_title': 'Heavy Metal Titan', 'hero_kragthor_titan_inst': 'Flying-V "Magma Fury"', 'hero_kragthor_titan_pass_name': 'Fury of the Titans', 'hero_kragthor_titan_pass_desc': '+1.0% Damage, high sonic knockback on zombies and brutal ground shockwaves.',
+                'hero_roxie_anarchy_title': 'Mythic Punk Valkyrie', 'hero_roxie_anarchy_inst': 'Custom "Riot Slash" Guitar', 'hero_roxie_anarchy_pass_name': 'Absolute Anarchy', 'hero_roxie_anarchy_pass_desc': '+1.0% Damage, doubled critical strike chance and spread damage bonus on perfect notes.',
+                'hero_finn_punk_title': 'Multiversal Sound Champion', 'hero_finn_punk_inst': 'Sonic Sword-Guitar of Ooo', 'hero_finn_punk_pass_name': 'Multiverse Rock Time', 'hero_finn_punk_pass_desc': '+1.22% Damage, +0.75% Crit Damage and +0.3% sonic projectile speed per level.',
+                'hero_ignis_draco_title': 'Riff-Devouring Dragon', 'hero_ignis_draco_inst': 'Draconic Guitar "Inferno"', 'hero_ignis_draco_pass_name': 'Acoustic Fiery Breath', 'hero_ignis_draco_pass_desc': '+1.26% Damage, +0.82% Crit Damage and +0.35% draconic burn chance per level.',
+                'hero_fenrir_howler_title': 'Full Moon Metal Beast', 'hero_fenrir_howler_inst': 'Axe-Star "Night Wolf"', 'hero_fenrir_howler_pass_name': 'Blood Moon Frenzy', 'hero_fenrir_howler_pass_desc': '+1.30% Damage, +0.90% Crit Damage and life drain upon defeating zombies.',
+                'hero_spiky_sponge_title': 'Yellow Anarchy of the Depths', 'hero_spiky_sponge_inst': 'Jet Flying-V "Bikini Bottom"', 'hero_spiky_sponge_pass_name': 'Hypersonic Propulsion', 'hero_spiky_sponge_pass_desc': '+1.35% Damage, +0.95% Crit Damage and high-impact aquatic sonic bursts.',
+                'hero_saul_slash_title': 'Immortal God of Top Hat & Les Paul', 'hero_saul_slash_inst': 'Sacred Gibson Les Paul Goldtop "1959"', 'hero_saul_slash_pass_name': 'Appetite For Destruction', 'hero_saul_slash_pass_desc': '+1.40% Damage, +1.10% Crit Damage, +0.6% mana regen per level and extended divine special.',
+                // Zombie Names & Badges
+                'zombie_punk_walker': 'Punk Rocker Zombie', 'zombie_feral_leaper': 'Feral Leaper', 'zombie_toxic_mutant': 'Radioactive Mutant', 'zombie_armored_soldier': 'Armored Sergeant',
+                'zombie_fungal_spore': 'Spore Infected', 'zombie_bloater_pounder': 'Bloated Devourer', 'zombie_chained_gladiator': 'Asphalt Gladiator', 'zombie_toxic_hazmat': 'Hazmat Worker',
+                'zombie_clown_jester': 'Sinister Clown', 'zombie_builder_demolisher': 'Demolisher Builder', 'zombie_mad_scientist': 'Mad Scientist', 'zombie_inferno_firefighter': 'Firefighter Zombie',
+                'zombie_sheriff_walker': 'Survivor Sheriff', 'zombie_presidential_politician': 'Presidential Politician', 'zombie_dark_knight_undead': 'Dark Knight Undead', 'zombie_god_of_war_spartan': 'Spartan Ghost',
+                'zombie_badge_normal': 'Normal / Punk', 'zombie_badge_agile': 'Agile / Air Leap', 'zombie_badge_tank': 'Tank / Devastator', 'zombie_badge_armored': 'Armored / Charge',
+                'zombie_badge_spore': 'Fungal / Regenerative', 'zombie_badge_colossus': 'Colossus / Seismic', 'zombie_badge_gladiator': 'Gladiator / Deflection', 'zombie_badge_toxic': 'Chemical / Acid Pool',
+                'zombie_badge_maniac': 'Maniac / Claws', 'zombie_badge_demolition': 'Demolition / Heavy', 'zombie_badge_viral': 'Viral / Chemical', 'zombie_badge_firefighter': 'Fireproof / Armored',
+                'zombie_badge_sheriff': 'Sheriff / Axe Chop', 'zombie_badge_politician': 'Politician / Rally', 'zombie_badge_batman': 'Bat / Cape Dodge', 'zombie_badge_spartan': 'Spartan / Rage',
+                'statSpeedUnit': 'Speed: {speed} px/s', 'statDmgUnit': 'Damage: {dmg}', 'specialChip': '🔥 Special: {duration}s (cap {max}s)', 'specialActiveChip': '🔥 Special: {duration}s'
             }
         };
     }
@@ -715,6 +801,7 @@ class I18n {
     }
 
     t(key, fallback = '', params = {}) {
+        if (typeof fallback === 'object' && fallback !== null) { params = fallback; fallback = ''; }
         const dict = this.translations[this.currentLang] || this.translations['pt'];
         let text = dict[key] || (this.translations['pt'] && this.translations['pt'][key]) || fallback || key;
 

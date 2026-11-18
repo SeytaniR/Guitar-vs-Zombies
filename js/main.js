@@ -105,19 +105,9 @@ class Game {
         bind('pve-stage-toggle-btn', () => this.toggleDrawer('map-stage-dropdown-drawer', 'pve-stage-toggle-btn'));
         bind('pve-hero-toggle-btn', () => this.toggleDrawer('map-hero-dropdown-drawer', 'pve-hero-toggle-btn'));
         bind('pve-song-toggle-btn', () => this.toggleDrawer('map-song-dropdown-drawer', 'pve-song-toggle-btn'));
-        bind('menu-btn-talents', (e) => {
-            if (e) e.preventDefault();
-            if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open();
-            else { const m = document.getElementById('talent-modal'); if (m) m.classList.add('open'); }
-        });
-        bind('menu-btn-missions', (e) => {
-            if (e) e.preventDefault();
-            if (window.metaMissionSystem) window.metaMissionSystem.open();
-        });
-        bind('menu-btn-studio', () => {
-            const m = document.getElementById('song-studio-modal');
-            if (m) { m.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); }
-        });
+        bind('menu-btn-talents', (e) => { if (e) e.preventDefault(); if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open(); else { const m = document.getElementById('talent-modal'); if (m) m.classList.add('open'); } });
+        bind('menu-btn-missions', (e) => { if (e) e.preventDefault(); if (window.metaMissionSystem) window.metaMissionSystem.open(); });
+        bind('menu-btn-studio', () => { const m = document.getElementById('song-studio-modal'); if (m) { m.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); } });
         bind('menu-btn-settings', () => this.openGearModal(true));
         bind('menu-sound-toggle', () => {
             if (window.soundEngine) {
@@ -279,14 +269,17 @@ class Game {
         const el = (id) => document.getElementById(id);
         const sImg = el('showcase-hero-img'), rBadge = el('showcase-hero-rarity-badge'), nEl = el('showcase-hero-name'), tEl = el('showcase-hero-title');
         const iEl = el('showcase-hero-instrument-text'), pnEl = el('showcase-hero-passive-name'), pdEl = el('showcase-hero-passive-desc'), sBox = el('map-selected-hero-showcase');
+        const hRarity = tr('rarity_' + (currentHero.rarityKey || 'common'), currentHero.rarity || 'COMUM');
         if (sImg) sImg.src = currentHero.icon;
-        if (rBadge) { rBadge.innerText = (isUnlocked ? (currentHero.rarity || 'COMUM') : `🔒 ${currentHero.rarity}`).toUpperCase(); rBadge.className = `hero-rarity-badge ${currentHero.rarityClass || currentHero.badgeClass || 'badge-common'} ${isUnlocked ? '' : 'badge-locked'}`; }
+        if (rBadge) { rBadge.innerText = (isUnlocked ? hRarity : `🔒 ${hRarity}`).toUpperCase(); rBadge.className = `hero-rarity-badge ${currentHero.rarityClass || currentHero.badgeClass || 'badge-common'} ${isUnlocked ? '' : 'badge-locked'}`; }
         if (nEl) nEl.innerText = isUnlocked ? currentHero.name : `🔒 ${currentHero.name}`;
-        if (tEl) tEl.innerText = currentHero.title;
+        if (tEl) tEl.innerText = tr('hero_' + currentHero.id + '_title', currentHero.title);
         const hStats = pool.getHeroStats(currentHero.id);
-        if (iEl) iEl.innerText = isUnlocked ? `${currentHero.instrument} • ⚡ 1.0/s • 🔥 Especial: ${hStats.specialDuration}s` : `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`;
-        if (pnEl) pnEl.innerText = (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva';
-        if (pdEl) pdEl.innerText = (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '';
+        const hInst = tr('hero_' + currentHero.id + '_inst', currentHero.instrument);
+        const unlockPrompt = tr('heroUnlockCostPrompt', `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`, { cost: (currentHero.unlockCost || 5000).toLocaleString() });
+        if (iEl) iEl.innerText = isUnlocked ? `${hInst} • ⚡ 1.0/s • 🔥 Especial: ${hStats.specialDuration}s` : unlockPrompt;
+        if (pnEl) pnEl.innerText = tr('hero_' + currentHero.id + '_pass_name', (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || 'Passiva');
+        if (pdEl) pdEl.innerText = tr('hero_' + currentHero.id + '_pass_desc', (currentHero.passive && currentHero.passive.desc) || currentHero.passiveDesc || '');
         if (sBox) {
             const color = isUnlocked ? (currentHero.accentColor || currentHero.themeColor || '#ffaa00') : '#666677';
             sBox.style.borderColor = color; sBox.style.boxShadow = `0 4px 20px ${color}44`;
@@ -315,7 +308,7 @@ class Game {
                     if (res.success) {
                         if (window.soundEngine) window.soundEngine.playPowerChord();
                         this.renderHeroRoster(); this.updateMenuCurrencies();
-                    } else alert(res.reason || 'Ouro insuficiente!');
+                    } else alert(res.reason || tr('insufficientGold', 'Ouro insuficiente!'));
                 };
             }
             if (injectBtn) {
@@ -335,7 +328,7 @@ class Game {
                         if (res.success) {
                             if (window.soundEngine) window.soundEngine.playPowerChord();
                             this.renderHeroRoster(); this.updateMenuCurrencies();
-                        } else alert(res.reason || 'Erro ao injetar XP!');
+                        } else alert(res.reason || tr('errorInjectXp', 'Erro ao injetar XP!'));
                     };
                 }
             }
@@ -355,7 +348,7 @@ class Game {
                         if (window.soundEngine) window.soundEngine.playPowerChord();
                         this.previewHeroId = null;
                         this.renderHeroRoster(); this.renderLaneSkills(); this.updateMenuCurrencies();
-                    } else alert(res.reason || 'Ouro insuficiente!');
+                    } else alert(res.reason || tr('insufficientGold', 'Ouro insuficiente!'));
                 };
             }
         }
@@ -737,7 +730,8 @@ class Game {
         bind('gear-modal-close-btn', () => this.closeGearModal());
         bind('gear-footer-action-btn', () => this.closeGearModal());
         bind('gear-abandon-battle-btn', () => {
-            if (confirm("⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido.")) {
+            const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+            if (confirm(tr('abandonBattleConfirm', "⚠️ Tem certeza que deseja abandonar a batalha e voltar ao menu inicial? O progresso desta partida será perdido."))) {
                 if (window.countdownSystem) window.countdownSystem.cancel();
                 closeM('battle-gear-modal'); this.switchScreen('menu');
             }
@@ -769,14 +763,15 @@ class Game {
         const modal = document.getElementById('battle-gear-modal');
         if (!modal) return;
         const title = document.getElementById('gear-modal-title'), dangerZone = document.getElementById('gear-danger-zone-wrap'), footerBtn = document.getElementById('gear-footer-action-btn');
+        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
         if (isFromMainMenu) {
-            if (title) title.innerText = '⚙️ CONFIGURAÇÕES';
+            if (title) title.innerText = tr('btnSettings', '⚙️ CONFIGURAÇÕES');
             if (dangerZone) dangerZone.style.display = 'none';
-            if (footerBtn) footerBtn.innerText = '✕ FECHAR CONFIGURAÇÕES';
+            if (footerBtn) footerBtn.innerText = tr('gearCloseSettings', '✕ FECHAR CONFIGURAÇÕES');
         } else {
-            if (title) title.innerText = '⚙️ OPÇÕES & PAUSA';
+            if (title) title.innerText = tr('gearTitle', '⚙️ OPÇÕES & PAUSA');
             if (dangerZone) dangerZone.style.display = 'block';
-            if (footerBtn) footerBtn.innerText = '▶️ CONTINUAR PARTIDA';
+            if (footerBtn) footerBtn.innerText = tr('gearResume', '▶️ CONTINUAR PARTIDA');
             this.pauseBattle();
         }
         modal.classList.add('open');
@@ -945,7 +940,7 @@ class Game {
         if (h.comboEl) {
             const streak = this.rhythm.streak || 0, pStreak = (this.combat && this.combat.perfectStreak) || 0;
             const critReady = (this.combat && this.combat.guaranteedCritReady);
-            const critTag = critReady ? ' • 💥 CRÍTICO PRONTO!' : (pStreak > 0 ? ` • 🎯 ${pStreak}/5 PERF` : '');
+            const critTag = critReady ? (typeof i18n !== 'undefined' ? i18n.t('critReadyTag', ' • 💥 CRÍTICO PRONTO!') : ' • 💥 CRÍTICO PRONTO!') : (pStreak > 0 ? ` • 🎯 ${pStreak}/5 PERF` : '');
             const t = `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} SPD)${critTag}`;
             if (t !== h.lastCombo) { h.lastCombo = t; h.comboEl.innerText = t; }
         }

@@ -712,15 +712,21 @@ assert(htmlContent.includes('data-cat="pvp"') && cssContent.includes('.pvp-missi
 // ==========================================
 console.log('\n22. Testing Complete i18n Localization (PT-BR & EN)...');
 assert(typeof i18n !== 'undefined' && i18n.currentLang, 'i18n engine is initialized');
+const ptKeys = Object.keys(i18n.translations.pt), enKeys = Object.keys(i18n.translations.en);
+assert(ptKeys.length === enKeys.length && ptKeys.length >= 440, `i18n has full key coverage (${ptKeys.length} keys)`);
+const missingEn = ptKeys.filter(k => !(k in i18n.translations.en)), missingPt = enKeys.filter(k => !(k in i18n.translations.pt));
+assert(missingEn.length === 0 && missingPt.length === 0, '100% key symmetry between translations.pt and translations.en');
+const currentHtml = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
+const domKeys = [...currentHtml.matchAll(/data-i18n(?:-title|-placeholder)?="([^"]+)"/g)].map(m => m[1]);
+const missingDom = [...new Set(domKeys)].filter(k => !(k in i18n.translations.pt));
+assert(missingDom.length === 0, `All ${new Set(domKeys).size} DOM i18n keys exist in translation dictionary`);
 i18n.setLanguage('pt');
-assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'CAMPANHA', 'i18n PT translation matches');
+assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'CAMPANHA' && i18n.t('countdownGetReady') === '🎸 PREPARAÇÃO', 'i18n PT translation matches');
 assert(i18n.t('requiresPrereq', '', { name: 'Power Chord', level: 3 }) === '🔒 Requer: Power Chord Nv. 3', 'i18n parametric interpolation works');
-let callbackLang = null;
-i18n.onLanguageChange((lang) => { callbackLang = lang; });
+let callbackLang = null; i18n.onLanguageChange((lang) => { callbackLang = lang; });
 i18n.setLanguage('en');
 assert(i18n.currentLang === 'en' && callbackLang === 'en' && i18n.t('btnPlay') === 'CAMPAIGN', 'i18n language switches to en and notifies listeners');
-assert(i18n.t('heroMaxLevel') === '⭐ MAX LEVEL (100)' && localStorage.getItem('gvs_language') === 'en', 'i18n EN heroMaxLevel matches & persisted');
-assert(htmlContent.includes('data-i18n="btnPlay"') && htmlContent.includes('data-i18n-placeholder="phSearchMissions"'), 'index.html contains data-i18n and data-i18n-placeholder attributes');
+assert(i18n.t('heroMaxLevel') === '⭐ MAX LEVEL (100)' && i18n.t('countdownGetReady') === '🎸 GET READY' && localStorage.getItem('gvs_language') === 'en', 'i18n EN heroMaxLevel & countdown match and persisted');
 i18n.setLanguage('pt');
 assert(i18n.currentLang === 'pt' && i18n.t('btnPlay') === 'CAMPANHA', 'i18n switches back to PT smoothly');
 

@@ -660,25 +660,33 @@ class GuitaristPoolSystem {
             const card = document.createElement('div');
             card.className = `shop-hero-card ${isEquipped ? 'active' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
 
+            const hRarity = tr('rarity_' + (h.rarityKey || 'common'), h.rarity);
+            const hTitle = tr('hero_' + h.id + '_title', h.title);
+            const hInst = tr('hero_' + h.id + '_inst', h.instrument);
+            const hPassName = tr('hero_' + h.id + '_pass_name', h.passiveName);
+            const hPassDesc = tr('hero_' + h.id + '_pass_desc', h.passiveDesc);
+            const hSpecialText = tr('specialChip', `🔥 Especial: ${stats.specialDuration}s (teto ${stats.specialDurationMax}s)`, { duration: stats.specialDuration, max: stats.specialDurationMax });
+            const hLvlTag = `⭐ ${tr('levelShort', 'Nv.')} ${lvlData.level}/100`;
+
             card.innerHTML = `
                 <div class="shop-hero-card-top">
                     <div class="shop-hero-thumb-wrap" style="border-color: ${h.accentColor || '#ffaa00'};">
                         <img src="${h.icon}" alt="${h.name}" class="shop-hero-thumb">
-                        <span class="hero-rarity-badge ${h.badgeClass || 'badge-common'}">${h.rarity}</span>
+                        <span class="hero-rarity-badge ${h.badgeClass || 'badge-common'}">${hRarity}</span>
                     </div>
                     <div class="shop-hero-meta">
                         <h4 class="shop-hero-name">${h.name}</h4>
-                        <span class="shop-hero-title">${h.title}</span>
-                        <div class="shop-hero-inst">🎸 ${h.instrument} • ⚡ 1.0/s</div>
-                        <div class="shop-hero-special-chip">🔥 Especial: ${stats.specialDuration}s (teto ${stats.specialDurationMax}s)</div>
+                        <span class="shop-hero-title">${hTitle}</span>
+                        <div class="shop-hero-inst">🎸 ${hInst} • ⚡ 1.0/s</div>
+                        <div class="shop-hero-special-chip">${hSpecialText}</div>
                     </div>
                 </div>
                 <div class="shop-hero-passive">
-                    <strong>PASSIVA: ${h.passiveName}</strong>
-                    <p>${h.passiveDesc}</p>
+                    <strong>${tr('heroPassiveTag', 'PASSIVA:')} ${hPassName}</strong>
+                    <p>${hPassDesc}</p>
                 </div>
                 <div class="shop-hero-footer">
-                    <div class="shop-hero-level-info">⭐ Nv. ${lvlData.level}/100</div>
+                    <div class="shop-hero-level-info">${hLvlTag}</div>
                     <div class="shop-hero-action">
                         ${isEquipped 
                             ? `<button type="button" class="shop-hero-btn active" disabled>🎸 ${tr('shopEquipped', 'EQUIPADO')}</button>`
@@ -710,7 +718,7 @@ class GuitaristPoolSystem {
                     if (res.success) {
                         if (window.soundEngine) window.soundEngine.playPowerChord();
                         if (window.game && typeof window.game.showToast === 'function') {
-                            window.game.showToast(`🎸 ${h.name} recrutado com sucesso!`);
+                            window.game.showToast(tr('heroRecruitedToast', `🎸 ${h.name} recrutado com sucesso!`, { name: h.name }));
                         }
                         this.renderShop();
                         if (window.game) {
@@ -720,7 +728,7 @@ class GuitaristPoolSystem {
                             window.game.renderLaneSkills();
                         }
                     } else {
-                        alert(res.reason || 'Ouro insuficiente!');
+                        alert(res.reason || tr('insufficientGold', 'Ouro insuficiente!'));
                     }
                 };
             }
