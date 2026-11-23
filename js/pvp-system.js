@@ -64,12 +64,16 @@ class PvPSystem {
         const oppTrophies = Math.max(50, this.playerTrophies + (Math.floor(Math.random() * 60) - 30));
         const oppRank = this.getRank(oppTrophies);
         const damageBase = Math.round(45 * (1 + 0.01 * (oppLevel - 1)));
+        const dList = (window.droneSystem && typeof window.droneSystem.getAllDrones === 'function') ? window.droneSystem.getAllDrones() : [];
+        const oppDrone = dList.length > 0 ? dList[Math.floor(Math.random() * dList.length)] : { id: 'pyro_shredder', name: 'Pyro-Shredder MK-I', type: 'offensive', sheet: 'droneOffensiveSheet' };
 
         return {
             id: `opp_${Date.now()}`,
             name: rawNick,
             guitarist: hero,
             sheetKey: hero.sheet || 'heroSheet',
+            drone: oppDrone,
+            droneLevel: oppLevel,
             level: oppLevel,
             trophies: oppTrophies,
             rank: oppRank,
@@ -122,10 +126,11 @@ class PvPSystem {
 
         if (this.selectedSong) this.updateSongCardPreview(this.selectedSong);
 
-        // Configure Character (Hero) Selection & Lane Skills Loadout
+        // Configure Character (Hero), Companion Drone & Lane Skills Loadout
         this.populateHeroDropdown();
         this.updateHeroCardPreview();
         this.renderPvPLaneSkills();
+        if (window.droneSystem) { window.droneSystem.populatePvPDroneDropdown(); window.droneSystem.updatePvPDroneCardPreview(); }
 
         const startBtn = document.getElementById('pvp-start-queue-btn');
         if (startBtn) {
@@ -353,9 +358,11 @@ class PvPSystem {
         const lvlStr = tr('levelShort', 'Nv.');
 
         // Player Side
+        const pDrone = (window.droneSystem && typeof window.droneSystem.getActiveDrone === 'function') ? window.droneSystem.getActiveDrone() : null;
         setVal('pvp-player-name', (playerHero && playerHero.name) || tr('pvpYou', 'Você'));
         setVal('pvp-player-level', `${lvlStr} ${(playerHero && playerHero.level) || 1}`);
         setVal('pvp-player-rank', this.getRank().badge);
+        if (pDrone) setVal('pvp-player-drone', `🛸 ${tr('drone_' + pDrone.id + '_name', pDrone.name)}`);
         setImg('pvp-player-avatar', (playerHero && playerHero.avatar) || 'assets/covers/default_cover.jpg');
 
         // Opponent Side
@@ -363,6 +370,7 @@ class PvPSystem {
         setVal('pvp-opp-versus-hero', opponent.guitarist.name);
         setVal('pvp-opp-versus-level', `${lvlStr} ${opponent.level}`);
         setVal('pvp-opp-versus-rank', opponent.rank.badge);
+        if (opponent.drone) setVal('pvp-opp-versus-drone', `🛸 ${tr('drone_' + opponent.drone.id + '_name', opponent.drone.name)}`);
         setImg('pvp-opp-versus-avatar', opponent.guitarist.avatar || 'assets/covers/default_cover.jpg');
     }
 
@@ -872,6 +880,7 @@ class PvPSystem {
         if (window.talentSystem) window.talentSystem.addGold(goldReward);
         const pActive = window.guitaristPool ? window.guitaristPool.getSelectedGuitarist() : null;
         if (pActive && window.guitaristPool) window.guitaristPool.addHeroXp(pActive.id, xpReward);
+        if (window.droneSystem && typeof window.droneSystem.addDroneXp === 'function') window.droneSystem.addDroneXp(window.droneSystem.selectedId, xpReward);
         if (window.metaMissionSystem && typeof window.metaMissionSystem.recordPvPOutcome === 'function') {
             const pKills = (combat && combat.battleStats && combat.battleStats.zombiesKilled != null) ? combat.battleStats.zombiesKilled : ((combat && combat.zombiesKilled) || 0);
             window.metaMissionSystem.recordPvPOutcome({ isWin: isPlayerWinner, reason, overheals: this.overhealsPlayer || 0, score: playerScore, kills: pKills });

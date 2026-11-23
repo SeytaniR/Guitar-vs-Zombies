@@ -677,6 +677,12 @@ class I18n {
         }
         try {
             if (window.guitaristPool && typeof window.guitaristPool.renderShop === 'function') window.guitaristPool.renderShop();
+            if (window.droneSystem) {
+                if (typeof window.droneSystem.renderPreBattleDroneCard === 'function') window.droneSystem.renderPreBattleDroneCard();
+                if (typeof window.droneSystem.renderShopDrones === 'function') window.droneSystem.renderShopDrones();
+                if (typeof window.droneSystem.populatePvPDroneDropdown === 'function') window.droneSystem.populatePvPDroneDropdown();
+                if (typeof window.droneSystem.updatePvPDroneCardPreview === 'function') window.droneSystem.updatePvPDroneCardPreview();
+            }
             if (window.metaMissionSystem && typeof window.metaMissionSystem.render === 'function') window.metaMissionSystem.render();
             if (window.talentSystem && typeof window.talentSystem.updateUI === 'function') window.talentSystem.updateUI();
             if (window.songStudio && typeof window.songStudio.renderLibrary === 'function') window.songStudio.renderLibrary();

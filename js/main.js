@@ -106,7 +106,10 @@ class Game {
         bind('shop-close-btn', () => this.closeShopModal());
         bind('pve-stage-toggle-btn', () => this.toggleDrawer('map-stage-dropdown-drawer', 'pve-stage-toggle-btn'));
         bind('pve-hero-toggle-btn', () => this.toggleDrawer('map-hero-dropdown-drawer', 'pve-hero-toggle-btn'));
+        bind('pve-drone-toggle-btn', () => this.toggleDrawer('map-drone-dropdown-drawer', 'pve-drone-toggle-btn'));
         bind('pve-song-toggle-btn', () => this.toggleDrawer('map-song-dropdown-drawer', 'pve-song-toggle-btn'));
+        bind('shop-tab-heroes', () => { if (window.droneSystem) window.droneSystem.switchShopTab('heroes'); });
+        bind('shop-tab-drones', () => { if (window.droneSystem) window.droneSystem.switchShopTab('drones'); });
         bind('menu-btn-talents', (e) => { if (e) e.preventDefault(); if (window.talentSystem && typeof window.talentSystem.open === 'function') window.talentSystem.open(); else { const m = document.getElementById('talent-modal'); if (m) m.classList.add('open'); } });
         bind('menu-btn-missions', (e) => { if (e) e.preventDefault(); if (window.metaMissionSystem) window.metaMissionSystem.open(); });
         bind('menu-btn-studio', () => { const m = document.getElementById('song-studio-modal'); if (m) { m.classList.add('open'); if (window.songStudio) window.songStudio.renderLibrary(); } });
@@ -122,13 +125,13 @@ class Game {
         bind('map-start-battle-btn', () => this.startMatch());
         bind('map-hero-prev-btn', () => this.cycleGuitarist(-1));
         bind('map-hero-next-btn', () => this.cycleGuitarist(1));
+        bind('map-drone-prev-btn', () => { if (window.droneSystem) window.droneSystem.cycleDrone(-1); });
+        bind('map-drone-next-btn', () => { if (window.droneSystem) window.droneSystem.cycleDrone(1); });
         bind('map-song-prev-btn', () => this.cycleSong(-1));
         bind('map-song-next-btn', () => this.cycleSong(1));
         bind('map-stage-prev-btn', () => this.cycleStage(-1));
         bind('map-stage-next-btn', () => this.cycleStage(1));
-        bind('skill-picker-close-btn', () => {
-            const m = document.getElementById('skill-picker-modal'); if (m) m.classList.remove('open');
-        });
+        bind('skill-picker-close-btn', () => { const m = document.getElementById('skill-picker-modal'); if (m) m.classList.remove('open'); });
         const mapSongSelect = document.getElementById('map-song-select');
         if (mapSongSelect) mapSongSelect.onchange = (e) => this.loadSelectedSongDetails(e.target.value);
     }
@@ -139,6 +142,7 @@ class Game {
             m.classList.add('open');
             this.updateShopCurrencies();
             if (window.guitaristPool && typeof window.guitaristPool.renderShop === 'function') window.guitaristPool.renderShop();
+            if (window.droneSystem && typeof window.droneSystem.renderShopDrones === 'function') window.droneSystem.renderShopDrones();
         }
     }
     closeShopModal() { const m = document.getElementById('shop-modal'); if (m) m.classList.remove('open'); this.updateMenuCurrencies(); }
@@ -153,18 +157,14 @@ class Game {
         const drawer = document.getElementById(drawerId), btn = toggleBtnId ? document.getElementById(toggleBtnId) : null;
         if (!drawer) return;
         const isOpen = drawer.classList.contains('open');
-        ['map-stage-dropdown-drawer', 'map-hero-dropdown-drawer', 'map-song-dropdown-drawer'].forEach(id => {
+        ['map-stage-dropdown-drawer', 'map-hero-dropdown-drawer', 'map-drone-dropdown-drawer', 'map-song-dropdown-drawer'].forEach(id => {
             const d = document.getElementById(id); if (d && id !== drawerId) d.classList.remove('open');
         });
-        ['pve-stage-toggle-btn', 'pve-hero-toggle-btn', 'pve-song-toggle-btn'].forEach(id => {
+        ['pve-stage-toggle-btn', 'pve-hero-toggle-btn', 'pve-drone-toggle-btn', 'pve-song-toggle-btn'].forEach(id => {
             const b = document.getElementById(id); if (b && id !== toggleBtnId) b.classList.remove('open');
         });
-        if (isOpen) {
-            drawer.classList.remove('open'); if (btn) btn.classList.remove('open');
-        } else {
-            drawer.classList.add('open'); if (btn) btn.classList.add('open');
-            if (window.soundEngine) window.soundEngine.playSustainTick(0);
-        }
+        if (isOpen) { drawer.classList.remove('open'); if (btn) btn.classList.remove('open'); }
+        else { drawer.classList.add('open'); if (btn) btn.classList.add('open'); if (window.soundEngine) window.soundEngine.playSustainTick(0); }
     }
     renderStageDropdown() {
         const drawer = document.getElementById('map-stage-dropdown-drawer');
@@ -206,6 +206,7 @@ class Game {
         this.renderArenaRoster();
         this.renderStageDropdown();
         this.renderHeroRoster();
+        if (window.droneSystem && typeof window.droneSystem.renderPreBattleDroneCard === 'function') window.droneSystem.renderPreBattleDroneCard();
         if (window.enemyPool) {
             this.currentMapZombies = window.enemyPool.rollMapEnemies(5);
             this.renderMapZombies();

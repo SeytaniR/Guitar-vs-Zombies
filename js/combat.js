@@ -38,6 +38,7 @@ class CombatSystem {
             scientistSheet: loadSheet('assets/zombie_scientist.jpg'), firefighterSheet: loadSheet('assets/zombie_firefighter.jpg'),
             sheriffSheet: loadSheet('assets/zombie_sheriff.jpg'), politicianSheet: loadSheet('assets/zombie_politician.jpg'),
             batmanSheet: loadSheet('assets/zombie_batman.jpg'), kratosSheet: loadSheet('assets/zombie_kratos.jpg'),
+            droneOffensiveSheet: loadSheet('assets/drones/drone_offensive_sheet.jpg'), droneSupportSheet: loadSheet('assets/drones/drone_support_sheet.jpg'), droneControllerSheet: loadSheet('assets/drones/drone_controller_sheet.jpg'),
             fxSheet: loadSheet('assets/fx2.jpg')
         };
 
@@ -125,7 +126,7 @@ class CombatSystem {
         this.heroHp = this.heroMaxHp; this.isGameOver = false; this.isPaused = false; this.isVictory = false;
         this.isVictorySequence = false; this.victorySequenceTimer = 0; this.pendingVictoryData = null;
         this.isDefeatSequence = false; this.defeatSequenceTimer = 0;
-        this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0; this.isSpecialActive = false; if (window.specialSystem) window.specialSystem.reset();
+        this.rockMana = 30; this.combo = 0; this.comboKills = 0; this.score = 0; this.isSpecialActive = false; if (window.specialSystem) window.specialSystem.reset(); if (window.droneSystem) window.droneSystem.resetBattle();
         this.zombiesKilled = 0; this.spawnTimer = 0; this.pendingAttackModifiers = [];
         this.stageCompleted = false; this.heroAttackTimer = 0; this.heroShieldHp = 0; this.heroShieldTimer = 0; this.perfectStreak = 0; this.guaranteedCritReady = false;
         const curStage = window.stageSystem ? window.stageSystem.selectedStage : 1;
@@ -319,7 +320,8 @@ class CombatSystem {
         const activeHero = this.getActiveHeroData();
         const heroStats = this.getActiveHeroStats();
         const talentBaseBonus = window.talentSystem ? window.talentSystem.getStat('power_chord') : 0;
-        const baseDmg = (45 + talentBaseBonus) * (heroStats.damageMult || 1.0) * (mod.mult || 1.0);
+        const droneAura = (window.droneSystem && window.droneSystem.getActiveDrone().type === 'offensive') ? (window.droneSystem.getDroneStats(window.droneSystem.getActiveDrone().id).heroDamageBonusPct / 100) : 0;
+        const baseDmg = (45 + talentBaseBonus) * ((heroStats.damageMult || 1.0) + droneAura) * (mod.mult || 1.0);
         let calcDamage = isMiss ? 0 : Math.round(baseDmg);
         let isCrit = !isMiss && (mod.isCrit || this.guaranteedCritReady);
         if (!isMiss && this.guaranteedCritReady) { this.guaranteedCritReady = false; }
@@ -436,6 +438,10 @@ class CombatSystem {
                 this.triggerShake(5);
             }
         }
+        if (window.droneSystem && typeof window.droneSystem.addDroneXp === 'function') {
+            const dRes = window.droneSystem.addDroneXp(window.droneSystem.selectedId, Math.max(2, Math.round(earnedXp * 0.75)));
+            if (dRes && dRes.leveledUp) this.addFloatingText(this.tr('droneLevelUpToast', `🛸 DRONE NÍVEL ${dRes.newLevel}!`, { level: dRes.newLevel }), this.getHeroPosition().x, this.getHeroPosition().y - 82, '#00e5ff', true);
+        }
 
         const textX = Math.min(this.canvas.width - 45, Math.max(30, z.x));
         const currentY = z.y + (z.jumpArcY || 0);
@@ -473,6 +479,7 @@ class CombatSystem {
         if (window.talentSystem) window.talentSystem.addGold(rewards.coins);
         const activeHero = this.getActiveHeroData();
         if (activeHero && window.guitaristPool) window.guitaristPool.addHeroXp(activeHero.id, rewards.xp);
+        if (window.droneSystem && typeof window.droneSystem.addDroneXp === 'function') window.droneSystem.addDroneXp(window.droneSystem.selectedId, Math.round(rewards.xp * 0.75));
         if (window.stageSystem) window.stageSystem.unlockNextStage();
 
         const isBoss = isBossKill || this.isBossStage;
@@ -629,6 +636,7 @@ class CombatSystem {
         }
         if (!this.matchActive) return;
         this.time += deltaTime; if (window.specialSystem && typeof window.specialSystem.update === 'function') window.specialSystem.update(dt);
+        if (window.droneSystem && typeof window.droneSystem.update === 'function') window.droneSystem.update(dt, this);
 
         if (this.heroStrumAnim > 0 && (this.heroStrumAnim -= 4 * dt) < 0) this.heroStrumAnim = 0;
         if (this.heroFlashTime > 0) this.heroFlashTime -= dt;
@@ -944,6 +952,7 @@ class CombatSystem {
         if (this.shockBarrierReady) this.fx.drawShockBarrier(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
         if (this.heroImmunityTimer > 0) this.fx.drawImmunityAura(this.ctx, heroPos.x + 4, heroPos.y - 16, this.time);
         if (this.isPvPMode && this.pvpSystem) this.pvpSystem.draw(this.ctx, this);
+        if (window.droneSystem && typeof window.droneSystem.draw === 'function') window.droneSystem.draw(this.ctx, this);
 
         // 7. Projectiles
         this.ctx.save();

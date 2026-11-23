@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
+['js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/drone-system.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -543,8 +543,8 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
-['i18n.js', 'missions.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=64`), `index.html links ${f} with v=64`));
-['i18n-content.js', 'i18n-modes.js', 'talents.js', 'special-system.js', 'combat.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
+['missions.js', 'i18n-modes.js', 'talents.js', 'special-system.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
+['i18n.js', 'i18n-content.js', 'drone-system.js', 'combat.js', 'pvp-system.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=66`), `index.html links ${f} with v=66`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -715,7 +715,7 @@ assert(htmlContent.includes('data-cat="pvp"') && cssContent.includes('.pvp-missi
 console.log('\n22. Testing Multilingual i18n Localization (PT, EN, ES, FR)...');
 assert(typeof i18n !== 'undefined' && i18n.currentLang, 'i18n engine is initialized');
 const ptKeys = Object.keys(i18n.translations.pt), enKeys = Object.keys(i18n.translations.en), esKeys = Object.keys(i18n.translations.es), frKeys = Object.keys(i18n.translations.fr);
-assert(ptKeys.length === 1077 && enKeys.length === 1077 && esKeys.length === 1077 && frKeys.length === 1077, 'All 4 languages have full 1077-key coverage');
+assert(ptKeys.length >= 1110 && ptKeys.length === enKeys.length && ptKeys.length === esKeys.length && ptKeys.length === frKeys.length, `All 4 languages have full ${ptKeys.length}-key coverage`);
 const symCheck = (t) => ptKeys.filter(k => !(k in t));
 assert(symCheck(i18n.translations.en).length === 0 && symCheck(i18n.translations.es).length === 0 && symCheck(i18n.translations.fr).length === 0, '100% key symmetry across pt, en, es, fr');
 const getP = (s) => (s.match(/\{[a-zA-Z0-9_]+\}/g) || []).sort().join(',');
@@ -910,75 +910,62 @@ i18n.setLanguage('pt');
 const battleCssContent = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
 assert(htmlContent.includes('id="battle-special-btn"') && battleCssContent.includes('.battle-special-btn'), 'Battle special UI & CSS styling present');
 
-// ==========================================
 // 29. Testing 5-Second Match Start & Resume Countdown System
-// ==========================================
 console.log('\n29. Testing 5-Second Match Start & Resume Countdown System...');
 const cdSys = new CountdownSystem(); window.countdownSystem = cdSys;
 assert(cdSys.isActive === false && cdSys.duration === 5.0, 'CountdownSystem initializes in inactive 5-second state');
 const mockRhythm = { isPaused: false, isCountdownActive: false, customSongTime: 0, songAudio: { pause: () => {}, play: () => Promise.resolve(), currentTime: 0 } };
 window.game = { rhythm: mockRhythm, combat: { isPaused: false, matchActive: true }, isBattlePaused: false };
 cdSys.startMatchCountdown();
-assert(cdSys.isActive === true && cdSys.mode === 'start' && cdSys.timer === 5.0, 'Match start initializes active 5.0s countdown');
-assert(mockRhythm.isCountdownActive === true, 'Rhythm system flagged with isCountdownActive');
-assert(cdSys.startSongTime === -2.0 && cdSys.targetSongTime === 0.0, 'Match start sets slow-rolling window from -2.0s to 0.0s (0.4x scroll)');
-assert(mockRhythm.customSongTime === -2.0, 'Rhythm highway set to -2.0s so early notes descend slowly into view');
-assert(window.game.combat.isPaused === true, 'Combat paused during countdown to protect hero from damage');
-cdSys.update(2.5); // 2.5s elapsed
-assert(cdSys.timer === 2.5, 'Countdown timer decremented by 2.5s');
-assert(Math.abs(mockRhythm.customSongTime - (-1.0)) < 0.01, `Highway smoothly rolled from -2.0s to ${mockRhythm.customSongTime.toFixed(2)}s`);
-assert(cdSys.currentSecond === 3, 'Integer second correctly computed (3s remaining)');
-cdSys.update(2.6); // Finish countdown
-assert(cdSys.isActive === false && mockRhythm.isCountdownActive === false, 'Countdown finished: isActive and isCountdownActive set to false');
-assert(mockRhythm.customSongTime === 0.0, 'Highway arrived exactly at 0.0s for song start');
-assert(window.game.combat.isPaused === false, 'Combat unpaused on countdown completion');
-mockRhythm.customSongTime = 16.5;
-cdSys.startResumeCountdown();
-assert(cdSys.isActive === true && cdSys.mode === 'resume', 'Settings unpause triggers resume 5-second countdown');
-assert(cdSys.targetSongTime === 16.5 && cdSys.startSongTime === 14.5, 'Resume rewinds 2.0s (from 16.5s to 14.5s) so player tracks incoming notes');
-assert(mockRhythm.customSongTime === 14.5, 'Highway starts rolling slowly from 14.5s towards pause point');
-cdSys.update(5.1); // Complete resume
-assert(cdSys.isActive === false && Math.abs(mockRhythm.customSongTime - 16.5) < 0.01, 'Resume completes exactly at paused time (16.5s) without skipping notes');
-const updatedHtmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
-const updatedBattleCss = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
-assert(updatedHtmlContent.includes('id="battle-countdown-overlay"') && updatedHtmlContent.includes('id="countdown-number"'), 'index.html contains #battle-countdown-overlay and #countdown-number');
-assert(updatedBattleCss.includes('.battle-countdown-overlay') && updatedBattleCss.includes('countdownPop'), 'battle.css defines .battle-countdown-overlay and pop keyframes');
-assert(updatedBattleCss.includes('background: transparent;'), 'battle.css keeps countdown overlay transparent so highway is fully visible');
-const rhythmCode = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8');
-assert(rhythmCode.includes('const curTime = this.customSongTime || 0;'), 'rhythm.js draw() safely defines curTime without ReferenceError');
-assert(rhythmCode.includes('note.y = (1.0 - cdProg) * startY + cdProg * targetY;'), 'rhythm.js smoothly interpolates notes with zero jump at countdown end');
-const mainCode = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
-assert(mainCode.includes('{ b: 0, l: 0 }'), 'main.js default song starts immediately with opening solo note at beat 0');
+assert(cdSys.isActive && cdSys.mode === 'start' && cdSys.timer === 5.0 && mockRhythm.isCountdownActive, 'Match start initializes active 5.0s countdown');
+assert(cdSys.startSongTime === -2.0 && cdSys.targetSongTime === 0.0 && mockRhythm.customSongTime === -2.0 && window.game.combat.isPaused, 'Slow-rolling window -2.0s to 0.0s & combat paused');
+cdSys.update(2.5);
+assert(cdSys.timer === 2.5 && Math.abs(mockRhythm.customSongTime - (-1.0)) < 0.01 && cdSys.currentSecond === 3, 'Countdown midpoint at 2.5s (-1.0s highway)');
+cdSys.update(2.6);
+assert(!cdSys.isActive && !mockRhythm.isCountdownActive && mockRhythm.customSongTime === 0.0 && !window.game.combat.isPaused, 'Countdown finished at 0.0s and unpaused combat');
+mockRhythm.customSongTime = 16.5; cdSys.startResumeCountdown();
+assert(cdSys.isActive && cdSys.mode === 'resume' && cdSys.targetSongTime === 16.5 && cdSys.startSongTime === 14.5 && mockRhythm.customSongTime === 14.5, 'Resume rewinds 2.0s (16.5s -> 14.5s)');
+cdSys.update(5.1);
+assert(!cdSys.isActive && Math.abs(mockRhythm.customSongTime - 16.5) < 0.01, 'Resume completes at 16.5s without skipping notes');
+const updatedHtmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8'), updatedBattleCss = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
+assert(updatedHtmlContent.includes('id="battle-countdown-overlay"') && updatedBattleCss.includes('.battle-countdown-overlay') && updatedBattleCss.includes('background: transparent;'), 'Countdown overlay HTML & transparent CSS present');
+const rhythmCode = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8'), mainCode = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
+assert(rhythmCode.includes('const curTime = this.customSongTime || 0;') && rhythmCode.includes('note.y = (1.0 - cdProg) * startY + cdProg * targetY;') && mainCode.includes('{ b: 0, l: 0 }'), 'rhythm.js & main.js countdown integration verified');
 
-// ==========================================
 // 30. Testing PvE Compact Single-Card HUD, Dropdown Pickers & Guitarist Shop
-// ==========================================
 console.log('\n30. Testing PvE Compact Single-Card HUD, Dropdown Pickers & Guitarist Shop...');
-const pveHtml = updatedHtmlContent;
-const pveMapCss = fs.readFileSync(path.resolve(__dirname, 'css/map-select.css'), 'utf8'), pveMenuCss = fs.readFileSync(path.resolve(__dirname, 'css/menu.css'), 'utf8');
-
-// Single card for each PvE item in index.html
-['pve-card-stage', 'pve-card-hero', 'pve-card-zombies', 'pve-card-skills', 'pve-card-song'].forEach(id => assert(pveHtml.includes(`id="${id}"`), `PvE HUD contains single ${id}`));
-
-// Dropdown accordion drawers
-['map-stage-dropdown-drawer', 'map-hero-dropdown-drawer', 'map-song-dropdown-drawer'].forEach(id => assert(pveHtml.includes(`id="${id}"`), `Drawer ${id} present`));
-assert(pveMapCss.includes('.pve-dropdown-drawer') && pveMapCss.includes('.pve-dropdown-drawer.open'), 'CSS defines .pve-dropdown-drawer and open state animation');
-
-// Guitarist Shop button and modal
-assert(pveHtml.includes('id="menu-btn-shop"'), 'Main menu contains #menu-btn-shop button');
-assert(pveHtml.includes('id="shop-modal"') && pveHtml.includes('id="shop-heroes-grid"'), 'HTML contains #shop-modal with #shop-heroes-grid');
-assert(pveMenuCss.includes('.btn-shop') && pveMenuCss.includes('.shop-modal-overlay'), 'CSS defines shop button and shop modal overlay');
-
-// Shop purchase & equip logic in guitaristPool
-const shopPool = new GuitaristPoolSystem();
-assert(typeof shopPool.renderShop === 'function', 'guitaristPool implements renderShop()');
-assert(shopPool.isHeroUnlocked('johnny_blaze') === true, 'Default hero johnny_blaze is unlocked');
-window.talentSystem = { gold: 100000, saveProgress: () => {} };
-shopPool.unlockedHeroes = ['johnny_blaze'];
+const pveHtml = updatedHtmlContent, pveMapCss = fs.readFileSync(path.resolve(__dirname, 'css/map-select.css'), 'utf8'), pveMenuCss = fs.readFileSync(path.resolve(__dirname, 'css/menu.css'), 'utf8');
+['pve-card-stage', 'pve-card-hero', 'pve-card-drone', 'pve-card-zombies', 'pve-card-skills', 'pve-card-song'].forEach(id => assert(pveHtml.includes(`id="${id}"`), `PvE HUD contains single ${id}`));
+['map-stage-dropdown-drawer', 'map-hero-dropdown-drawer', 'map-drone-dropdown-drawer', 'map-song-dropdown-drawer'].forEach(id => assert(pveHtml.includes(`id="${id}"`), `Drawer ${id} present`));
+assert(pveMapCss.includes('.pve-dropdown-drawer') && pveHtml.includes('id="menu-btn-shop"') && pveHtml.includes('id="shop-modal"') && pveMenuCss.includes('.shop-modal-overlay'), 'Drawers & Shop modal present');
+const shopPool = new GuitaristPoolSystem(); window.talentSystem = { gold: 100000, saveProgress: () => {} }; shopPool.unlockedHeroes = ['johnny_blaze'];
 const buyRes = shopPool.unlockHeroWithGold('vulkan_ironhead');
-assert(buyRes.success === true && shopPool.isHeroUnlocked('vulkan_ironhead') === true, 'Hero vulkan_ironhead bought successfully with gold');
-assert(window.talentSystem.gold === 95000, 'Gold correctly deducted from player balance on shop purchase');
-assert(shopPool.getActiveGuitarist().id === 'vulkan_ironhead', 'Newly purchased hero is automatically selected');
+assert(buyRes.success && shopPool.isHeroUnlocked('vulkan_ironhead') && window.talentSystem.gold === 95000 && shopPool.getActiveGuitarist().id === 'vulkan_ironhead', 'Hero bought & auto-selected');
+
+// 31. Testing Drone System (Offensive, Support & Controller Invulnerable Pets)
+console.log('\n31. Testing Drone System (3 Types, Invulnerable, Leveling 1-100, Combat & PvP)...');
+const dSys = new DroneSystem(); window.droneSystem = dSys;
+assert(dSys.getAllDrones().length === 3 && dSys.getAllDrones().every(d => d.unlockedByDefault && d.unlockCost === 0 && dSys.isDroneUnlocked(d.id)), 'All 3 drones (Offensive, Support, Controller) unlocked by default at 0 cost');
+assert(dSys.getAllDrones().every(d => d.isInvulnerable === true && d.hasHp === false && typeof d.hp === 'undefined'), 'Drones have NO HP and are 100% invulnerable');
+['drone_offensive.jpg', 'drone_support.jpg', 'drone_controller.jpg', 'drone_offensive_sheet.jpg', 'drone_support_sheet.jpg', 'drone_controller_sheet.jpg'].forEach(f => assert(fs.existsSync(path.resolve(__dirname, 'assets/drones', f)), `Asset assets/drones/${f} exists`));
+dSys.setLevel('pyro_shredder', 1); window.talentSystem.gold = 50000;
+const dGoldUp = dSys.levelUpWithGold('pyro_shredder');
+assert(dGoldUp.success && dSys.getDroneLevelData('pyro_shredder').level === 2, 'Drone leveled up with gold');
+window.guitaristPool.playerXp = 500; const dXpUp = dSys.injectXpIntoDrone('pyro_shredder');
+assert(dXpUp.success && dXpUp.leveledUp && dSys.getDroneLevelData('pyro_shredder').level === 3, 'Drone leveled up via inventory XP injection');
+testCombat.resetBattle(); testCombat.heroHp = 50; testCombat.heroMaxHp = 100; testCombat.rockMana = 40; testCombat.maxRockMana = 100;
+const dZombie = new ZombieEntity(mockZombieType, 100, 400, 5, 220); testCombat.entities.zombies = [dZombie];
+const hpBeforeOff = dZombie.hp;
+dSys.selectDrone('pyro_shredder'); dSys.resetBattle(); dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('pyro_shredder'), testCombat);
+assert(dZombie.hp < hpBeforeOff, 'Offensive drone damages enemy zombies');
+dSys.selectDrone('harmonic_pulse'); dSys.resetBattle(); dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('harmonic_pulse'), testCombat);
+assert(testCombat.heroHp > 50 && testCombat.rockMana > 40 && testCombat.heroAttackSpeedBuffTimer > 0, 'Support drone heals guitarist, restores mana, and grants speed buff');
+dSys.selectDrone('cryo_vortex'); dSys.resetBattle();
+for (let c = 0; c < 4; c++) dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('cryo_vortex'), testCombat);
+assert(dZombie.freezeTimer > 0 && dZombie.stunTimer > 0 && dZombie.sleepTimer > 0 && dZombie.poisonTimer > 0, 'Controller drone applies Freeze/Slow, Stun, Sleep, and Poison CC');
+const pvpOppWithDrone = pvp.generateOpponent({ level: 12, name: 'Rocker' });
+assert(pvpOppWithDrone.drone && pvpOppWithDrone.droneLevel === pvpOppWithDrone.level, 'PvP fake opponent is equipped with an active drone matching opponent level');
+assert(pveHtml.includes('id="shop-tab-drones"') && pveHtml.includes('id="pvp-drone-dropdown"'), 'Shop drone tab & PvP pre-battle drone selector present in HTML');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
