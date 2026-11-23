@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/drone-system.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
+['js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/drone-catalog.js', 'js/drone-system.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -543,8 +543,8 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
-['missions.js', 'i18n-modes.js', 'talents.js', 'special-system.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
-['i18n.js', 'i18n-content.js', 'drone-system.js', 'combat.js', 'pvp-system.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=66`), `index.html links ${f} with v=66`));
+['missions.js', 'i18n-modes.js', 'special-system.js', 'i18n.js', 'main.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
+['i18n-content.js', 'drone-catalog.js', 'drone-system.js', 'talents.js', 'combat.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -899,7 +899,7 @@ assert(!specSys.isSpecialActive && specSys.specialTimeLeft === 0 && specSys.spec
 specSys.onComboHit(50); assert(specSys.specialMeter === 0 && !specSys.canActivate(), 'Special CANNOT recharge once used in the match');
 // Special Talents: Damage (2x -> 3x cap) & Duration (+0.5s/lv) + Custom Image Assets
 const spTal = new TalentSystem(); window.talentSystem = spTal;
-assert(spTal.talents.special_fury && spTal.talents.special_encore && spTal.getMaxTotalUpgrades() === 209, 'Talent tree includes special_fury & special_encore (209 total upgrades)');
+assert(spTal.talents.special_fury && spTal.talents.special_encore && spTal.getMaxTotalUpgrades() === 268, 'Talent tree includes special & drone talents (268 total upgrades)');
 assert(fs.existsSync(path.resolve(__dirname, 'assets/talents/special_fury.jpg')) && fs.existsSync(path.resolve(__dirname, 'assets/talents/special_duration.jpg')), 'External talent icons special_fury.jpg & special_duration.jpg exist');
 spTal.talents.special_fury.level = 5; assert(specSys.getSpecialDamageMult() === 2.5, 'Special Fury Lv.5 yields 2.5x damage multiplier');
 spTal.talents.special_fury.level = 10; assert(specSys.getSpecialDamageMult() === 3.0, 'Special Fury Lv.10 reaches 3.0x max ceiling');
@@ -942,30 +942,41 @@ const shopPool = new GuitaristPoolSystem(); window.talentSystem = { gold: 100000
 const buyRes = shopPool.unlockHeroWithGold('vulkan_ironhead');
 assert(buyRes.success && shopPool.isHeroUnlocked('vulkan_ironhead') && window.talentSystem.gold === 95000 && shopPool.getActiveGuitarist().id === 'vulkan_ironhead', 'Hero bought & auto-selected');
 
-// 31. Testing Drone System (Offensive, Support & Controller Invulnerable Pets)
-console.log('\n31. Testing Drone System (3 Types, Invulnerable, Leveling 1-100, Combat & PvP)...');
+// 31. Testing Expanded Drone System (13 Drones: 3 Free + 10 Shop, 5 Drone Talents, Combat & PvP)
+console.log('\n31. Testing Expanded Drone System (13 Drones, Shop Pricing, 5 Drone Talents & Combat)...');
+localStorage.removeItem('gvs_unlocked_drones');
 const dSys = new DroneSystem(); window.droneSystem = dSys;
-assert(dSys.getAllDrones().length === 3 && dSys.getAllDrones().every(d => d.unlockedByDefault && d.unlockCost === 0 && dSys.isDroneUnlocked(d.id)), 'All 3 drones (Offensive, Support, Controller) unlocked by default at 0 cost');
-assert(dSys.getAllDrones().every(d => d.isInvulnerable === true && d.hasHp === false && typeof d.hp === 'undefined'), 'Drones have NO HP and are 100% invulnerable');
-['drone_offensive.jpg', 'drone_support.jpg', 'drone_controller.jpg', 'drone_offensive_sheet.jpg', 'drone_support_sheet.jpg', 'drone_controller_sheet.jpg'].forEach(f => assert(fs.existsSync(path.resolve(__dirname, 'assets/drones', f)), `Asset assets/drones/${f} exists`));
-dSys.setLevel('pyro_shredder', 1); window.talentSystem.gold = 50000;
-const dGoldUp = dSys.levelUpWithGold('pyro_shredder');
+const allD = dSys.getAllDrones(), starters = allD.filter(d => d.unlockedByDefault), shopD = allD.filter(d => !d.unlockedByDefault);
+assert(allD.length === 13 && starters.length === 3 && shopD.length === 10, 'Catalog has 13 drones: 3 free starters + 10 shop drones');
+assert(starters.every(d => d.unlockCost === 0 && dSys.isDroneUnlocked(d.id)) && shopD.every(d => d.unlockCost >= 3500 && !dSys.isDroneUnlocked(d.id)), '3 starters free/unlocked; 10 shop drones locked with fair scalable costs');
+assert(shopD.every((d, i) => i === 0 || d.unlockCost > shopD[i - 1].unlockCost), 'All 10 shop drones have strictly ascending scalable prices (3.5k -> 150k)');
+assert(allD.every(d => d.isInvulnerable === true && d.hasHp === false && typeof d.hp === 'undefined'), 'All 13 drones have NO HP and are 100% invulnerable');
+assert(allD.every(d => fs.existsSync(path.resolve(__dirname, d.icon)) && fs.existsSync(path.resolve(__dirname, d.sheetSrc))), 'All 26 drone portrait & sprite sheet assets exist on disk');
+window.talentSystem = spTal; spTal.gold = 2000;
+assert(!dSys.unlockDroneWithGold('volt_viper').success, 'Shop blocks drone purchase when gold is insufficient');
+spTal.gold = 200000; const dBuy = dSys.unlockDroneWithGold('apocalypse_rex');
+assert(dBuy.success && dSys.isDroneUnlocked('apocalypse_rex') && spTal.gold === 50000 && dSys.getActiveDrone().id === 'apocalypse_rex', 'Mythic drone bought for 150k gold & auto-equipped');
+const basePyro = dSys.getDroneStats('pyro_shredder', 1, false), baseApex = dSys.getDroneStats('apocalypse_rex', 1, false);
+assert(baseApex.damage > basePyro.damage && baseApex.cooldown < basePyro.cooldown && baseApex.heroDamageBonusPct > basePyro.heroDamageBonusPct, 'Higher-tier shop drones scale fairly in damage, cooldown & aura');
+['drone_firepower', 'drone_overclock', 'drone_cc_mastery', 'drone_synergy', 'drone_xp_boost'].forEach(tid => assert(spTal.talents[tid] && spTal.talents[tid].branch === 'drones' && fs.existsSync(path.resolve(__dirname, spTal.talents[tid].icon)), `Drone talent ${tid} & icon exist`));
+spTal.talents.drone_firepower.level = 10; spTal.talents.drone_overclock.level = 10; spTal.talents.drone_cc_mastery.level = 5; spTal.talents.drone_synergy.level = 10; spTal.talents.drone_xp_boost.level = 10;
+const boostedPyro = dSys.getDroneStats('pyro_shredder', 1, true), boostedCryo = dSys.getDroneStats('cryo_vortex', 1, true), rawCryo = dSys.getDroneStats('cryo_vortex', 1, false);
+assert(boostedPyro.damage > basePyro.damage && boostedPyro.cooldown < basePyro.cooldown && boostedPyro.heroDamageBonusPct > basePyro.heroDamageBonusPct && boostedCryo.stunDuration > rawCryo.stunDuration, 'Drone talents boost combat power, cooldown, synergy & CC duration');
+const xpRes = dSys.addDroneXp('pyro_shredder', 100, true); assert(xpRes.awardedXp === 200, 'drone_xp_boost Lv.10 doubles drone combat XP (+100%)');
+dSys.setLevel('pyro_shredder', 1); const dGoldUp = dSys.levelUpWithGold('pyro_shredder');
 assert(dGoldUp.success && dSys.getDroneLevelData('pyro_shredder').level === 2, 'Drone leveled up with gold');
 window.guitaristPool.playerXp = 500; const dXpUp = dSys.injectXpIntoDrone('pyro_shredder');
 assert(dXpUp.success && dXpUp.leveledUp && dSys.getDroneLevelData('pyro_shredder').level === 3, 'Drone leveled up via inventory XP injection');
 testCombat.resetBattle(); testCombat.heroHp = 50; testCombat.heroMaxHp = 100; testCombat.rockMana = 40; testCombat.maxRockMana = 100;
-const dZombie = new ZombieEntity(mockZombieType, 100, 400, 5, 220); testCombat.entities.zombies = [dZombie];
-const hpBeforeOff = dZombie.hp;
+const dZombie = new ZombieEntity(mockZombieType, 100, 400, 5, 220); testCombat.entities.zombies = [dZombie]; const hpBeforeOff = dZombie.hp;
 dSys.selectDrone('pyro_shredder'); dSys.resetBattle(); dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('pyro_shredder'), testCombat);
 assert(dZombie.hp < hpBeforeOff, 'Offensive drone damages enemy zombies');
 dSys.selectDrone('harmonic_pulse'); dSys.resetBattle(); dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('harmonic_pulse'), testCombat);
-assert(testCombat.heroHp > 50 && testCombat.rockMana > 40 && testCombat.heroAttackSpeedBuffTimer > 0, 'Support drone heals guitarist, restores mana, and grants speed buff');
-dSys.selectDrone('cryo_vortex'); dSys.resetBattle();
-for (let c = 0; c < 4; c++) dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('cryo_vortex'), testCombat);
-assert(dZombie.freezeTimer > 0 && dZombie.stunTimer > 0 && dZombie.sleepTimer > 0 && dZombie.poisonTimer > 0, 'Controller drone applies Freeze/Slow, Stun, Sleep, and Poison CC');
+assert(testCombat.heroHp > 50 && testCombat.rockMana > 40 && testCombat.heroAttackSpeedBuffTimer > 0, 'Support drone heals, restores mana & buffs speed');
+dSys.selectDrone('cryo_vortex'); dSys.resetBattle(); dZombie.hp = 5000; dZombie.active = true; for (let c = 0; c < 4; c++) dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('cryo_vortex'), testCombat);
+assert(dZombie.freezeTimer > 0 && dZombie.stunTimer > 0 && dZombie.sleepTimer > 0 && dZombie.poisonTimer > 0, 'Controller drone applies Freeze, Stun, Sleep & Poison CC');
 const pvpOppWithDrone = pvp.generateOpponent({ level: 12, name: 'Rocker' });
-assert(pvpOppWithDrone.drone && pvpOppWithDrone.droneLevel === pvpOppWithDrone.level, 'PvP fake opponent is equipped with an active drone matching opponent level');
-assert(pveHtml.includes('id="shop-tab-drones"') && pveHtml.includes('id="pvp-drone-dropdown"'), 'Shop drone tab & PvP pre-battle drone selector present in HTML');
+assert(pvpOppWithDrone.drone && pvpOppWithDrone.droneLevel === pvpOppWithDrone.level && pveHtml.includes('data-branch="drones"') && pveHtml.includes('id="shop-tab-drones"'), 'PvP opponent drone, Drone talent tab & Shop drone tab verified');
 
 // Zero God Object rule check (JS & CSS files)
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {

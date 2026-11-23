@@ -267,6 +267,83 @@ class TalentSystem {
                 getBenefit: (lvl) => _trT('tb_special_encore', `+${(lvl * 0.5).toFixed(1)}s na duração do Especial`, { sec: (lvl * 0.5).toFixed(1) }),
                 getNextBenefit: (lvl) => _trT('tb_special_encore', `+${((lvl + 1) * 0.5).toFixed(1)}s na duração do Especial`, { sec: ((lvl + 1) * 0.5).toFixed(1) }),
                 getValue: (lvl) => Math.round(lvl * 0.5 * 10) / 10
+            },
+
+            // === BRANCH 4: DRONES (Pets Invulneráveis & Tecnologia Aérea) ===
+            'drone_firepower': {
+                id: 'drone_firepower',
+                branch: 'drones',
+                name: 'Núcleo de Potência Drone',
+                icon: 'assets/talents/drone_firepower.jpg',
+                desc: 'Amplifica o poder de combate de todos os drones: aumenta Dano, Mísseis, Queimadura, Cura, Escudo e Veneno.',
+                level: 0,
+                maxLevel: 15,
+                baseCost: 140,
+                costMult: 1.55,
+                prereq: null,
+                getBenefit: (lvl) => _trT('tb_drone_firepower', `+${lvl * 6}% Poder de Combate dos Drones`, { amount: lvl * 6 }),
+                getNextBenefit: (lvl) => _trT('tb_drone_firepower', `+${(lvl + 1) * 6}% Poder de Combate dos Drones`, { amount: (lvl + 1) * 6 }),
+                getValue: (lvl) => lvl * 0.06
+            },
+            'drone_overclock': {
+                id: 'drone_overclock',
+                branch: 'drones',
+                name: 'Overclock de Propulsores',
+                icon: 'assets/talents/drone_overclock.jpg',
+                desc: 'Turbina os circuitos de disparo dos drones, reduzindo o intervalo entre ataques, curas e pulsos de controle.',
+                level: 0,
+                maxLevel: 12,
+                baseCost: 240,
+                costMult: 1.58,
+                prereq: { id: 'drone_firepower', level: 3 },
+                getBenefit: (lvl) => _trT('tb_drone_overclock', `-${lvl * 3}% Tempo de Recarga dos Drones`, { amount: lvl * 3 }),
+                getNextBenefit: (lvl) => _trT('tb_drone_overclock', `-${(lvl + 1) * 3}% Tempo de Recarga dos Drones`, { amount: (lvl + 1) * 3 }),
+                getValue: (lvl) => lvl * 0.03
+            },
+            'drone_cc_mastery': {
+                id: 'drone_cc_mastery',
+                branch: 'drones',
+                name: 'Matriz Neural de Controle',
+                icon: 'assets/talents/drone_cc_mastery.jpg',
+                desc: 'Prolonga a duração de Congelamento, Stun, Sono e Veneno dos drones Controladores e intensifica a lentidão.',
+                level: 0,
+                maxLevel: 10,
+                baseCost: 340,
+                costMult: 1.60,
+                prereq: { id: 'drone_overclock', level: 3 },
+                getBenefit: (lvl) => _trT('tb_drone_cc_mastery', `+${lvl * 8}% Duração CC & +${lvl * 2}% Lentidão`, { dur: lvl * 8, slow: lvl * 2 }),
+                getNextBenefit: (lvl) => _trT('tb_drone_cc_mastery', `+${(lvl + 1) * 8}% Duração CC & +${(lvl + 1) * 2}% Lentidão`, { dur: (lvl + 1) * 8, slow: (lvl + 1) * 2 }),
+                getValue: (lvl) => lvl * 0.08
+            },
+            'drone_synergy': {
+                id: 'drone_synergy',
+                branch: 'drones',
+                name: 'Ressonância Drone-Herói',
+                icon: 'assets/talents/drone_synergy.jpg',
+                desc: 'Sincroniza o drone com o guitarrista, ampliando a Aura de Dano, a restauração de Rock Mana e o Escudo Acústico.',
+                level: 0,
+                maxLevel: 12,
+                baseCost: 380,
+                costMult: 1.62,
+                prereq: { id: 'drone_firepower', level: 5 },
+                getBenefit: (lvl) => _trT('tb_drone_synergy', `+${lvl * 5}% Sinergia (Aura, Mana & Escudo)`, { amount: lvl * 5 }),
+                getNextBenefit: (lvl) => _trT('tb_drone_synergy', `+${(lvl + 1) * 5}% Sinergia (Aura, Mana & Escudo)`, { amount: (lvl + 1) * 5 }),
+                getValue: (lvl) => lvl * 0.05
+            },
+            'drone_xp_boost': {
+                id: 'drone_xp_boost',
+                branch: 'drones',
+                name: 'Telemetria de Evolução',
+                icon: 'assets/talents/drone_xp_boost.jpg',
+                desc: 'Acelera o aprendizado em combate, aumentando o XP obtido pelos drones em abates, fases e duelos PvP.',
+                level: 0,
+                maxLevel: 10,
+                baseCost: 260,
+                costMult: 1.56,
+                prereq: { id: 'drone_overclock', level: 2 },
+                getBenefit: (lvl) => _trT('tb_drone_xp_boost', `+${lvl * 10}% XP de Combate para Drones`, { amount: lvl * 10 }),
+                getNextBenefit: (lvl) => _trT('tb_drone_xp_boost', `+${(lvl + 1) * 10}% XP de Combate para Drones`, { amount: (lvl + 1) * 10 }),
+                getValue: (lvl) => lvl * 0.10
             }
         };
 
@@ -310,6 +387,11 @@ class TalentSystem {
         this.updateUI();
         this.syncWithCombat();
         if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
+        if (window.droneSystem && typeof window.droneSystem.renderPreBattleDroneCard === 'function') {
+            window.droneSystem.renderPreBattleDroneCard();
+            window.droneSystem.renderShopDrones();
+            window.droneSystem.updatePvPDroneCardPreview();
+        }
         return true;
     }
 

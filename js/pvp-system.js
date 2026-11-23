@@ -64,8 +64,9 @@ class PvPSystem {
         const oppTrophies = Math.max(50, this.playerTrophies + (Math.floor(Math.random() * 60) - 30));
         const oppRank = this.getRank(oppTrophies);
         const damageBase = Math.round(45 * (1 + 0.01 * (oppLevel - 1)));
-        const dList = (window.droneSystem && typeof window.droneSystem.getAllDrones === 'function') ? window.droneSystem.getAllDrones() : [];
-        const oppDrone = dList.length > 0 ? dList[Math.floor(Math.random() * dList.length)] : { id: 'pyro_shredder', name: 'Pyro-Shredder MK-I', type: 'offensive', sheet: 'droneOffensiveSheet' };
+        const oppDrone = (window.droneSystem && typeof window.droneSystem.getOpponentDroneForLevel === 'function')
+            ? window.droneSystem.getOpponentDroneForLevel(oppLevel)
+            : { id: 'pyro_shredder', name: 'Pyro-Shredder MK-I', type: 'offensive', sheet: 'droneOffensiveSheet' };
 
         return {
             id: `opp_${Date.now()}`,

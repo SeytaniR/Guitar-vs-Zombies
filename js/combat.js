@@ -320,7 +320,7 @@ class CombatSystem {
         const activeHero = this.getActiveHeroData();
         const heroStats = this.getActiveHeroStats();
         const talentBaseBonus = window.talentSystem ? window.talentSystem.getStat('power_chord') : 0;
-        const droneAura = (window.droneSystem && window.droneSystem.getActiveDrone().type === 'offensive') ? (window.droneSystem.getDroneStats(window.droneSystem.getActiveDrone().id).heroDamageBonusPct / 100) : 0;
+        const droneAura = (window.droneSystem && window.droneSystem.getActiveDrone()) ? ((window.droneSystem.getDroneStats(window.droneSystem.getActiveDrone().id).heroDamageBonusPct || 0) / 100) : 0;
         const baseDmg = (45 + talentBaseBonus) * ((heroStats.damageMult || 1.0) + droneAura) * (mod.mult || 1.0);
         let calcDamage = isMiss ? 0 : Math.round(baseDmg);
         let isCrit = !isMiss && (mod.isCrit || this.guaranteedCritReady);
