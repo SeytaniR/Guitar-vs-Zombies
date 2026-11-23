@@ -542,7 +542,7 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=62`), `index.html links ${f} with v=62`));
+['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
 ['i18n.js', 'missions.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=64`), `index.html links ${f} with v=64`));
 ['i18n-content.js', 'i18n-modes.js', 'talents.js', 'special-system.js', 'combat.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');

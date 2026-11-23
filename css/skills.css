@@ -29,14 +29,14 @@
 
 /* Hero Level Progression */
 .hero-level-progression-box {
-    margin-top: 2px;
-    padding: 3px 6px;
+    margin-top: 1px;
+    padding: 3px 5px;
     background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 204, 0, 0.3);
-    border-radius: 6px;
+    border: 1px solid rgba(255, 204, 0, 0.28);
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 2.5px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -45,24 +45,28 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
 }
 
 .hero-level-badge {
-    font-size: 9px;
+    font-size: 8.5px;
     font-weight: 900;
     color: #ffd700;
     text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+    white-space: nowrap;
 }
 
 .hero-xp-text {
-    font-size: 8.5px;
+    font-size: 8px;
     font-weight: 700;
     color: #aaccff;
+    white-space: nowrap;
 }
 
 .hero-xp-bar-track {
     width: 100%;
-    height: 4px;
+    height: 3.5px;
     background: rgba(20, 25, 40, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 2px;
@@ -77,20 +81,21 @@
 }
 
 .hero-inventory-xp-row {
-    display: flex;
-    justify-content: space-between;
+    display: inline-flex;
     align-items: center;
-    padding: 1px 4px;
+    padding: 0 5px;
     background: rgba(0, 240, 255, 0.08);
     border: 1px dashed rgba(0, 240, 255, 0.35);
-    border-radius: 4px;
-    font-size: 8px;
+    border-radius: 3px;
+    font-size: 7.5px;
     color: #bbf7d0;
+    line-height: 1.3;
+    white-space: nowrap;
 }
 
 .hero-inventory-xp-row strong {
     color: #00ffff;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
 }
 
@@ -102,13 +107,14 @@
 
 .hero-inject-xp-action {
     flex: 1;
-    padding: 3px 6px;
-    height: 22px;
+    min-width: 0;
+    padding: 2px 5px;
+    height: 20px;
     background: linear-gradient(135deg, #00c6ff, #0072ff);
     border: 1px solid #70e1ff;
     border-radius: 4px;
     color: #fff;
-    font-size: 8px;
+    font-size: 7.5px;
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 198, 255, 0.35);
@@ -117,6 +123,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .hero-inject-xp-action:disabled {
@@ -133,13 +142,14 @@
 
 .hero-level-up-action {
     flex: 1;
-    padding: 3px 6px;
-    height: 22px;
+    min-width: 0;
+    padding: 2px 5px;
+    height: 20px;
     background: linear-gradient(135deg, #ffd700, #ff8800);
     border: 1px solid #ffe680;
     border-radius: 4px;
     color: #1a0800;
-    font-size: 8px;
+    font-size: 7.5px;
     font-weight: 900;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(255, 215, 0, 0.35);
@@ -148,6 +158,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .hero-level-up-action:active {
@@ -181,11 +194,12 @@
     background: rgba(18, 14, 32, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 6px;
-    padding: 3px 2px;
+    padding: 3px 3px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
+    justify-content: space-between;
+    gap: 1.5px;
     cursor: pointer;
     transition: all 0.15s ease;
     text-align: center;
@@ -209,14 +223,16 @@
 .lane-skill-slot.lane-3 { border-top: 2px solid #00d4ff; }
 
 .lane-tag-num {
-    font-size: 7px;
-    font-weight: 800;
+    font-size: 6.8px;
+    font-weight: 900;
     text-transform: uppercase;
     white-space: nowrap;
+    line-height: 1.1;
 }
 
 .lane-skill-icon {
     font-size: 13px;
+    line-height: 1.1;
     margin: 0;
     filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
     flex-shrink: 0;
@@ -226,19 +242,24 @@
     font-size: 7.5px;
     font-weight: 800;
     color: #fff;
-    line-height: 1.1;
+    line-height: 1.12;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 100%;
     max-width: 100%;
+    min-height: 16px;
 }
 
 .lane-skill-type-pill {
-    font-size: 6.5px;
+    font-size: 6px;
     font-weight: 800;
-    padding: 0 2px;
+    padding: 1px 2px;
     border-radius: 2px;
-    letter-spacing: 0.1px;
+    letter-spacing: -0.2px;
     text-transform: uppercase;
     margin: 0;
     max-width: 100%;
@@ -247,6 +268,7 @@
     white-space: nowrap;
     box-sizing: border-box;
     display: inline-block;
+    line-height: 1.15;
 }
 
 .lane-skill-cost {
@@ -467,16 +489,16 @@
 /* Responsive adjustment for small screens */
 @media (max-width: 380px) {
     .map-lane-skills-grid {
-        gap: 4px;
+        gap: 3px;
     }
     .lane-skill-slot {
-        padding: 6px 2px;
+        padding: 3px 2px;
     }
     .lane-skill-icon {
-        font-size: 18px;
+        font-size: 13px;
     }
     .lane-skill-title {
-        font-size: 9px;
+        font-size: 7.2px;
     }
 }
 

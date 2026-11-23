@@ -24,7 +24,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px;
+    padding: calc(3px + env(safe-area-inset-top, 0px)) 8px 3px;
     background: rgba(15, 10, 25, 0.95);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 10;
@@ -41,26 +41,17 @@
     color: #eee;
     padding: 3px 7px;
     border-radius: 5px;
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 800;
     cursor: pointer;
     flex-shrink: 0;
     white-space: nowrap;
 }
 
-.map-header-spacer {
-    width: 55px;
-    flex-shrink: 0;
-}
-
-.map-header-title {
-    text-align: center;
-    flex: 1;
-    min-width: 0;
-}
-
+.map-header-spacer { width: 52px; flex-shrink: 0; }
+.map-header-title { text-align: center; flex: 1; min-width: 0; }
 .map-header-title h2 {
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 900;
     color: #ffcc00;
     letter-spacing: 0.5px;
@@ -69,10 +60,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-.map-header-title .map-sub {
-    display: none;
-}
+.map-header-title .map-sub { display: none; }
 
 .map-screen-scroll {
     flex: 1 1 0%;
@@ -82,9 +70,10 @@
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y !important;
     overscroll-behavior-y: contain;
-    padding: 4px 6px 4px;
+    padding: 4px 6px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: 4px;
     width: 100%;
     max-width: 100%;
@@ -92,11 +81,11 @@
 }
 
 .map-section-card, .pve-hud-card {
-    background: rgba(18, 14, 28, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(18, 14, 28, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
-    padding: 5px 7px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    padding: 4px 7px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -117,24 +106,24 @@
 }
 .pve-card-icon-wrap {
     position: relative;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border-radius: 6px;
+    border-radius: 7px;
     overflow: hidden;
     border: 1.5px solid rgba(255, 255, 255, 0.25);
     background: #000;
 }
 .pve-card-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pve-card-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.pve-card-meta-row { display: flex; align-items: center; justify-content: space-between; }
-.pve-card-label { font-size: 8px; font-weight: 800; color: #00d4ff; letter-spacing: 0.4px; text-transform: uppercase; }
-.pve-dropdown-arrow { font-size: 9px; color: #ffcc00; transition: transform 0.2s ease; }
+.pve-card-meta-row { display: flex; align-items: center; justify-content: space-between; line-height: 1.1; }
+.pve-card-label { font-size: 7.5px; font-weight: 800; color: #00d4ff; letter-spacing: 0.4px; text-transform: uppercase; }
+.pve-dropdown-arrow { font-size: 8.5px; color: #ffcc00; transition: transform 0.2s ease; }
 .pve-card-main-row.open .pve-dropdown-arrow { transform: rotate(180deg); }
-.pve-card-subname { font-size: 8.5px; color: #8899aa; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pve-hero-title { font-size: 13.5px; font-weight: 900; color: #fff; margin: 0; }
-.pve-card-simple-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.pve-card-simple-header h3 { font-size: 12.5px; font-weight: 900; color: #fff; margin: 0; }
+.pve-card-subname { font-size: 8.5px; color: #94a3b8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+.pve-hero-title { font-size: 12px; font-weight: 900; color: #fff; margin: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pve-card-simple-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.pve-card-simple-header h3 { font-size: 11px; font-weight: 900; color: #fff; margin: 0; line-height: 1.15; }
 
 /* Dropdown Drawer System */
 .pve-dropdown-drawer {
@@ -227,13 +216,14 @@
 .selected-hero-showcase {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    background: rgba(25, 20, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+    gap: 3px;
+    background: rgba(16, 12, 28, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin-top: 3px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     transition: all 0.2s ease;
     width: 100%;
     max-width: 100%;
@@ -241,32 +231,21 @@
     overflow: hidden;
 }
 
-.hero-showcase-top-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    min-width: 0;
-}
+.hero-showcase-top-row { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
 
 .hero-showcase-portrait-wrap {
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border-radius: 10px;
+    border-radius: 7px;
     overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
     background: #000;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
 }
 
-.showcase-hero-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+.showcase-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .hero-rarity-badge {
     position: absolute;
@@ -274,11 +253,15 @@
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 7.5px;
+    font-size: 6.5px;
     font-weight: 900;
-    letter-spacing: 0.5px;
-    padding: 2px 0;
+    letter-spacing: 0.3px;
+    padding: 1px 0;
+    line-height: 1.1;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .badge-common { background: rgba(160, 170, 184, 0.95); color: #111; }
@@ -290,15 +273,16 @@
 .badge-cosmic { background: linear-gradient(135deg, #00f0ff, #ffee00); color: #000; box-shadow: 0 0 12px rgba(0, 240, 255, 0.85); font-weight: 800; }
 .badge-divine { background: linear-gradient(135deg, #ffd700, #fff275, #ff8800); color: #000; box-shadow: 0 0 16px rgba(255, 215, 0, 0.95); font-weight: 900; }
 
-.hero-showcase-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.hero-showcase-details { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .showcase-hero-header { display: flex; flex-direction: column; gap: 1px; }
-.showcase-hero-header h4 { font-size: 14px; font-weight: 900; color: #fff; margin: 0; line-height: 1.2; }
-.showcase-hero-title { font-size: 8.5px; font-weight: 700; color: #ffaa00; }
-.showcase-hero-instrument { font-size: 8.5px; color: #00d4ff; font-weight: 700; display: flex; align-items: center; gap: 3px; margin-top: 1px; }
-.showcase-hero-passive-box { background: rgba(0, 0, 0, 0.4); border-left: 2px solid #00ff66; padding: 2px 6px; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 3px; }
-.passive-tag { font-size: 8px; font-weight: 900; color: #00ff66; display: inline-block; margin-right: 4px; }
-.passive-desc { font-size: 8px; color: #ccd6e8; margin: 0; line-height: 1.2; word-break: break-word; display: inline; }
-.hero-roster-title { font-size: 9.5px; font-weight: 800; color: #8899aa; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.showcase-hero-header h4 { font-size: 12px; font-weight: 900; color: #fff; margin: 0; line-height: 1.15; }
+.showcase-hero-title { font-size: 8px; font-weight: 700; color: #ffaa00; }
+.showcase-hero-instrument { font-size: 8px; color: #00d4ff; font-weight: 700; display: block; line-height: 1.2; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.showcase-hero-instrument .inst-icon { display: inline; margin-right: 2px; }
+.showcase-hero-passive-box { background: rgba(0, 0, 0, 0.45); border-left: 2px solid #00ff66; padding: 2px 6px; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 8px; line-height: 1.25; }
+.passive-tag { font-size: 8px; font-weight: 900; color: #00ff66; display: inline; margin-right: 4px; }
+.passive-desc { font-size: 8px; color: #ccd6e8; margin: 0; line-height: 1.25; word-break: break-word; display: inline; }
+.hero-roster-title { font-size: 9px; font-weight: 800; color: #8899aa; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
 
 .map-heroes-roster-grid {
     display: grid;
@@ -348,17 +332,15 @@
 .section-card-header h3 { font-size: 11px; font-weight: 900; color: #fff; margin: 1px 0; }
 .section-subtext { font-size: 9px; color: #8899aa; line-height: 1.2; }
 
-/* 5 Zombies Preview Grid (Compact Horizontal Carousel) */
+/* 5 Zombies Preview Grid (Responsive 5-Column Grid, Zero Overlap) */
 .map-zombies-grid {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
     width: 100%;
-    padding: 1px 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0;
 }
 .map-zombies-grid::-webkit-scrollbar { display: none; }
 
@@ -367,38 +349,29 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 1px;
-    background: rgba(22, 17, 34, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 2px;
+    background: rgba(22, 17, 34, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     padding: 3px 2px;
-    width: 58px;
-    flex-shrink: 0;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
     box-sizing: border-box;
 }
-
-.zombie-preview-card:hover {
-    border-color: rgba(255, 51, 102, 0.35);
-    background: rgba(30, 22, 45, 0.85);
-}
+.zombie-preview-card:hover { border-color: rgba(255, 51, 102, 0.35); background: rgba(30, 22, 45, 0.85); }
 
 .zombie-card-art {
     position: relative;
-    width: 30px;
+    width: 100%;
     height: 30px;
     flex-shrink: 0;
-    border-radius: 5px;
+    border-radius: 4px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: #000;
 }
-
-.zombie-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+.zombie-card-img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
 
 .zombie-card-badge {
     position: absolute;
@@ -408,10 +381,10 @@
     font-size: 6px;
     font-weight: 900;
     text-align: center;
-    background: rgba(0, 0, 0, 0.78);
+    background: rgba(0, 0, 0, 0.82);
     color: #ffaa00;
-    padding: 0 1px;
-    line-height: 8px;
+    padding: 0 2px;
+    line-height: 9px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -424,21 +397,8 @@
 .badge-agile { color: #00d4ff !important; }
 .badge-common { color: #a0aab8 !important; }
 
-.zombie-card-info {
-    width: 100%;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.zombie-card-top-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
+.zombie-card-info { width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.zombie-card-top-row { display: flex; flex-direction: column; align-items: center; width: 100%; min-width: 0; }
 .zombie-card-name {
     font-size: 7.5px;
     font-weight: 800;
@@ -447,29 +407,35 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 52px;
+    width: 100%;
+    max-width: 100%;
+    line-height: 1.15;
 }
-
-.zombie-card-type-tag {
-    display: none;
-}
+.zombie-card-type-tag { display: none; }
 
 .zombie-card-stats-row {
     display: flex;
-    gap: 2px;
-    justify-content: center;
-    margin-top: 1px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1px;
+    width: 100%;
+    max-width: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 3px;
+    padding: 1px 2px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .zombie-stat-chip {
-    font-size: 7px;
-    font-weight: 700;
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0 2px;
-    border-radius: 2px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 6.8px;
+    font-weight: 800;
+    color: #cbd5e1;
+    background: transparent;
+    padding: 0;
+    border: none;
     white-space: nowrap;
+    line-height: 1.1;
 }
 
 /* Song Selection Section */
@@ -501,83 +467,61 @@
 
 .map-song-cover-wrap {
     position: relative;
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 7px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
 }
-
-.map-song-cover-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 6px;
-    object-fit: cover;
-    display: block;
-}
+.map-song-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .map-song-active-pill {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 255, 102, 0.9);
+    background: rgba(0, 255, 102, 0.92);
     color: #000;
-    font-size: 6.5px;
+    font-size: 6px;
     font-weight: 900;
     text-align: center;
     padding: 1px 0;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.map-song-current-title {
-    font-size: 13px;
-    font-weight: 900;
-    color: #00ffff;
-    margin: 0;
-}
-
-.map-selected-song-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.map-song-tags {
-    display: flex;
-    gap: 6px;
-    margin-top: 2px;
-}
+.map-song-current-title { font-size: 11.5px; font-weight: 900; color: #00ffff; margin: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.map-selected-song-info { display: flex; flex-direction: column; gap: 1px; }
+.map-song-tags { display: flex; align-items: center; gap: 5px; margin-top: 1px; }
 
 .map-song-tag-bpm {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
     background: rgba(0, 212, 255, 0.2);
     color: #00d4ff;
     border: 1px solid rgba(0, 212, 255, 0.5);
-    padding: 1px 6px;
-    border-radius: 4px;
+    padding: 0 5px;
+    border-radius: 3px;
     display: inline-block;
     width: fit-content;
 }
 
 .map-song-tag-notes {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
     background: rgba(255, 170, 0, 0.2);
     color: #ffaa00;
     border: 1px solid rgba(255, 170, 0, 0.4);
-    padding: 1px 6px;
-    border-radius: 4px;
+    padding: 0 5px;
+    border-radius: 3px;
     display: inline-block;
     width: fit-content;
 }
 
-.map-song-meta-text {
-    font-size: 10px;
-    color: #a0aab8;
-    font-weight: 600;
-}
+.map-song-meta-text { font-size: 8.5px; color: #a0aab8; font-weight: 600; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Cycle navigation & Section Header Row */
 .section-header-row {
@@ -753,7 +697,7 @@ button.hero-roster-card {
 }
 
 .map-bottom-bar {
-    padding: 4px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    padding: 4px 8px calc(5px + env(safe-area-inset-bottom, 0px));
     background: rgba(15, 10, 25, 0.95);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
@@ -767,17 +711,17 @@ button.hero-roster-card {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    padding: 8px 12px;
-    height: 40px;
+    padding: 6px 12px;
+    height: 36px;
     background: linear-gradient(135deg, #ff1744 0%, #ff9100 100%);
     border: none;
     border-radius: 8px;
     color: #fff;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 900;
     letter-spacing: 0.8px;
     cursor: pointer;
-    box-shadow: 0 0 16px rgba(255, 23, 68, 0.55);
+    box-shadow: 0 0 14px rgba(255, 23, 68, 0.55);
     transition: transform 0.1s ease;
     display: flex;
     align-items: center;
@@ -840,72 +784,57 @@ button.hero-roster-card {
 
 .arena-theme-badge {
     position: absolute;
-    bottom: 2px;
-    left: 2px;
-    font-size: 6.5px;
-    font-weight: 800;
-    padding: 1px 3px;
-    border-radius: 2px;
-}
-
-.arena-showcase-details {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-    flex: 1;
-}
-
-.showcase-arena-name {
-    font-size: 12.5px;
-    font-weight: 800;
-    color: #fff;
-    margin: 0;
-    text-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
-}
-
-.showcase-arena-sub {
-    font-size: 9px;
-    color: #00ffcc;
-    font-weight: 700;
-    margin: 1px 0;
-}
-
-.showcase-arena-desc {
-    font-size: 8.5px;
-    color: #94a3b8;
-    line-height: 1.25;
-    margin: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 6px;
+    font-weight: 900;
+    padding: 1px 2px;
+    line-height: 1.1;
+    background: rgba(0, 0, 0, 0.85) !important;
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
 }
+
+.arena-showcase-details { display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; }
+.showcase-arena-name { font-size: 12px; font-weight: 800; color: #fff; margin: 0; text-shadow: 0 0 8px rgba(0, 255, 204, 0.3); }
+.showcase-arena-sub { font-size: 8.5px; color: #00ffcc; font-weight: 700; margin: 1px 0; }
+.showcase-arena-desc { font-size: 8px; color: #94a3b8; line-height: 1.2; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 /* Minimalist Tags & Stage Chips */
 .stage-name-highlight {
-    font-size: 13px;
-    font-weight: 800;
+    font-size: clamp(10px, 2.7vw, 11.5px);
+    font-weight: 900;
     color: #ffcc00;
-    margin: 4px 0 6px;
+    margin: 1px 0;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .stage-info-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 4px;
+    gap: 3px;
+    margin-top: 2px;
 }
 
 .stage-chip {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.3px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.2px;
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
+    line-height: 1.2;
 }
 
 .chip-diff { background: rgba(255, 68, 85, 0.15); color: #ff5566; border: 1px solid rgba(255, 68, 85, 0.3); }
@@ -943,3 +872,26 @@ button.hero-roster-card {
 .hero-unlock-cta { background: linear-gradient(135deg, #ffd700, #ff8800) !important; color: #000 !important; font-weight: 900; border: none; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); cursor: pointer; }
 .hero-unlock-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6); }
 .badge-locked { background: rgba(80, 80, 80, 0.6); color: #bbb; border: 1px solid rgba(255, 255, 255, 0.2); }
+
+/* Responsive Viewport-Height Adaptation (No-Scroll Fit on Any Device) */
+@media (max-height: 720px) {
+    .map-screen-scroll { padding: 3px 5px; gap: 3px; }
+    .pve-hud-card { padding: 3px 6px; }
+    .pve-card-icon-wrap, .hero-showcase-portrait-wrap, .map-song-cover-wrap { width: 38px; height: 38px; }
+    .selected-hero-showcase { padding: 3px 5px; margin-top: 2px; gap: 2px; }
+    .showcase-hero-passive-box { padding: 1.5px 5px; font-size: 7.5px; line-height: 1.18; }
+    .passive-tag, .passive-desc { font-size: 7.5px; line-height: 1.18; }
+    .zombie-card-art { height: 26px; }
+    .map-start-battle-action { height: 33px; font-size: 12px; }
+}
+
+@media (max-height: 620px) {
+    .map-header-bar { padding: 2px 6px; }
+    .map-screen-scroll { padding: 2px 4px; gap: 2px; }
+    .pve-hud-card { padding: 2px 5px; border-radius: 6px; }
+    .pve-card-icon-wrap, .hero-showcase-portrait-wrap, .map-song-cover-wrap { width: 34px; height: 34px; }
+    .zombie-card-art { height: 22px; }
+    .zombie-preview-card { padding: 2px 1.5px; gap: 1px; }
+    .map-bottom-bar { padding: 2px 6px 3px; }
+    .map-start-battle-action { height: 30px; font-size: 11px; }
+}

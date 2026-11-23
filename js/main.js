@@ -235,8 +235,8 @@ class Game {
         const imgEl = document.getElementById('showcase-arena-img'), badgeEl = document.getElementById('showcase-arena-badge');
         if (imgEl) imgEl.src = currentMap.thumb;
         const bTxt = tr(currentMap.id + '_badge', currentMap.badge);
-        if (badgeEl) { badgeEl.innerText = `${bTxt} • ${tr('badgeRandom', 'ALEATÓRIO')}`; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
-        setTxt('showcase-arena-name', tr(currentMap.id + '_name', currentMap.name));
+        if (badgeEl) { badgeEl.innerText = bTxt; badgeEl.className = `arena-theme-badge ${currentMap.badgeClass || ''}`; }
+        setTxt('showcase-arena-name', `${tr(currentMap.id + '_name', currentMap.name)} • 🎲 ${tr('badgeRandom', 'ALEATÓRIO')}`);
         setTxt('showcase-arena-sub', tr(currentMap.id + '_sub', currentMap.subtitle));
         setTxt('showcase-arena-desc', tr(currentMap.id + '_desc', currentMap.description));
     }
@@ -424,6 +424,7 @@ class Game {
             const zName = this.tr('zombie_' + z.id, z.name), zShort = this.tr('zombie_short_' + z.id, z.badge), zFull = this.tr('zombie_full_' + z.id, z.fullBadge || z.badge);
             const card = document.createElement('div');
             card.className = 'zombie-preview-card';
+            card.title = `${zName} (${zFull}) — ❤️ ${z.hp} ${hpU} • ⚡ ${z.speed} ${spdU} • 💥 ${z.attackDamage} ${dmgU}`;
             card.innerHTML = `
                 <div class="zombie-card-art">
                     <img src="${z.icon}" alt="${zName}" class="zombie-card-img">
@@ -435,9 +436,9 @@ class Game {
                         <span class="zombie-card-type-tag ${z.badgeClass || ''}">${zFull}</span>
                     </div>
                     <div class="zombie-card-stats-row">
-                        <span class="zombie-stat-chip">❤️ ${z.hp} ${hpU}</span>
-                        <span class="zombie-stat-chip">⚡ ${z.speed} ${spdU}</span>
-                        <span class="zombie-stat-chip">💥 ${z.attackDamage} ${dmgU}</span>
+                        <span class="zombie-stat-chip" title="${hpU}">❤️${z.hp}</span>
+                        <span class="zombie-stat-chip" title="${spdU}">⚡${z.speed}</span>
+                        <span class="zombie-stat-chip" title="${dmgU}">💥${z.attackDamage}</span>
                     </div>
                 </div>
             `;
