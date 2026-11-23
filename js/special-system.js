@@ -59,12 +59,12 @@ class SpecialSystem {
         this.specialUsed = false;
         this.specialTimeLeft = 0;
 
-        // Fetch active hero special duration
+        // Fetch active hero special duration + Talent Tree bonuses
         const heroStats = (window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function')
             ? window.guitaristPool.getHeroStats(window.guitaristPool.selectedGuitaristId)
             : null;
-        this.specialDuration = (heroStats && heroStats.specialDuration) ? heroStats.specialDuration : 6.0;
-        this.specialDurationMax = (heroStats && heroStats.specialDurationMax) ? heroStats.specialDurationMax : 12.0;
+        this.specialDuration = this.getEffectiveDuration(heroStats);
+        this.specialDurationMax = Math.max((heroStats && heroStats.specialDurationMax) ? heroStats.specialDurationMax : 12.0, this.specialDuration);
 
         if (window.game && window.game.combat) {
             window.game.combat.isSpecialActive = false;
@@ -82,6 +82,19 @@ class SpecialSystem {
         this.updateUI();
     }
 
+    getSpecialDamageMult() {
+        const bonus = (window.talentSystem && typeof window.talentSystem.getStat === 'function')
+            ? (window.talentSystem.getStat('special_fury') || 0) : 0;
+        return Math.min(3.0, Math.max(2.0, Math.round((2.0 + bonus) * 10) / 10));
+    }
+
+    getEffectiveDuration(heroStats = null) {
+        const base = (heroStats && heroStats.specialDuration) ? heroStats.specialDuration : 6.0;
+        const bonus = (window.talentSystem && typeof window.talentSystem.getStat === 'function')
+            ? (window.talentSystem.getStat('special_encore') || 0) : 0;
+        return Math.round((base + bonus) * 10) / 10;
+    }
+
     canActivate() {
         return !this.specialUsed && !this.isSpecialActive && this.specialMeter >= 100;
     }
@@ -93,12 +106,12 @@ class SpecialSystem {
         this.specialUsed = true;
         this.isSpecialActive = true;
 
-        // Refresh duration from active hero
+        // Refresh duration from active hero + Talent Tree bonus
         const heroStats = (window.guitaristPool && typeof window.guitaristPool.getHeroStats === 'function')
             ? window.guitaristPool.getHeroStats(window.guitaristPool.selectedGuitaristId)
             : null;
-        this.specialDuration = (heroStats && heroStats.specialDuration) ? heroStats.specialDuration : 6.0;
-        this.specialDurationMax = (heroStats && heroStats.specialDurationMax) ? heroStats.specialDurationMax : 12.0;
+        this.specialDuration = this.getEffectiveDuration(heroStats);
+        this.specialDurationMax = Math.max((heroStats && heroStats.specialDurationMax) ? heroStats.specialDurationMax : 12.0, this.specialDuration);
         this.specialTimeLeft = Math.min(this.specialDurationMax, this.specialDuration);
 
         if (window.game && window.game.combat) {
@@ -115,8 +128,10 @@ class SpecialSystem {
                 combat.fx.shockwaves.push({ x: heroPos.x, y: heroPos.y, radius: 6, maxRadius: 55, color: '#ffd700', lineWidth: 4, alpha: 1.0 });
             }
             combat.triggerShake(9);
-            const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
-            combat.addFloatingText(tr('specialActivatedToast', '🔥 SOLO ESPECIAL 2X ATIVADO! ⚡'), combat.canvas.width / 2, combat.canvas.height * 0.42, '#ffd700', true);
+            const mult = this.getSpecialDamageMult();
+            const multStr = (mult % 1 === 0) ? mult.toFixed(0) : mult.toFixed(1);
+            const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
+            combat.addFloatingText(tr('specialActivatedToast', `🔥 SOLO ESPECIAL ${multStr}X ATIVADO! ⚡`, { mult: multStr }), combat.canvas.width / 2, combat.canvas.height * 0.42, '#ffd700', true);
         }
 
         this.updateUI();
@@ -192,8 +207,10 @@ class SpecialSystem {
         // Percentage / Status label
         if (this.pctEl) {
             const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+            const mult = this.getSpecialDamageMult();
+            const multStr = (mult % 1 === 0) ? mult.toFixed(0) : mult.toFixed(1);
             let labelText;
-            if (isActive) labelText = `🔥 2X (${this.specialTimeLeft.toFixed(1)}s)`;
+            if (isActive) labelText = `🔥 ${multStr}X (${this.specialTimeLeft.toFixed(1)}s)`;
             else if (isExhausted) labelText = tr('specialUsed', 'USADO ✖');
             else if (isReady) labelText = tr('specialReady', 'PRONTO! ⚡');
             else labelText = `${meterInt}%`;

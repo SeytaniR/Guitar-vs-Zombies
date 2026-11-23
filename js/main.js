@@ -278,7 +278,9 @@ class Game {
         if (tEl) tEl.innerText = tr('hero_' + currentHero.id + '_title', currentHero.title);
         const hStats = pool.getHeroStats(currentHero.id);
         const hInst = tr('hero_' + currentHero.id + '_inst', currentHero.instrument);
-        const spChip = tr('specialActiveChip', `🔥 Especial: ${hStats.specialDuration}s`, { duration: hStats.specialDuration });
+        const encoreBonus = (window.talentSystem && typeof window.talentSystem.getStat === 'function') ? (window.talentSystem.getStat('special_encore') || 0) : 0;
+        const effDur = Math.round(((hStats.specialDuration || 6) + encoreBonus) * 10) / 10;
+        const spChip = tr('specialActiveChip', `🔥 Especial: ${effDur}s`, { duration: effDur });
         const unlockPrompt = tr('heroUnlockCostPrompt', `🔒 Desbloqueie por 🪙 ${(currentHero.unlockCost || 5000).toLocaleString()}`, { cost: (currentHero.unlockCost || 5000).toLocaleString() });
         if (iEl) iEl.innerText = isUnlocked ? `${hInst} • ⚡ 1.0/s • ${spChip}` : unlockPrompt;
         if (pnEl) pnEl.innerText = tr('hero_' + currentHero.id + '_pass_name', (currentHero.passive && currentHero.passive.name) || currentHero.passiveName || tr('passiveFallback', 'Passiva'));

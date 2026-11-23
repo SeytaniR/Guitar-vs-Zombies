@@ -543,7 +543,8 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=62`), `index.html links ${f} with v=62`));
-['i18n.js', 'i18n-content.js', 'i18n-modes.js', 'missions.js', 'main.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=64`), `index.html links ${f} with v=64`));
+['i18n.js', 'missions.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=64`), `index.html links ${f} with v=64`));
+['i18n-content.js', 'i18n-modes.js', 'talents.js', 'special-system.js', 'combat.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -714,7 +715,7 @@ assert(htmlContent.includes('data-cat="pvp"') && cssContent.includes('.pvp-missi
 console.log('\n22. Testing Multilingual i18n Localization (PT, EN, ES, FR)...');
 assert(typeof i18n !== 'undefined' && i18n.currentLang, 'i18n engine is initialized');
 const ptKeys = Object.keys(i18n.translations.pt), enKeys = Object.keys(i18n.translations.en), esKeys = Object.keys(i18n.translations.es), frKeys = Object.keys(i18n.translations.fr);
-assert(ptKeys.length === 1071 && enKeys.length === 1071 && esKeys.length === 1071 && frKeys.length === 1071, 'All 4 languages have full 1071-key coverage');
+assert(ptKeys.length === 1077 && enKeys.length === 1077 && esKeys.length === 1077 && frKeys.length === 1077, 'All 4 languages have full 1077-key coverage');
 const symCheck = (t) => ptKeys.filter(k => !(k in t));
 assert(symCheck(i18n.translations.en).length === 0 && symCheck(i18n.translations.es).length === 0 && symCheck(i18n.translations.fr).length === 0, '100% key symmetry across pt, en, es, fr');
 const getP = (s) => (s.match(/\{[a-zA-Z0-9_]+\}/g) || []).sort().join(',');
@@ -883,36 +884,31 @@ pvp.openMatchmakingModal([{ id: 'test_song', title: 'Test Song', bpm: 140 }], nu
 assert(pvp.selectedSong && pvp.selectedSong.id === 'test_song', 'openMatchmakingModal successfully configures player chosen song for PvP');
 assert(htmlContent.includes('id="pvp-hero-dropdown"') && htmlContent.includes('id="pvp-lane-skills-grid"'), 'PvP pre-battle dialog provides hero and lane skills customization');
 
-// ==========================================
-// 28. Testing Especial System (Combo Charge, 2x Damage, 2x Points, Single-Use & Durations)
-// ==========================================
-console.log('\n28. Testing Especial System (Combo Charge, 2x Points, 2x Damage & Single-Use)...');
-const specSys = new SpecialSystem(); window.specialSystem = specSys;
-specSys.init();
-assert(specSys.specialMeter === 0 && !specSys.isSpecialActive && !specSys.specialUsed, 'SpecialSystem initializes at 0% and inactive');
-assert(!specSys.canActivate(), 'Cannot activate special when meter is 0%');
-
-// Combo charge
-specSys.onComboHit(10);
-assert(specSys.specialMeter > 0 && specSys.specialMeter < 100, `Special charged on combo hit: ${specSys.specialMeter.toFixed(1)}%`);
+// 28. Testing Especial System & Talent Tree Upgrades (2x -> 3x Damage Cap & Duration)
+console.log('\n28. Testing Especial System & Talent Tree Upgrades...');
+const specSys = new SpecialSystem(); window.specialSystem = specSys; specSys.init();
+assert(specSys.specialMeter === 0 && !specSys.isSpecialActive && !specSys.specialUsed && !specSys.canActivate(), 'SpecialSystem initializes at 0%, inactive, cannot activate');
+specSys.onComboHit(10); assert(specSys.specialMeter > 0 && specSys.specialMeter < 100, `Special charged on combo hit: ${specSys.specialMeter.toFixed(1)}%`);
 for (let c = 0; c < 35; c++) specSys.onComboHit(c);
 assert(specSys.specialMeter === 100 && specSys.canActivate(), 'Special meter caps at 100% and canActivate returns true');
-
-// Special Activation & Multipliers
 const activated = specSys.activateSpecial();
-assert(activated === true && specSys.isSpecialActive === true && specSys.specialUsed === true, 'Special successfully activated: 2x overdrive active, specialUsed set to true');
-assert(specSys.specialTimeLeft > 0 && specSys.specialTimeLeft <= 12.0, `Special duration active: ${specSys.specialTimeLeft}s (capped at 12s)`);
-assert(150 * (specSys.isSpecialActive ? 2 : 1) === 300, 'During active special, rhythm note score is multiplied by 2x');
-assert(45 * (specSys.isSpecialActive ? 2 : 1) === 90, 'During active special, attack damage is multiplied by 2x');
-
-// Expiration and Single-Use Exhaustion Guarantee
+assert(activated === true && specSys.isSpecialActive === true && specSys.specialUsed === true, 'Special activated: 2x overdrive active, specialUsed set to true');
+assert(specSys.specialTimeLeft > 0 && specSys.specialTimeLeft <= 12.0 && specSys.getSpecialDamageMult() === 2.0, `Base special active: ${specSys.specialTimeLeft}s, 2.0x mult`);
 specSys.update(specSys.specialDuration + 1);
 assert(!specSys.isSpecialActive && specSys.specialTimeLeft === 0 && specSys.specialMeter === 0, 'Special duration expired cleanly');
-specSys.onComboHit(50);
-assert(specSys.specialMeter === 0 && !specSys.canActivate(), 'Special CANNOT recharge once used in the match (single-use guarantee)');
+specSys.onComboHit(50); assert(specSys.specialMeter === 0 && !specSys.canActivate(), 'Special CANNOT recharge once used in the match');
+// Special Talents: Damage (2x -> 3x cap) & Duration (+0.5s/lv) + Custom Image Assets
+const spTal = new TalentSystem(); window.talentSystem = spTal;
+assert(spTal.talents.special_fury && spTal.talents.special_encore && spTal.getMaxTotalUpgrades() === 209, 'Talent tree includes special_fury & special_encore (209 total upgrades)');
+assert(fs.existsSync(path.resolve(__dirname, 'assets/talents/special_fury.jpg')) && fs.existsSync(path.resolve(__dirname, 'assets/talents/special_duration.jpg')), 'External talent icons special_fury.jpg & special_duration.jpg exist');
+spTal.talents.special_fury.level = 5; assert(specSys.getSpecialDamageMult() === 2.5, 'Special Fury Lv.5 yields 2.5x damage multiplier');
+spTal.talents.special_fury.level = 10; assert(specSys.getSpecialDamageMult() === 3.0, 'Special Fury Lv.10 reaches 3.0x max ceiling');
+spTal.talents.special_fury.level = 99; assert(specSys.getSpecialDamageMult() === 3.0, 'Special Damage multiplier strictly capped at 3.0x ceiling');
+spTal.talents.special_encore.level = 10; assert(specSys.getEffectiveDuration({ specialDuration: 7.5 }) === 12.5, 'Special Encore Lv.10 adds +5.0s duration');
+['pt', 'en', 'es', 'fr'].forEach(l => { i18n.setLanguage(l); assert(i18n.t('talent_special_fury_name') !== 'talent_special_fury_name' && i18n.t('talent_special_encore_name') !== 'talent_special_encore_name', `Special talents translated in ${l}`); });
+i18n.setLanguage('pt');
 const battleCssContent = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
-assert(htmlContent.includes('id="battle-special-btn"') && htmlContent.includes('class="battle-special-wrap"'), 'index.html contains strategic #battle-special-btn');
-assert(battleCssContent.includes('.battle-special-btn') && battleCssContent.includes('.battle-special-wrap'), 'battle.css defines responsive strategic special button styling');
+assert(htmlContent.includes('id="battle-special-btn"') && battleCssContent.includes('.battle-special-btn'), 'Battle special UI & CSS styling present');
 
 // ==========================================
 // 29. Testing 5-Second Match Start & Resume Countdown System

@@ -328,7 +328,8 @@ class CombatSystem {
             const critBonusPercent = (heroStats.critDamageBonusPercent || 50) + (window.talentSystem ? window.talentSystem.getStat('ferocious_solo') * 6 : 0);
             calcDamage = Math.round(baseDmg * (1 + critBonusPercent / 100));
         }
-        if (!isMiss) calcDamage = Math.max(1, calcDamage); if (!isMiss && (this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive))) calcDamage = Math.round(calcDamage * 2);
+        const specMult = (window.specialSystem && typeof window.specialSystem.getSpecialDamageMult === 'function') ? window.specialSystem.getSpecialDamageMult() : 2.0;
+        if (!isMiss) calcDamage = Math.max(1, calcDamage); if (!isMiss && (this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive))) calcDamage = Math.round(calcDamage * specMult);
 
         let projColor = isMiss ? '#777777' : (isCrit ? '#ff00ff' : '#00ffff');
         if (!isMiss && mod.skill && mod.skill.color) projColor = mod.skill.color;
@@ -366,7 +367,8 @@ class CombatSystem {
             }
         }
 
-        const tickDamage = Math.round((14 + (window.talentSystem ? Math.round(window.talentSystem.getStat('power_chord') * 0.25) : 0)) * ((this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive)) ? 2 : 1));
+        const sDmgMult = (this.isSpecialActive || (window.specialSystem && window.specialSystem.isSpecialActive)) ? ((window.specialSystem && typeof window.specialSystem.getSpecialDamageMult === 'function') ? window.specialSystem.getSpecialDamageMult() : 2.0) : 1;
+        const tickDamage = Math.round((14 + (window.talentSystem ? Math.round(window.talentSystem.getStat('power_chord') * 0.25) : 0)) * sDmgMult);
         const colors = ['#00ff66', '#ff0055', '#ffcc00', '#00d4ff'];
         const tickColor = colors[lane % 4];
 

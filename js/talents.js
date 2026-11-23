@@ -6,7 +6,7 @@ class TalentSystem {
         this.activeBranch = 'offense'; // 'offense', 'defense', 'rhythm'
         this.selectedTalentId = 'power_chord';
 
-        // 15 Comprehensive Talents across 3 Branches with Slow Progression Curve
+        // 17 Comprehensive Talents across 3 Branches with Slow Progression Curve
         this.talents = {
             // === BRANCH 1: OFENSIVO (Riffs & Dano) ===
             'power_chord': {
@@ -83,6 +83,21 @@ class TalentSystem {
                 getBenefit: (lvl) => _trT('tb_air_sniper', `+${lvl * 25}% Dano em Air Shots`, { amount: lvl * 25 }),
                 getNextBenefit: (lvl) => _trT('tb_air_sniper', `+${(lvl + 1) * 25}% Dano em Air Shots`, { amount: (lvl + 1) * 25 }),
                 getValue: (lvl) => lvl * 0.25
+            },
+            'special_fury': {
+                id: 'special_fury',
+                branch: 'offense',
+                name: 'Fúria do Especial',
+                icon: 'assets/talents/special_fury.jpg',
+                desc: 'Potencializa o dano da Barra de Especial acima de 2.0x até o teto máximo de 3.0x.',
+                level: 0,
+                maxLevel: 10,
+                baseCost: 400,
+                costMult: 1.55,
+                prereq: { id: 'ferocious_solo', level: 3 },
+                getBenefit: (lvl) => _trT('tb_special_fury', `Dano do Especial: ${(2 + Math.min(10, lvl) * 0.1).toFixed(1)}x (teto 3.0x)`, { mult: (2 + Math.min(10, lvl) * 0.1).toFixed(1) }),
+                getNextBenefit: (lvl) => _trT('tb_special_fury', `Dano do Especial: ${(2 + Math.min(10, lvl + 1) * 0.1).toFixed(1)}x (teto 3.0x)`, { mult: (2 + Math.min(10, lvl + 1) * 0.1).toFixed(1) }),
+                getValue: (lvl) => Math.min(1.0, Math.round(lvl * 0.1 * 10) / 10)
             },
 
             // === BRANCH 2: DEFENSIVO (Palco & Resistência) ===
@@ -237,6 +252,21 @@ class TalentSystem {
                 getBenefit: (lvl) => _trT('tb_solo_mastery', `Multiplicador máximo: x${4 + lvl}`, { mult: 4 + lvl }),
                 getNextBenefit: (lvl) => _trT('tb_solo_mastery', `Multiplicador máximo: x${4 + lvl + 1}`, { mult: 4 + lvl + 1 }),
                 getValue: (lvl) => 4 + lvl
+            },
+            'special_encore': {
+                id: 'special_encore',
+                branch: 'rhythm',
+                name: 'Bis do Especial',
+                icon: 'assets/talents/special_duration.jpg',
+                desc: 'Aumenta a duração do Solo Especial de todos os guitarristas durante o combate.',
+                level: 0,
+                maxLevel: 10,
+                baseCost: 350,
+                costMult: 1.55,
+                prereq: { id: 'fine_sync', level: 2 },
+                getBenefit: (lvl) => _trT('tb_special_encore', `+${(lvl * 0.5).toFixed(1)}s na duração do Especial`, { sec: (lvl * 0.5).toFixed(1) }),
+                getNextBenefit: (lvl) => _trT('tb_special_encore', `+${((lvl + 1) * 0.5).toFixed(1)}s na duração do Especial`, { sec: ((lvl + 1) * 0.5).toFixed(1) }),
+                getValue: (lvl) => Math.round(lvl * 0.5 * 10) / 10
             }
         };
 
@@ -279,6 +309,7 @@ class TalentSystem {
 
         this.updateUI();
         this.syncWithCombat();
+        if (window.game && typeof window.game.renderHeroRoster === 'function') window.game.renderHeroRoster();
         return true;
     }
 
@@ -299,6 +330,10 @@ class TalentSystem {
             total += this.talents[k].level;
         }
         return total;
+    }
+
+    getMaxTotalUpgrades() {
+        return Object.values(this.talents).reduce((sum, t) => sum + (t.maxLevel || 0), 0);
     }
 
     saveProgress() {
@@ -357,39 +392,40 @@ class TalentSystem {
         const modal = document.getElementById('talent-modal');
         const closeBtn = document.getElementById('talent-close-btn');
 
-        if (toggleBtn && modal) {
+        if (toggleBtn && modal && typeof toggleBtn.addEventListener === 'function') {
             toggleBtn.addEventListener('click', () => {
                 modal.classList.add('open');
                 this.updateUI();
             });
         }
-        if (closeBtn && modal) {
+        if (closeBtn && modal && typeof closeBtn.addEventListener === 'function') {
             closeBtn.addEventListener('click', () => {
                 modal.classList.remove('open');
             });
         }
 
         // Branch Tabs
-        document.querySelectorAll('.talent-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.talent-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                this.activeBranch = tab.getAttribute('data-branch');
-                
-                // Select first talent in new branch
-                for (const k in this.talents) {
-                    if (this.talents[k].branch === this.activeBranch) {
-                        this.selectedTalentId = k;
-                        break;
+        if (typeof document.querySelectorAll === 'function') {
+            document.querySelectorAll('.talent-tab').forEach(tab => {
+                if (typeof tab.addEventListener !== 'function') return;
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.talent-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    this.activeBranch = tab.getAttribute('data-branch');
+                    for (const k in this.talents) {
+                        if (this.talents[k].branch === this.activeBranch) {
+                            this.selectedTalentId = k;
+                            break;
+                        }
                     }
-                }
-                this.updateUI();
+                    this.updateUI();
+                });
             });
-        });
+        }
 
         // Upgrade Action Button in Inspector
         const upgradeBtn = document.getElementById('talent-upgrade-action');
-        if (upgradeBtn) {
+        if (upgradeBtn && typeof upgradeBtn.addEventListener === 'function') {
             upgradeBtn.addEventListener('click', () => {
                 this.upgrade(this.selectedTalentId);
             });
@@ -413,7 +449,7 @@ class TalentSystem {
         if (modalGold) modalGold.innerText = this.gold.toLocaleString();
 
         const progressEl = document.getElementById('modal-total-upgrades');
-        if (progressEl) progressEl.innerText = `${this.getTotalUpgrades()} / 188`;
+        if (progressEl) progressEl.innerText = `${this.getTotalUpgrades()} / ${this.getMaxTotalUpgrades()}`;
 
         // Render Branch Nodes
         const container = document.getElementById('talent-nodes-container');

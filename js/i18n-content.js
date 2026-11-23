@@ -149,6 +149,8 @@
         "tb_rhythmic_heal": "+{amount} HP curado a cada 10 notas", "tb_rock_never_dies": "Revive com {sec}s de imunidade e repulsão", "tb_rock_none": "Revive padrão",
         "tb_golden_pick": "+{amount} Moeda extra por zumbi", "tb_fine_sync": "+{amount}% Janela de PERFECT!", "tb_hyper_overdrive": "+{amount}% Ganho de Rock Meter",
         "tb_lucrative_streak": "+{amount} Moedas por 15-Streak", "tb_solo_mastery": "Multiplicador máximo: x{mult}",
+        "talent_special_fury_name": "Fúria do Especial", "talent_special_fury_desc": "Potencializa o dano da Barra de Especial acima de 2.0x até o teto máximo de 3.0x.", "tb_special_fury": "Dano do Especial: {mult}x (teto 3.0x)",
+        "talent_special_encore_name": "Bis do Especial", "talent_special_encore_desc": "Aumenta a duração do Solo Especial de todos os guitarristas durante o combate.", "tb_special_encore": "+{sec}s na duração do Especial",
         },
         en: {
         "skill_basic_strike_name": "Sonic Pick", "skill_basic_strike_desc": "Steady rhythmic pick fired at zombies. Standard basic attack with zero MP cost.",
@@ -260,6 +262,8 @@
         "tb_rhythmic_heal": "+{amount} HP healed every 10 notes", "tb_rock_never_dies": "Revives with {sec}s immunity & pushback", "tb_rock_none": "Standard revive",
         "tb_golden_pick": "+{amount} Extra coin per zombie", "tb_fine_sync": "+{amount}% PERFECT! window", "tb_hyper_overdrive": "+{amount}% Rock Meter gain",
         "tb_lucrative_streak": "+{amount} Coins per 15-Streak", "tb_solo_mastery": "Max multiplier: x{mult}",
+        "talent_special_fury_name": "Special Overdrive Fury", "talent_special_fury_desc": "Empowers Special Bar damage above 2.0x up to a 3.0x maximum ceiling.", "tb_special_fury": "Special Damage: {mult}x (3.0x cap)",
+        "talent_special_encore_name": "Special Encore", "talent_special_encore_desc": "Extends the active Special Solo duration for all guitarists in combat.", "tb_special_encore": "+{sec}s Special duration",
         },
         es: {
         "skill_basic_strike_name": "Púa Sónica", "skill_basic_strike_desc": "Púa rítmica constante disparada contra los zombis. Ataque básico estándar sin costo de MP.",
@@ -387,6 +391,8 @@
         "tb_rhythmic_heal": "+{amount} HP curado cada 10 notas", "tb_rock_never_dies": "Revive con {sec}s de inmunidad y empuje", "tb_rock_none": "Revivir estándar",
         "tb_golden_pick": "+{amount} Moneda extra por zumbi", "tb_fine_sync": "+{amount}% Ventana de PERFECT!", "tb_hyper_overdrive": "+{amount}% Ganancia de Rock Meter",
         "tb_lucrative_streak": "+{amount} Monedas por 15-Racha", "tb_solo_mastery": "Multiplicador máximo: x{mult}",
+        "talent_special_fury_name": "Furia del Especial", "talent_special_fury_desc": "Potencia el daño de la Barra Especial sobre 2.0x hasta el tope máximo de 3.0x.", "tb_special_fury": "Daño Especial: {mult}x (tope 3.0x)",
+        "talent_special_encore_name": "Bis del Especial", "talent_special_encore_desc": "Extiende el tiempo de duración del Solo Especial para todos los guitarristas.", "tb_special_encore": "+{sec}s duración Especial",
         },
         fr: {
         "skill_basic_strike_name": "Médiator Sonique", "skill_basic_strike_desc": "Coup de médiator rythmique tiré sur les zombies. Attaque de base standard sans coût de MP.",
@@ -512,6 +518,8 @@
         "tb_shock_none": "Aucun bouclier actif", "tb_rhythmic_heal": "+{amount} PV soignés chaque 10 notes", "tb_rock_never_dies": "Ressuscite avec {sec}s d'immunité",
         "tb_rock_none": "Résurrection standard", "tb_golden_pick": "+{amount} Pièce bonus par zombie", "tb_fine_sync": "+{amount}% Fenêtre PERFECT !",
         "tb_hyper_overdrive": "+{amount}% Gain Rock Meter", "tb_lucrative_streak": "+{amount} Pièces par 15-Série", "tb_solo_mastery": "Multiplicateur max : x{mult}",
+        "talent_special_fury_name": "Furie du Spécial", "talent_special_fury_desc": "Augmente les dégâts de la Barre Spéciale au-delà de 2.0x jusqu'au plafond de 3.0x.", "tb_special_fury": "Dégâts Spécial : {mult}x (max 3.0x)",
+        "talent_special_encore_name": "Rappel du Spécial", "talent_special_encore_desc": "Prolonge la durée active du Solo Spécial pour tous les guitaristes en combat.", "tb_special_encore": "+{sec}s durée Spécial",
         }
     };
 
