@@ -2,7 +2,7 @@
 class SongEditor {
     constructor() {
         this.song = null;
-        this.audio = new Audio();
+        this.audio = (typeof Audio !== 'undefined') ? new Audio() : null;
         this.isPlaying = false;
         this.isRecording = false;
         this.playbackRate = 1.0;
@@ -33,9 +33,6 @@ class SongEditor {
         // Hold / Sustain Note creation & resizing state
         this.noteMode = 'tap'; // 'tap' or 'hold'
         this.holdDuration = 1.0; // default hold duration in seconds
-    }
-
-    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
         this.isResizingNote = false;
         this.resizingTarget = null;
         this.resizeStartX = 0;
@@ -58,6 +55,8 @@ class SongEditor {
         this.setupAudioListeners();
     }
 
+    tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
+
     initDOM() {
         if (this.isInitialized) {
             this.resizeCanvas();
@@ -69,10 +68,12 @@ class SongEditor {
         this.timeDisplayEl = document.getElementById('editor-time-display');
         this.scrubberEl = document.getElementById('editor-time-scrubber');
 
-        if (this.canvas) {
+        if (this.canvas && typeof this.canvas.getContext === 'function') {
             this.ctx = this.canvas.getContext('2d');
             this.resizeCanvas();
-            window.addEventListener('resize', () => this.resizeCanvas());
+            if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
             this.setupCanvasInteractions();
         }
 
@@ -80,7 +81,7 @@ class SongEditor {
     }
 
     resizeCanvas() {
-        if (!this.canvas) return;
+        if (!this.canvas || !this.canvas.parentElement) return;
         const rect = this.canvas.parentElement.getBoundingClientRect();
         this.canvas.width = rect.width || 360;
         this.canvas.height = Math.max(220, rect.height || 220);
@@ -88,6 +89,7 @@ class SongEditor {
     }
 
     setupAudioListeners() {
+        if (!this.audio) return;
         this.audio.addEventListener('timeupdate', () => {
             if (this.isPlaying && this.audio && !this.audio.paused && this.audio.currentTime > 0) {
                 this.currentTime = this.audio.currentTime;
@@ -120,6 +122,7 @@ class SongEditor {
     }
 
     loadSong(song) {
+        if (!song) return;
         this.song = JSON.parse(JSON.stringify(song)); // Deep clone
         if (!this.song.notes) this.song.notes = [];
         this.duration = Math.max(15, Number(this.song.duration) || 30);
@@ -127,16 +130,18 @@ class SongEditor {
         this.undoStack = [];
 
         // Load Audio Track Safely
-        if (this.song.audioData && typeof this.song.audioData === 'string' && this.song.audioData.length > 50 && !this.song.audioData.startsWith('blob:')) {
-            try {
-                this.audio.src = this.song.audioData;
-                this.audio.playbackRate = this.playbackRate;
-                this.audio.load();
-            } catch (err) {
-                console.warn("SongEditor: Erro ao definir src de áudio", err);
+        if (this.audio) {
+            if (this.song.audioData && typeof this.song.audioData === 'string' && this.song.audioData.length > 50 && !this.song.audioData.startsWith('blob:')) {
+                try {
+                    this.audio.src = this.song.audioData;
+                    this.audio.playbackRate = this.playbackRate;
+                    this.audio.load();
+                } catch (err) {
+                    console.warn("SongEditor: Erro ao definir src de áudio", err);
+                }
+            } else {
+                this.audio.removeAttribute('src');
             }
-        } else {
-            this.audio.removeAttribute('src');
         }
 
         this.updateHeaderInfo();
@@ -149,6 +154,7 @@ class SongEditor {
 
     startAnimationLoop() {
         this.stopAnimationLoop();
+        if (typeof requestAnimationFrame !== 'function') return;
         this.lastFrameTime = performance.now();
         this.lastRenderTime = 0;
 
@@ -965,24 +971,20 @@ class SongEditor {
 
     open(song) {
         const modal = document.getElementById('chart-editor-modal');
-        if (modal) { modal.classList.add('open'); this.initDOM(); this.loadSong(song); this.startAnimationLoop(); }
+        if (modal) { modal.classList.add('open'); this.initDOM(); this.loadSong(song); this.startAnimationLoop(); if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => this.resizeCanvas()); }
     }
 
     close() {
-        this.pause();
-        this.stopAnimationLoop();
+        this.pause(); this.stopAnimationLoop();
         const modal = document.getElementById('chart-editor-modal');
         if (modal) modal.classList.remove('open');
     }
 
     showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'studio-toast';
-        toast.innerText = message;
+        const toast = document.createElement('div'); toast.className = 'studio-toast'; toast.innerText = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2200);
     }
 }
-
 window.songEditor = new SongEditor();

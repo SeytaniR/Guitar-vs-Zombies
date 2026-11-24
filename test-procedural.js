@@ -978,16 +978,20 @@ assert(dZombie.freezeTimer > 0 && dZombie.stunTimer > 0 && dZombie.sleepTimer > 
 const pvpOppWithDrone = pvp.generateOpponent({ level: 12, name: 'Rocker' });
 assert(pvpOppWithDrone.drone && pvpOppWithDrone.droneLevel === pvpOppWithDrone.level && pveHtml.includes('data-branch="drones"') && pveHtml.includes('id="shop-tab-drones"'), 'PvP opponent drone, Drone talent tab & Shop drone tab verified');
 
-// Zero God Object rule check (JS & CSS files)
+let edOpen = false; const prevGetEl = global.document.getElementById; global.document.getElementById = (id) => ({ classList: { add: (c) => { if (id === 'chart-editor-modal' && c === 'open') edOpen = true; }, remove: () => {}, contains: () => edOpen }, style: {}, innerText: '', addEventListener: () => {} });
+loadScript('js/song-editor.js'); window.songEditor.open({ id: 't1', title: 'Test', artist: 'A', bpm: 120, duration: 30, notes: [] }); global.document.getElementById = prevGetEl;
+assert(typeof window.songEditor !== 'undefined' && edOpen === true && window.songEditor.song.id === 't1', 'SongEditor loads with zero syntax errors and opens #chart-editor-modal');
+// Zero God Object rule check (JS & CSS files) + JS Syntax check
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
-    const lines = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8').split('\n').length;
+    const src = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8'), lines = src.split('\n').length;
     assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
+    let synOk = true; try { new vm.Script(src, { filename: f }); } catch (e) { synOk = false; }
+    assert(synOk, `File js/${f} parses with zero syntax errors`);
 });
 allCssFiles.forEach(f => {
     const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length;
     assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`);
 });
-
 // Summary
 console.log(`\n==========================================\nTOTAL TESTS: ${testsPassed + testsFailed}\nPASSED: ${testsPassed}\nFAILED: ${testsFailed}\n==========================================\n`);
 process.exit(testsFailed > 0 ? 1 : 0);
