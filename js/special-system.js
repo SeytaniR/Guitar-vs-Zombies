@@ -113,6 +113,9 @@ class SpecialSystem {
         this.specialDuration = this.getEffectiveDuration(heroStats);
         this.specialDurationMax = Math.max((heroStats && heroStats.specialDurationMax) ? heroStats.specialDurationMax : 12.0, this.specialDuration);
         this.specialTimeLeft = Math.min(this.specialDurationMax, this.specialDuration);
+        if (window.soundEngine && typeof window.soundEngine.playCrowdCheer === 'function') {
+            window.soundEngine.playCrowdCheer({ fadeIn: 0.35, fadeOut: 0.85, volume: 0.58 });
+        }
 
         if (window.game && window.game.combat) {
             window.game.combat.isSpecialActive = true;

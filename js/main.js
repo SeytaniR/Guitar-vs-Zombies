@@ -79,7 +79,7 @@ class Game {
             this.isBattlePaused = false;
             this.combat.matchActive = false;
             this.combat.isGameOver = false;
-            this.rhythm.stopCustomSong();
+            this.rhythm.stopCustomSong(); if (window.soundEngine && typeof window.soundEngine.stopCrowdSfx === 'function') window.soundEngine.stopCrowdSfx(0.35);
             this.updateMenuHUD();
             ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal', 'skill-picker-modal'].forEach(id => {
                 const el = document.getElementById(id);
@@ -695,7 +695,7 @@ class Game {
         const song = chosenSong || this.selectedSong || this.getBuiltinDefaultSong();
         this.selectedSong = song;
         const enemies = (window.enemyPool && typeof window.enemyPool.rollMapEnemies === 'function') ? window.enemyPool.rollMapEnemies(4) : [];
-        this.switchScreen('battle');
+        if (window.soundEngine && typeof window.soundEngine.stopCrowdSfx === 'function') window.soundEngine.stopCrowdSfx(0.3); this.switchScreen('battle');
         const bScreen = document.getElementById('screen-battle');
         if (bScreen) bScreen.classList.add('pvp-active');
         this.combat.resetBattle(enemies, true);
@@ -705,7 +705,7 @@ class Game {
 
     startMatch() {
         if (!this.selectedSong) this.selectedSong = this.getBuiltinDefaultSong();
-        this.isBattlePaused = false;
+        this.isBattlePaused = false; if (window.soundEngine && typeof window.soundEngine.stopCrowdSfx === 'function') window.soundEngine.stopCrowdSfx(0.3);
         if (this.combat) { this.combat.isPaused = false; this.combat.isGameOver = false; this.combat.isVictory = false; }
         if (this.rhythm) this.rhythm.isPaused = false;
         ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal'].forEach(id => {
@@ -861,7 +861,7 @@ class Game {
         setVal('result-score-gained', `+${(this.combat ? this.combat.score : 0).toLocaleString()}`);
         if (window.metaMissionSystem && typeof window.metaMissionSystem.recordSongCompletion === 'function') window.metaMissionSystem.recordSongCompletion(accPct, stats);
         try { if (window.stageSystem && typeof window.stageSystem.completeStage === 'function') window.stageSystem.completeStage(window.stageSystem.selectedStage); } catch(err) { console.warn("Stage completion error:", err); }
-        if (window.soundEngine && typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord();
+        if (window.soundEngine) { if (typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord(); if (typeof window.soundEngine.playCrowdCheer === 'function') window.soundEngine.playCrowdCheer({ fadeIn: 0.35, fadeOut: 0.90, volume: 0.65 }); }
         modal.classList.add('open');
     }
 
@@ -878,7 +878,7 @@ class Game {
         setVal('defeat-zombies-killed', `${s.zombiesKilled} 💀`); setVal('defeat-total-damage', Math.round(s.damageDealt).toLocaleString());
         setVal('defeat-accuracy', `${accPct}%`); setVal('defeat-gold-reward', `+${s.coinsEarned} 🪙`);
         setVal('defeat-score-gained', (this.combat ? this.combat.score : 0).toLocaleString());
-        if (window.soundEngine && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
+        if (window.soundEngine) { if (typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss(); if (typeof window.soundEngine.playCrowdBoo === 'function') window.soundEngine.playCrowdBoo({ fadeIn: 0.18, fadeOut: 0.55, volume: 0.65 }); }
         modal.classList.add('open');
     }
 

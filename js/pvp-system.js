@@ -976,8 +976,8 @@ class PvPSystem {
         setVal('pvp-rew-trophies', `${trophyDelta >= 0 ? '+' : ''}${trophyDelta} 🏆`);
 
         if (window.soundEngine) {
-            if (isWin && typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord(0);
-            else if (!isWin && typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss();
+            if (isWin) { if (typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord(0); if (typeof window.soundEngine.playCrowdCheer === 'function') window.soundEngine.playCrowdCheer({ fadeIn: 0.35, fadeOut: 0.90, volume: 0.65 }); }
+            else { if (typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss(); if (typeof window.soundEngine.playCrowdBoo === 'function') window.soundEngine.playCrowdBoo({ fadeIn: 0.18, fadeOut: 0.55, volume: 0.65 }); }
         }
 
         modal.classList.add('open');

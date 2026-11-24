@@ -41,9 +41,7 @@ function assert(condition, testName, details = '') {
     }
 }
 
-// ==========================================
 // TEST 1: GUITARIST POOL PROCEDURAL LEVELING (1-100)
-// ==========================================
 console.log('1. Testing Guitarist Pool & Leveling (1-100)...');
 const pool = new GuitaristPoolSystem(); window.guitaristPool = pool;
 assert(pool.guitarists.length === 11, 'Pool contains all 11 unique guitarists');
@@ -77,12 +75,8 @@ pool.setLevel('roxie_anarchy', 100);
 const roxieStatsLv100 = pool.getHeroStats('roxie_anarchy');
 assert(roxieStatsLv100.manaRegenRate > roxieStatsLv1.manaRegenRate, 'Mythic hero gains significant mana regen bonus at Level 100');
 assert(roxieStatsLv100.critDamageBonusPercent >= 110, 'Mythic hero reaches high crit damage bonus at Level 100');
-assert(roxieStatsLv100.manaRegenRate > roxieStatsLv1.manaRegenRate, 'Mythic hero gains significant mana regen bonus at Level 100');
-assert(roxieStatsLv100.critDamageBonusPercent >= 110, 'Mythic hero reaches high crit damage bonus at Level 100');
 
-// ==========================================
 // TEST 2: INFINITE PROCEDURAL STAGE SYSTEM
-// ==========================================
 console.log('\n2. Testing Infinite Procedural Stage System...');
 const stageSys = new StageSystem(); window.stageSystem = stageSys;
 assert(stageSys.selectedStage === 1 && stageSys.highestUnlockedStage === 1, 'Stage System starts at Stage 1');
@@ -95,9 +89,7 @@ const stage50Info = stageSys.getStageInfo(50);
 assert(stage50Info.minZombieLevel >= 60, `Stage 50 scales zombie levels: min ${stage50Info.minZombieLevel}, max ${stage50Info.maxZombieLevel}`);
 assert(stage50Info.rewardCoins > stage1Info.rewardCoins && stage50Info.rewardXp > stage1Info.rewardXp, `Stage 50 gives scaled gold/XP reward (${stage50Info.rewardCoins} vs ${stage1Info.rewardCoins})`);
 
-// ==========================================
 // TEST 3: PROCEDURAL ZOMBIES (LEVEL, STATS & REWARDS)
-// ==========================================
 console.log('\n3. Testing Procedural Zombie Scaling & Status Effects...');
 
 // Mock Zombie Type
@@ -543,8 +535,8 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
-['missions.js', 'i18n-modes.js', 'special-system.js', 'i18n.js', 'main.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
-['i18n-content.js', 'drone-catalog.js', 'drone-system.js', 'talents.js', 'combat.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`));
+['missions.js', 'i18n-modes.js', 'i18n.js', 'song-editor.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
+['i18n-content.js', 'drone-catalog.js', 'drone-system.js', 'talents.js', 'combat.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`)); ['audio.js', 'special-system.js', 'pvp-system.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=69`), `index.html links ${f} with v=69`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -978,20 +970,24 @@ assert(dZombie.freezeTimer > 0 && dZombie.stunTimer > 0 && dZombie.sleepTimer > 
 const pvpOppWithDrone = pvp.generateOpponent({ level: 12, name: 'Rocker' });
 assert(pvpOppWithDrone.drone && pvpOppWithDrone.droneLevel === pvpOppWithDrone.level && pveHtml.includes('data-branch="drones"') && pveHtml.includes('id="shop-tab-drones"'), 'PvP opponent drone, Drone talent tab & Shop drone tab verified');
 
+// 32. Testing Crowd Cheer (Special & Victory) & Boo (Defeat) SFX with Anti-Overlap
+console.log('\n32. Testing Crowd SFX (Cheer & Boo, Anti-Overlap, Fade-In/Out)...'); assert(fs.statSync(path.resolve(__dirname, 'assets/audio/crowd_cheer.ogg')).size > 100000 && fs.statSync(path.resolve(__dirname, 'assets/audio/crowd_boo.mp3')).size > 40000, 'Crowd cheer & boo audio files exist in assets/audio/');
+let sStarts = 0, sStops = 0, ramps = []; const prevAC = global.AudioContext;
+global.AudioContext = function() { this.currentTime = 1.0; this.destination = {}; this.createGain = () => ({ gain: { value: 1, setValueAtTime: () => {}, cancelScheduledValues: () => {}, linearRampToValueAtTime: (v, t) => ramps.push({ v, t }) }, connect: () => {} }); this.createBufferSource = () => ({ buffer: null, connect: () => {}, start: () => { sStarts++; }, stop: () => { sStops++; }, onended: null }); };
+loadScript('js/audio.js'); const se = window.soundEngine; se.init(); se.crowdBuffers = { cheer: { duration: 9.5 }, boo: { duration: 2.5 } };
+const c1 = se.playCrowdCheer(); assert(c1.started && sStarts === 1 && se.crowdActive.type === 'cheer' && ramps.length >= 2, 'Crowd cheer starts with fade-in and tail fade-out');
+se.ctx.currentTime = 3.0; const c2 = se.playCrowdCheer(); assert(c2.continued === true && !c2.started && sStarts === 1, 'Second cheer while playing continues smoothly without overlapping');
+const b1 = se.playCrowdBoo(); assert(b1.started && sStarts === 2 && sStops >= 1 && se.crowdActive.type === 'boo', 'Defeat boo fades out active cheer and plays boo');
+se.stopCrowdSfx(0.3); assert(se.crowdActive === null, 'stopCrowdSfx fades out and clears active crowd SFX'); se.toggleMute(); assert(se.playCrowdCheer().muted === true, 'Muted SoundEngine blocks crowd SFX'); se.toggleMute(); global.AudioContext = prevAC;
+assert(fs.readFileSync(path.resolve(__dirname, 'js/special-system.js'), 'utf8').includes('playCrowdCheer') && fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8').includes('playCrowdBoo') && fs.readFileSync(path.resolve(__dirname, 'js/pvp-system.js'), 'utf8').includes('playCrowdCheer'), 'Crowd SFX wired to Special, Victory & Defeat in PvE & PvP');
 let edOpen = false; const prevGetEl = global.document.getElementById; global.document.getElementById = (id) => ({ classList: { add: (c) => { if (id === 'chart-editor-modal' && c === 'open') edOpen = true; }, remove: () => {}, contains: () => edOpen }, style: {}, innerText: '', addEventListener: () => {} });
 loadScript('js/song-editor.js'); window.songEditor.open({ id: 't1', title: 'Test', artist: 'A', bpm: 120, duration: 30, notes: [] }); global.document.getElementById = prevGetEl;
 assert(typeof window.songEditor !== 'undefined' && edOpen === true && window.songEditor.song.id === 't1', 'SongEditor loads with zero syntax errors and opens #chart-editor-modal');
-// Zero God Object rule check (JS & CSS files) + JS Syntax check
 fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
     const src = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8'), lines = src.split('\n').length;
     assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
     let synOk = true; try { new vm.Script(src, { filename: f }); } catch (e) { synOk = false; }
     assert(synOk, `File js/${f} parses with zero syntax errors`);
 });
-allCssFiles.forEach(f => {
-    const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length;
-    assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`);
-});
-// Summary
-console.log(`\n==========================================\nTOTAL TESTS: ${testsPassed + testsFailed}\nPASSED: ${testsPassed}\nFAILED: ${testsFailed}\n==========================================\n`);
-process.exit(testsFailed > 0 ? 1 : 0);
+allCssFiles.forEach(f => { const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length; assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`); });
+console.log(`\n==========================================\nTOTAL TESTS: ${testsPassed + testsFailed}\nPASSED: ${testsPassed}\nFAILED: ${testsFailed}\n==========================================\n`); process.exit(testsFailed > 0 ? 1 : 0);
