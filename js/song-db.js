@@ -4,7 +4,11 @@ class SongDB {
         this.dbName = 'GVS_MusicStudio_DB';
         this.dbVersion = 1;
         this.db = null;
-        this.defaultSongId = 'default_thunder_strike';
+        this.defaultSongId = 'official_burning_through_the_redline';
+    }
+
+    isValidAudioSrc(src) {
+        return typeof src === 'string' && !src.startsWith('blob:') && (src.length > 50 || /^(assets\/|https?:\/\/|\/|\.\/)/i.test(src));
     }
 
     async init() {
@@ -39,44 +43,46 @@ class SongDB {
 
     async ensureDefaultSong() {
         try {
-            const existing1 = await this.getSong('default_thunder_strike');
-            if (!existing1) {
-                const s1 = await this.createDefaultRockSong('default_thunder_strike', 'Thunder Strike', 'Cyber Shock', 136, 'assets/covers/default_cover.jpg');
-                await this.saveSong(s1);
-            }
+            // Remove legacy starter songs from existing player databases
+            const legacyIds = (typeof window !== 'undefined' && Array.isArray(window.LEGACY_DEFAULT_SONG_IDS))
+                ? window.LEGACY_DEFAULT_SONG_IDS
+                : ['default_thunder_strike', 'default_hellfire_riff', 'default_anarchy_riot', 'default_gravit_stand'];
 
-            const existing2 = await this.getSong('default_hellfire_riff');
-            if (!existing2) {
-                const s2 = await this.createDefaultRockSong('default_hellfire_riff', 'Hellfire Riff', 'Johnny Blaze', 148, 'assets/heroes/johnny_blaze.jpg');
-                await this.saveSong(s2);
-            }
-
-            const existing3 = await this.getSong('default_anarchy_riot');
-            if (!existing3) {
-                const s3 = await this.createDefaultRockSong('default_anarchy_riot', 'Anarchy Riot', 'Roxie Anarchy', 160, 'assets/heroes/roxie_anarchy.jpg');
-                await this.saveSong(s3);
-            }
-
-            const existing4 = await this.getSong('default_gravit_stand');
-            if (!existing4) {
-                let gravitData = null;
+            for (const oldId of legacyIds) {
                 try {
-                    const res = await fetch('assets/songs/gravit_stand.json');
-                    if (res.ok) gravitData = await res.json();
-                } catch(err) {}
+                    const oldSong = await this.getSong(oldId);
+                    if (oldSong) await this.deleteSong(oldId);
+                } catch (e) {}
+            }
 
-                if (gravitData && gravitData.notes) {
-                    gravitData.id = 'default_gravit_stand';
-                    gravitData.isDefault = true;
-                    await this.saveSong(gravitData);
-                } else {
-                    const s4 = await this.createDefaultRockSong('default_gravit_stand', 'Gravit Stand', 'Antigravity Rockers', 142, 'assets/branding/wallpaper.jpg');
-                    s4.description = 'Faixa original lendária de alta voltagem (142 BPM)! Sincronia pesada para o apocalipse zumbi.';
-                    await this.saveSong(s4);
+            // Seed or repair all official built-in songs
+            const officialCatalog = (typeof window !== 'undefined' && Array.isArray(window.OFFICIAL_SONGS))
+                ? window.OFFICIAL_SONGS
+                : [];
+
+            for (const official of officialCatalog) {
+                const existing = await this.getSong(official.id);
+                if (!existing) {
+                    await this.saveSong(JSON.parse(JSON.stringify(official)));
+                } else if (existing.isDefault) {
+                    let needsRepair = false;
+                    if (!this.isValidAudioSrc(existing.audioData)) {
+                        existing.audioData = official.audioData;
+                        needsRepair = true;
+                    }
+                    if (!existing.cover) {
+                        existing.cover = official.cover;
+                        needsRepair = true;
+                    }
+                    if (!Array.isArray(existing.notes) || existing.notes.length === 0) {
+                        existing.notes = JSON.parse(JSON.stringify(official.notes));
+                        needsRepair = true;
+                    }
+                    if (needsRepair) await this.saveSong(existing);
                 }
             }
         } catch (e) {
-            console.warn("Could not check/create default starter song:", e);
+            console.warn("Could not check/create official songs:", e);
         }
     }
 
@@ -85,9 +91,7 @@ class SongDB {
             const songs = await this.getAllSongs();
             if (!songs || songs.length === 0) return;
             for (const s of songs) {
-                const titleLower = (s.title || '').toLowerCase();
-                const isGravit = titleLower.includes('gravit');
-                const isCustom = !s.isDefault || isGravit;
+                const isCustom = !s.isDefault;
                 if (isCustom && s.notes && s.notes.length > 0) {
                     fetch('/api/sync-song', {
                         method: 'POST',
@@ -105,8 +109,8 @@ class SongDB {
         }
     }
 
-    // Generates a complete 30-second procedural heavy rock song with charted notes
-    async createDefaultRockSong(id = 'default_thunder_strike', title = 'Thunder Strike', artist = 'Cyber Shock', bpm = 136, cover = 'assets/covers/default_cover.jpg') {
+    // Generates a complete 30-second procedural heavy rock song with charted notes (for studio custom fallback)
+    async createDefaultRockSong(id = 'custom_rock_track', title = 'Rock Track', artist = 'Oficial', bpm = 136, cover = 'assets/covers/default_cover.jpg') {
         // High quality charted notes for a 30s rock solo at 136 BPM
         // 136 BPM = 2.266 beats/sec = 0.4411s per beat
         bpm = Math.max(60, bpm || 136);
@@ -379,10 +383,30 @@ class SongDB {
         });
     }
 
+    async resolveAssetToDataUrl(src) {
+        if (!src || typeof src !== 'string' || src.startsWith('data:')) return src;
+        try {
+            const res = await fetch(src);
+            if (!res.ok) return src;
+            const blob = await res.blob();
+            return await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result || src);
+                reader.onerror = () => resolve(src);
+                reader.readAsDataURL(blob);
+            });
+        } catch (e) {
+            return src;
+        }
+    }
+
     // Export a single song as a .gvsong (JSON package)
     async exportSong(id) {
         const song = await this.getSong(id);
         if (!song) throw new Error("Música não encontrada para exportar");
+
+        const coverData = await this.resolveAssetToDataUrl(song.cover);
+        const audioData = await this.resolveAssetToDataUrl(song.audioData);
 
         const exportPayload = {
             format: 'GuitarVsZombies_SongPackage',
@@ -395,8 +419,8 @@ class SongDB {
                 description: song.description,
                 bpm: song.bpm || 120,
                 duration: song.duration,
-                cover: song.cover,
-                audioData: song.audioData,
+                cover: coverData,
+                audioData: audioData,
                 notes: song.notes || []
             }
         };
@@ -635,7 +659,7 @@ class SongDB {
 
                     // Validate audio data: if empty or dead blob url, synthesize heavy rock audio
                     let audioData = songData.audioData;
-                    if (!audioData || typeof audioData !== 'string' || audioData.startsWith('blob:') || audioData.length < 50) {
+                    if (!this.isValidAudioSrc(audioData)) {
                         console.log("Pacote importado sem áudio embutido; sintetizando trilha de rock...");
                         audioData = await this.synthesizeRockAudioWav(duration, bpm);
                     }

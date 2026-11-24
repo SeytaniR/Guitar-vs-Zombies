@@ -31,23 +31,8 @@ class Game {
     tr(k, f, p) { return (typeof i18n !== 'undefined') ? i18n.t(k, f, p) : f; }
 
     getBuiltinDefaultSong() {
-        const bpm = 136;
-        const beatSec = 60 / bpm;
-        const pattern = [
-            { b: 0, l: 0 }, { b: 1, l: 1 }, { b: 2, l: 2 }, { b: 3, l: 1 }, { b: 4, l: 0 }, { b: 5, l: 1 }, { b: 6, l: 0 }, { b: 7, l: 2 }, { b: 8, l: 0 }, { b: 9, l: 1 }, { b: 10, l: 2 }, { b: 11, l: 3 }, { b: 12, l: 0 }, { b: 12.5, l: 0 }, { b: 13, l: 1 }, { b: 14, l: 2 }, { b: 15, l: 3 }, { b: 16, l: 2 }, { b: 17, l: 1 }, { b: 18, l: 0 },
-            { b: 19, l: 1 }, { b: 19.5, l: 2 }, { b: 20, l: 3 }, { b: 21, l: 2 }, { b: 22, l: 1 }, { b: 23, l: 0 }, { b: 24, l: 0 }, { b: 24.5, l: 1 }, { b: 25, l: 2 }, { b: 25.5, l: 3 }, { b: 26, l: 2 }, { b: 26.5, l: 1 }, { b: 27, l: 0 }, { b: 28, l: 3 }, { b: 29, l: 2 }, { b: 29.5, l: 1 },
-            { b: 30, l: 0 }, { b: 31, l: 1 }, { b: 32, l: 2 }, { b: 32.5, l: 3 }, { b: 33, l: 2 }, { b: 33.5, l: 1 }, { b: 34, l: 0 }, { b: 35, l: 1 }, { b: 36, l: 2 }, { b: 37, l: 3 }, { b: 38, l: 2 }, { b: 39, l: 1 }, { b: 40, l: 0 }, { b: 41, l: 3 }, { b: 41.5, l: 2 }, { b: 42, l: 1 },
-            { b: 42.5, l: 0 }, { b: 43, l: 1 }, { b: 44, l: 2 }, { b: 44.5, l: 3 }, { b: 45, l: 2 }, { b: 46, l: 1 }, { b: 47, l: 0 }, { b: 48, l: 3 }, { b: 49, l: 2 }, { b: 50, l: 1 }, { b: 50.5, l: 2 }, { b: 51, l: 3 }, { b: 52, l: 0 }, { b: 53, l: 1 }, { b: 54, l: 2 }, { b: 55, l: 3 }, { b: 56, l: 3 }, { b: 57, l: 2 }, { b: 58, l: 0 }
-        ];
-        const notes = pattern.map(p => ({
-            time: Math.round((p.b * beatSec) * 1000) / 1000, lane: p.l, id: 'n_' + Math.random().toString(36).substr(2, 9)
-        }));
-        return {
-            id: 'default_thunder_strike', title: 'Thunder Strike', artist: 'Cyber Shock',
-            description: 'Solo oficial de alta voltagem pós-apocalíptico! Perfeito para detonar hordas mutantes no asfalto.',
-            bpm: bpm, duration: 30, cover: 'assets/covers/default_cover.jpg', audioData: null,
-            notes: notes, createdAt: Date.now(), updatedAt: Date.now(), isDefault: true
-        };
+        if (typeof window !== 'undefined' && typeof window.getOfficialSongClone === 'function') return window.getOfficialSongClone('official_burning_through_the_redline');
+        return { id: 'official_burning_through_the_redline', title: 'Burning Through The Redline', artist: 'Oficial', description: 'Alta voltagem a 140 BPM! Acelere no limite contra a horda zumbi.', bpm: 140, duration: 179.827, cover: 'assets/covers/burning_through_the_redline.jpg', audioData: 'assets/songs/burning_through_the_redline.mp3', notes: [], createdAt: Date.now(), updatedAt: Date.now(), isDefault: true };
     }
 
     // ==========================================
@@ -571,7 +556,10 @@ class Game {
     async populateSongDropdown() {
         const select = document.getElementById('map-song-select');
         if (!this.selectedSong) this.selectedSong = this.getBuiltinDefaultSong();
-        let songs = [this.selectedSong];
+        const fallbackSongs = (typeof window !== 'undefined' && Array.isArray(window.OFFICIAL_SONGS) && window.OFFICIAL_SONGS.length > 0)
+            ? window.OFFICIAL_SONGS.map(s => JSON.parse(JSON.stringify(s)))
+            : [this.selectedSong];
+        let songs = fallbackSongs;
         if (window.songDB) {
             try {
                 await window.songDB.init();
@@ -579,6 +567,17 @@ class Game {
                 if (dbSongs && dbSongs.length > 0) songs = dbSongs;
             } catch (e) { console.warn("Could not load songs from SongDB", e); }
         }
+        const officialOrder = (typeof window !== 'undefined' && Array.isArray(window.OFFICIAL_SONGS))
+            ? window.OFFICIAL_SONGS.map(s => s.id)
+            : [];
+        songs.sort((a, b) => {
+            const ia = officialOrder.indexOf(a.id);
+            const ib = officialOrder.indexOf(b.id);
+            if (ia !== -1 && ib !== -1) return ia - ib;
+            if (ia !== -1) return -1;
+            if (ib !== -1) return 1;
+            return (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
         this.availableSongs = songs;
         if (!this.selectedSong || !songs.some(s => s.id === this.selectedSong.id)) this.selectedSong = songs[0];
         if (select) {

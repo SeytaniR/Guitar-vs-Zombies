@@ -131,7 +131,8 @@ class SongEditor {
 
         // Load Audio Track Safely
         if (this.audio) {
-            if (this.song.audioData && typeof this.song.audioData === 'string' && this.song.audioData.length > 50 && !this.song.audioData.startsWith('blob:')) {
+            const hasValidAudio = this.song.audioData && typeof this.song.audioData === 'string' && !this.song.audioData.startsWith('blob:') && (this.song.audioData.length > 50 || /^(assets\/|https?:\/\/|\/|\.\/)/i.test(this.song.audioData));
+            if (hasValidAudio) {
                 try {
                     this.audio.src = this.song.audioData;
                     this.audio.playbackRate = this.playbackRate;

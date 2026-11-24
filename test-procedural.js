@@ -536,7 +536,7 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
 ['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
 ['missions.js', 'i18n-modes.js', 'i18n.js', 'song-editor.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
-['i18n-content.js', 'drone-catalog.js', 'drone-system.js', 'talents.js', 'combat.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`)); ['audio.js', 'special-system.js', 'pvp-system.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=69`), `index.html links ${f} with v=69`));
+['i18n-content.js', 'drone-catalog.js', 'drone-system.js', 'talents.js', 'combat.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`)); ['audio.js', 'special-system.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=69`), `index.html links ${f} with v=69`)); ['official-songs.js', 'song-db.js', 'song-editor.js', 'rhythm.js', 'main.js', 'i18n-modes.js'].forEach(f => assert(htmlContent.includes(`${f}?v=70`), `index.html links ${f} with v=70`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -922,7 +922,7 @@ assert(!cdSys.isActive && Math.abs(mockRhythm.customSongTime - 16.5) < 0.01, 'Re
 const updatedHtmlContent = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8'), updatedBattleCss = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
 assert(updatedHtmlContent.includes('id="battle-countdown-overlay"') && updatedBattleCss.includes('.battle-countdown-overlay') && updatedBattleCss.includes('background: transparent;'), 'Countdown overlay HTML & transparent CSS present');
 const rhythmCode = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8'), mainCode = fs.readFileSync(path.resolve(__dirname, 'js/main.js'), 'utf8');
-assert(rhythmCode.includes('const curTime = this.customSongTime || 0;') && rhythmCode.includes('note.y = (1.0 - cdProg) * startY + cdProg * targetY;') && mainCode.includes('{ b: 0, l: 0 }'), 'rhythm.js & main.js countdown integration verified');
+assert(rhythmCode.includes('const curTime = this.customSongTime || 0;') && rhythmCode.includes('note.y = (1.0 - cdProg) * startY + cdProg * targetY;') && mainCode.includes('getOfficialSongClone'), 'rhythm.js & main.js countdown integration verified');
 
 // 30. Testing PvE Compact Single-Card HUD, Dropdown Pickers & Guitarist Shop
 console.log('\n30. Testing PvE Compact Single-Card HUD, Dropdown Pickers & Guitarist Shop...');
@@ -983,11 +983,38 @@ assert(fs.readFileSync(path.resolve(__dirname, 'js/special-system.js'), 'utf8').
 let edOpen = false; const prevGetEl = global.document.getElementById; global.document.getElementById = (id) => ({ classList: { add: (c) => { if (id === 'chart-editor-modal' && c === 'open') edOpen = true; }, remove: () => {}, contains: () => edOpen }, style: {}, innerText: '', addEventListener: () => {} });
 loadScript('js/song-editor.js'); window.songEditor.open({ id: 't1', title: 'Test', artist: 'A', bpm: 120, duration: 30, notes: [] }); global.document.getElementById = prevGetEl;
 assert(typeof window.songEditor !== 'undefined' && edOpen === true && window.songEditor.song.id === 't1', 'SongEditor loads with zero syntax errors and opens #chart-editor-modal');
-fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
-    const src = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8'), lines = src.split('\n').length;
-    assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
-    let synOk = true; try { new vm.Script(src, { filename: f }); } catch (e) { synOk = false; }
-    assert(synOk, `File js/${f} parses with zero syntax errors`);
+// 33. Testing Official Soundtrack Catalog (5 Original Tracks & Legacy Removal)
+console.log('\n33. Testing Official Soundtrack Catalog (5 Original Tracks & Legacy Removal)...');
+loadScript('js/official-songs.js');
+loadScript('js/song-db.js');
+const offSongs = window.OFFICIAL_SONGS;
+assert(Array.isArray(offSongs) && offSongs.length === 5, 'Official catalog contains exactly 5 original tracks');
+const expectedOffIds = ['official_burning_through_the_redline', 'official_copper_and_chrome', 'official_gravitys_last_stand', 'official_riot_at_the_gate', 'official_the_last_defiance'];
+assert(expectedOffIds.every(id => offSongs.some(s => s.id === id)), 'All 5 expected official song IDs are present');
+assert(offSongs.every(s => !/radiohead|creep|highway|acdc/i.test(s.title + ' ' + s.artist + ' ' + s.id)), 'Zero copyrighted band tracks in official catalog');
+offSongs.forEach(s => {
+    assert(s.artist === 'Oficial' && s.isDefault === true && s.notes.length >= 480, `Official song "${s.title}" has Oficial artist, isDefault & ${s.notes.length} notes`);
+    assert(fs.statSync(path.resolve(__dirname, s.audioData)).size > 1000000 && fs.statSync(path.resolve(__dirname, s.cover)).size > 10000, `MP3 & cover exist on disk for "${s.title}"`);
+    ['pt', 'en', 'es', 'fr'].forEach(lang => assert(typeof i18n.translations[lang]['song_desc_' + s.id] === 'string' && i18n.translations[lang]['song_desc_' + s.id].length > 10, `i18n ${lang} has description for ${s.id}`));
 });
-allCssFiles.forEach(f => { const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length; assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`); });
-console.log(`\n==========================================\nTOTAL TESTS: ${testsPassed + testsFailed}\nPASSED: ${testsPassed}\nFAILED: ${testsFailed}\n==========================================\n`); process.exit(testsFailed > 0 ? 1 : 0);
+assert(window.songDB.isValidAudioSrc('assets/songs/riot_at_the_gate.mp3') && window.songDB.isValidAudioSrc('data:audio/mpeg;base64,' + 'A'.repeat(60)) && !window.songDB.isValidAudioSrc('blob:http://x/1') && !window.songDB.isValidAudioSrc(''), 'SongDB.isValidAudioSrc accepts MP3 asset paths & Data URLs, rejects blob/empty');
+const mockStore = new Map([['default_thunder_strike', { id: 'default_thunder_strike', isDefault: true }], ['default_hellfire_riff', { id: 'default_hellfire_riff', isDefault: true }], ['default_anarchy_riot', { id: 'default_anarchy_riot', isDefault: true }], ['default_gravit_stand', { id: 'default_gravit_stand', isDefault: true }], ['user_custom_1', { id: 'user_custom_1', isDefault: false }]]);
+const mockDB = new SongDB(); mockDB.getSong = async (id) => mockStore.get(id); mockDB.saveSong = async (s) => { mockStore.set(s.id, s); return s; }; mockDB.deleteSong = async (id) => mockStore.delete(id);
+(async () => {
+    await mockDB.ensureDefaultSong();
+    assert(['default_thunder_strike', 'default_hellfire_riff', 'default_anarchy_riot', 'default_gravit_stand'].every(id => !mockStore.has(id)), 'ensureDefaultSong removes all 4 legacy default songs from IndexedDB');
+    assert(expectedOffIds.every(id => mockStore.has(id)) && mockStore.has('user_custom_1'), 'ensureDefaultSong seeds all 5 official songs and preserves user custom songs');
+    ['index.html', 'js/main.js', 'js/song-db.js', 'js/i18n-modes.js'].forEach(f => {
+        const c = fs.readFileSync(path.resolve(__dirname, f), 'utf8');
+        assert(!/Thunder Strike|Cyber Shock|Hellfire Riff|Anarchy Riot|Gravit Stand/.test(c), `No legacy song names remain in ${f}`);
+    });
+    fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
+        const src = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8'), lines = src.split('\n').length;
+        assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);
+        let synOk = true; try { new vm.Script(src, { filename: f }); } catch (e) { synOk = false; }
+        assert(synOk, `File js/${f} parses with zero syntax errors`);
+    });
+    allCssFiles.forEach(f => { const lines = fs.readFileSync(path.resolve(__dirname, 'css', f), 'utf8').split('\n').length; assert(lines < 1000, `File css/${f} is under 1,000 lines (${lines} lines)`); });
+    console.log(`\n==========================================\nTOTAL TESTS: ${testsPassed + testsFailed}\nPASSED: ${testsPassed}\nFAILED: ${testsFailed}\n==========================================\n`);
+    process.exit(testsFailed > 0 ? 1 : 0);
+})();

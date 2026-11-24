@@ -874,7 +874,8 @@ class RhythmSystem {
         // Sort notes chronologically
         this.notes.sort((a, b) => a.time - b.time);
 
-        if (song.audioData && typeof song.audioData === 'string' && song.audioData.length > 50 && !song.audioData.startsWith('blob:')) {
+        const hasValidAudio = song.audioData && typeof song.audioData === 'string' && !song.audioData.startsWith('blob:') && (song.audioData.length > 50 || /^(assets\/|https?:\/\/|\/|\.\/)/i.test(song.audioData));
+        if (hasValidAudio) {
             try {
                 this.songAudio = new Audio(song.audioData);
                 this.songAudio.currentTime = 0;
