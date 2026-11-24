@@ -791,10 +791,18 @@ class ZombieEntity {
             ctx.fillStyle = (meta && meta.bar) ? meta.bar : '#00ff66';
             ctx.fillRect(bx, by, Math.max(0, bw * (this.hp / this.maxHp)), bh);
 
-            ctx.font = "bold 8px 'Segoe UI', sans-serif";
-            ctx.fillStyle = (meta && meta.name) ? meta.name : '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.fillText(this.name || this.tr('zombieFallback', "ZUMBI").toUpperCase(), this.x, by - 2);
+            const zName = this.name || this.tr('zombieFallback', "ZUMBI").toUpperCase();
+            const zCol = (meta && meta.name) ? meta.name : '#ffffff';
+            const pu = typeof window !== 'undefined' ? window.PerfUtils : null;
+            const badge = pu && pu.getTextBadge(`zname_${zName}_${zCol}`, zName, "bold 8px 'Segoe UI', sans-serif", zCol);
+            if (badge) {
+                ctx.drawImage(badge.canvas, Math.round(this.x - badge.halfW), Math.round(by - 4 - badge.halfH));
+            } else {
+                ctx.font = "bold 8px 'Segoe UI', sans-serif";
+                ctx.fillStyle = zCol;
+                ctx.textAlign = 'center';
+                ctx.fillText(zName, this.x, by - 2);
+            }
         }
     }
 

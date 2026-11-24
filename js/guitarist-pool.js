@@ -364,9 +364,9 @@ class GuitaristPoolSystem {
     }
 
     savePlayerXp() {
-        try {
-            localStorage.setItem('gvs_player_xp', (this.playerXp || 0).toString());
-        } catch(e) {}
+        const doSave = () => { try { localStorage.setItem('gvs_player_xp', (this.playerXp || 0).toString()); } catch (e) {} };
+        if (typeof window !== 'undefined' && window.PerfUtils && typeof window.PerfUtils.deferSave === 'function') window.PerfUtils.deferSave('player_xp', doSave);
+        else doSave();
     }
 
     addPlayerXp(amount) {
@@ -435,9 +435,9 @@ class GuitaristPoolSystem {
     }
 
     saveHeroLevels() {
-        try {
-            localStorage.setItem('gvs_hero_levels', JSON.stringify(this.heroLevels));
-        } catch(e) {}
+        const doSave = () => { try { localStorage.setItem('gvs_hero_levels', JSON.stringify(this.heroLevels)); } catch (e) {} };
+        if (typeof window !== 'undefined' && window.PerfUtils && typeof window.PerfUtils.deferSave === 'function') window.PerfUtils.deferSave('hero_levels', doSave);
+        else doSave();
     }
 
     getHeroLevelData(heroId) {

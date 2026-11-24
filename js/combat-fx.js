@@ -55,6 +55,7 @@ class CombatFX {
     }
 
     addFloatingText(text, x, y, color = '#ffff00', isCrit = false) {
+        if (this.floatingTexts.length >= 24) this.floatingTexts.shift();
         this.floatingTexts.push({
             text: text,
             x: x + (Math.random() - 0.5) * 16,
@@ -429,6 +430,7 @@ class CombatFX {
         for (let i = this.shockwaves.length - 1; i >= 0; i--) {
             if (this.shockwaves[i].alpha <= 0) { this.shockwaves[i] = this.shockwaves[this.shockwaves.length - 1]; this.shockwaves.pop(); }
         }
+        if (this.shockwaves.length > 16) this.shockwaves.splice(0, this.shockwaves.length - 16);
         for (let i = this.particles.length - 1; i >= 0; i--) {
             if (this.particles[i].life <= 0) { this.particles[i] = this.particles[this.particles.length - 1]; this.particles.pop(); }
         }
@@ -471,42 +473,49 @@ class CombatFX {
         });
         ctx.restore();
 
-        // Shockwaves
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        this.shockwaves.forEach(sw => {
+        // Shockwaves (Zero per-item save/restore)
+        if (this.shockwaves.length > 0) {
             ctx.save();
-            ctx.strokeStyle = sw.color;
-            ctx.lineWidth = sw.lineWidth;
-            ctx.globalAlpha = Math.max(0, sw.alpha);
-            ctx.beginPath();
-            ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < this.shockwaves.length; i++) {
+                const sw = this.shockwaves[i];
+                ctx.strokeStyle = sw.color;
+                ctx.lineWidth = sw.lineWidth;
+                ctx.globalAlpha = Math.max(0, sw.alpha);
+                ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2); ctx.stroke();
+            }
             ctx.restore();
-        });
+        }
 
         // Particles (Fast GPU rect batch)
-        for (let i = 0; i < this.particles.length; i++) {
-            const pt = this.particles[i];
-            ctx.fillStyle = pt.color;
-            ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
-            ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
-        }
-        ctx.restore();
-
-        // Floating Text
-        this.floatingTexts.forEach(ft => {
+        if (this.particles.length > 0) {
             ctx.save();
-            ctx.globalAlpha = Math.max(0, ft.alpha);
-            ctx.font = `bold ${Math.round(14 * ft.scale)}px 'Impact', sans-serif`;
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < this.particles.length; i++) {
+                const pt = this.particles[i];
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+                ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
+            }
+            ctx.restore();
+        }
+
+        // Floating Text (Single save/restore outside loop)
+        if (this.floatingTexts.length > 0) {
+            ctx.save();
             ctx.textAlign = 'center';
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 3;
-            ctx.strokeText(ft.text, ft.x, ft.y);
-            ctx.fillStyle = ft.color;
-            ctx.fillText(ft.text, ft.x, ft.y);
+            for (let i = 0; i < this.floatingTexts.length; i++) {
+                const ft = this.floatingTexts[i];
+                ctx.globalAlpha = Math.max(0, ft.alpha);
+                ctx.font = `bold ${Math.round(14 * ft.scale)}px 'Impact', sans-serif`;
+                ctx.strokeText(ft.text, ft.x, ft.y);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            }
             ctx.restore();
-        });
+        }
 
         // MultiKill Radical Adrenaline Banners
         this.drawMultiKillBanners(ctx);
@@ -514,6 +523,8 @@ class CombatFX {
 
     drawMultiKillBanners(ctx) {
         if (!this.multiKillBanners || this.multiKillBanners.length === 0) return;
+        if (!this._flareGrads) this._flareGrads = {};
+        const flareW = 220;
         this.multiKillBanners.forEach(b => {
             if (b.alpha <= 0) return;
             ctx.save();
@@ -526,11 +537,14 @@ class CombatFX {
             ctx.scale(currentScale, currentScale);
             ctx.transform(1, 0, -0.12, 1, 0, 0);
 
-            // Background dynamic neon flare
-            const flareW = 220;
-            const flareGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, flareW / 2);
-            flareGrad.addColorStop(0, b.color + '44');
-            flareGrad.addColorStop(1, 'rgba(0,0,0,0)');
+            // Cached radial flare gradient per banner color
+            let flareGrad = this._flareGrads[b.color];
+            if (!flareGrad) {
+                flareGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, flareW / 2);
+                flareGrad.addColorStop(0, b.color + '44');
+                flareGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                this._flareGrads[b.color] = flareGrad;
+            }
             ctx.fillStyle = flareGrad;
             ctx.fillRect(-flareW / 2, -35, flareW, 70);
 

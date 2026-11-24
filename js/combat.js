@@ -4,43 +4,43 @@
 class CombatSystem {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { alpha: false }) || this.canvas.getContext('2d');
 
         // Modular VFX Subsystem
         const FXClass = window.CombatFX || CombatFX;
         this.fx = new FXClass();
 
-        // Asset Loader
+        // Lazy Asset Loader (only fxSheet decodes eagerly; maps/heroes/zombies/drones decode on first demand)
         const SheetClass = window.SpriteSheet || SpriteSheet;
         const loadImg = src => { const img = new Image(); img.src = src; return img; };
         const loadSheet = (src, cols = 4, rows = 3) => new SheetClass(loadImg(src), cols, rows);
-        this.assets = {
-            map_void: loadImg('assets/maps/map_void.jpg'), map_ruins: loadImg('assets/maps/map_ruins.jpg'), map_wasteland: loadImg('assets/maps/map_wasteland.jpg'),
-            map_thermopylae: loadImg('assets/maps/map_thermopylae.jpg'), map_coliseum: loadImg('assets/maps/map_coliseum.jpg'),
-            map_bikini_bottom: loadImg('assets/maps/map_bikini_bottom.jpg'), map_valhalla: loadImg('assets/maps/map_valhalla.jpg'), map_stadium: loadImg('assets/maps/map_stadium.jpg'),
+        const rawCache = {};
+        const assetsObj = {
+            fxSheet: loadSheet('assets/fx2.jpg'),
             get bg() {
                 const mapId = (window.stageSystem && typeof window.stageSystem.getSelectedMap === 'function')
-                    ? window.stageSystem.getSelectedMap().id
-                    : 'map_void';
+                    ? window.stageSystem.getSelectedMap().id : 'map_void';
                 return this[mapId] || this.map_void;
-            },
-            heroSheet: loadSheet('assets/hero2.jpg'), heroVulkanSheet: loadSheet('assets/hero_vulkan.jpg'),
-            heroHazmatSheet: loadSheet('assets/hero_hazmat.jpg'), heroCyborgSheet: loadSheet('assets/hero_cyborg.jpg'),
-            heroGladiatorSheet: loadSheet('assets/hero_gladiator.jpg', 4, 4), heroAnarchySheet: loadSheet('assets/hero_anarchy.jpg'),
-            heroFinnSheet: loadSheet('assets/hero_finn.jpg'), heroDracoSheet: loadSheet('assets/hero_draco.jpg'),
-            heroFenrirSheet: loadSheet('assets/hero_fenrir.jpg'), heroSpongeSheet: loadSheet('assets/hero_sponge.jpg'),
-            heroSlashSheet: loadSheet('assets/hero_slash.jpg'),
-            zombieSheet: loadSheet('assets/zombie2.jpg'), mutantSheet: loadSheet('assets/zombie_mutant.jpg'),
-            leaperSheet: loadSheet('assets/zombie_leaper.jpg'), soldierSheet: loadSheet('assets/zombie_soldier.jpg'),
-            sporeSheet: loadSheet('assets/zombie_spore.jpg'), bloaterSheet: loadSheet('assets/zombie_bloater.jpg'),
-            gladiatorSheet: loadSheet('assets/zombie_gladiator.jpg'), hazmatSheet: loadSheet('assets/zombie_hazmat.jpg'),
-            clownSheet: loadSheet('assets/zombie_clown.jpg'), builderSheet: loadSheet('assets/zombie_builder.jpg'),
-            scientistSheet: loadSheet('assets/zombie_scientist.jpg'), firefighterSheet: loadSheet('assets/zombie_firefighter.jpg'),
-            sheriffSheet: loadSheet('assets/zombie_sheriff.jpg'), politicianSheet: loadSheet('assets/zombie_politician.jpg'),
-            batmanSheet: loadSheet('assets/zombie_batman.jpg'), kratosSheet: loadSheet('assets/zombie_kratos.jpg'),
-            droneOffensiveSheet: loadSheet('assets/drones/drone_offensive_sheet.jpg'), droneSupportSheet: loadSheet('assets/drones/drone_support_sheet.jpg'), droneControllerSheet: loadSheet('assets/drones/drone_controller_sheet.jpg'),
-            fxSheet: loadSheet('assets/fx2.jpg')
+            }
         };
+        const lazyImg = (key, src) => Object.defineProperty(assetsObj, key, { enumerable: true, get() { return rawCache[key] || (rawCache[key] = loadImg(src)); } });
+        const lazySheet = (key, src, c = 4, r = 3) => Object.defineProperty(assetsObj, key, { enumerable: true, get() { return rawCache[key] || (rawCache[key] = loadSheet(src, c, r)); } });
+        [['map_void','assets/maps/map_void.jpg'],['map_ruins','assets/maps/map_ruins.jpg'],['map_wasteland','assets/maps/map_wasteland.jpg'],
+         ['map_thermopylae','assets/maps/map_thermopylae.jpg'],['map_coliseum','assets/maps/map_coliseum.jpg'],['map_bikini_bottom','assets/maps/map_bikini_bottom.jpg'],
+         ['map_valhalla','assets/maps/map_valhalla.jpg'],['map_stadium','assets/maps/map_stadium.jpg']].forEach(([k, s]) => lazyImg(k, s));
+        [['heroSheet','assets/hero2.jpg'],['heroVulkanSheet','assets/hero_vulkan.jpg'],['heroHazmatSheet','assets/hero_hazmat.jpg'],
+         ['heroCyborgSheet','assets/hero_cyborg.jpg'],['heroGladiatorSheet','assets/hero_gladiator.jpg',4,4],['heroAnarchySheet','assets/hero_anarchy.jpg'],
+         ['heroFinnSheet','assets/hero_finn.jpg'],['heroDracoSheet','assets/hero_draco.jpg'],['heroFenrirSheet','assets/hero_fenrir.jpg'],
+         ['heroSpongeSheet','assets/hero_sponge.jpg'],['heroSlashSheet','assets/hero_slash.jpg'],
+         ['zombieSheet','assets/zombie2.jpg'],['mutantSheet','assets/zombie_mutant.jpg'],['leaperSheet','assets/zombie_leaper.jpg'],
+         ['soldierSheet','assets/zombie_soldier.jpg'],['sporeSheet','assets/zombie_spore.jpg'],['bloaterSheet','assets/zombie_bloater.jpg'],
+         ['gladiatorSheet','assets/zombie_gladiator.jpg'],['hazmatSheet','assets/zombie_hazmat.jpg'],['clownSheet','assets/zombie_clown.jpg'],
+         ['builderSheet','assets/zombie_builder.jpg'],['scientistSheet','assets/zombie_scientist.jpg'],['firefighterSheet','assets/zombie_firefighter.jpg'],
+         ['sheriffSheet','assets/zombie_sheriff.jpg'],['politicianSheet','assets/zombie_politician.jpg'],['batmanSheet','assets/zombie_batman.jpg'],
+         ['kratosSheet','assets/zombie_kratos.jpg'],['droneOffensiveSheet','assets/drones/drone_offensive_sheet.jpg'],
+         ['droneSupportSheet','assets/drones/drone_support_sheet.jpg'],['droneControllerSheet','assets/drones/drone_controller_sheet.jpg']
+        ].forEach(([k, s, c, r]) => lazySheet(k, s, c || 4, r || 3));
+        this.assets = assetsObj;
 
         // Core Combat Entities with backwards-compatible accessors to FX
         const fxRef = this.fx;
@@ -104,13 +104,20 @@ class CombatSystem {
     getActiveHeroSheet() { const h = this.getActiveHeroData(); return (h && this.assets && this.assets[h.sheet]) ? this.assets[h.sheet] : this.assets.heroSheet; }
 
     getRoadMetrics() {
-        const cw = Math.max(100, this.canvas.width || 360);
-        const ch = Math.max(100, this.canvas.height || 300), bg = this.assets.bg;
-        if (!bg.complete || bg.naturalWidth === 0) return { drawX: 0, drawY: 0, drawW: cw, drawH: ch, laneY: ch * 0.78 };
-        const aspect = bg.naturalHeight / bg.naturalWidth;
-        let drawH = ch * 1.05, drawW = drawH / aspect;
-        if (drawW < cw * 1.25) { drawW = cw * 1.25; drawH = drawW * aspect; }
-        return { drawX: -Math.round((drawW - cw) * 0.2), drawY: ch - drawH, drawW, drawH, laneY: (ch - drawH) + drawH * 0.77 };
+        const cw = Math.max(100, this.canvas.width || 360), ch = Math.max(100, this.canvas.height || 300), bg = this.assets.bg;
+        const ready = bg && bg.complete && bg.naturalWidth > 0, bgKey = ready ? (bg.src || 'ok') : 'fallback';
+        if (this._roadCache && this._roadCache.cw === cw && this._roadCache.ch === ch && this._roadCache.bgKey === bgKey) return this._roadCache.metrics;
+        let metrics;
+        if (!ready) {
+            metrics = { drawX: 0, drawY: 0, drawW: cw, drawH: ch, laneY: ch * 0.78 };
+        } else {
+            const aspect = bg.naturalHeight / bg.naturalWidth;
+            let drawH = ch * 1.05, drawW = drawH / aspect;
+            if (drawW < cw * 1.25) { drawW = cw * 1.25; drawH = drawW * aspect; }
+            metrics = { drawX: -Math.round((drawW - cw) * 0.2), drawY: ch - drawH, drawW, drawH, laneY: (ch - drawH) + drawH * 0.77 };
+        }
+        this._roadCache = { cw, ch, bgKey, metrics };
+        return metrics;
     }
 
     getHeroPosition() {
@@ -135,6 +142,9 @@ class CombatSystem {
         const activeMap = (window.stageSystem && window.stageSystem.getSelectedMap) ? window.stageSystem.getSelectedMap().id : 'map_void';
         if (this.fx && typeof this.fx.initEmbers === 'function') this.fx.initEmbers(25, this.canvas.width || 800, this.canvas.height || 600, activeMap);
         this.activeEnemyTypes = (enemyList && enemyList.length > 0) ? enemyList : (window.enemyPool ? window.enemyPool.getEnemiesForCurrentMatch() : []);
+        void this.assets.bg; void this.getActiveHeroSheet();
+        if (window.droneSystem && typeof window.droneSystem.getDroneSheet === 'function') window.droneSystem.getDroneSheet(window.droneSystem.getActiveDrone(), this);
+        if (typeof ZOMBIE_META_MAP !== 'undefined') this.activeEnemyTypes.forEach(t => { const k = (ZOMBIE_META_MAP[t && t.type] || {}).sheet || 'zombieSheet'; void this.assets[k]; });
         this.battleStats = { damageDealt: 0, zombiesKilled: 0, coinsEarned: 0, hitsReceived: 0, matchStartTime: performance.now() };
         this.matchActive = true;
         const cw = Math.max(200, this.canvas ? this.canvas.width : 360);
@@ -404,14 +414,15 @@ class CombatSystem {
             window.metaMissionSystem.recordStat('unbelievable', 1);
         }
 
-        try {
-            const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0', 10);
-            localStorage.setItem('gvs_total_kills', (tk + 1).toString());
-            const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
-            if (this.score > hs) {
-                localStorage.setItem('gvs_highscore', this.score.toString());
-            }
-        } catch (e) {}
+        const saveKillMeta = () => {
+            try {
+                const tk = parseInt(localStorage.getItem('gvs_total_kills') || '0', 10);
+                localStorage.setItem('gvs_total_kills', (tk + 1).toString());
+                const hs = parseInt(localStorage.getItem('gvs_highscore') || '0', 10);
+                if (this.score > hs) localStorage.setItem('gvs_highscore', this.score.toString());
+            } catch (e) {}
+        };
+        if (window.PerfUtils) window.PerfUtils.deferSave('combat_meta', saveKillMeta); else saveKillMeta();
         if (window.metaMissionSystem) window.metaMissionSystem.recordKill(z);
 
         const activeHero = this.getActiveHeroData();
@@ -924,28 +935,16 @@ class CombatSystem {
         const totalHeroFrames = activeSheet ? (activeSheet.totalFrames || 12) : 12;
         const heroFrame = (this.time / 100) % totalHeroFrames;
 
-        if (activeSheet) {
-            activeSheet.drawFrame(
-                this.ctx,
-                heroFrame,
-                heroPos.x,
-                heroPos.y - 12,
-                0.52,
-                false,
-                this.heroFlashTime > 0
-            );
-        }
-
+        if (activeSheet) activeSheet.drawFrame(this.ctx, heroFrame, heroPos.x, heroPos.y - 12, 0.52, false, this.heroFlashTime > 0);
         if (activeHero) {
-            this.ctx.save();
-            this.ctx.font = "bold 9px 'Segoe UI', sans-serif";
-            this.ctx.textAlign = 'center';
-            this.ctx.lineWidth = 2.5;
-            this.ctx.strokeStyle = '#000000';
-            this.ctx.strokeText(activeHero.name, heroPos.x + 8, heroPos.y - 42);
-            this.ctx.fillStyle = activeHero.accentColor || '#ffaa00';
-            this.ctx.fillText(activeHero.name, heroPos.x + 8, heroPos.y - 42);
-            this.ctx.restore();
+            const col = activeHero.accentColor || '#ffaa00', pu = typeof window !== 'undefined' ? window.PerfUtils : null;
+            const badge = pu && pu.getTextBadge(`hero_${activeHero.name}_${col}`, activeHero.name, "bold 9px 'Segoe UI', sans-serif", col, '#000000', 2.5);
+            if (badge) { this.ctx.drawImage(badge.canvas, Math.round(heroPos.x + 8 - badge.halfW), Math.round(heroPos.y - 44 - badge.halfH)); }
+            else {
+                this.ctx.save(); this.ctx.font = "bold 9px 'Segoe UI', sans-serif"; this.ctx.textAlign = 'center';
+                this.ctx.lineWidth = 2.5; this.ctx.strokeStyle = '#000000'; this.ctx.strokeText(activeHero.name, heroPos.x + 8, heroPos.y - 42);
+                this.ctx.fillStyle = col; this.ctx.fillText(activeHero.name, heroPos.x + 8, heroPos.y - 42); this.ctx.restore();
+            }
         }
 
         if (this.rockPower > 30) this.fx.drawElectricAura(this.ctx, heroPos.x + 10, heroPos.y - 18);
@@ -955,18 +954,15 @@ class CombatSystem {
         if (window.droneSystem && typeof window.droneSystem.draw === 'function') window.droneSystem.draw(this.ctx, this);
 
         // 7. Projectiles
-        this.ctx.save();
-        this.ctx.globalCompositeOperation = 'lighter';
-        this.entities.projectiles.forEach(p => {
-            const sc = p.isSkillShot ? 0.28 : (p.isCrit ? 0.25 : 0.18);
+        this.ctx.save(); this.ctx.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < this.entities.projectiles.length; i++) {
+            const p = this.entities.projectiles[i], sc = p.isSkillShot ? 0.28 : (p.isCrit ? 0.25 : 0.18);
             this.assets.fxSheet.drawFrame(this.ctx, p.frame, p.x, p.y, sc, false);
-        });
+        }
         this.ctx.restore();
 
-        // 8. VFX Module (Explosions, Shockwaves, Particles, Floating Text)
+        // 8 & 9. VFX, Vignette & Cinematics
         this.fx.drawEffects(this.ctx, this.assets.fxSheet);
-
-        // 9. Vignette & Game Over / Cinematics
         this.fx.drawVignette(this.ctx, this.canvas.width, this.canvas.height);
         if (this.isVictorySequence) this.fx.drawVictoryFinaleOverlay(this.ctx, this.canvas.width, this.canvas.height, this.victorySequenceTimer, 2.4);
         if (this.isDefeatSequence) this.fx.drawDefeatCinematicOverlay(this.ctx, this.canvas.width, this.canvas.height, this.defeatSequenceTimer, 1.8);
@@ -977,8 +973,20 @@ class CombatSystem {
     drawGameOverOverlay() { this.fx.drawGameOverOverlay(this.ctx, this.canvas.width, this.canvas.height); }
     drawAmpAndShadow(heroX, heroY) { this.fx.drawAmpAndShadow(this.ctx, heroX, heroY, this.time); }
     drawBackground() {
-        const bg = this.assets.bg;
-        if (!bg.complete || bg.naturalWidth === 0 || this.canvas.width <= 10 || this.canvas.height <= 10) { this.ctx.fillStyle = '#1a1a2e'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); return; }
+        const bg = this.assets.bg, cw = this.canvas.width, ch = this.canvas.height;
+        if (!bg.complete || bg.naturalWidth === 0 || cw <= 10 || ch <= 10) { this.ctx.fillStyle = '#1a1a2e'; this.ctx.fillRect(0, 0, cw, ch); return; }
+        const key = `${bg.src}|${cw}x${ch}`;
+        if (typeof document !== 'undefined' && typeof document.createElement === 'function') {
+            if (!this._bgCache || this._bgCache.key !== key) {
+                const c = (this._bgCache && this._bgCache.canvas) || document.createElement('canvas');
+                c.width = cw; c.height = ch;
+                const m = this.getRoadMetrics(), bctx = c.getContext('2d', { alpha: false }) || c.getContext('2d');
+                if (m.drawW > 0 && m.drawH > 0 && bctx) bctx.drawImage(bg, m.drawX, m.drawY, m.drawW, m.drawH);
+                this._bgCache = { key, canvas: c };
+            }
+            this.ctx.drawImage(this._bgCache.canvas, 0, 0);
+            return;
+        }
         const m = this.getRoadMetrics();
         if (m.drawW > 0 && m.drawH > 0) this.ctx.drawImage(bg, m.drawX, m.drawY, m.drawW, m.drawH);
     }

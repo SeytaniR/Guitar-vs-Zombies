@@ -26,7 +26,7 @@ function loadScript(relPath) {
 console.log('=== TEST SUITE: GUITAR VS ZOMBIES PROCEDURAL SYSTEMS ===\n');
 
 // 1. Load Systems
-['js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/drone-catalog.js', 'js/drone-system.js', 'js/zombie-entity.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
+['js/perf-utils.js', 'js/i18n.js', 'js/i18n-content.js', 'js/i18n-modes.js', 'js/stage-system.js', 'js/skills.js', 'js/guitarist-pool.js', 'js/drone-catalog.js', 'js/drone-system.js', 'js/zombie-entity.js', 'js/drone-missions.js', 'js/special-system.js', 'js/pvp-system.js', 'js/countdown-system.js'].forEach(loadScript);
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -534,9 +534,9 @@ assert(!htmlContent.includes('id="map-arena-prev-btn"') && !htmlContent.includes
 assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling for .selected-arena-showcase');
 
 // Cache Buster Version & Modular CSS Links (v1.9.7 Build 62)
-['base.css', 'menu.css', 'map-select.css', 'battle.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'missions.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`));
+['base.css', 'menu.css', 'map-select.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`)); ['battle.css', 'missions.css'].forEach(f => assert(htmlContent.includes(`${f}?v=71`), `index.html links ${f} with v=71`));
 ['missions.js', 'i18n-modes.js', 'i18n.js', 'song-editor.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
-['i18n-content.js', 'drone-catalog.js', 'drone-system.js', 'talents.js', 'combat.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`)); ['audio.js', 'special-system.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=69`), `index.html links ${f} with v=69`)); ['official-songs.js', 'song-db.js', 'song-editor.js', 'rhythm.js', 'main.js', 'i18n-modes.js'].forEach(f => assert(htmlContent.includes(`${f}?v=70`), `index.html links ${f} with v=70`));
+['i18n-content.js', 'drone-catalog.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`)); ['special-system.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=69`), `index.html links ${f} with v=69`)); ['official-songs.js', 'song-db.js', 'song-editor.js'].forEach(f => assert(htmlContent.includes(`${f}?v=70`), `index.html links ${f} with v=70`)); ['perf-utils.js', 'audio.js', 'i18n.js', 'i18n-modes.js', 'spritesheet.js', 'combat-fx.js', 'zombie-entity.js', 'guitarist-pool.js', 'drone-system.js', 'talents.js', 'skills.js', 'combat.js', 'rhythm.js', 'drone-missions.js', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=71`), `index.html links ${f} with v=71`));
 assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
@@ -1008,6 +1008,70 @@ const mockDB = new SongDB(); mockDB.getSong = async (id) => mockStore.get(id); m
         const c = fs.readFileSync(path.resolve(__dirname, f), 'utf8');
         assert(!/Thunder Strike|Cyber Shock|Hellfire Riff|Anarchy Riot|Gravit Stand/.test(c), `No legacy song names remain in ${f}`);
     });
+    // 34. Testing Drone Quests Category (8 Quests, Combat Tracking, Claiming & 4-Language i18n)
+    console.log('\n34. Testing Drone Quests (8 Quests, Combat Hooks, Claims & 4-Language i18n)...');
+    const dmList = meta.getAllDroneMissions();
+    assert(Array.isArray(dmList) && dmList.length === 8, 'MetaMissionSystem exposes all 8 procedural drone quests');
+    const reqDroneQIds = ['drone_actions', 'drone_kills', 'drone_damage', 'drone_heals', 'drone_cc_applied', 'drone_missiles', 'drone_unlocked', 'drone_max_level'];
+    assert(reqDroneQIds.every(id => dmList.some(m => m.id === id && m.category === 'drones' && m.allTiers.length === 5)), 'All 8 drone quest IDs have 5 tiers and drones category');
+    dmList.forEach(m => {
+        assert(fs.existsSync(path.resolve(__dirname, m.icon)), `Drone quest icon exists: ${m.icon}`);
+        ['pt', 'en', 'es', 'fr'].forEach(lang => {
+            const tr = i18n.translations[lang];
+            assert(typeof tr[`dronem_name_${m.id}`] === 'string' && typeof tr[`dronem_desc_${m.id}`] === 'string' && typeof tr[`dronem_tier_${m.id}_4`] === 'string', `i18n ${lang} covers drone quest ${m.id}`);
+        });
+    });
+    const actBefore = meta.state.performanceStats['drone_actions'] || 0;
+    const dmgBefore = meta.state.performanceStats['drone_damage'] || 0;
+    const healBefore = meta.state.performanceStats['drone_heals'] || 0;
+    const ccBefore = meta.state.performanceStats['drone_cc_applied'] || 0;
+    const mslBefore = meta.state.performanceStats['drone_missiles'] || 0;
+    const killBefore = meta.state.performanceStats['drone_kills'] || 0;
+    const prevSfx = window.soundEngine; window.soundEngine = undefined;
+    window.metaMissionSystem = meta;
+    dSys.selectDrone('pyro_shredder'); dSys.actionCount = 3;
+    const dqZ = new ZombieEntity(mockZombieType, 100, 400, 1, 220); dqZ.hp = 10; testCombat.entities.zombies = [dqZ];
+    dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('pyro_shredder'), testCombat);
+    assert((meta.state.performanceStats['drone_actions'] || 0) === actBefore + 1 && (meta.state.performanceStats['drone_missiles'] || 0) === mslBefore + 1 && (meta.state.performanceStats['drone_damage'] || 0) > dmgBefore && (meta.state.performanceStats['drone_kills'] || 0) === killBefore + 1, 'Offensive drone missile/kill updates drone_actions, drone_missiles, drone_damage & drone_kills');
+    dSys.selectDrone('harmonic_pulse'); dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('harmonic_pulse'), testCombat);
+    assert((meta.state.performanceStats['drone_heals'] || 0) === healBefore + 1, 'Support drone pulse updates drone_heals quest');
+    dSys.selectDrone('cryo_vortex'); dqZ.hp = 500; dqZ.active = true; testCombat.entities.zombies = [dqZ];
+    dSys.executePlayerDroneAction(dSys.getActiveDrone(), dSys.getDroneStats('cryo_vortex'), testCombat);
+    assert((meta.state.performanceStats['drone_cc_applied'] || 0) > ccBefore, 'Controller drone burst updates drone_cc_applied quest');
+    const preOppAct = meta.state.performanceStats['drone_actions'] || 0;
+    dSys.updateOpponentDrone(2.0, testCombat, { opponent: { level: 5, score: 0, drone: dSys.drones[0], droneLevel: 5 }, getOpponentPosition: () => ({ x: 350, y: 200 }), opponentZombiesKilled: 0 });
+    assert((meta.state.performanceStats['drone_actions'] || 0) === preOppAct, 'PvP opponent AI drone does NOT inflate player drone quests');
+    meta.state.performanceStats['drone_heals'] = 10; meta.state.performanceClaimedTiers['drone_heals'] = 0;
+    assert(meta.getPendingClaimsCount('drones') >= 1, 'Pending claims count includes ready drone quests');
+    const dClaim = meta.claimPerformanceReward('drone_heals');
+    assert(dClaim && dClaim.success && dClaim.category === 'drones' && dClaim.reward.gold === 30, 'Claiming drone_heals Tier 1 awards 30 gold under drones category');
+    const mCss = fs.readFileSync(path.resolve(__dirname, 'css/missions.css'), 'utf8');
+    assert(pveHtml.includes('data-cat="drones"') && pveHtml.includes('id="cat-badge-drones"') && mCss.includes('.drone-mission-card'), 'Missions modal & CSS include Drone quests tab and card styles');
+
+    // 35. Testing Zero-Loss Mobile Performance Optimizations (Redmi Note 14 FPS)
+    console.log('\n35. Testing Mobile GPU/CPU FPS Optimizations (Zero Visual Quality Loss)...');
+    let dSaveRuns = 0;
+    window.game = { currentScreen: 'menu', isBattlePaused: false, combat: { matchActive: false } };
+    window.PerfUtils.deferSave('t_sync', () => { dSaveRuns++; });
+    assert(dSaveRuns === 1 && window.PerfUtils.getPendingSaveCount() === 0, 'PerfUtils.deferSave executes synchronously outside battle');
+    window.game = { currentScreen: 'battle', isBattlePaused: false, combat: { matchActive: true } };
+    window.PerfUtils.deferSave('t_bat', () => { dSaveRuns++; });
+    assert(dSaveRuns === 1 && window.PerfUtils.getPendingSaveCount() === 1, 'PerfUtils.deferSave batches disk writes during active battle');
+    window.PerfUtils.flushSaves();
+    assert(dSaveRuns === 2 && window.PerfUtils.getPendingSaveCount() === 0, 'PerfUtils.flushSaves commits batched writes cleanly');
+    window.game = undefined;
+    const spSrc = fs.readFileSync(path.resolve(__dirname, 'js/spritesheet.js'), 'utf8');
+    const auSrc = fs.readFileSync(path.resolve(__dirname, 'js/audio.js'), 'utf8');
+    const cbSrc = fs.readFileSync(path.resolve(__dirname, 'js/combat.js'), 'utf8');
+    const fxSrc = fs.readFileSync(path.resolve(__dirname, 'js/combat-fx.js'), 'utf8');
+    const rhSrc = fs.readFileSync(path.resolve(__dirname, 'js/rhythm.js'), 'utf8');
+    const skSrc = fs.readFileSync(path.resolve(__dirname, 'js/skills.js'), 'utf8');
+    const bCssSrc = fs.readFileSync(path.resolve(__dirname, 'css/battle.css'), 'utf8');
+    assert(spSrc.includes('createImageBitmap') && spSrc.includes('_scratchCanvas'), 'SpriteSheet promotes GPU canvases/ImageBitmap without leaving willReadFrequently active');
+    assert(auSrc.includes("oversample = 'none'") && auSrc.includes('_snareNoiseBuf') && !auSrc.includes('n_samples = 44100'), 'SoundEngine disables 4x WaveShaper oversampling and caches snare noise buffer');
+    assert(cbSrc.includes("alpha: false") && cbSrc.includes('_bgCache') && cbSrc.includes('lazySheet') && rhSrc.includes('alpha: false') && rhSrc.includes('highwayBgCanvas'), 'Combat & Rhythm canvases disable alpha channel, lazy-load sheets, and cache static layers');
+    assert(skSrc.includes('_fretCache') && fxSrc.includes('_flareGrads') && mainJs.includes('lastComboFire') && bCssSrc.includes('contain: layout paint'), 'Skills fret overlay, FX flare gradients, combo pill toggle & CSS containment optimized');
+
     fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
         const src = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8'), lines = src.split('\n').length;
         assert(lines < 1000, `File js/${f} is under 1,000 lines (${lines} lines)`);

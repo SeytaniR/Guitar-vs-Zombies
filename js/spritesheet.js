@@ -27,27 +27,24 @@ class SpriteSheet {
     }
 
     processImages(img) {
-        // 1. Transparent Clean Canvas
-        const c = document.createElement('canvas');
-        c.width = img.width;
-        c.height = img.height;
-        const cx = c.getContext('2d', { willReadFrequently: true });
+        // 1. Reuse static software scratch canvases ONLY for the one-time chroma-key pass
+        const w = img.width, h = img.height;
+        const sc = SpriteSheet._scratchCanvas || (SpriteSheet._scratchCanvas = document.createElement('canvas'));
+        sc.width = w; sc.height = h;
+        const cx = sc.getContext('2d', { willReadFrequently: true });
+        cx.clearRect(0, 0, w, h);
         cx.drawImage(img, 0, 0);
-        const imgData = cx.getImageData(0, 0, c.width, c.height);
+        const imgData = cx.getImageData(0, 0, w, h);
         const d = imgData.data;
 
-        // 2. White Silhouette Canvas (Fixes the white box bug completely)
-        const wc = document.createElement('canvas');
-        wc.width = img.width;
-        wc.height = img.height;
-        const wcx = wc.getContext('2d', { willReadFrequently: true });
-        const whiteData = wcx.createImageData(c.width, c.height);
+        const wsc = SpriteSheet._whiteScratchCanvas || (SpriteSheet._whiteScratchCanvas = document.createElement('canvas'));
+        wsc.width = w; wsc.height = h;
+        const wcx = wsc.getContext('2d', { willReadFrequently: true });
+        const whiteData = wcx.createImageData(w, h);
         const wd = whiteData.data;
 
         for (let i = 0; i < d.length; i += 4) {
-            const r = d[i];
-            const g = d[i + 1];
-            const b = d[i + 2];
+            const r = d[i], g = d[i + 1], b = d[i + 2];
 
             // Green screen detection with compression tolerance
             const isGreen = g > 130 && g > r * 1.25 && g > b * 1.25;
@@ -56,30 +53,38 @@ class SpriteSheet {
                 if (g > 158 && g > r * 1.38 && g > b * 1.38) {
                     d[i + 3] = 0; // Transparent
                 } else {
-                    // Suppress green spill on edge borders
                     d[i + 1] = Math.min(g, Math.max(r, b));
                     const maxRb = Math.max(r, b);
                     const spillDiff = g - maxRb;
-                    if (spillDiff > 20) {
-                        d[i + 3] = Math.max(0, 255 - spillDiff * 4);
-                    }
+                    if (spillDiff > 20) d[i + 3] = Math.max(0, 255 - spillDiff * 4);
                 }
             }
 
-            // Populate pure white silhouette for hit-flash effects
             if (d[i + 3] > 10) {
-                wd[i] = 255;
-                wd[i + 1] = 255;
-                wd[i + 2] = 255;
-                wd[i + 3] = d[i + 3];
+                wd[i] = 255; wd[i + 1] = 255; wd[i + 2] = 255; wd[i + 3] = d[i + 3];
             }
         }
 
         cx.putImageData(imgData, 0, 0);
         wcx.putImageData(whiteData, 0, 0);
 
-        this.cleanImage = c;
-        this.whiteImage = wc;
+        // 2. Blit onto pure GPU-backed canvases (no willReadFrequently) to prevent per-frame CPU->GPU re-uploads
+        const gpuClean = document.createElement('canvas');
+        gpuClean.width = w; gpuClean.height = h;
+        gpuClean.getContext('2d').drawImage(sc, 0, 0);
+
+        const gpuWhite = document.createElement('canvas');
+        gpuWhite.width = w; gpuWhite.height = h;
+        gpuWhite.getContext('2d').drawImage(wsc, 0, 0);
+
+        this.cleanImage = gpuClean;
+        this.whiteImage = gpuWhite;
+
+        // 3. Promote to immutable GPU ImageBitmap textures asynchronously when available
+        if (typeof createImageBitmap === 'function') {
+            createImageBitmap(gpuClean).then(bmp => { this.cleanImage = bmp; }).catch(() => {});
+            createImageBitmap(gpuWhite).then(bmp => { this.whiteImage = bmp; }).catch(() => {});
+        }
     }
 
     drawFrame(ctx, frameIndex, x, y, scale = 1, flip = false, flashWhite = false, alpha = 1.0) {

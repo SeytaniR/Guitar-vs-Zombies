@@ -552,30 +552,35 @@
     50% { transform: scale(1.18); }
 }
 
-/* Category Switcher Tabs (Zombies vs Guitarists) */
+/* Category Switcher Tabs (Zombies vs Guitarists vs Drones vs Performance vs PvP) */
 .missions-category-tabs {
     display: flex;
-    gap: 8px;
-    padding: 10px 16px 0 16px;
+    gap: 5px;
+    padding: 8px 10px 0 10px;
     background: rgba(18, 14, 28, 0.95);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
+.missions-category-tabs::-webkit-scrollbar { display: none; }
 
 .missions-cat-tab {
-    flex: 1;
+    flex: 1 0 auto;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-bottom: none;
     border-radius: 10px 10px 0 0;
-    padding: 8px 12px;
+    padding: 7px 8px;
     color: #bbb;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
+    white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     transition: all 0.2s ease;
 }
 
@@ -747,3 +752,10 @@
 .pvp-title {
     color: #00d4ff;
 }
+
+/* Drone Quest Card Theme */
+.drone-mission-card { border-color: rgba(0, 229, 255, 0.25); }
+.drone-mission-card:hover { border-color: rgba(0, 229, 255, 0.58); box-shadow: 0 4px 18px rgba(0, 229, 255, 0.2); }
+.drone-tier-pill { background: rgba(0, 229, 255, 0.14); border-color: rgba(0, 229, 255, 0.4); color: #00e5ff; }
+.drone-fill { background: linear-gradient(90deg, #00e5ff 0%, #7c3aed 100%); }
+.drone-title { background: rgba(124, 58, 237, 0.18); border-color: rgba(124, 58, 237, 0.45); color: #c4b5fd; }

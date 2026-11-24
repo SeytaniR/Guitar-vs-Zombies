@@ -56,6 +56,7 @@ class Game {
         });
 
         if (screenName !== 'battle') {
+            if (window.PerfUtils) window.PerfUtils.flushSaves();
             const b = document.getElementById('screen-battle'); if (b) b.classList.remove('pvp-active');
             if (this.combat) this.combat.isPvPMode = false;
             if (window.countdownSystem) window.countdownSystem.cancel();
@@ -65,6 +66,7 @@ class Game {
             this.combat.matchActive = false;
             this.combat.isGameOver = false;
             this.rhythm.stopCustomSong(); if (window.soundEngine && typeof window.soundEngine.stopCrowdSfx === 'function') window.soundEngine.stopCrowdSfx(0.35);
+            if (window.metaMissionSystem) window.metaMissionSystem.updateBadgeCounter();
             this.updateMenuHUD();
             ['battle-gear-modal', 'battle-stats-modal', 'song-results-modal', 'battle-defeat-modal', 'skill-picker-modal'].forEach(id => {
                 const el = document.getElementById(id);
@@ -760,6 +762,7 @@ class Game {
         this.isBattlePaused = true;
         if (this.combat) this.combat.isPaused = true;
         if (this.rhythm) { this.rhythm.isPaused = true; this.rhythm.pauseAudio(); }
+        if (window.PerfUtils) window.PerfUtils.flushSaves();
     }
 
     resumeBattle() {
@@ -860,6 +863,8 @@ class Game {
         setVal('result-score-gained', `+${(this.combat ? this.combat.score : 0).toLocaleString()}`);
         if (window.metaMissionSystem && typeof window.metaMissionSystem.recordSongCompletion === 'function') window.metaMissionSystem.recordSongCompletion(accPct, stats);
         try { if (window.stageSystem && typeof window.stageSystem.completeStage === 'function') window.stageSystem.completeStage(window.stageSystem.selectedStage); } catch(err) { console.warn("Stage completion error:", err); }
+        if (window.PerfUtils) window.PerfUtils.flushSaves();
+        if (window.metaMissionSystem) window.metaMissionSystem.updateBadgeCounter();
         if (window.soundEngine) { if (typeof window.soundEngine.playPowerChord === 'function') window.soundEngine.playPowerChord(); if (typeof window.soundEngine.playCrowdCheer === 'function') window.soundEngine.playCrowdCheer({ fadeIn: 0.35, fadeOut: 0.90, volume: 0.65 }); }
         modal.classList.add('open');
     }
@@ -877,6 +882,8 @@ class Game {
         setVal('defeat-zombies-killed', `${s.zombiesKilled} 💀`); setVal('defeat-total-damage', Math.round(s.damageDealt).toLocaleString());
         setVal('defeat-accuracy', `${accPct}%`); setVal('defeat-gold-reward', `+${s.coinsEarned} 🪙`);
         setVal('defeat-score-gained', (this.combat ? this.combat.score : 0).toLocaleString());
+        if (window.PerfUtils) window.PerfUtils.flushSaves();
+        if (window.metaMissionSystem) window.metaMissionSystem.updateBadgeCounter();
         if (window.soundEngine) { if (typeof window.soundEngine.playMiss === 'function') window.soundEngine.playMiss(); if (typeof window.soundEngine.playCrowdBoo === 'function') window.soundEngine.playCrowdBoo({ fadeIn: 0.18, fadeOut: 0.55, volume: 0.65 }); }
         modal.classList.add('open');
     }
@@ -919,28 +926,16 @@ class Game {
 
     update(deltaTime) {
         if (window.countdownSystem && window.countdownSystem.isActive) window.countdownSystem.update(deltaTime / 1000);
-        this.combat.update(deltaTime);
-        this.rhythm.update(deltaTime);
+        this.combat.update(deltaTime); this.rhythm.update(deltaTime);
+        if (window.PerfUtils) window.PerfUtils.tickSaves(performance.now());
     }
 
-    draw() {
-        this.combat.draw();
-        this.rhythm.draw();
-    }
+    draw() { this.combat.draw(); this.rhythm.draw(); }
 
     updateBattleHUD() {
         if (!this.hudCache) {
-            this.hudCache = {
-                hpBar: document.getElementById('hero-hp-bar'),
-                hpText: document.getElementById('battle-hero-hp-text'),
-                rockBar: document.getElementById('rock-meter-bar'),
-                manaText: document.getElementById('battle-hero-mana-text'),
-                scoreEl: document.getElementById('battle-score-val'),
-                comboEl: document.getElementById('battle-combo-val'),
-                multEl: document.getElementById('battle-mult-val'),
-                lastHpPct: -1, lastHpText: '', lastRockW: '', lastManaText: '',
-                lastScore: '', lastCombo: '', lastMult: ''
-            };
+            const g = id => document.getElementById(id);
+            this.hudCache = { hpBar: g('hero-hp-bar'), hpText: g('battle-hero-hp-text'), rockBar: g('rock-meter-bar'), manaText: g('battle-hero-mana-text'), scoreEl: g('battle-score-val'), comboEl: g('battle-combo-val'), multEl: g('battle-mult-val'), comboPill: g('battle-combo-pill'), lastHpPct: -1, lastHpText: '', lastRockW: '', lastManaText: '', lastScore: '', lastCombo: '', lastMult: '', lastComboActive: null, lastComboFire: null };
         }
         const h = this.hudCache;
         if (h.hpBar) {
@@ -952,15 +947,17 @@ class Game {
         if (h.manaText) { const t = `${Math.floor(this.combat.rockMana)} / ${this.combat.maxRockMana}`; if (t !== h.lastManaText) { h.lastManaText = t; h.manaText.innerText = t; } }
         if (h.scoreEl) { const t = (this.combat.score || 0).toLocaleString(); if (t !== h.lastScore) { h.lastScore = t; h.scoreEl.innerText = t; } }
         if (h.comboEl) {
-            const streak = this.rhythm.streak || 0, pStreak = (this.combat && this.combat.perfectStreak) || 0;
-            const critReady = (this.combat && this.combat.guaranteedCritReady);
+            const streak = this.rhythm.streak || 0, pStreak = (this.combat && this.combat.perfectStreak) || 0, critReady = (this.combat && this.combat.guaranteedCritReady);
             const critTag = critReady ? this.tr('critReadyTag', ' • 💥 CRÍTICO PRONTO!') : (pStreak > 0 ? ` • 🎯 ${pStreak}/5 PERF` : '');
             const t = this.tr('comboHudFormat', `${streak} COMBO (+${Math.min(2.0, streak * 0.01).toFixed(2)} VEL)${critTag}`, { streak, spd: Math.min(2.0, streak * 0.01).toFixed(2), crit: critTag });
             if (t !== h.lastCombo) { h.lastCombo = t; h.comboEl.innerText = t; }
         }
         if (h.multEl) { const t = `x${this.rhythm.multiplier || 1}`; if (t !== h.lastMult) { h.lastMult = t; h.multEl.innerText = t; } }
-        if (!h.comboPill) h.comboPill = document.getElementById('battle-combo-pill');
-        if (h.comboPill) { const streak = this.rhythm.streak || 0; h.comboPill.classList.toggle('active', streak >= 5); h.comboPill.classList.toggle('on-fire', streak >= 15); }
+        if (h.comboPill) {
+            const streak = this.rhythm.streak || 0, isAct = streak >= 5, isFire = streak >= 15;
+            if (isAct !== h.lastComboActive) { h.lastComboActive = isAct; h.comboPill.classList.toggle('active', isAct); }
+            if (isFire !== h.lastComboFire) { h.lastComboFire = isFire; h.comboPill.classList.toggle('on-fire', isFire); }
+        }
     }
 
     updateMenuHUD() {

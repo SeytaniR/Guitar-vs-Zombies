@@ -2,7 +2,7 @@
 class RhythmSystem {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { alpha: false }) || this.canvas.getContext('2d');
 
         this.tracks = 4;
         this.notes = [];
@@ -584,6 +584,29 @@ class RhythmSystem {
         }
     }
 
+    buildHighwayBgCache(cw, ch, hitZoneY) {
+        if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
+        if (this.highwayBgCanvas && this._bgW === cw && this._bgH === ch && this._bgHitY === hitZoneY) return this.highwayBgCanvas;
+        const c = this.highwayBgCanvas || document.createElement('canvas');
+        c.width = cw; c.height = ch;
+        const bctx = c.getContext('2d', { alpha: false }) || c.getContext('2d');
+        const tw = cw / this.tracks;
+        bctx.fillStyle = '#0f0f18'; bctx.fillRect(0, 0, cw, ch);
+        for (let i = 0; i < this.tracks; i++) {
+            const tx = i * tw;
+            bctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'; bctx.lineWidth = 1.5;
+            bctx.beginPath(); bctx.moveTo(tx + tw / 2, 0); bctx.lineTo(tx + tw / 2, ch); bctx.stroke();
+            bctx.strokeStyle = '#222233'; bctx.lineWidth = 1;
+            bctx.beginPath(); bctx.moveTo(tx, 0); bctx.lineTo(tx, ch); bctx.stroke();
+        }
+        bctx.strokeStyle = 'rgba(0, 255, 255, 0.28)'; bctx.lineWidth = 7;
+        bctx.beginPath(); bctx.moveTo(0, hitZoneY); bctx.lineTo(cw, hitZoneY); bctx.stroke();
+        bctx.strokeStyle = '#ffffff'; bctx.lineWidth = 2.5;
+        bctx.beginPath(); bctx.moveTo(0, hitZoneY); bctx.lineTo(cw, hitZoneY); bctx.stroke();
+        this.highwayBgCanvas = c; this._bgW = cw; this._bgH = ch; this._bgHitY = hitZoneY;
+        return c;
+    }
+
     draw() {
         if (this.canvas.width <= 10 || this.canvas.height <= 10) {
             this.resize();
@@ -598,9 +621,14 @@ class RhythmSystem {
         const isStartCd = this.isCountdownActive && window.countdownSystem && window.countdownSystem.mode === 'start';
         const cdProg = isStartCd ? Math.min(1.0, Math.max(0, (curTime - (-2.0)) / 2.0)) : 0;
 
-        // 1. Draw Fretboard Background & Strings (Stable solid fill without buffer-clear flash)
-        this.ctx.fillStyle = '#0f0f18';
-        this.ctx.fillRect(0, 0, cw, ch);
+        // 1 & 2. Blit Pre-Rendered Highway Background, Strings & Hit Zone Bar (1 drawImage call!)
+        const bgCache = this.buildHighwayBgCache(cw, ch, hitZoneY);
+        if (bgCache) {
+            this.ctx.drawImage(bgCache, 0, 0);
+        } else {
+            this.ctx.fillStyle = '#0f0f18';
+            this.ctx.fillRect(0, 0, cw, ch);
+        }
 
         if (this.pvpFinaleMode) {
             const isWin = this.pvpFinaleMode === 'victory';
@@ -608,41 +636,6 @@ class RhythmSystem {
             this.ctx.fillStyle = isWin ? `rgba(0, 255, 100, ${0.14 + pulse * 0.18})` : `rgba(255, 25, 35, ${0.16 + pulse * 0.18})`;
             this.ctx.fillRect(0, 0, cw, ch);
         }
-
-        for (let i = 0; i < this.tracks; i++) {
-            const tx = i * trackW;
-
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-            this.ctx.lineWidth = 1.5;
-            this.ctx.beginPath();
-            this.ctx.moveTo(tx + trackW / 2, 0);
-            this.ctx.lineTo(tx + trackW / 2, ch);
-            this.ctx.stroke();
-
-            this.ctx.strokeStyle = '#222233';
-            this.ctx.lineWidth = 1;
-            this.ctx.beginPath();
-            this.ctx.moveTo(tx, 0);
-            this.ctx.lineTo(tx, ch);
-            this.ctx.stroke();
-        }
-
-        // 2. Draw Hit Zone Bar
-        this.ctx.save();
-        this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.28)';
-        this.ctx.lineWidth = 7;
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, hitZoneY);
-        this.ctx.lineTo(cw, hitZoneY);
-        this.ctx.stroke();
-
-        this.ctx.strokeStyle = '#ffffff';
-        this.ctx.lineWidth = 2.5;
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, hitZoneY);
-        this.ctx.lineTo(cw, hitZoneY);
-        this.ctx.stroke();
-        this.ctx.restore();
 
         // 3. Draw Fret Buttons (Target Pads)
         for (let i = 0; i < this.tracks; i++) {
@@ -772,19 +765,22 @@ class RhythmSystem {
         }
         this.ctx.restore();
 
-        // 6. Floating Ratings
-        this.floatingRatings.forEach(r => {
+        // 6. Floating Ratings (Single save/restore outside loop)
+        if (this.floatingRatings.length > 0) {
             this.ctx.save();
-            this.ctx.globalAlpha = Math.max(0, r.alpha);
-            this.ctx.font = `bold ${Math.round(18 * r.scale)}px 'Impact', sans-serif`;
             this.ctx.textAlign = 'center';
             this.ctx.strokeStyle = '#000000';
             this.ctx.lineWidth = 4;
-            this.ctx.strokeText(r.text, r.x, r.y);
-            this.ctx.fillStyle = r.color;
-            this.ctx.fillText(r.text, r.x, r.y);
+            for (let i = 0; i < this.floatingRatings.length; i++) {
+                const r = this.floatingRatings[i];
+                this.ctx.globalAlpha = Math.max(0, r.alpha);
+                this.ctx.font = `bold ${Math.round(18 * r.scale)}px 'Impact', sans-serif`;
+                this.ctx.strokeText(r.text, r.x, r.y);
+                this.ctx.fillStyle = r.color;
+                this.ctx.fillText(r.text, r.x, r.y);
+            }
             this.ctx.restore();
-        });
+        }
 
         // 7. HUD Prompt & Multiplier
         this.drawHighwayHUD(cw, ch);

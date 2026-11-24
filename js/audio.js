@@ -60,7 +60,7 @@ class SoundEngine {
 
     makeDistortionCurve(amount = 50) {
         const k = typeof amount === 'number' ? amount : 50;
-        const n_samples = 44100;
+        const n_samples = 1024;
         const curve = new Float32Array(n_samples);
         const deg = Math.PI / 180;
         for (let i = 0; i < n_samples; ++i) {
@@ -72,16 +72,19 @@ class SoundEngine {
 
     playGuitarChord(chordIndex = 0) {
         if (!this.ctx || this.muted) return;
+        const tMs = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        if (this._lastChordMs && (tMs - this._lastChordMs) < 22) return;
+        this._lastChordMs = tMs;
         this.resume();
 
         const chord = this.chords[chordIndex % this.chords.length];
         const now = this.ctx.currentTime;
         const duration = 0.55;
 
-        // Create distortion waveshaper
+        // Create distortion waveshaper (zero 4x FIR resampling overhead on mobile)
         const waveshaper = this.ctx.createWaveShaper();
         waveshaper.curve = this.distortionCurve;
-        waveshaper.oversample = '4x';
+        waveshaper.oversample = 'none';
 
         // Lowpass filter for warm amp tone
         const filter = this.ctx.createBiquadFilter();
@@ -151,14 +154,16 @@ class SoundEngine {
             osc.start(now);
             osc.stop(now + 0.18);
         } else if (type === 'snare') {
-            // Noise burst
-            const bufferSize = this.ctx.sampleRate * 0.12;
-            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
+            // Reuse cached noise buffer per sampleRate (zero per-hit Float32Array allocation)
+            if (!this._snareNoiseBuf || this._snareNoiseBuf.sampleRate !== this.ctx.sampleRate) {
+                const bufferSize = Math.floor(this.ctx.sampleRate * 0.12);
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                this._snareNoiseBuf = buffer;
+            }
             const noise = this.ctx.createBufferSource();
-            noise.buffer = buffer;
+            noise.buffer = this._snareNoiseBuf;
             const filter = this.ctx.createBiquadFilter();
             filter.type = 'highpass';
             filter.frequency.setValueAtTime(1000, now);

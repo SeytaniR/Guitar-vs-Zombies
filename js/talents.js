@@ -419,17 +419,17 @@ class TalentSystem {
     }
 
     saveProgress() {
-        try {
-            const data = {
-                gold: this.gold,
-                levels: {}
-            };
-            for (const k in this.talents) {
-                data.levels[k] = this.talents[k].level;
-            }
-            localStorage.setItem('gvs_talent_data', JSON.stringify(data));
-        } catch (e) {
-            console.warn("Could not save talent progress", e);
+        const doSave = () => {
+            try {
+                const data = { gold: this.gold, levels: {} };
+                for (const k in this.talents) data.levels[k] = this.talents[k].level;
+                localStorage.setItem('gvs_talent_data', JSON.stringify(data));
+            } catch (e) { console.warn("Could not save talent progress", e); }
+        };
+        if (typeof window !== 'undefined' && window.PerfUtils && typeof window.PerfUtils.deferSave === 'function') {
+            window.PerfUtils.deferSave('talent_data', doSave);
+        } else {
+            doSave();
         }
     }
 

@@ -825,57 +825,56 @@ class SkillSystem {
         const combat = (typeof window !== 'undefined' && window.game) ? window.game.combat : null;
         const currentMana = combat ? combat.rockMana : 100;
         const hasMana = !skill.manaCost || currentMana >= skill.manaCost;
+        const lang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'pt';
+        const cacheKey = `${skill.id}|${hasMana ? 1 : 0}|${lang}`;
 
-        ctx.save();
-        ctx.font = '13px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.globalAlpha = hasMana ? 1.0 : 0.45;
-        ctx.fillText(skill.icon || '⚡', bx, hitZoneY);
+        if (!this._fretCache) this._fretCache = {};
+        if (typeof document !== 'undefined' && typeof document.createElement === 'function') {
+            let entry = this._fretCache[laneIndex];
+            if (!entry || entry.key !== cacheKey) {
+                const c = (entry && entry.canvas) || document.createElement('canvas');
+                c.width = 108; c.height = 76;
+                const oc = c.getContext('2d');
+                const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
+                const badgeText = skill.manaCost > 0 ? (hasMana ? `⚡ ${skill.manaCost} MP` : tr('fretNoMpBadge', '⚡ SEM MP')) : tr('fretBasicBadge', 'BÁSICO');
+                const badgeColor = skill.manaCost > 0 ? (hasMana ? '#00ffff' : '#ff4444') : '#00ff66';
+
+                oc.clearRect(0, 0, 108, 76);
+                oc.font = '13px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                oc.textAlign = 'center'; oc.textBaseline = 'middle';
+                oc.globalAlpha = hasMana ? 1.0 : 0.45;
+                oc.fillText(skill.icon || '⚡', 54, 22);
+                oc.globalAlpha = 1.0;
+
+                oc.font = 'bold 8.5px "Segoe UI", sans-serif';
+                const bw = Math.max(38, oc.measureText(badgeText).width + 10), bh = 14, by = 49;
+                oc.fillStyle = hasMana ? 'rgba(10, 15, 28, 0.85)' : 'rgba(38, 10, 10, 0.88)';
+                oc.strokeStyle = badgeColor; oc.lineWidth = 1;
+                oc.beginPath();
+                if (typeof oc.roundRect === 'function') oc.roundRect(54 - bw / 2, by - bh / 2, bw, bh, 4);
+                else oc.rect(54 - bw / 2, by - bh / 2, bw, bh);
+                oc.fill(); oc.stroke();
+                oc.fillStyle = badgeColor;
+                oc.fillText(badgeText, 54, by + 0.5);
+
+                entry = { key: cacheKey, canvas: c };
+                this._fretCache[laneIndex] = entry;
+            }
+            ctx.drawImage(entry.canvas, Math.round(bx - 54), Math.round(hitZoneY - 22));
+        }
 
         if (hasMana && skill.manaCost > 0) {
             const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
             const pulse = (Math.sin(now * 0.006 + laneIndex * 1.5) + 1) * 0.5;
+            ctx.save();
             ctx.strokeStyle = (skill.color || '#00d4ff') + '44';
             ctx.lineWidth = 3.5 + pulse * 2;
-            ctx.beginPath();
-            ctx.arc(bx, hitZoneY, 20 + pulse * 2, 0, Math.PI * 2);
-            ctx.stroke();
-
+            ctx.beginPath(); ctx.arc(bx, hitZoneY, 20 + pulse * 2, 0, Math.PI * 2); ctx.stroke();
             ctx.strokeStyle = skill.color || '#00d4ff';
             ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(bx, hitZoneY, 18 + pulse * 1.5, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(bx, hitZoneY, 18 + pulse * 1.5, 0, Math.PI * 2); ctx.stroke();
+            ctx.restore();
         }
-
-        const tr = (k, f) => (typeof i18n !== 'undefined' ? i18n.t(k, f) : f);
-        const badgeY = hitZoneY + 27;
-        const badgeText = skill.manaCost > 0 
-            ? (hasMana ? `⚡ ${skill.manaCost} MP` : tr('fretNoMpBadge', '⚡ SEM MP'))
-            : tr('fretBasicBadge', 'BÁSICO');
-        const badgeColor = skill.manaCost > 0 ? (hasMana ? '#00ffff' : '#ff4444') : '#00ff66';
-
-        ctx.font = 'bold 8.5px "Segoe UI", sans-serif';
-        const textMetrics = ctx.measureText(badgeText);
-        const bw = Math.max(38, textMetrics.width + 10);
-        const bh = 14;
-
-        ctx.fillStyle = hasMana ? 'rgba(10, 15, 28, 0.85)' : 'rgba(38, 10, 10, 0.88)';
-        ctx.strokeStyle = badgeColor;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') {
-            ctx.roundRect(bx - bw / 2, badgeY - bh / 2, bw, bh, 4);
-        } else {
-            ctx.rect(bx - bw / 2, badgeY - bh / 2, bw, bh);
-        }
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = badgeColor;
-        ctx.fillText(badgeText, bx, badgeY + 0.5);
-        ctx.restore();
     }
 }
 

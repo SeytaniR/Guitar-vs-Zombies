@@ -49,11 +49,28 @@ class MetaMissionSystem {
     }
 
     saveState() {
-        try {
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state));
-        } catch (e) {
-            console.warn('Failed to save meta missions state:', e);
+        const doSave = () => {
+            try { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state)); }
+            catch (e) { console.warn('Failed to save meta missions state:', e); }
+        };
+        if (typeof window !== 'undefined' && window.PerfUtils && typeof window.PerfUtils.deferSave === 'function') {
+            window.PerfUtils.deferSave('meta_missions', doSave);
+        } else {
+            doSave();
         }
+    }
+
+    getDroneDefinitions() {
+        return (typeof window !== 'undefined' && Array.isArray(window.DRONE_MISSION_DEFS)) ? window.DRONE_MISSION_DEFS : [];
+    }
+
+    syncLiveDroneStats() {
+        if (typeof window === 'undefined' || !window.droneSystem) return;
+        const unlocked = window.droneSystem.getUnlockedDrones ? window.droneSystem.getUnlockedDrones().length : 0;
+        const lvls = Object.values(window.droneSystem.droneLevels || {}).map(v => (v && v.level) || 1);
+        const maxLvl = lvls.length > 0 ? Math.max(1, ...lvls) : 1;
+        this.state.performanceStats['drone_unlocked'] = Math.max(this.state.performanceStats['drone_unlocked'] || 0, unlocked);
+        this.state.performanceStats['drone_max_level'] = Math.max(this.state.performanceStats['drone_max_level'] || 0, maxLvl);
     }
 
     getAllZombies() {
@@ -221,7 +238,7 @@ class MetaMissionSystem {
 
     getPerformanceMission(statIdOrDef) {
         let def = null;
-        if (typeof statIdOrDef === 'string') def = this.getPerformanceDefinitions().find(d => d.id === statIdOrDef) || this.getPvPDefinitions().find(d => d.id === statIdOrDef);
+        if (typeof statIdOrDef === 'string') def = this.getPerformanceDefinitions().find(d => d.id === statIdOrDef) || this.getPvPDefinitions().find(d => d.id === statIdOrDef) || this.getDroneDefinitions().find(d => d.id === statIdOrDef);
         else if (statIdOrDef && typeof statIdOrDef === 'object') def = statIdOrDef;
         if (!def) return null;
 
@@ -229,11 +246,13 @@ class MetaMissionSystem {
         const isMaxCompleted = claimedTier >= this.MAX_TIER, currentTierIndex = Math.min(this.MAX_TIER - 1, claimedTier);
         const targetVal = def.tiers[currentTierIndex], isReadyToClaim = !isMaxCompleted && currentVal >= targetVal;
         const progressPercent = isMaxCompleted ? 100 : Math.min(100, Math.floor((currentVal / targetVal) * 100));
-        const isPvp = def.id && def.id.startsWith('pvp_'), pfx = isPvp ? 'pvpm' : 'perf', rew = def.rewards[currentTierIndex];
+        const isPvp = def.id && def.id.startsWith('pvp_'), isDrone = def.id && def.id.startsWith('drone_');
+        const pfx = isPvp ? 'pvpm' : (isDrone ? 'dronem' : 'perf'), rew = def.rewards[currentTierIndex];
+        const category = isPvp ? 'pvp' : (isDrone ? 'drones' : 'performance');
         const reward = { gold: rew.gold, xp: rew.xp, title: _trM(`${pfx}_tier_${def.id}_${currentTierIndex}`, rew.title), tier: currentTierIndex + 1, target: targetVal };
 
         return {
-            category: isPvp ? 'pvp' : 'performance', id: def.id, statId: def.id,
+            category, id: def.id, statId: def.id,
             name: _trM(`${pfx}_name_${def.id}`, def.name), icon: def.icon, badgeText: _trM(`${pfx}_badge_${def.id}`, def.badge), badgeClass: def.badgeClass,
             desc: _trM(`${pfx}_desc_${def.id}`, def.desc), unitLabel: _trM(`${pfx}_unit_${def.id}`, def.unitLabel), currentVal, targetVal,
             claimedTier, currentTierIndex, currentTierNum: currentTierIndex + 1, progressPercent, isReadyToClaim, isMaxCompleted, reward, allTiers: def.tiers
@@ -256,6 +275,15 @@ class MetaMissionSystem {
         return this.getPvPDefinitions().map(d => {
             const m = this.getPerformanceMission(d);
             if (m) m.category = 'pvp';
+            return m;
+        }).filter(Boolean);
+    }
+
+    getAllDroneMissions() {
+        this.syncLiveDroneStats();
+        return this.getDroneDefinitions().map(d => {
+            const m = this.getPerformanceMission(d);
+            if (m) m.category = 'drones';
             return m;
         }).filter(Boolean);
     }
@@ -316,7 +344,7 @@ class MetaMissionSystem {
     }
 
     recordStat(statId, amount = 1) {
-        const def = this.getPerformanceDefinitions().find(d => d.id === statId) || this.getPvPDefinitions().find(d => d.id === statId);
+        const def = this.getPerformanceDefinitions().find(d => d.id === statId) || this.getPvPDefinitions().find(d => d.id === statId) || this.getDroneDefinitions().find(d => d.id === statId);
         if (!def) return;
 
         const cur = this.state.performanceStats[statId] || 0;
@@ -327,12 +355,17 @@ class MetaMissionSystem {
         if (claimedTier < this.MAX_TIER) {
             const target = def.tiers[claimedTier];
             if (cur < target && nextVal >= target) {
-                this.onMilestoneReached(def.id, def.name, nextVal, (def.id && def.id.startsWith('pvp_')) ? 'pvp' : 'performance');
+                const mType = (def.id && def.id.startsWith('pvp_')) ? 'pvp' : ((def.id && def.id.startsWith('drone_')) ? 'drones' : 'performance');
+                this.onMilestoneReached(def.id, def.name, nextVal, mType);
             }
         }
 
         this.saveState();
         this.updateBadgeCounter();
+    }
+
+    recordDroneStat(statId, amount = 1) {
+        this.recordStat(statId, amount);
     }
 
     recordMaxStreak(streak) {
@@ -362,13 +395,17 @@ class MetaMissionSystem {
 
     onMilestoneReached(entityId, entityName, val, type = 'zombie') {
         const rawName = entityName || entityId;
-        const name = type === 'zombie' ? _trM(`zombie_${entityId}`, rawName) : (type === 'pvp' ? _trM(`pvpm_name_${entityId}`, rawName) : (type === 'performance' ? _trM(`perf_name_${entityId}`, rawName) : rawName));
+        const name = type === 'zombie' ? _trM(`zombie_${entityId}`, rawName)
+            : (type === 'pvp' ? _trM(`pvpm_name_${entityId}`, rawName)
+            : (type === 'drones' ? _trM(`dronem_name_${entityId}`, rawName)
+            : (type === 'performance' ? _trM(`perf_name_${entityId}`, rawName) : rawName)));
         if (window.combat && typeof window.combat.addFloatingText === 'function') {
             const cx = window.combat.canvas ? window.combat.canvas.width / 2 : 200;
             const cy = window.combat.canvas ? window.combat.canvas.height * 0.28 : 120;
             let label = _trM('milestoneHitZombie', `🎯 META CONCLUÍDA: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
             if (type === 'guitarist') label = _trM('milestoneHitHero', `🎸 MESTRIA: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
             else if (type === 'pvp') label = _trM('milestoneHitPvp', `⚔️ MARCO PVP: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
+            else if (type === 'drones') label = _trM('milestoneHitDrone', `🛸 MARCO DE DRONE: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
             else if (type === 'performance') label = _trM('milestoneHitPerf', `⚡ MARCO DE RITMO: ${name} (${val.toLocaleString()})!`, { name, val: val.toLocaleString() });
             window.combat.addFloatingText(label, cx, cy, '#ffd700', true);
             if (window.soundEngine && typeof window.soundEngine.playLevelUp === 'function') window.soundEngine.playLevelUp();
@@ -448,7 +485,7 @@ class MetaMissionSystem {
         }
 
         return {
-            success: true, id: statId, statId, category: 'performance',
+            success: true, id: statId, statId, category: mission.category,
             claimedTier: nextClaimed, reward, isMaxCompleted: nextClaimed >= this.MAX_TIER
         };
     }
@@ -456,7 +493,7 @@ class MetaMissionSystem {
     claimReward(idOrType, maybeId = null) {
         if (maybeId) {
             if (idOrType === 'guitarist' || idOrType === 'guitarists') return this.claimGuitaristReward(maybeId);
-            if (idOrType === 'performance' || idOrType === 'ritmo') return this.claimPerformanceReward(maybeId);
+            if (idOrType === 'performance' || idOrType === 'ritmo' || idOrType === 'drones' || idOrType === 'pvp') return this.claimPerformanceReward(maybeId);
             return this.claimZombieReward(maybeId);
         }
         const pRes = this.claimPerformanceReward(idOrType);
@@ -535,15 +572,15 @@ class MetaMissionSystem {
             missionsToClaim = [
                 ...this.getAllZombieMissions().filter(m => m.isReadyToClaim),
                 ...this.getAllGuitaristMissions().filter(m => m.isReadyToClaim),
-                ...this.getAllPerformanceMissions().filter(m => m.isReadyToClaim)
+                ...this.getAllDroneMissions().filter(m => m.isReadyToClaim),
+                ...this.getAllPerformanceMissions().filter(m => m.isReadyToClaim),
+                ...this.getAllPvPMissions().filter(m => m.isReadyToClaim)
             ];
-        } else if (cat === 'guitarists') {
-            missionsToClaim = this.getAllGuitaristMissions().filter(m => m.isReadyToClaim);
-        } else if (cat === 'performance') {
-            missionsToClaim = this.getAllPerformanceMissions().filter(m => m.isReadyToClaim);
-        } else {
-            missionsToClaim = this.getAllZombieMissions().filter(m => m.isReadyToClaim);
-        }
+        } else if (cat === 'guitarists') missionsToClaim = this.getAllGuitaristMissions().filter(m => m.isReadyToClaim);
+        else if (cat === 'drones') missionsToClaim = this.getAllDroneMissions().filter(m => m.isReadyToClaim);
+        else if (cat === 'performance') missionsToClaim = this.getAllPerformanceMissions().filter(m => m.isReadyToClaim);
+        else if (cat === 'pvp') missionsToClaim = this.getAllPvPMissions().filter(m => m.isReadyToClaim);
+        else missionsToClaim = this.getAllZombieMissions().filter(m => m.isReadyToClaim);
 
         if (missionsToClaim.length === 0) return { count: 0, totalGold: 0, totalXp: 0 };
 
@@ -551,7 +588,7 @@ class MetaMissionSystem {
         missionsToClaim.forEach(m => {
             let res = null;
             if (m.category === 'guitarists') res = this.claimGuitaristReward(m.heroId || m.id, false);
-            else if (m.category === 'performance' || m.category === 'pvp') res = this.claimPerformanceReward(m.statId || m.id, false);
+            else if (m.category === 'performance' || m.category === 'pvp' || m.category === 'drones') res = this.claimPerformanceReward(m.statId || m.id, false);
             else res = this.claimZombieReward(m.zombieId || m.id, false);
 
             if (res && res.success) {
@@ -571,28 +608,26 @@ class MetaMissionSystem {
     getPendingClaimsCount(category = null) {
         if (category === 'zombies') return this.getAllZombieMissions().filter(m => m.isReadyToClaim).length;
         if (category === 'guitarists') return this.getAllGuitaristMissions().filter(m => m.isReadyToClaim).length;
+        if (category === 'drones') return this.getAllDroneMissions().filter(m => m.isReadyToClaim).length;
         if (category === 'performance') return this.getAllPerformanceMissions().filter(m => m.isReadyToClaim).length;
         if (category === 'pvp') return this.getAllPvPMissions().filter(m => m.isReadyToClaim).length;
         return this.getAllZombieMissions().filter(m => m.isReadyToClaim).length +
                this.getAllGuitaristMissions().filter(m => m.isReadyToClaim).length +
+               this.getAllDroneMissions().filter(m => m.isReadyToClaim).length +
                this.getAllPerformanceMissions().filter(m => m.isReadyToClaim).length +
                this.getAllPvPMissions().filter(m => m.isReadyToClaim).length;
     }
 
     updateBadgeCounter() {
         if (typeof document === 'undefined') return;
+        if (typeof window !== 'undefined' && window.PerfUtils && window.PerfUtils.isInActiveBattle()) return;
         const totalPending = this.getPendingClaimsCount();
         const badge = document.getElementById('menu-missions-badge');
         if (badge) {
             badge.innerText = totalPending.toString();
             if (badge.classList) {
-                if (totalPending > 0) {
-                    badge.classList.remove('hidden');
-                    badge.classList.add('pulse-badge');
-                } else {
-                    badge.classList.add('hidden');
-                    badge.classList.remove('pulse-badge');
-                }
+                if (totalPending > 0) { badge.classList.remove('hidden'); badge.classList.add('pulse-badge'); }
+                else { badge.classList.add('hidden'); badge.classList.remove('pulse-badge'); }
             }
         }
 
@@ -606,31 +641,17 @@ class MetaMissionSystem {
                 : tr('btnClaimAll', '✨ REIVINDICAR TODAS');
         }
 
-        const zCount = this.getPendingClaimsCount('zombies');
-        const hCount = this.getPendingClaimsCount('guitarists');
-        const pCount = this.getPendingClaimsCount('performance');
-        const pvCount = this.getPendingClaimsCount('pvp');
-        const zTabBadge = document.getElementById('cat-badge-zombies');
-        const hTabBadge = document.getElementById('cat-badge-guitarists');
-        const pTabBadge = document.getElementById('cat-badge-performance');
-        const pvTabBadge = document.getElementById('cat-badge-pvp');
-        if (pvTabBadge) {
-            pvTabBadge.innerText = pvCount > 0 ? `(${pvCount})` : '';
-            if (pvTabBadge.style) pvTabBadge.style.display = pvCount > 0 ? 'inline' : 'none';
-        }
-
-        if (zTabBadge) {
-            zTabBadge.innerText = zCount > 0 ? `(${zCount})` : '';
-            if (zTabBadge.style) zTabBadge.style.display = zCount > 0 ? 'inline' : 'none';
-        }
-        if (hTabBadge) {
-            hTabBadge.innerText = hCount > 0 ? `(${hCount})` : '';
-            if (hTabBadge.style) hTabBadge.style.display = hCount > 0 ? 'inline' : 'none';
-        }
-        if (pTabBadge) {
-            pTabBadge.innerText = pCount > 0 ? `(${pCount})` : '';
-            if (pTabBadge.style) pTabBadge.style.display = pCount > 0 ? 'inline' : 'none';
-        }
+        const setTabBadge = (id, cnt) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerText = cnt > 0 ? `(${cnt})` : '';
+            if (el.style) el.style.display = cnt > 0 ? 'inline' : 'none';
+        };
+        setTabBadge('cat-badge-zombies', this.getPendingClaimsCount('zombies'));
+        setTabBadge('cat-badge-guitarists', this.getPendingClaimsCount('guitarists'));
+        setTabBadge('cat-badge-drones', this.getPendingClaimsCount('drones'));
+        setTabBadge('cat-badge-performance', this.getPendingClaimsCount('performance'));
+        setTabBadge('cat-badge-pvp', this.getPendingClaimsCount('pvp'));
     }
 
     initDOM() {
@@ -709,9 +730,13 @@ class MetaMissionSystem {
             missions = this.getAllGuitaristMissions();
             totalCount = Object.values(this.state.heroKills).reduce((a, b) => a + (Number(b) || 0), 0);
             labelText = tr('statKillsHeroes', 'Kills Heróis:');
+        } else if (this.activeCategory === 'drones') {
+            missions = this.getAllDroneMissions();
+            totalCount = this.state.performanceStats['drone_actions'] || 0;
+            labelText = tr('statDroneActions', '🛸 Ações Drones:');
         } else if (this.activeCategory === 'performance') {
             missions = this.getAllPerformanceMissions();
-            totalCount = Object.values(this.state.performanceStats).reduce((a, b) => a + (Number(b) || 0), 0);
+            totalCount = Object.entries(this.state.performanceStats).filter(([k]) => !k.startsWith('pvp_') && !k.startsWith('drone_')).reduce((a, [, v]) => a + (Number(v) || 0), 0);
             labelText = tr('statRhythmActions', 'Ações de Ritmo:');
         } else if (this.activeCategory === 'pvp') {
             missions = this.getAllPvPMissions();
@@ -754,6 +779,7 @@ class MetaMissionSystem {
 
         let missions = [];
         if (this.activeCategory === 'guitarists') missions = this.getAllGuitaristMissions();
+        else if (this.activeCategory === 'drones') missions = this.getAllDroneMissions();
         else if (this.activeCategory === 'performance') missions = this.getAllPerformanceMissions();
         else if (this.activeCategory === 'pvp') missions = this.getAllPvPMissions();
         else missions = this.getAllZombieMissions();
@@ -771,7 +797,7 @@ class MetaMissionSystem {
         else if (this.activeFilter === 'completed') missions = missions.filter(m => m.isMaxCompleted);
 
         if (missions.length === 0) {
-            const icon = this.activeCategory === 'guitarists' ? '🎸' : (this.activeCategory === 'pvp' ? '⚔️' : (this.activeCategory === 'performance' ? '⚡' : '🧟'));
+            const icon = this.activeCategory === 'guitarists' ? '🎸' : (this.activeCategory === 'drones' ? '🛸' : (this.activeCategory === 'pvp' ? '⚔️' : (this.activeCategory === 'performance' ? '⚡' : '🧟')));
             const emptyMsg = typeof i18n !== 'undefined' ? i18n.t('noMissionsFound', 'Nenhuma missão encontrada para o filtro selecionado.') : 'Nenhuma missão encontrada para o filtro selecionado.';
             container.innerHTML = `
                 <div class="missions-empty-state">
@@ -791,7 +817,7 @@ class MetaMissionSystem {
                     const id = btn.dataset ? btn.dataset.claimId : null;
                     if (!id) return;
                     if (cat === 'guitarists') this.claimGuitaristReward(id);
-                    else if (cat === 'performance' || cat === 'pvp') this.claimPerformanceReward(id);
+                    else if (cat === 'performance' || cat === 'pvp' || cat === 'drones') this.claimPerformanceReward(id);
                     else this.claimZombieReward(id);
                 };
             });
@@ -801,16 +827,18 @@ class MetaMissionSystem {
     createCardHTML(m) {
         const isReady = m.isReadyToClaim;
         const isMax = m.isMaxCompleted;
-        const catClass = m.category === 'guitarists' ? 'hero-mission-card' : (m.category === 'pvp' ? 'pvp-mission-card' : (m.category === 'performance' ? 'perf-mission-card' : ''));
-        const fillClass = m.category === 'guitarists' ? 'hero-fill' : (m.category === 'pvp' ? 'pvp-fill' : (m.category === 'performance' ? 'perf-fill' : ''));
-        const titleClass = m.category === 'guitarists' ? 'hero-title' : (m.category === 'pvp' ? 'pvp-title' : (m.category === 'performance' ? 'perf-title' : ''));
-        const tierPillClass = m.category === 'guitarists' ? 'hero-tier-pill' : (m.category === 'pvp' ? 'pvp-tier-pill' : (m.category === 'performance' ? 'perf-tier-pill' : ''));
+        const themePfx = m.category === 'guitarists' ? 'hero' : (m.category === 'drones' ? 'drone' : (m.category === 'pvp' ? 'pvp' : (m.category === 'performance' ? 'perf' : '')));
+        const catClass = themePfx ? `${themePfx}-mission-card` : '';
+        const fillClass = themePfx ? `${themePfx}-fill` : '';
+        const titleClass = themePfx ? `${themePfx}-title` : '';
+        const tierPillClass = themePfx ? `${themePfx}-tier-pill` : '';
 
         const tr = (k, f, p) => (typeof i18n !== 'undefined' ? i18n.t(k, f, p) : f);
         let actionBtnHTML = '';
         if (isMax) {
             let masterTitle = tr('masterHunter', 'MESTRE CAÇADOR');
             if (m.category === 'guitarists') masterTitle = tr('rockLegend', 'LENDA DO ROCK');
+            else if (m.category === 'drones') masterTitle = tr('droneMasterTitle', 'MESTRE DOS DRONES');
             else if (m.category === 'pvp') masterTitle = tr('pvpMasterTitle', 'LENDA DO PVP');
             else if (m.category === 'performance') masterTitle = tr('supremeMastery', 'MESTRIA SUPREMA');
 
@@ -842,11 +870,13 @@ class MetaMissionSystem {
 
         let sectionTag = tr('milestoneReward', 'RECOMPENSA DO MARCO:');
         if (m.category === 'guitarists') sectionTag = tr('heroMastery', 'MESTRIA DO GUITARRISTA:');
+        else if (m.category === 'drones') sectionTag = tr('droneMilestoneTag', 'MARCO DE DRONE:');
         else if (m.category === 'pvp') sectionTag = tr('pvpMilestoneTag', 'MARCO DO DUELO PVP:');
         else if (m.category === 'performance') sectionTag = tr('perfMilestone', 'MARCO DE PERFORMANCE:');
 
         const goldLabel = tr('goldUnit', 'Ouro');
         const targetLabel = tr('target', 'Meta:');
+        const statIcon = m.category === 'guitarists' ? '🎸' : (m.category === 'drones' ? '🛸' : (m.category === 'pvp' ? '⚔️' : (m.category === 'performance' ? '⚡' : '💀')));
 
         return `
             <div class="mission-card ${catClass} ${isReady ? 'card-ready' : ''} ${isMax ? 'card-master' : ''}">
@@ -858,7 +888,7 @@ class MetaMissionSystem {
                     <div class="mission-info-col">
                         <div class="mission-title-row">
                             <h4 class="mission-zombie-name ${m.category === 'guitarists' ? 'hero-name' : ''}">${m.name}</h4>
-                            <span class="mission-lifetime-kills ${m.category === 'guitarists' ? 'hero-kills' : ''}">${m.category === 'guitarists' ? '🎸' : (m.category === 'pvp' ? '⚔️' : (m.category === 'performance' ? '⚡' : '💀'))} ${m.currentVal.toLocaleString()} ${m.unitLabel}</span>
+                            <span class="mission-lifetime-kills ${m.category === 'guitarists' ? 'hero-kills' : ''}">${statIcon} ${m.currentVal.toLocaleString()} ${m.unitLabel}</span>
                         </div>
                         <div class="mission-tier-indicator">
                             <span class="tier-pill ${tierPillClass}">${tr('tierPillFmt', `Nível ${isMax ? 5 : m.currentTierNum}/5`, { cur: isMax ? 5 : m.currentTierNum })}</span>

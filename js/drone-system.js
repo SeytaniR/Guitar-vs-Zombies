@@ -27,6 +27,14 @@ class DroneSystem {
         this.oppActionCount = 0;
         this.oppCcCycleIndex = 0;
         this.activeBeams = [];
+        this._poisonDmgAcc = 0;
+        this._statsCache = null;
+    }
+
+    _recQuest(id, n = 1) {
+        if (typeof window !== 'undefined' && window.metaMissionSystem && typeof window.metaMissionSystem.recordStat === 'function') {
+            window.metaMissionSystem.recordStat(id, n);
+        }
     }
 
     loadSelectedId() {
@@ -80,6 +88,7 @@ class DroneSystem {
         if (!this.unlockedDrones.includes(droneId)) this.unlockedDrones.push(droneId);
         this.saveUnlockedDrones();
         this.setSelectedDrone(droneId);
+        this._recQuest('drone_unlocked', this.getUnlockedDrones().length);
         return { success: true, drone, cost };
     }
 
@@ -102,7 +111,9 @@ class DroneSystem {
     }
 
     saveDroneLevels() {
-        try { localStorage.setItem('gvs_drone_levels', JSON.stringify(this.droneLevels)); } catch (e) {}
+        const doSave = () => { try { localStorage.setItem('gvs_drone_levels', JSON.stringify(this.droneLevels)); } catch (e) {} };
+        if (typeof window !== 'undefined' && window.PerfUtils && typeof window.PerfUtils.deferSave === 'function') window.PerfUtils.deferSave('drone_levels', doSave);
+        else doSave();
     }
 
     getAllDrones() { return this.drones; }
@@ -122,6 +133,7 @@ class DroneSystem {
     setSelectedDrone(droneId) {
         if (this.drones.some(d => d.id === droneId) && this.isDroneUnlocked(droneId)) {
             this.selectedId = droneId;
+            this._statsCache = null;
             try { localStorage.setItem('gvs_selected_drone', droneId); } catch (e) {}
             return true;
         }
@@ -161,7 +173,9 @@ class DroneSystem {
     setLevel(droneId, level) {
         const data = this.getDroneLevelData(droneId);
         data.level = Math.max(1, Math.min(100, Math.floor(level)));
+        this._statsCache = null;
         this.saveDroneLevels();
+        this._recQuest('drone_max_level', data.level);
         return data;
     }
 
@@ -199,6 +213,10 @@ class DroneSystem {
             } else break;
         }
         if (data.level >= 100) data.xp = 0;
+        if (leveledUp) {
+            this._statsCache = null;
+            this._recQuest('drone_max_level', data.level);
+        }
         this.saveDroneLevels();
         return { leveledUp, newLevel: data.level, currentXp: data.xp, reqXp: this.getXpRequiredForNextLevel(data.level), awardedXp: finalXp };
     }
@@ -235,7 +253,9 @@ class DroneSystem {
         }
         data.level++;
         data.xp = 0;
+        this._statsCache = null;
         this.saveDroneLevels();
+        this._recQuest('drone_max_level', data.level);
         return { success: true, newLevel: data.level, cost };
     }
 
@@ -316,6 +336,14 @@ class DroneSystem {
         this.oppActionCount = 0;
         this.oppCcCycleIndex = 0;
         this.activeBeams = [];
+        this._poisonDmgAcc = 0;
+        this._statsCache = null;
+    }
+
+    _recQuest(id, n = 1) {
+        if (typeof window !== 'undefined' && window.metaMissionSystem && typeof window.metaMissionSystem.recordStat === 'function') {
+            window.metaMissionSystem.recordStat(id, n);
+        }
     }
 
     getPlayerDronePosition(combat) {
@@ -357,26 +385,27 @@ class DroneSystem {
 
         for (let i = this.activeBeams.length - 1; i >= 0; i--) {
             this.activeBeams[i].life -= dt;
-            if (this.activeBeams[i].life <= 0) this.activeBeams.splice(i, 1);
+            if (this.activeBeams[i].life <= 0) { this.activeBeams[i] = this.activeBeams[this.activeBeams.length - 1]; this.activeBeams.pop(); }
         }
 
         for (const z of combat.entities.zombies) {
             if (!z.active) continue;
-            if (z.sleepTimer > 0) {
-                z.sleepTimer -= dt;
-                z.stunTimer = Math.max(z.stunTimer || 0, 0.05);
-            }
+            if (z.sleepTimer > 0) { z.sleepTimer -= dt; z.stunTimer = Math.max(z.stunTimer || 0, 0.05); }
             if (z.freezeTimer > 0) z.freezeTimer -= dt;
             if (z.poisonTimer > 0) {
                 z.poisonTimer -= dt;
-                z.hp -= (z.poisonDps || 14) * dt;
+                const pd = (z.poisonDps || 14) * dt;
+                z.hp -= pd;
+                if (z.side !== 'opponent') {
+                    this._poisonDmgAcc += pd;
+                    if (this._poisonDmgAcc >= 10) { const fl = Math.floor(this._poisonDmgAcc); this._poisonDmgAcc -= fl; this._recQuest('drone_damage', fl); }
+                }
                 if (z.hp <= 0 && z.active) {
                     if (z.side === 'opponent' && combat.isPvPMode && combat.pvpSystem) {
-                        z.active = false;
-                        combat.pvpSystem.opponentZombiesKilled++;
+                        z.active = false; combat.pvpSystem.opponentZombiesKilled++;
                         if (combat.pvpSystem.opponent) combat.pvpSystem.opponent.score += 150;
                     } else {
-                        z.active = false;
+                        z.active = false; this._recQuest('drone_kills', 1);
                         combat.onZombieKilled(z, 130, _trD('dronePoisonKill', '+VENENO! 🧪'), '#b336ff');
                     }
                 }
@@ -384,7 +413,11 @@ class DroneSystem {
         }
 
         const drone = this.getActiveDrone();
-        const stats = this.getDroneStats(drone.id, null, true);
+        const tNow = (combat.time || 0);
+        if (!this._statsCache || this._statsCache.id !== drone.id || (tNow - this._statsCache.at) > 500) {
+            this._statsCache = { id: drone.id, at: tNow, stats: this.getDroneStats(drone.id, null, true) };
+        }
+        const stats = this._statsCache.stats;
         this.actionTimer += dt;
         if (this.actionTimer >= stats.cooldown) {
             this.actionTimer = 0;
@@ -430,40 +463,28 @@ class DroneSystem {
     }
 
     executePlayerDroneAction(drone, stats, combat) {
-        const dPos = this.getPlayerDronePosition(combat);
-        const heroPos = combat.getHeroPosition();
+        const dPos = this.getPlayerDronePosition(combat), heroPos = combat.getHeroPosition();
         this.actionCount++;
 
         if (drone.type === 'offensive') {
             const target = this.findClosestZombie(combat, 'player', heroPos.x);
             if (!target) return;
-            const ty = target.y + (target.jumpArcY || 0) - 18;
-            const isMissile = (this.actionCount % (stats.missileEvery || 4) === 0);
+            const ty = target.y + (target.jumpArcY || 0) - 18, isMissile = (this.actionCount % (stats.missileEvery || 4) === 0);
             const dmg = isMissile ? stats.missileDamage : stats.damage;
+            let totalDmg = dmg, killCount = 0;
 
             this.addBeam(dPos.x + 8, dPos.y + 4, target.x, ty, isMissile ? (drone.accentColor || '#ffaa00') : (drone.color || '#ff3300'), isMissile ? 4.5 : 2.8, 0.26);
-            target.hp -= dmg;
-            target.flashTime = 0.14;
-            combat.battleStats.damageDealt += dmg;
+            target.hp -= dmg; target.flashTime = 0.14; combat.battleStats.damageDealt += dmg;
 
             if (isMissile) {
-                if (!target.isBurnImmune && target.type !== 'firefighter') {
-                    target.burnTimer = Math.max(target.burnTimer || 0, 3.0);
-                    target.burnDps = Math.max(target.burnDps || 0, stats.burnDps);
-                }
+                if (!target.isBurnImmune && target.type !== 'firefighter') { target.burnTimer = Math.max(target.burnTimer || 0, 3.0); target.burnDps = Math.max(target.burnDps || 0, stats.burnDps); }
                 combat.fx.spawnBurst(target.x, ty, drone.color || '#ff5500', 12, 75, 2.8, 0.35);
                 combat.fx.shockwaves.push({ x: target.x, y: ty, radius: 5, maxRadius: Math.round((stats.aoeRadius || 75) * 0.72), color: drone.color || '#ff5500', lineWidth: 3, alpha: 1.0 });
                 combat.addFloatingText(_trD('droneFxPyroMissile', `🚀 MÍSSIL PYRO! -${dmg} 🔥`, { dmg }), target.x, ty - 28, drone.accentColor || '#ffaa00', true);
                 for (const other of combat.entities.zombies) {
                     if (other.active && other !== target && Math.abs(other.x - target.x) < (stats.aoeRadius || 75) && (!combat.isPvPMode || other.side === 'player')) {
-                        const splash = Math.round(dmg * 0.6);
-                        other.hp -= splash;
-                        other.flashTime = 0.12;
-                        combat.battleStats.damageDealt += splash;
-                        if (other.hp <= 0 && other.active) {
-                            other.active = false;
-                            combat.onZombieKilled(other, 140, _trD('droneKillToast', '+DRONE KILL! 🛸'), drone.color || '#ff5500');
-                        }
+                        const splash = Math.round(dmg * 0.6); other.hp -= splash; other.flashTime = 0.12; combat.battleStats.damageDealt += splash; totalDmg += splash;
+                        if (other.hp <= 0 && other.active) { other.active = false; killCount++; combat.onZombieKilled(other, 140, _trD('droneKillToast', '+DRONE KILL! 🛸'), drone.color || '#ff5500'); }
                     }
                 }
             } else {
@@ -471,30 +492,23 @@ class DroneSystem {
                 combat.addFloatingText(`🛸 -${dmg}`, target.x, ty - 20, drone.accentColor || '#ff7733', false);
             }
 
-            // Chain Arc for high-tier offensive drones (Volt-Viper, Plasma-Reaper, Nova-Valkyrie, Apocalypse-Rex)
             if (stats.chainTargets > 0) {
                 let chained = 0, prevX = target.x, prevY = ty;
                 for (const z2 of combat.entities.zombies) {
                     if (chained >= stats.chainTargets) break;
                     if (!z2.active || z2 === target || (combat.isPvPMode && z2.side !== 'player') || z2.x > combat.canvas.width - 4) continue;
-                    const z2y = z2.y + (z2.jumpArcY || 0) - 18;
-                    const cDmg = Math.round(dmg * 0.55);
+                    const z2y = z2.y + (z2.jumpArcY || 0) - 18, cDmg = Math.round(dmg * 0.55);
                     this.addBeam(prevX, prevY, z2.x, z2y, drone.accentColor || '#ffee00', 2.2, 0.22);
-                    z2.hp -= cDmg;
-                    z2.flashTime = 0.12;
-                    combat.battleStats.damageDealt += cDmg;
-                    if (z2.hp <= 0 && z2.active) {
-                        z2.active = false;
-                        combat.onZombieKilled(z2, 135, _trD('droneKillToast', '+DRONE KILL! 🛸'), drone.accentColor || '#ffee00');
-                    }
+                    z2.hp -= cDmg; z2.flashTime = 0.12; combat.battleStats.damageDealt += cDmg; totalDmg += cDmg;
+                    if (z2.hp <= 0 && z2.active) { z2.active = false; killCount++; combat.onZombieKilled(z2, 135, _trD('droneKillToast', '+DRONE KILL! 🛸'), drone.accentColor || '#ffee00'); }
                     prevX = z2.x; prevY = z2y; chained++;
                 }
             }
 
-            if (target.hp <= 0 && target.active) {
-                target.active = false;
-                combat.onZombieKilled(target, 140, _trD('droneKillToast', '+DRONE KILL! 🛸'), drone.color || '#ff5500');
-            }
+            if (target.hp <= 0 && target.active) { target.active = false; killCount++; combat.onZombieKilled(target, 140, _trD('droneKillToast', '+DRONE KILL! 🛸'), drone.color || '#ff5500'); }
+            this._recQuest('drone_actions', 1); this._recQuest('drone_damage', totalDmg);
+            if (isMissile) this._recQuest('drone_missiles', 1);
+            if (killCount > 0) this._recQuest('drone_kills', killCount);
             return;
         }
 
@@ -502,10 +516,7 @@ class DroneSystem {
             this.addBeam(dPos.x, dPos.y + 8, heroPos.x + 4, heroPos.y - 24, drone.color || '#00ff88', 3.5, 0.32);
             combat.fx.spawnBurst(heroPos.x + 4, heroPos.y - 24, drone.color || '#00ff88', 8, 50, 2.2, 0.35);
             combat.fx.shockwaves.push({ x: heroPos.x + 4, y: heroPos.y - 20, radius: 4, maxRadius: 42, color: drone.color || '#00ff88', lineWidth: 2.5, alpha: 0.95 });
-
-            if (combat.heroHp < combat.heroMaxHp) {
-                combat.heroHp = Math.min(combat.heroMaxHp, combat.heroHp + stats.healAmount);
-            }
+            if (combat.heroHp < combat.heroMaxHp) combat.heroHp = Math.min(combat.heroMaxHp, combat.heroHp + stats.healAmount);
             combat.rockMana = Math.min(combat.maxRockMana, combat.rockMana + stats.manaGrant);
             if (window.specialSystem && !window.specialSystem.specialUsed && !window.specialSystem.isSpecialActive) {
                 window.specialSystem.specialMeter = Math.min(100, window.specialSystem.specialMeter + (stats.specialCharge || 4.0));
@@ -513,10 +524,12 @@ class DroneSystem {
             }
             combat.heroAttackSpeedBuffTimer = Math.max(combat.heroAttackSpeedBuffTimer || 0, 2.8);
             combat.heroAttackSpeedBuffMult = Math.max(combat.heroAttackSpeedBuffMult || 1.0, 1 + stats.atkSpeedBuffPct / 100);
+            this._recQuest('drone_actions', 1); this._recQuest('drone_heals', 1);
 
             if (this.actionCount % (stats.shieldEvery || 3) === 0) {
                 combat.heroShieldHp = Math.min(stats.shieldCap || 120, (combat.heroShieldHp || 0) + stats.shieldAmount);
                 combat.heroShieldTimer = Math.max(combat.heroShieldTimer || 0, 6.5);
+                this._recQuest('drone_missiles', 1);
                 combat.addFloatingText(_trD('droneFxSupportShield', `🛸 +${stats.healAmount} HP 🛡️ +${stats.shieldAmount} ESCUDO!`, { hp: stats.healAmount, shd: stats.shieldAmount }), heroPos.x + 10, heroPos.y - 54, '#ffd700', true);
             } else {
                 combat.addFloatingText(_trD('droneFxSupportPulse', `🛸 +${stats.healAmount} HP 💚 +${stats.manaGrant} MP ⚡`, { hp: stats.healAmount, mp: stats.manaGrant }), heroPos.x + 10, heroPos.y - 52, drone.color || '#00ff88', false);
@@ -524,32 +537,30 @@ class DroneSystem {
             return;
         }
 
-        // Controller Drone: Cycles 5 tactical CC & DoT effects (dualCc applies 2 simultaneous CCs!)
         const target = this.findClosestZombie(combat, 'player', heroPos.x);
         if (!target) return;
-        const ty = target.y + (target.jumpArcY || 0) - 18;
-        const mode = this.ccCycleIndex % 5;
-        const mode2 = stats.dualCc ? ((mode + 3) % 5) : -1;
+        const ty = target.y + (target.jumpArcY || 0) - 18, mode = this.ccCycleIndex % 5, mode2 = stats.dualCc ? ((mode + 3) % 5) : -1;
         this.ccCycleIndex++;
 
-        const colors = ['#00e5ff', '#ffff00', '#d488ff', '#39ff14', '#b336ff'];
-        const beamCol = colors[mode];
+        const colors = ['#00e5ff', '#ffff00', '#d488ff', '#39ff14', '#b336ff'], beamCol = colors[mode];
         this.addBeam(dPos.x + 6, dPos.y + 4, target.x, ty, beamCol, 3.6, 0.30);
         combat.fx.spawnBurst(target.x, ty, beamCol, 10, 65, 2.4, 0.32);
         combat.fx.shockwaves.push({ x: target.x, y: ty, radius: 5, maxRadius: Math.round((stats.aoeRadius || 85) * 0.72), color: beamCol, lineWidth: 2.5, alpha: 1.0 });
 
+        let ccHits = 0, ccTotalDmg = 0, killCount = 0;
         for (const z of combat.entities.zombies) {
             if (!z.active || Math.abs(z.x - target.x) > (stats.aoeRadius || 85) || (combat.isPvPMode && z.side !== 'player')) continue;
-            z.hp -= stats.ccDamage;
-            z.flashTime = 0.14;
-            combat.battleStats.damageDealt += stats.ccDamage;
+            z.hp -= stats.ccDamage; z.flashTime = 0.14; combat.battleStats.damageDealt += stats.ccDamage;
+            ccHits++; ccTotalDmg += stats.ccDamage;
             this.applyControllerMode(mode, z, stats, combat);
             if (mode2 >= 0) this.applyControllerMode(mode2, z, stats, combat);
-            if (z.hp <= 0 && z.active) {
-                z.active = false;
-                combat.onZombieKilled(z, 135, _trD('droneKillToast', '+DRONE KILL! 🛸'), beamCol);
-            }
+            if (z.hp <= 0 && z.active) { z.active = false; killCount++; combat.onZombieKilled(z, 135, _trD('droneKillToast', '+DRONE KILL! 🛸'), beamCol); }
         }
+        this._recQuest('drone_actions', 1);
+        if (ccHits > 0) this._recQuest('drone_cc_applied', ccHits * (mode2 >= 0 ? 2 : 1));
+        if (ccTotalDmg > 0) this._recQuest('drone_damage', ccTotalDmg);
+        if (mode2 >= 0) this._recQuest('drone_missiles', 1);
+        if (killCount > 0) this._recQuest('drone_kills', killCount);
 
         const callouts = [
             _trD('droneFxCryo', `❄️ CONGELADO! (-${stats.slowPct}% VEL)`, { pct: stats.slowPct }),
@@ -579,14 +590,9 @@ class DroneSystem {
             const ty = target.y + (target.jumpArcY || 0) - 18;
             const dmg = (this.oppActionCount % (stats.missileEvery || 4) === 0) ? stats.missileDamage : stats.damage;
             this.addBeam(dPos.x - 8, dPos.y + 4, target.x, ty, opp.drone.color || '#ff4422', 2.8, 0.25);
-            target.hp -= dmg;
-            target.flashTime = 0.14;
+            target.hp -= dmg; target.flashTime = 0.14;
             combat.addFloatingText(`🛸 -${dmg}`, target.x, ty - 20, '#ff5533', false);
-            if (target.hp <= 0 && target.active) {
-                target.active = false;
-                pvp.opponentZombiesKilled++;
-                opp.score += 140;
-            }
+            if (target.hp <= 0 && target.active) { target.active = false; pvp.opponentZombiesKilled++; opp.score += 140; }
         } else if (opp.drone.type === 'support') {
             this.addBeam(dPos.x, dPos.y + 8, oppPos.x - 4, oppPos.y - 24, opp.drone.color || '#00ff88', 3.0, 0.28);
             const hAmt = Math.max(3, Math.round(stats.healAmount * 0.55));
@@ -597,29 +603,24 @@ class DroneSystem {
             if (!target) return;
             const ty = target.y + (target.jumpArcY || 0) - 18;
             this.addBeam(dPos.x - 6, dPos.y + 4, target.x, ty, opp.drone.color || '#00e5ff', 3.0, 0.26);
-            target.hp -= stats.ccDamage;
-            target.x = Math.max(combat.canvas.width * 0.50, target.x - 18);
+            target.hp -= stats.ccDamage; target.x = Math.max(combat.canvas.width * 0.50, target.x - 18);
             if (typeof target.applyStun === 'function') target.applyStun(0.8);
-            if (target.hp <= 0 && target.active) {
-                target.active = false;
-                pvp.opponentZombiesKilled++;
-                opp.score += 135;
-            }
+            if (target.hp <= 0 && target.active) { target.active = false; pvp.opponentZombiesKilled++; opp.score += 135; }
         }
     }
 
     draw(ctx, combat) {
         if (!ctx || !combat) return;
-        for (const b of this.activeBeams) {
-            const alpha = Math.max(0, b.life / b.maxLife);
+        const pu = typeof window !== 'undefined' ? window.PerfUtils : null;
+        if (this.activeBeams.length > 0) {
             ctx.save();
-            ctx.globalAlpha = alpha;
-            ctx.strokeStyle = b.color;
-            ctx.lineWidth = b.width;
-            ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = Math.max(1, b.width * 0.4);
-            ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+            for (const b of this.activeBeams) {
+                ctx.globalAlpha = Math.max(0, b.life / b.maxLife);
+                ctx.strokeStyle = b.color; ctx.lineWidth = b.width;
+                ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(1, b.width * 0.4);
+                ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+            }
             ctx.restore();
         }
 
@@ -638,48 +639,42 @@ class DroneSystem {
             if (!z.active) continue;
             const zy = z.y + (z.jumpArcY || 0);
             if (z.sleepTimer > 0 || z.freezeTimer > 0 || z.poisonTimer > 0) {
-                ctx.save();
-                ctx.font = "bold 10px 'Segoe UI Emoji', sans-serif";
-                ctx.textAlign = 'center';
-                ctx.fillText(`${z.sleepTimer > 0 ? '💤' : ''}${z.freezeTimer > 0 ? '❄️' : ''}${z.poisonTimer > 0 ? '🧪' : ''}`, z.x, zy - 44);
-                ctx.restore();
+                const iconStr = `${z.sleepTimer > 0 ? '💤' : ''}${z.freezeTimer > 0 ? '❄️' : ''}${z.poisonTimer > 0 ? '🧪' : ''}`;
+                const badge = pu && pu.getTextBadge(`zcc_${iconStr}`, iconStr, "bold 10px 'Segoe UI Emoji', sans-serif", '#ffffff');
+                if (badge) ctx.drawImage(badge.canvas, Math.round(z.x - badge.halfW), Math.round(zy - 44 - badge.halfH));
+                else { ctx.font = "bold 10px 'Segoe UI Emoji', sans-serif"; ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff'; ctx.fillText(iconStr, z.x, zy - 44); }
             }
         }
     }
 
     drawDroneUnit(ctx, combat, drone, level, x, y, flip = false) {
-        const t = (combat.time || 0) / 1000;
-        const pulse = 0.85 + Math.sin(t * 6) * 0.15;
-        const sheet = this.getDroneSheet(drone, combat);
-        const frame = Math.floor((combat.time || 0) / 90) % 12;
+        const t = (combat.time || 0) / 1000, pulse = 0.85 + Math.sin(t * 6) * 0.15;
+        const sheet = this.getDroneSheet(drone, combat), frame = Math.floor((combat.time || 0) / 90) % 12;
 
         ctx.save();
-        ctx.strokeStyle = drone.color || '#00e5ff';
-        ctx.globalAlpha = 0.55 * pulse;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.ellipse(x, y + 11, 13 * pulse, 4, 0, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.strokeStyle = drone.color || '#00e5ff'; ctx.globalAlpha = 0.55 * pulse; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.ellipse(x, y + 11, 13 * pulse, 4, 0, 0, Math.PI * 2); ctx.stroke();
         ctx.globalAlpha = 1.0;
 
         if (sheet && sheet.ready) {
             sheet.drawFrame(ctx, frame, x, y, 0.17, flip, false, 1.0);
         } else {
-            ctx.fillStyle = drone.color || '#00e5ff';
-            ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = drone.color || '#00e5ff'; ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
             ctx.strokeStyle = drone.accentColor || '#ffd700'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.arc(x + (flip ? -3 : 3), y - 1, 2.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x + (flip ? -3 : 3), y - 1, 2.5, 0, Math.PI * 2); ctx.fill();
         }
-
-        ctx.font = "bold 7.5px 'Segoe UI', sans-serif";
-        ctx.textAlign = 'center';
-        const tag = `🛸 ${_trD('levelShort', 'Nv.')}${level}`;
-        ctx.lineWidth = 2.2; ctx.strokeStyle = '#000000';
-        ctx.strokeText(tag, x, y - 14);
-        ctx.fillStyle = drone.accentColor || '#ffd700';
-        ctx.fillText(tag, x, y - 14);
         ctx.restore();
+
+        const tag = `🛸 ${_trD('levelShort', 'Nv.')}${level}`, col = drone.accentColor || '#ffd700';
+        const pu = typeof window !== 'undefined' ? window.PerfUtils : null;
+        const badge = pu && pu.getTextBadge(`dtag_${tag}_${col}`, tag, "bold 7.5px 'Segoe UI', sans-serif", col, '#000000', 2.2);
+        if (badge) {
+            ctx.drawImage(badge.canvas, Math.round(x - badge.halfW), Math.round(y - 16 - badge.halfH));
+        } else {
+            ctx.save(); ctx.font = "bold 7.5px 'Segoe UI', sans-serif"; ctx.textAlign = 'center';
+            ctx.lineWidth = 2.2; ctx.strokeStyle = '#000000'; ctx.strokeText(tag, x, y - 14);
+            ctx.fillStyle = col; ctx.fillText(tag, x, y - 14); ctx.restore();
+        }
     }
 
     // ==========================================
