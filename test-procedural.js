@@ -537,7 +537,7 @@ assert(cssContent.includes('.selected-arena-showcase'), 'CSS includes styling fo
 ['base.css', 'menu.css', 'map-select.css', 'skills.css', 'talents.css', 'song-studio.css', 'editor.css', 'results.css', 'pvp.css'].forEach(f => assert(htmlContent.includes(`${f}?v=65`), `index.html links ${f} with v=65`)); ['battle.css', 'missions.css'].forEach(f => assert(htmlContent.includes(`${f}?v=71`), `index.html links ${f} with v=71`));
 ['missions.js', 'i18n-modes.js', 'i18n.js', 'song-editor.js'].forEach(f => assert(htmlContent.includes(`js/${f}?v=`), `index.html links ${f} with cache buster`));
 ['i18n-content.js', 'drone-catalog.js'].forEach(f => assert(htmlContent.includes(`${f}?v=67`), `index.html links ${f} with v=67`)); ['special-system.js', 'pvp-system.js'].forEach(f => assert(htmlContent.includes(`${f}?v=69`), `index.html links ${f} with v=69`)); ['official-songs.js', 'song-db.js', 'song-editor.js'].forEach(f => assert(htmlContent.includes(`${f}?v=70`), `index.html links ${f} with v=70`)); ['perf-utils.js', 'audio.js', 'i18n.js', 'i18n-modes.js', 'spritesheet.js', 'combat-fx.js', 'zombie-entity.js', 'guitarist-pool.js', 'drone-system.js', 'talents.js', 'skills.js', 'combat.js', 'rhythm.js', 'drone-missions.js', 'missions.js', 'main.js'].forEach(f => assert(htmlContent.includes(`${f}?v=71`), `index.html links ${f} with v=71`));
-assert(htmlContent.includes('v1.9.8 (Build 62)'), 'index.html footer specifies v1.9.8 (Build 62)');
+assert(htmlContent.includes('v2.0.0') && htmlContent.includes('281Games'), 'index.html footer specifies v2.0.0 and credits 281Games');
 
 // Pre-Battle Minimalist Redesign Checks (v1.7.4)
 assert(cssContent.includes('.zombie-card-stats-row') && cssContent.includes('.zombie-stat-chip'), 'CSS provides clean compact combat stat chips for horde cards');
@@ -983,14 +983,14 @@ assert(fs.readFileSync(path.resolve(__dirname, 'js/special-system.js'), 'utf8').
 let edOpen = false; const prevGetEl = global.document.getElementById; global.document.getElementById = (id) => ({ classList: { add: (c) => { if (id === 'chart-editor-modal' && c === 'open') edOpen = true; }, remove: () => {}, contains: () => edOpen }, style: {}, innerText: '', addEventListener: () => {} });
 loadScript('js/song-editor.js'); window.songEditor.open({ id: 't1', title: 'Test', artist: 'A', bpm: 120, duration: 30, notes: [] }); global.document.getElementById = prevGetEl;
 assert(typeof window.songEditor !== 'undefined' && edOpen === true && window.songEditor.song.id === 't1', 'SongEditor loads with zero syntax errors and opens #chart-editor-modal');
-// 33. Testing Official Soundtrack Catalog (5 Original Tracks & Legacy Removal)
-console.log('\n33. Testing Official Soundtrack Catalog (5 Original Tracks & Legacy Removal)...');
+// 33. Testing Official Soundtrack Catalog (6 Original Tracks & Legacy Removal)
+console.log('\n33. Testing Official Soundtrack Catalog (6 Original Tracks & Legacy Removal)...');
 loadScript('js/official-songs.js');
 loadScript('js/song-db.js');
 const offSongs = window.OFFICIAL_SONGS;
-assert(Array.isArray(offSongs) && offSongs.length === 5, 'Official catalog contains exactly 5 original tracks');
-const expectedOffIds = ['official_burning_through_the_redline', 'official_copper_and_chrome', 'official_gravitys_last_stand', 'official_riot_at_the_gate', 'official_the_last_defiance'];
-assert(expectedOffIds.every(id => offSongs.some(s => s.id === id)), 'All 5 expected official song IDs are present');
+assert(Array.isArray(offSongs) && offSongs.length === 6, 'Official catalog contains exactly 6 original tracks');
+const expectedOffIds = ['official_burning_through_the_redline', 'official_copper_and_chrome', 'official_gravitys_last_stand', 'official_riot_at_the_gate', 'official_the_last_defiance', 'official_crown_of_iron_and_bone'];
+assert(expectedOffIds.every(id => offSongs.some(s => s.id === id)), 'All 6 expected official song IDs are present');
 assert(offSongs.every(s => !/radiohead|creep|highway|acdc/i.test(s.title + ' ' + s.artist + ' ' + s.id)), 'Zero copyrighted band tracks in official catalog');
 offSongs.forEach(s => {
     assert(s.artist === 'Oficial' && s.isDefault === true && s.notes.length >= 480, `Official song "${s.title}" has Oficial artist, isDefault & ${s.notes.length} notes`);
@@ -1003,7 +1003,7 @@ const mockDB = new SongDB(); mockDB.getSong = async (id) => mockStore.get(id); m
 (async () => {
     await mockDB.ensureDefaultSong();
     assert(['default_thunder_strike', 'default_hellfire_riff', 'default_anarchy_riot', 'default_gravit_stand'].every(id => !mockStore.has(id)), 'ensureDefaultSong removes all 4 legacy default songs from IndexedDB');
-    assert(expectedOffIds.every(id => mockStore.has(id)) && mockStore.has('user_custom_1'), 'ensureDefaultSong seeds all 5 official songs and preserves user custom songs');
+    assert(expectedOffIds.every(id => mockStore.has(id)) && mockStore.has('user_custom_1'), 'ensureDefaultSong seeds all 6 official songs and preserves user custom songs');
     ['index.html', 'js/main.js', 'js/song-db.js', 'js/i18n-modes.js'].forEach(f => {
         const c = fs.readFileSync(path.resolve(__dirname, f), 'utf8');
         assert(!/Thunder Strike|Cyber Shock|Hellfire Riff|Anarchy Riot|Gravit Stand/.test(c), `No legacy song names remain in ${f}`);
@@ -1040,7 +1040,7 @@ const mockDB = new SongDB(); mockDB.getSong = async (id) => mockStore.get(id); m
     assert((meta.state.performanceStats['drone_cc_applied'] || 0) > ccBefore, 'Controller drone burst updates drone_cc_applied quest');
     const preOppAct = meta.state.performanceStats['drone_actions'] || 0;
     dSys.updateOpponentDrone(2.0, testCombat, { opponent: { level: 5, score: 0, drone: dSys.drones[0], droneLevel: 5 }, getOpponentPosition: () => ({ x: 350, y: 200 }), opponentZombiesKilled: 0 });
-    assert((meta.state.performanceStats['drone_actions'] || 0) === preOppAct, 'PvP opponent AI drone does NOT inflate player drone quests');
+    assert((meta.state.performanceStats['drone_actions'] || 0) === preOppAct, 'PvP opponent virtual drone does NOT inflate player drone quests');
     meta.state.performanceStats['drone_heals'] = 10; meta.state.performanceClaimedTiers['drone_heals'] = 0;
     assert(meta.getPendingClaimsCount('drones') >= 1, 'Pending claims count includes ready drone quests');
     const dClaim = meta.claimPerformanceReward('drone_heals');
@@ -1071,6 +1071,29 @@ const mockDB = new SongDB(); mockDB.getSong = async (id) => mockStore.get(id); m
     assert(auSrc.includes("oversample = 'none'") && auSrc.includes('_snareNoiseBuf') && !auSrc.includes('n_samples = 44100'), 'SoundEngine disables 4x WaveShaper oversampling and caches snare noise buffer');
     assert(cbSrc.includes("alpha: false") && cbSrc.includes('_bgCache') && cbSrc.includes('lazySheet') && rhSrc.includes('alpha: false') && rhSrc.includes('highwayBgCanvas'), 'Combat & Rhythm canvases disable alpha channel, lazy-load sheets, and cache static layers');
     assert(skSrc.includes('_fretCache') && fxSrc.includes('_flareGrads') && mainJs.includes('lastComboFire') && bCssSrc.includes('contain: layout paint'), 'Skills fret overlay, FX flare gradients, combo pill toggle & CSS containment optimized');
+
+    // 36. Testing Fresh Player Reset, 5,000 Starting Gold & Zero AI Mentions
+    console.log('\n36. Testing Fresh Player Reset, 5,000 Starting Gold & Zero AI Mentions...');
+    mockLocalStorage = {};
+    const freshTalent = new TalentSystem();
+    assert(freshTalent.gold === 5000 && freshTalent.getTotalUpgrades() === 0, 'Fresh player starts with 5,000 gold and 0 talent upgrades');
+    const freshPool = new GuitaristPoolSystem();
+    assert(freshPool.getPlayerXp() === 0 && freshPool.unlockedHeroes.length === 1 && freshPool.unlockedHeroes[0] === 'johnny_blaze' && freshPool.selectedId === 'johnny_blaze', 'Fresh player starts with 0 XP and only Johnny Blaze unlocked');
+    const freshJ = freshPool.getHeroLevelData('johnny_blaze');
+    assert(freshJ.level === 1 && freshJ.xp === 0, 'Starter guitarist starts cleanly at Level 1 with 0 XP');
+    const freshDrones = new DroneSystem();
+    assert(freshDrones.getUnlockedDrones().length === 3 && freshDrones.drones.every(d => freshDrones.getDroneLevelData(d.id).level === 1 && freshDrones.getDroneLevelData(d.id).xp === 0), 'Fresh player starts with 3 free starter drones at Level 1 / 0 XP');
+    const freshStage = new StageSystem();
+    assert(freshStage.highestUnlockedStage === 1 && freshStage.selectedStage === 1, 'Fresh player starts cleanly at Stage 1 (highest === 1)');
+    const freshPvP = new PvPSystem();
+    assert(freshPvP.playerTrophies === 0 && freshPvP.playerWins === 0 && freshPvP.playerLosses === 0 && freshPvP.getRank().tier === 'bronze', 'Fresh player starts PvP with 0 trophies, 0 wins, 0 losses (Bronze)');
+    const freshMissions = new MetaMissionSystem();
+    assert(freshMissions.state.totalClaimedGold === 0 && freshMissions.state.totalClaimedXp === 0 && Object.keys(freshMissions.state.kills).length === 0, 'Fresh player starts with clean mission counters and 0 claims');
+    assert(localStorage.getItem('gvs_highscore') === null && localStorage.getItem('gvs_total_kills') === null, 'Fresh player has clean highscore and kill counters (0)');
+    const aiAuditRe = /\b(intelig[êe]ncia\s+artificial|artificial\s+intelligence|chatgpt|openai|gemini|midjourney|dall-?e|llm|ia\s+generativa|opponent\s+ai|encapsulates\s+ai)\b/i;
+    const projectFilesForAudit = ['index.html', ...fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).map(f => path.join('js', f)), ...allCssFiles.map(f => path.join('css', f))];
+    const aiHits = projectFilesForAudit.filter(rel => aiAuditRe.test(fs.readFileSync(path.resolve(__dirname, rel), 'utf8')));
+    assert(aiHits.length === 0, 'Zero AI mentions in index.html, js/*.js, and css/*.css', aiHits.join(', '));
 
     fs.readdirSync(path.resolve(__dirname, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
         const src = fs.readFileSync(path.resolve(__dirname, 'js', f), 'utf8'), lines = src.split('\n').length;

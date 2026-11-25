@@ -447,8 +447,8 @@ class TalentSystem {
                     }
                 }
             } else {
-                // Initial starter stash for fun immediate first upgrade
-                this.gold = 50;
+                // Initial starter gold (5,000) for new players
+                this.gold = 5000;
             }
         } catch (e) {
             console.warn("Could not load talent progress", e);

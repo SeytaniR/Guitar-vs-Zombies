@@ -1,4 +1,4 @@
-// PvP System Module (Asynchronous Simulated Online Matchmaking, Realistic Opponent AI, Center Spawning & Cross-Healing)
+// PvP System Module (Asynchronous Simulated Online Matchmaking, Realistic Virtual Opponent, Center Spawning & Cross-Healing)
 
 class PvPSystem {
     constructor() {
@@ -8,7 +8,7 @@ class PvPSystem {
         this.searchTargetTime = 3.2;
         this.versusCountdown = 3;
         this.matchInterval = null;
-        this.playerTrophies = parseInt(localStorage.getItem('gvs_pvp_trophies') || '500', 10);
+        this.playerTrophies = parseInt(localStorage.getItem('gvs_pvp_trophies') || '0', 10);
         this.playerWins = parseInt(localStorage.getItem('gvs_pvp_wins') || '0', 10);
         this.playerLosses = parseInt(localStorage.getItem('gvs_pvp_losses') || '0', 10);
         this.selectedSong = null;
@@ -61,7 +61,7 @@ class PvPSystem {
         const rawNick = this.nicknamesPool[Math.floor(Math.random() * this.nicknamesPool.length)];
         const pLevel = (playerHeroData && playerHeroData.level) || 1;
         const oppLevel = Math.max(1, Math.min(100, pLevel + (Math.floor(Math.random() * 3) - 1)));
-        const oppTrophies = Math.max(50, this.playerTrophies + (Math.floor(Math.random() * 60) - 30));
+        const oppTrophies = Math.max(0, this.playerTrophies + (Math.floor(Math.random() * 60) - 30));
         const oppRank = this.getRank(oppTrophies);
         const damageBase = Math.round(45 * (1 + 0.01 * (oppLevel - 1)));
         const oppDrone = (window.droneSystem && typeof window.droneSystem.getOpponentDroneForLevel === 'function')

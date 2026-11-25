@@ -1,4 +1,4 @@
-// Polymorphic Zombie Entity Class (Encapsulates AI, Animations, States, and Rendering for All 8 Archetypes)
+// Polymorphic Zombie Entity Class (Encapsulates Behavior, Animations, States, and Rendering for All 8 Archetypes)
 const ZOMBIE_META_MAP = {
     mutant: { sheet: 'mutantSheet', yOffset: 14, bar: '#39ff14', name: '#39ff14' },
     leaper: { sheet: 'leaperSheet', yOffset: 12, bar: '#ff9900', name: '#ff9900' },
